@@ -39,4 +39,13 @@ rules:
   indent: [2, 2, {'SwitchCase': 1}]
   object-curly-spacing: [2, 'always']
   comma-spacing: [2, {'before': false, 'after': true}]
-  quotes: [2, 'single', {'allowTemplateLiterals': true}]
+  quotes: [2, 'single', {'allowTemplateLiterals': true}],
+  settings: {
+		'import/resolver': {
+			alias: {
+				map: [
+					['@', './src']
+				]
+			}
+		}
+	}

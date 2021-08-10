@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "allowJs": false,
-    "target": "es5",
+    "target": "es6",
     "sourceMap": true,
     "module": "commonjs",
     "moduleResolution": "node",
@@ -18,7 +18,11 @@
     ],
     "types": [
       "node"
-    ]
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": [
     "src/**/*"
