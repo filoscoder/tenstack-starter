@@ -45,6 +45,26 @@ Nothing new under the sun, just a straight forward combo to make server developm
 <br>
 <br>
 
+## Alias @
+
+To make paths clean and ease to access `@` is setup up for `/src` path
+
+```javascript
+// BEFORE
+import config from './config';
+import routes from './routes';
+
+// NOW
+import config from '@/config';
+import routes from '@/routes';
+```
+> You can customize this setup:
+> `/tsconfig.json` > compilerOptions.paths
+> `/eslintrc.yml` > rules.settings.alias.map
+
+<br>
+<br>
+
 ## Local Development
 
 Run the server locally. It will be run with Nodemon and ready to serve on port `8080` (unless you specify it on your `.env`)
@@ -84,7 +104,7 @@ If you have any question or suggestion, don't hesitate to contact me:
 
 ✉️ [filoscoder.io@gmail.com](mailto:filoscoder.io@gmail.com)
 
-🎧 I was listening [this](https://www.youtube.com/watch?v=91PA8d9jCcA) playlist to boost my productivity!
+🎧 I was listening [this](https://www.youtube.com/watch?v=_H8ku3APY40) playlist to boost my productivity!
 
 # Author & Credits
 <a src="https://github.com/filoscoder">
