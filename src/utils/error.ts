@@ -1,4 +1,4 @@
-import * as HttpStatus from 'http-status-codes';
+import * as HttpStatus from 'http-status';
 
 /**
  * Build error response for validation errors.
@@ -11,7 +11,7 @@ export function buildError(err: any) {
   if (err.isJoi || err instanceof SyntaxError) {
     return {
       code: HttpStatus.BAD_REQUEST,
-      message: HttpStatus.getStatusText(HttpStatus.BAD_REQUEST),
+      message: HttpStatus[HttpStatus.BAD_REQUEST],
       details:
         err.details &&
         err.details.map((error: any) => {
@@ -33,6 +33,6 @@ export function buildError(err: any) {
 
   return {
     code: HttpStatus.INTERNAL_SERVER_ERROR,
-    message: HttpStatus.getStatusText(HttpStatus.INTERNAL_SERVER_ERROR),
+    message: HttpStatus[HttpStatus.INTERNAL_SERVER_ERROR],
   };
 }

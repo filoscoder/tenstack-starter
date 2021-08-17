@@ -1,5 +1,5 @@
-import * as HttpStatus from 'http-status-codes';
-import * as errors from '../utils/error';
+import * as HttpStatus from 'http-status';
+import * as errors from '@/utils/error';
 
 import { NextFunction, Request, Response } from 'express';
 
@@ -11,11 +11,12 @@ import { NextFunction, Request, Response } from 'express';
  * @param  {function} next
  */
 export function notFoundError(req: Request, res: Response, next: NextFunction) {
+  const NOT_FOUND_CODE = HttpStatus.NOT_FOUND
   // eslint-disable-line no-unused-vars
-  res.status(HttpStatus.NOT_FOUND).json({
+  res.status(NOT_FOUND_CODE).json({
     error: {
-      code: HttpStatus.NOT_FOUND,
-      message: HttpStatus.getStatusText(HttpStatus.NOT_FOUND),
+      code: NOT_FOUND_CODE,
+      message: HttpStatus[NOT_FOUND_CODE],
     },
   });
 }
