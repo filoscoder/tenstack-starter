@@ -1,7 +1,5 @@
 <p align="center">
-  <a href="https://github.com/filoscoder/fe-kiddo">
     <img width="250px" src="https://user-images.githubusercontent.com/50701501/104827248-f88a1800-585b-11eb-985e-5e31dbb0b913.jpg"><br/>
-  </a>
 </p>
 <p align="center">
   <a href="https://lerna.js.org/"><img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg" alt="Maintained with Lerna"></a>
