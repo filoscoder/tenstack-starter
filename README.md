@@ -48,14 +48,7 @@ Comes with:
  git remote add origin ${forked-and-cloned-path}
 ```
 
-- Run it locally for development
-
-```bash
-# or `npm start`
- yarn start
-```
-
-> Check `package.json` to see more "scripts"
+> [Update the url](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories#changing-a-remote-repositorys-url) if you already have an `origin`
 
 <br>
 <br>
@@ -102,6 +95,8 @@ Run the server locally. It will be run with Nodemon and ready to serve on port `
 ```bash
  yarn start # or npm start
 ```
+
+> Check [`package.json`](https://github.com/filoscoder/tenstack-starter/blob/master/package.json) to see more "scripts"
 
 <br>
 <br>
