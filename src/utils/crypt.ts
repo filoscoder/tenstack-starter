@@ -1,5 +1,6 @@
 import * as bcrypt from 'bcrypt';
-import config from '../config';
+
+import config from '@/config';
 
 /**
  * Create a bcrypt hash for a string.

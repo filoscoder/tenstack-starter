@@ -1,4 +1,4 @@
-import * as homeService from '../service/home';
+import * as homeService from '@/service/home';
 
 import { Request, Response } from 'express';
 

@@ -1,12 +1,12 @@
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
-import * as errorHandler from './middlewares/errorHandler';
+import * as errorHandler from '@/middlewares/errorHandler';
 import * as express from 'express';
 import * as helmet from 'helmet';
 import * as morgan from 'morgan';
 
-import config from './config';
-import routes from './routes';
+import config from '@/config';
+import routes from '@/routes';
 
 const app = express();
 
