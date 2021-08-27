@@ -1,4 +1,4 @@
-import * as HttpStatus from 'http-status';
+import HttpStatus from 'http-status';
 
 /**
  * Build error response for validation errors.
@@ -6,7 +6,7 @@ import * as HttpStatus from 'http-status';
  * @param  {error} err
  * @return {array|object}
  */
-export function buildError(err: any) {
+export const buildError = (err: any) => {
   // Validation errors
   if (err.isJoi || err instanceof SyntaxError) {
     return {
@@ -35,4 +35,4 @@ export function buildError(err: any) {
     code: HttpStatus.INTERNAL_SERVER_ERROR,
     message: HttpStatus[HttpStatus.INTERNAL_SERVER_ERROR],
   };
-}
+};

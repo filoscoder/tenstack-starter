@@ -1,11 +1,11 @@
 import AppInformation from '@/types/response/AppInformation';
-import config from '@/config';
+import CONFIG from '@/config';
 
 /**
  * Get application information.
  *
  * @returns {AppInformation}
  */
-export function getAppInfo(): AppInformation {
-  return config.app;
-}
+export const getAppInfo = (): AppInformation => {
+  return CONFIG.APP;
+};

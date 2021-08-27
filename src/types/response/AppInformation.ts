@@ -2,8 +2,8 @@
  * Application Information response strucuture.
  */
 interface AppInformation {
-  name: string;
-  version: string;
+  NAME: string;
+  VERSION: string;
 }
 
 export default AppInformation;

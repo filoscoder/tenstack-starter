@@ -1,4 +1,4 @@
-import { differenceBy, intersectionBy } from 'lodash';
+import { differenceBy, intersectionBy } from 'lodash-es';
 
 /**
  * Get the copy of object without attributes.
@@ -7,7 +7,7 @@ import { differenceBy, intersectionBy } from 'lodash';
  * @param  {Array} attrsToExclude
  * @return {Object}
  */
-export function withoutAttrs(obj: any, attrsToExclude: any[]) {
+export const withoutAttrs = (obj: any, attrsToExclude: any[]) => {
   const result: any = {};
 
   Object.keys(obj).forEach((key: string) => {
@@ -17,7 +17,7 @@ export function withoutAttrs(obj: any, attrsToExclude: any[]) {
   });
 
   return result;
-}
+};
 
 /**
  * Get the copy of object with only specified attributes.
@@ -26,7 +26,7 @@ export function withoutAttrs(obj: any, attrsToExclude: any[]) {
  * @param  {Array} attrs
  * @return {Object}
  */
-export function withOnlyAttrs(obj: any, attrs: any[]) {
+export const withOnlyAttrs = (obj: any, attrs: any[]) => {
   const result: any = {};
 
   Object.keys(obj).forEach((key) => {
@@ -36,7 +36,7 @@ export function withOnlyAttrs(obj: any, attrs: any[]) {
   });
 
   return result;
-}
+};
 
 /**
  * Compare array of two objects and find data that needs to be create, update
@@ -47,7 +47,7 @@ export function withOnlyAttrs(obj: any, attrs: any[]) {
  * @param {String} key
  * @returns {Object}
  */
-export function difference(list1: any[], list2: any[], key = 'id') {
+export const difference = (list1: any[], list2: any[], key = 'id') => {
   return {
     create: list2
       .filter((obj) => obj.hasOwnProperty(key) && obj[key] === null)
@@ -55,4 +55,4 @@ export function difference(list1: any[], list2: any[], key = 'id') {
     update: intersectionBy(list2, list1, key),
     destroy: differenceBy(list1, list2, key).map((obj: any) => obj[key]),
   };
-}
+};

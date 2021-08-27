@@ -4,7 +4,7 @@
  * @param obj
  * @returns {*}
  */
-export function emptyToNull(obj: any): any {
+export const emptyToNull = (obj: any): any => {
   if (isScalarType(obj)) {
     return obj;
   }
@@ -26,7 +26,7 @@ export function emptyToNull(obj: any): any {
   }
 
   return result;
-}
+};
 
 /**
  * Returns if scalar type.
@@ -34,7 +34,7 @@ export function emptyToNull(obj: any): any {
  * @param obj
  * @returns {boolean}
  */
-function isScalarType(obj: any) {
+const isScalarType = (obj: any) => {
   return (
     typeof obj !== 'object' ||
     obj instanceof String ||
@@ -42,7 +42,7 @@ function isScalarType(obj: any) {
     obj instanceof Boolean ||
     obj === null
   );
-}
+};
 
 /**
  * Changes empty value to null.
@@ -50,10 +50,10 @@ function isScalarType(obj: any) {
  * @param value
  * @returns {*}
  */
-function nullIfEmpty(value: any) {
+const nullIfEmpty = (value: any) => {
   if (typeof value !== 'string') {
     return value;
   }
 
   return value.trim() === '' ? null : value;
-}
+};

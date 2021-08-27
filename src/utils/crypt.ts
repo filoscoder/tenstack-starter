@@ -1,6 +1,5 @@
-import * as bcrypt from 'bcrypt';
-
-import config from '@/config';
+import CONFIG from '@/config';
+import bcrypt from 'bcrypt';
 
 /**
  * Create a bcrypt hash for a string.
@@ -8,11 +7,11 @@ import config from '@/config';
  * @param {string} value
  * @returns {Promise<any>}
  */
-export async function hash(value: string): Promise<any> {
-  const saltRounds = parseInt(config.auth.saltRounds, 10);
+export const hash = async (value: string): Promise<any> => {
+  const saltRounds = parseInt(CONFIG.AUTH.SALT_ROUNDS, 10);
 
   return bcrypt.hash(value, saltRounds);
-}
+};
 
 /**
  * Compare a string with the hash.
@@ -21,9 +20,9 @@ export async function hash(value: string): Promise<any> {
  * @param {string} hashedValue
  * @returns {Promise<boolean>}
  */
-export async function compare(
+export const compare = async (
   value: string,
   hashedValue: string,
-): Promise<boolean> {
+): Promise<boolean> => {
   return bcrypt.compare(value, hashedValue);
-}
+};

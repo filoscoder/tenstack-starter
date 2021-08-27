@@ -1,4 +1,4 @@
-import { differenceWith, isEqual } from 'lodash';
+import { differenceWith, isEqual } from 'lodash-es';
 
 export interface ArrayDifference {
   added: any[];
@@ -11,9 +11,9 @@ export interface ArrayDifference {
  * @param {any[]} arr2
  * @returns {ArrayDifference}
  */
-export function diff(arr1: any[], arr2: any[]): ArrayDifference {
+export const diff = (arr1: any[], arr2: any[]): ArrayDifference => {
   const added = differenceWith(arr2, arr1, isEqual);
   const removed = differenceWith(arr1, arr2, isEqual);
 
   return { added, removed };
-}
+};
