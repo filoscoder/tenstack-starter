@@ -1,54 +1,46 @@
-import * as dotenv from 'dotenv';
-import * as pkg from '../../package.json';
+import pkg from '../../package.json';
 
-dotenv.config();
+require('dotenv').config();
 
-const isTestEnvironment = process.env.NODE_ENV === 'test';
-const PORT = (isTestEnvironment && 8888) || process.env.PORT || 8080;
-
-export default {
-  app: {
-    name: pkg.name,
-    version: pkg.version,
-    description: pkg.description,
-    authors: pkg.authors,
-    license: pkg.license,
-    host: process.env.APP_HOST,
-    baseUrl: process.env.API_BASE_URL,
-    port: PORT,
-    staticPath: process.env.STATIC_PATH || 'api-static',
-    isTestEnvironment,
+const CONFIG = {
+  APP: {
+    NAME: pkg.name,
+    VERSION: pkg.version,
+    DESCRIPTION: pkg.description,
+    AUTHORS: pkg.authors,
+    HOST: process.env.APP_HOST,
+    BASE_URL: process.env.API_BASE_URL,
+    PORT: process.env.NODE_ENV === 'test' ? 8888 : process.env.PORT || 8080,
+    ENV: process.env.NODE_ENV,
   },
-  logging: {
-    path: process.env.LOGGING_DIR || 'logs',
-    level: process.env.LOGGING_LEVEL || 'info',
-    maxFiles: process.env.LOGGING_MAX_FILES || 5,
+  LOG: {
+    PATH: process.env.LOGGING_DIR || 'logs',
+    LEVEL: process.env.LOGGING_LEVEL || 'info',
+    MAX_FILES: process.env.LOGGING_MAX_FILES || 5,
   },
-  database: {
-    client: 'pg',
-    connection: {
-      charset: 'utf8',
-      user: process.env.DB_USER,
-      database: process.env.DB_NAME,
-      password: process.env.DB_PASSWORD,
-      host: process.env.DB_HOST || '127.0.0.1',
+  AUTH: {
+    SALT_ROUNDS: process.env.SALT_ROUNDS || '11',
+    ACCESS_TOKEN_EXPIRE: process.env.ACCESS_TOKEN_DURATION || '300000',
+    REFRESH_TOKEN_EXPIRE: process.env.REFRESH_TOKEN_DURATION || '86400000',
+    ACCESS_TOKEN_SALT: process.env.ACCESS_TOKEN_SALT,
+    REFRESH_TOKEN_SALT: process.env.REFRESH_TOKEN_SALT,
+  },
+  AWS: {
+    ACCESS_KEY: process.env.AWS_ACCESS_KEY,
+    SECRET_KEY: process.env.AWS_SECRET_KEY,
+    REGION: process.env.AWS_REGION,
+    S3: {
+      PATH: process.env.S3_BUCKET_PATH,
+      BUCKET_NAME: process.env.S3_BUCKET_NAME,
+    },
+    COGNITO: {
+      USER_POOL_ID: process.env.COGNITO_USER_POOL_ID,
+      CLIENT_ID: process.env.COGNITO_CLIENT_ID,
     },
   },
-  auth: {
-    saltRounds: process.env.SALT_ROUNDS || '11',
-    accessTokenExpiry: process.env.ACCESS_TOKEN_DURATION || '300000',
-    refreshTokenExpiry: process.env.REFRESH_TOKEN_DURATION || '86400000',
-    accessTokenSalt: process.env.ACCESS_TOKEN_SALT,
-    refreshTokenSalt: process.env.REFRESH_TOKEN_SALT,
-  },
-  pagination: {
-    maxRows: 25,
-    page: 1,
-  },
-  aws: {
-    path: process.env.AWS_BUCKET_PATH,
-    accessKey: process.env.AWS_ACCESS_KEY,
-    secretKey: process.env.AWS_SECRET_KEY,
-    bucketName: process.env.AWS_BUCKET_NAME,
+  EXTERNAL: {
+    API_KEY: process.env.API_KEY,
   },
 };
+
+export default CONFIG;
