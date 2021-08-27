@@ -1,34 +1,12 @@
-import * as bodyParser from 'body-parser';
-import * as cors from 'cors';
-import * as errorHandler from '@/middlewares/errorHandler';
-import * as express from 'express';
-import * as helmet from 'helmet';
-import * as morgan from 'morgan';
+// ! Don't convert require into import
+require('module-alias/register');
+const moduleAlias = require('module-alias');
+moduleAlias.addAlias('@', __dirname);
 
-import config from '@/config';
-import routes from '@/routes';
+import { createApp } from './app';
+import { startServer } from './server';
 
-const app = express();
-
-app.use(cors());
-app.use(helmet());
-app.use(morgan('dev'));
-app.use(bodyParser.json());
-
-// API Routes
-app.use('/', routes);
-
-// Error Middlewares
-app.use(errorHandler.genericErrorHandler);
-app.use(errorHandler.notFoundError);
-
-process.stdout.write(`⚙️  Application Environment: ${app.get('env')}\n`);
-process.stdout.write('📚 Debug logs are ENABLED\n');
-
-app.listen(config.app.port, () =>
-  process.stdout.write(
-    `🚀 Server ready at http://localhost:${config.app.port}\n`,
-  ),
-);
-
-export default app;
+if (process.env.NODE_ENV !== 'test') {
+  const app = createApp();
+  startServer(app);
+}
