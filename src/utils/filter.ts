@@ -18,7 +18,7 @@ export const emptyToNull = (obj: any): any => {
   for (const key of Object.keys(obj)) {
     const value = obj[key];
 
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       result[key] = emptyToNull(value);
     } else {
       result[key] = nullIfEmpty(value);
@@ -36,7 +36,7 @@ export const emptyToNull = (obj: any): any => {
  */
 const isScalarType = (obj: any) => {
   return (
-    typeof obj !== 'object' ||
+    typeof obj !== "object" ||
     obj instanceof String ||
     obj instanceof Number ||
     obj instanceof Boolean ||
@@ -51,9 +51,9 @@ const isScalarType = (obj: any) => {
  * @returns {*}
  */
 const nullIfEmpty = (value: any) => {
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return value;
   }
 
-  return value.trim() === '' ? null : value;
+  return value.trim() === "" ? null : value;
 };

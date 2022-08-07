@@ -1,9 +1,8 @@
-import CONFIG from '@/config';
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
+import CONFIG from "@/config";
 
 /**
- * Create a bcrypt hash for a string.
- *
+ * @description Create a bcrypt hash for a string.
  * @param {string} value
  * @returns {Promise<any>}
  */
@@ -14,8 +13,7 @@ export const hash = async (value: string): Promise<any> => {
 };
 
 /**
- * Compare a string with the hash.
- *
+ * @description Compare a string with the hash.
  * @param {string} value
  * @param {string} hashedValue
  * @returns {Promise<boolean>}

@@ -1,4 +1,4 @@
-import { differenceBy, intersectionBy } from 'lodash-es';
+import { differenceBy, intersectionBy } from "lodash-es";
 
 /**
  * Get the copy of object without attributes.
@@ -47,7 +47,7 @@ export const withOnlyAttrs = (obj: any, attrs: any[]) => {
  * @param {String} key
  * @returns {Object}
  */
-export const difference = (list1: any[], list2: any[], key = 'id') => {
+export const difference = (list1: any[], list2: any[], key = "id") => {
   return {
     create: list2
       .filter((obj) => obj.hasOwnProperty(key) && obj[key] === null)

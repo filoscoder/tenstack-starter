@@ -1,4 +1,4 @@
-import { differenceWith, isEqual } from 'lodash-es';
+import { differenceWith, isEqual } from "lodash-es";
 
 export interface ArrayDifference {
   added: any[];

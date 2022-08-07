@@ -1,9 +1,9 @@
-import * as homeController from '@/controller/home';
-
-import { Router } from 'express';
+import { Router } from "express";
+import { HomeController, appKeyValidator } from "@/components/home";
+import { sanitizer } from "@/helpers";
 
 const router = Router();
 
-router.get('/', homeController.getAppInfo);
+router.get("/", sanitizer(appKeyValidator), HomeController.getAppInfo);
 
 export default router;
