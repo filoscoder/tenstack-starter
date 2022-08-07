@@ -1,2 +1,2 @@
-export { expressPinoLogger, exitLog } from "./logger";
-export { sanitizer } from "./dataSanitizer";
+export { expressPinoLogger, exitLog } from "./loggers";
+export { sanitizer } from "./dataSanitizers";

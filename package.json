@@ -1,6 +1,6 @@
 {
-  "name": "ts-node-express-starter",
-  "version": "1.0.0",
+  "name": "tenstack-starter",
+  "version": "2.0.0",
   "description": "Typescript Node Express Rest API server starter",
   "private": true,
   "authors": "filoscoder",

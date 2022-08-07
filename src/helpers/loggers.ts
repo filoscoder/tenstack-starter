@@ -4,6 +4,7 @@ import { hidePassword } from "@/utils/auth";
 
 const { OK, BAD_REQUEST, SERVER_ERROR } = httpStatus;
 
+// More info: https://github.com/pinojs/express-pino-logger
 export const expressPinoLogger = expressPino({
   transport: {
     target: "pino-pretty",
@@ -51,7 +52,7 @@ export const expressPinoLogger = expressPino({
       };
     },
     res: (res) => {
-      // console.log('[ R E S P O N S E ] => ', res);
+      // console.log("[ R E S P O N S E ] => ", res);
       return {
         status: res.statusCode,
       };
@@ -60,7 +61,7 @@ export const expressPinoLogger = expressPino({
   },
 });
 
-export const exitLog = (err: any, evt: any) => {
+export const exitLog = (err: any, evt: string) => {
   if (err) {
     process.stdout.write(`\n\n[!ERROR][${evt}] => ${err}\n\n`);
   } else {

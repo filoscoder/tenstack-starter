@@ -40,7 +40,7 @@ export const genericErrorHandler = (
   res: Response,
   _next: NextFunction,
 ) => {
-  let resCode: number = err.opcode || INTERNAL_SERVER_ERROR;
+  let resCode: number = err.status || INTERNAL_SERVER_ERROR;
   let resBody = err;
 
   if (err.code === "ETIMEDOUT") {
