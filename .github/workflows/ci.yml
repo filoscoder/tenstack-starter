@@ -1,0 +1,36 @@
+name: CI
+
+on: 
+  pull_request:
+      types: [ opened, synchronize, reopened ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ '16' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2.3.4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2.4.1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Run Lint
+        run: yarn lint
+
+      - name: Run Test code
+        run: yarn test
+
+      - name: Build module
+        run: yarn build
+
+

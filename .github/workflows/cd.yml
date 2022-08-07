@@ -1,0 +1,75 @@
+name: CD
+
+on: 
+  push:
+    branches: [ main, develop, staging ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2.3.4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2.4.1
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Run Lint
+        run: yarn lint
+      
+      - name: Build module
+        run: yarn build
+
+      - name: Run Test code
+        run: yarn test
+
+# ↓↓↓↓ Please edit below according your environment ↓↓↓↓
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: test
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2.3.4
+
+  #     - name: Deploy DEVELOPMENT
+  #       uses: appleboy/ssh-action@v0.1.4
+  #       if: github.ref == 'refs/heads/develop'
+  #       with:
+  #         key: ${{ secrets.DEV_PEM_KEY }}
+  #         host: ${{ secrets.DEV_HOST }}
+  #         username: ubuntu
+  #         script: |
+  #           cd /home/ubuntu/source
+  #           git checkout develop
+  #           git fetch --all
+  #           git reset --hard origin/develop
+  #           git pull origin develop
+  #           yarn
+  #           yarn build
+  #           export NODE_ENV=development && pm2 startOrReload ecosystem.config.js
+  #           pm2 set pm2:autodump true
+  #           pm2 save
+
+  #     - name: Deploy PRODUCTION
+  #       uses: appleboy/ssh-action@v0.1.4
+  #       if: github.ref == 'refs/heads/main'
+  #       with:
+  #         key: ${{ secrets.PROD_PEM_KEY }}
+  #         host: ${{ secrets.PROD_HOST }}
+  #         username: ubuntu
+  #         script: |
+  #           cd /home/ubuntu/source
+  #           git checkout main
+  #           git fetch --all
+  #           git reset --hard origin/main
+  #           git pull origin main
+  #           yarn
+  #           yarn build
+  #           export NODE_ENV=production && pm2 startOrReload ecosystem.config.js
+  #           pm2 set pm2:autodump true
+  #           pm2 save
