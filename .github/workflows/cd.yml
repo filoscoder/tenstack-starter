@@ -2,7 +2,7 @@ name: CD
 
 on: 
   push:
-    branches: [ main, develop, staging ]
+    branches: [ main, develop ]
 
 jobs:
   test:
