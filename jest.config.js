@@ -1,16 +1,16 @@
 const { defaults: tsjPreset } = require("ts-jest/presets");
 
 module.exports = {
-  globals: {
-    "ts-jest": {
-      tsconfig: "tsconfig.json",
-      diagnostics: false,
-    },
-  },
   preset: "ts-jest",
   moduleFileExtensions: ["ts", "js", "json"],
   transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
+    "^.+\\.(ts|tsx)$": [
+      "ts-jest",
+      {
+        tsconfig: "tsconfig.json",
+        diagnostics: false,
+      },
+    ],
     ...tsjPreset.transform,
   },
   testPathIgnorePatterns: ["dist"],
