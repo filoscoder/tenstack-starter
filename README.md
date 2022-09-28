@@ -29,7 +29,7 @@ Comes with:
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org) (`>= 12.0.0`)
+- [Node.js](https://nodejs.org) (`>= 16.0.0`)
 - [Yarn](https://yarnpkg.com/en/docs/install) or [NPM](https://docs.npmjs.com/getting-started/installing-node)
 
 ## Install
@@ -127,7 +127,6 @@ If you have any question or suggestion, don't hesitate to contact me:
 
 ✉️ [filoscoder.io@gmail.com](mailto:filoscoder.io@gmail.com)
 
-🎧 I was listening [this](https://www.youtube.com/watch?v=_H8ku3APY40) playlist to boost my productivity!
 
 # Author & Credits
 

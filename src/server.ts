@@ -15,7 +15,7 @@ export const startServer = (app: e.Application): Server => {
     .on("exit", () => exitLog(null, "exit"));
 
   return httpServer.listen({ port: CONFIG.APP.PORT }, (): void => {
-    process.stdout.write(`⚙️  Application Environment: ${CONFIG.APP.ENV}\n`);
+    process.stdout.write(`⚙️ Application Environment: ${CONFIG.APP.ENV}\n`);
     process.stdout.write(`⏱ Started on: ${Date.now()}\n`);
     process.stdout.write(
       `🚀 TEN-STACK-API Server ready at http://localhost:${CONFIG.APP.PORT}\n`,
