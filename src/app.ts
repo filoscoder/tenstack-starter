@@ -22,7 +22,7 @@ export const createApp = (): express.Application => {
 
   if (CONFIG.APP.ENV !== "test") {
     app.use(morgan("dev"));
-    app.use(expressPinoLogger);
+    app.use(expressPinoLogger());
   }
 
   app.use(timeout(CONFIG.SERVER.TIMEOUT));
