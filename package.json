@@ -40,7 +40,7 @@
     "dotenv": "^16.0.1",
     "express": "^4.15.3",
     "express-pino-logger": "^7.0.0",
-    "express-validator": "^6.14.2",
+    "express-validator": "^6.15.0",
     "helmet": "^6.0.0",
     "http-status": "^1.5.2",
     "jsonwebtoken": "^9.0.0",
