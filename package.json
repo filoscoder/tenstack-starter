@@ -37,7 +37,7 @@
     "bcrypt": "^5.0.0",
     "connect-timeout": "^1.9.0",
     "cors": "^2.8.3",
-    "dotenv": "^16.0.1",
+    "dotenv": "^16.3.1",
     "express": "^4.15.3",
     "express-pino-logger": "^7.0.0",
     "express-validator": "^6.14.2",
