@@ -6,6 +6,17 @@
   <a href="/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
 </p>
 
+## Star History
+
+<a href="https://star-history.com/#filoscoder/tenstack-starter&Timeline">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=filoscoder/tenstack-starter&type=Timeline&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=filoscoder/tenstack-starter&type=Timeline" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=filoscoder/tenstack-starter&type=Timeline" />
+  </picture>
+</a>
+
+
 # Overview
 
 **TEN stack** is a `Typescript` + `Express` + `Node` starter kit to develop `REST API` server apps.
