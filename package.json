@@ -16,6 +16,7 @@
     "test": "NODE_ENV=test jest --coverage --runInBand --detectOpenHandles",
     "test:watchAll": "NODE_ENV=test jest --watchAll --runInBand --detectOpenHandles",
     "start": "NODE_ENV=development run-s prettify lint & nodemon",
+    "start-prod": "NODE_ENV=production nodemon tsx src/app.ts",
     "service:start": "pm2 start ecosystem.config.js",
     "service:reload": "pm2 reload ecosystem.config.js",
     "service:startup": "pm2 startup",
@@ -34,7 +35,15 @@
     "server"
   ],
   "dependencies": {
+    "@bot-whatsapp/bot": "^0.1.38",
+    "@bot-whatsapp/cli": "^0.1.38",
+    "@bot-whatsapp/database": "^0.1.38",
+    "@bot-whatsapp/provider": "^0.1.38",
+    "@prisma/client": "^5.9.1",
+    "@whiskeysockets/baileys": "^6.6.0",
+    "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
     "connect-timeout": "^1.9.0",
     "cors": "^2.8.3",
     "dotenv": "^16.3.2",
@@ -46,8 +55,13 @@
     "jsonwebtoken": "^9.0.2",
     "lodash-es": "^4.17.21",
     "morgan": "^1.8.2",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
     "pino-pretty": "^9.4.1",
-    "rimraf": "^3.0.2"
+    "prisma": "^5.9.1",
+    "rimraf": "^3.0.2",
+    "rollup": "^4.12.0",
+    "wa-sticker-formatter": "^4.4.4"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.18.10",
