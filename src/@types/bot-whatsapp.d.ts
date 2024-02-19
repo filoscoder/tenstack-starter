@@ -55,28 +55,27 @@ declare module "@bot-whatsapp/bot" {
   type IMethodsChain = {
     addAction: (
       actionProps: ActionPropertiesGeneric | CallbackFunction,
-      cb?: CallbackFunction
+      cb?: CallbackFunction,
     ) => IMethodsChain;
     addAnswer: (
-      message: string | string[]?,
+      message: string | string[] | null,
       options?: ActionPropertiesKeyword,
-      cb?: CallbackFunction
+      cb?: CallbackFunction,
     ) => IMethodsChain;
   };
 
   /**
- * Crea un nuevo flujo.
- * @param args - Opciones de configuración del flujo.
- * @returns Instancia del flujo.
- */
+   * Crea un nuevo flujo.
+   * @param args - Opciones de configuración del flujo.
+   * @returns Instancia del flujo.
+   */
   function createFlow(args: any): any;
-
 
   type ICreateFlowArg = {
     flow: any;
     database: any;
-    provider: any
-  }
+    provider: any;
+  };
 
   /**
    * Crea una nueva instancia de bot.
@@ -86,10 +85,8 @@ declare module "@bot-whatsapp/bot" {
    */
   function createBot(
     { flow, database, provider }: ICreateFlowArg,
-    args?: any
+    args?: any,
   ): Promise<any>;
-
-
 
   /**
    * Crea una nueva instancia del proveedor.
@@ -99,7 +96,7 @@ declare module "@bot-whatsapp/bot" {
    */
   function createProvider(
     providerClass?: new (args: any) => any,
-    args?: any
+    args?: any,
   ): any;
 
   /**
@@ -110,7 +107,7 @@ declare module "@bot-whatsapp/bot" {
    */
   function addKeyword(
     args: string | string[],
-    opts?: ActionPropertiesKeyword
+    opts?: ActionPropertiesKeyword,
   ): IMethodsChain;
 
   // Constantes de eventos del bot
@@ -134,6 +131,5 @@ declare module "@bot-whatsapp/bot" {
     EVENTS,
     IMethodsChain,
     ActionPropertiesGeneric,
-    BotContext
   };
 }

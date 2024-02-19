@@ -5,7 +5,7 @@ require("module-alias").addAlias("@", __dirname);
 import { createApp } from "./app";
 import { startServer, startWhatsappBot } from "./server";
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   startWhatsappBot();
 }
 
