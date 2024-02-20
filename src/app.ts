@@ -6,7 +6,7 @@ import timeout from "connect-timeout";
 import CONFIG from "./config";
 import { expressPinoLogger } from "./helpers";
 import * as errorHandler from "@/middlewares/errorHandler";
-import routes from "@/routes";
+import mainRouter from "@/routes";
 
 export const createApp = (): express.Application => {
   const app = express();
@@ -27,8 +27,9 @@ export const createApp = (): express.Application => {
 
   app.use(timeout(CONFIG.SERVER.TIMEOUT));
 
-  // API Routes
-  app.use(`/api/${CONFIG.APP.VER}`, routes);
+  // API Routes (/app/v1/....)
+  
+  app.use(`/app/${CONFIG.APP.VER}`, mainRouter);
 
   // Error Middleware
   app.use(errorHandler.genericErrorHandler);

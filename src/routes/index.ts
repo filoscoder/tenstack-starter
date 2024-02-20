@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { HomeController, appKeyValidator } from "@/components/home";
-import { sanitizer } from "@/helpers";
+import homeRouter from "./home.router";
+import playersRouter from "./players.router";
+// import agentsRouter from "./agent.router";
 
-const router = Router();
+  const mainRouter = Router();
 
-router.get("/", sanitizer(appKeyValidator), HomeController.getAppInfo);
+  mainRouter.use("/", homeRouter);
+  mainRouter.use("/players", playersRouter);
 
-export default router;
+export default mainRouter;

@@ -1,9 +1,9 @@
 {
-  "name": "tenstack-starter",
-  "version": "2.0.0",
-  "description": "Typescript Node Express Rest API server starter",
+  "name": "timba-api",
+  "version": "1",
+  "description": "Timba Api Server",
   "private": true,
-  "authors": "filoscoder",
+  "authors": "Alpha-Dev",
   "license": "MIT",
   "scripts": {
     "prepare": "husky install",
@@ -16,7 +16,7 @@
     "test": "NODE_ENV=test jest --coverage --runInBand --detectOpenHandles",
     "test:watchAll": "NODE_ENV=test jest --watchAll --runInBand --detectOpenHandles",
     "start": "NODE_ENV=development run-s prettify lint & nodemon",
-    "start-prod": "NODE_ENV=production nodemon tsx src/app.ts",
+    "start-prod": "NODE_ENV=production nodemon  --exec tsx src/app.ts",
     "service:start": "pm2 start ecosystem.config.js",
     "service:reload": "pm2 reload ecosystem.config.js",
     "service:startup": "pm2 startup",

@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model UserRoot {
+  id                String        @id @default(uuid())
+  username          String        @db.VarChar(50) @unique
+  password          String        @db.Text
+  panel_id          Int
+  access            String        @db.VarChar(800)
+  refresh           String        @db.VarChar(800)
+  json_response     String        @db.Text
+  dirty             Boolean       @default(false)     // El agente está siendo logueado
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+
+  @@map("USERS_ROOT")
+}
+
+model Transactions {
+  id                Int           @id @default(autoincrement())
+  sender_id         Int           // Panel ID
+  recipient_id      Int           // Panel ID
+  amount            Float
+  date              DateTime
+  status            String        @db.VarChar(100)
+  // payment_sent      Boolean       @default(true)      // En caso de retiro, fue enviado el pago? 
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+
+  @@map("TRANSACTIONS")
+}
+
+model Player {
+  id                Int           @id @default(autoincrement())
+  panel_id          Int           @unique
+  username          String        @db.VarChar(100) @unique
+  password          String        @db.Text
+  email             String?       @db.VarChar(50) @unique
+  first_name        String?       @db.VarChar(50)
+  last_name         String?       @db.VarChar(50)
+  date_of_birth     DateTime?
+  movile_number     String?       @db.VarChar(50)
+  country           String?       @db.VarChar(50)
+  BankAccounts      BankAccount[]  
+  balance_currency  String?       @db.VarChar(10) @default("MXN")
+  status            String?       @db.VarChar(20) @default("ACTIVO")
+  Payments          Payment[]       
+  Deposits          Deposit[]
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt     
+
+  @@map("PLAYERS")
+}
+
+model Payment {
+  id                Int           @id @default(autoincrement())
+  player_id         Int           // Panel ID
+  Player            Player        @relation(fields: [player_id], references: [panel_id])
+  amount            Float
+  paid              DateTime?     // El dinero fue transferido (datetime) o no (null)
+  bank_account      Int           // Cuenta en la que recibe el pago
+  BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt    
+
+  @@map("PAYMENTS")   
+}
+
+model BankAccount {
+  id                Int           @id @default(autoincrement())
+  player_id         Int           // Panel ID
+  Player            Player        @relation(fields: [player_id], references: [panel_id])
+  name              String
+  number            String        @unique
+  Payments          Payment[]
+  Deposits          Deposit[]
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt    
+
+  @@map("BANK_ACCOUNTS")   
+}
+
+model Deposit {
+  id                Int           @id @default(autoincrement())
+  player_id         Int           // Panel ID
+  Player            Player        @relation(fields: [player_id], references: [panel_id])
+  amount            Float
+  confirmed         DateTime?     // El deposito fue confirmado (datetime) o no (null)
+  bank_account      Int           // Cuenta desde la que hace el deposito
+  BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt    
+
+  @@map("DEPOSITS")   
+}

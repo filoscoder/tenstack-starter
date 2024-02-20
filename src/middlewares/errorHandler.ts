@@ -47,6 +47,7 @@ export const genericErrorHandler = (
     resCode = REQUEST_TIMEOUT;
     resBody = new TimeOutError(req.originalUrl);
   }
-
+  console.log('[genericErrorHandler]', resBody);
+  
   res.status(resCode).json(resBody);
 };
