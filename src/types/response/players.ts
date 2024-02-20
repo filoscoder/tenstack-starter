@@ -1,4 +1,4 @@
-import { BankAccount } from '@prisma/client';
+import { BankAccount } from "@prisma/client";
 
 export type Player = {
   id: number;
@@ -16,4 +16,3 @@ export type Player = {
   created_at: string;
   updated_at: string;
 };
-

@@ -14,7 +14,7 @@ export class PlayersDAO {
     try {
       const playerPrisma = await prisma.player.findUnique({
         where: { id: playerId },
-        include: { BankAccounts:  true }
+        include: { BankAccounts: true },
       });
 
       return parsePlayer(playerPrisma);
