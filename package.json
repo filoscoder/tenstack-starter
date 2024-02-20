@@ -1,6 +1,6 @@
 {
   "name": "timba-api",
-  "version": "1.0",
+  "version": "1.0.0",
   "description": "Timba Api Server",
   "private": true,
   "authors": "Alpha-Dev",
