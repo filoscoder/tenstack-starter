@@ -1,7 +1,7 @@
 import { NOT_FOUND, OK } from "http-status/lib";
+import { Response } from "express";
 import { PlayerServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
-import { Response } from "express";
 
 export class PlayersController {
   /**
@@ -16,11 +16,11 @@ export class PlayersController {
   ) => {
     try {
       const playerId = parseInt(req.params.id);
-      
+
       const playersServices = new PlayerServices();
-      
+
       const player = await playersServices.getPlayerById(playerId);
-      console.log('[getPlayerById]:: 23');
+      console.log("[getPlayerById]:: 23");
 
       if (player) {
         res.status(OK).json(apiResponse(player));

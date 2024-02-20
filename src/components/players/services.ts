@@ -9,7 +9,6 @@ export class PlayerServices {
    * @returns Player
    */
   getPlayerById = async (playerId: getPlayerId): Promise<Player | null> => {
-    
     const player = await PlayersDAO.getById(playerId);
     return player;
   };
