@@ -8,7 +8,7 @@ const CONFIG = {
   APP: {
     NAME: pkg.name,
     VERSION: pkg.version,
-    VER: `v${pkg.version[0]}`,
+    VER: `v${pkg.version[0][0]}`,
     DESCRIPTION: pkg.description,
     AUTHORS: pkg.authors,
     HOST: process.env.APP_HOST,
