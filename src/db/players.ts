@@ -14,6 +14,7 @@ export class PlayersDAO {
     try {
       const playerPrisma = await prisma.player.findUnique({
         where: { id: playerId },
+        include: { BankAccounts:  true }
       });
 
       return parsePlayer(playerPrisma);
@@ -30,19 +31,16 @@ const parsePlayer = (playerDB: any): Player | null => {
         id: playerDB.id,
         panel_id: playerDB.panel_id,
         username: playerDB.username,
-        password: playerDB.password,
         email: playerDB.email,
-        first_name: playerDB,
-        last_name: playerDB,
-        date_of_birth: playerDB,
-        movile_number: playerDB,
-        country: playerDB,
-        // BankAccounts      BankAccount[]
-        balance_currency: playerDB,
-        status: playerDB,
-        // Payments          Payment[]
-        // Deposits          Deposit[]
-        created_at: playerDB,
-        updated_at: playerDB,
+        first_name: playerDB.first_name,
+        last_name: playerDB.last_name,
+        date_of_birth: playerDB.date_of_birth,
+        movile_number: playerDB.movile_number,
+        country: playerDB.country,
+        bank_accounts: playerDB.BankAccounts,
+        balance_currency: playerDB.balance_currency,
+        status: playerDB.status,
+        created_at: playerDB.created_at,
+        updated_at: playerDB.updated_at,
       };
 };

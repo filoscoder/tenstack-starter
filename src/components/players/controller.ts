@@ -20,7 +20,6 @@ export class PlayersController {
       const playersServices = new PlayerServices();
 
       const player = await playersServices.getPlayerById(playerId);
-      console.log("[getPlayerById]:: 23");
 
       if (player) {
         res.status(OK).json(apiResponse(player));
