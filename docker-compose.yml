@@ -1,0 +1,22 @@
+version: '3.1'
+
+# AlphaDev casinomex database
+services:
+  casinomex_db:
+    image: mysql
+      #command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: timba2024
+      MYSQL_DATABASE: timba-data-base
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    ports:
+      - 3307:3306
+
+  casinomex_adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 8081:8080
+
