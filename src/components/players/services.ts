@@ -14,7 +14,7 @@ export class PlayerServices {
   private _httpService: HttpService;
   private _prisma: PrismaClient;
 
-  private _createPlayerError: ErrorData = {
+  private _alreadyExistsError: ErrorData = {
     status: 400,
     code: "ya_existe",
     description: "Un usuario con ese nombre ya existe",
@@ -53,18 +53,16 @@ export class PlayerServices {
 
     if (response.status === 400 && response.data.code === "already_exists") {
       // Usuario existe en el panel, verificar que esté en local
-      const localPlayer = await this._prisma.player.findUnique({
-        where: { username: player.username },
-      });
+      const localPlayer = await PlayersDAO.getByUsername(player.username);
 
       // Usuario existe en panel y en local. Devolver "Ya existe"
-      if (localPlayer) throw new CustomError(this._createPlayerError);
+      if (localPlayer) throw new CustomError(this._alreadyExistsError);
 
       // Usuario existe en panel pero no en local
       response = await axios.post(panelLoginUrl, player);
       // Credenciales inválidas
       if (response.status !== 200)
-        throw new CustomError(this._createPlayerError);
+        throw new CustomError(this._alreadyExistsError);
     }
 
     // Crear usuario en local
