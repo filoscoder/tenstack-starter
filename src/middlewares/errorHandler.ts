@@ -18,7 +18,6 @@ export const notFoundError = (
   res: Response,
   _next: NextFunction,
 ) => {
-  console.log("NOT FOUND ERROR");
   res.status(NOT_FOUND).json({
     error: {
       code: NOT_FOUND,
@@ -48,7 +47,7 @@ export const genericErrorHandler = (
     resCode = REQUEST_TIMEOUT;
     resBody = new TimeOutError(req.originalUrl);
   }
-  console.log("[genericErrorHandler]", resBody);
+  // console.log("[genericErrorHandler]", resBody);
 
   res.status(resCode).json(resBody);
 };
@@ -59,9 +58,7 @@ export const customErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  console.log("CUSTOM ERROR");
   if (err instanceof CustomError) {
-    console.log("HANDLING");
     res.status(err.status).json({
       code: err.code,
       description: err.description,
@@ -90,3 +87,11 @@ export interface ErrorData {
   code: string; // bad_request
   description: string; // Missing parameter x
 }
+
+export const ERR: { [key: string]: ErrorData } = {
+  USER_ALREADY_EXISTS: {
+    status: 400,
+    code: "ya_existe",
+    description: "Un usuario con ese nombre ya existe",
+  },
+};

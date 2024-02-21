@@ -1,8 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { PlayerDetails } from "usuarios";
-import { Player as PrismaPlayer } from "@prisma/client";
-import { Player } from "@/types/response/players";
-import { getPlayerId } from "@/types/request/players";
+import { PlainPlayerResponse, PlayerResponse } from "@/types/response/players";
+import { PlayerRequest, getPlayerId } from "@/types/request/players";
 import { hidePassword } from "@/utils/auth";
 
 const prisma = new PrismaClient();
@@ -13,7 +11,9 @@ export class PlayersDAO {
    * @param playerId ID of the player to retrieve information.
    * @returns Player | null
    */
-  static getById = async (playerId: getPlayerId): Promise<Player | null> => {
+  static getById = async (
+    playerId: getPlayerId,
+  ): Promise<PlayerResponse | null> => {
     try {
       const playerPrisma = await prisma.player.findUnique({
         where: { id: playerId },
@@ -28,7 +28,7 @@ export class PlayersDAO {
 
   static getByUsername = async (
     username: string,
-  ): Promise<PrismaPlayer | null> => {
+  ): Promise<PlainPlayerResponse | null> => {
     try {
       const playerPrisma = await prisma.player.findUnique({
         where: { username: username },
@@ -36,19 +36,21 @@ export class PlayersDAO {
 
       if (!playerPrisma) return null;
 
-      return hidePassword<PrismaPlayer>(playerPrisma);
+      return hidePassword<PlainPlayerResponse>(playerPrisma);
     } catch (error: any) {
       throw new Error(`Error getting player by username: ${error.message}`);
     }
   };
 
-  static create = async (details: PlayerDetails): Promise<PrismaPlayer> => {
-    const player = await prisma.player.create({ data: details });
+  static create = async (
+    request: PlayerRequest,
+  ): Promise<PlainPlayerResponse> => {
+    const player = await prisma.player.create({ data: request });
     return hidePassword(player);
   };
 }
 
-const parsePlayer = (playerDB: any): Player | null => {
+const parsePlayer = (playerDB: any): PlayerResponse | null => {
   return !playerDB
     ? null
     : {

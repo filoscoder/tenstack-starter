@@ -1,8 +1,8 @@
 import { NOT_FOUND, OK, CREATED } from "http-status/lib";
-import { Request, Response } from "express";
-import { PlayerDetails } from "usuarios";
+import { Response } from "express";
 import { PlayerServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
+import { PlayerRequest } from "@/types/request/players";
 
 export class PlayersController {
   /**
@@ -32,13 +32,16 @@ export class PlayersController {
     }
   };
 
-  static create = async (req: Request, res: Response, next: NextFn) => {
+  /**
+   * Creates a player.
+   */
+  static create = async (req: Req, res: Res, next: NextFn) => {
     try {
       const playersServices = new PlayerServices();
 
-      const playerDetails: PlayerDetails = req.body;
+      const request: PlayerRequest = req.body;
 
-      const player = await playersServices.create(playerDetails);
+      const player = await playersServices.create(request);
 
       res.status(CREATED).json(apiResponse(player));
     } catch (error) {

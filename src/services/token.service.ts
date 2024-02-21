@@ -1,8 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import axios from "axios";
 import { LoginResponse } from "usuarios";
+import { HttpService } from "./http.service";
 import { decrypt } from "@/utils/crypt";
-import CONFIG from "@/config";
 import { CustomError } from "@/middlewares/errorHandler";
 
 export class TokenService {
@@ -11,7 +10,6 @@ export class TokenService {
   private _password = "";
   private _encryptedPassword = "";
   private _token?: string;
-  private _urlApiExterna = CONFIG.EXTERNAL.AGENT_BASE_URL + "/accounts/login/";
 
   constructor() {
     this._prisma = new PrismaClient();
@@ -107,19 +105,19 @@ export class TokenService {
    * @returns Agent access token
    */
   async refreshToken(): Promise<string | null> {
-    const refreshUrl = CONFIG.EXTERNAL.AGENT_BASE_URL + "/accounts/refresh/";
+    const refreshUrl = "/accounts/refresh/";
     const agent = await this._prisma.userRoot.findFirst();
+    const { plainAgentApi } = new HttpService();
     if (!agent) return null;
 
     const isValid = this.verifyTokenExpiration(agent.refresh);
     if (!isValid) return null;
 
     // Conseguir un access token nuevo
-    const response = await axios({
+    const response = await plainAgentApi({
       url: refreshUrl,
       method: "POST",
       data: { refresh: agent.refresh },
-      validateStatus: () => true,
     });
 
     const access = response.data.access;
@@ -140,6 +138,9 @@ export class TokenService {
    * @returns access token or null if agent login is under way
    */
   async login(): Promise<string | null> {
+    const agentLoginUrl = "/accounts/login/";
+    const { plainAgentApi } = new HttpService();
+
     const agent = await this._prisma.userRoot.findFirst();
     // El agente está siendo logueado
     if (agent && agent.dirty) return null;
@@ -147,9 +148,7 @@ export class TokenService {
     // Indicar que estamos logueando al agente
     if (agent) await this.setAgentDirtyFlag(true);
 
-    const response = await axios.post(this._urlApiExterna, this.loginDetails, {
-      validateStatus: () => true,
-    });
+    const response = await plainAgentApi.post(agentLoginUrl, this.loginDetails);
 
     if (response.status !== 200) {
       await this.setAgentDirtyFlag(false);
