@@ -47,7 +47,51 @@ export const genericErrorHandler = (
     resCode = REQUEST_TIMEOUT;
     resBody = new TimeOutError(req.originalUrl);
   }
-  console.log("[genericErrorHandler]", resBody);
+  // console.log("[genericErrorHandler]", resBody);
 
   res.status(resCode).json(resBody);
+};
+
+export const customErrorHandler = (
+  err: any,
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (err instanceof CustomError) {
+    res.status(err.status).json({
+      code: err.code,
+      description: err.description,
+    });
+  } else {
+    return next(err);
+  }
+};
+
+export class CustomError extends Error {
+  status: number;
+  code: string;
+  description: string;
+
+  constructor(err: ErrorData) {
+    super(err.description);
+
+    this.description = err.description;
+    this.code = err.code;
+    this.status = err.status;
+  }
+}
+
+export interface ErrorData {
+  status: number; // 400
+  code: string; // bad_request
+  description: string; // Missing parameter x
+}
+
+export const ERR: { [key: string]: ErrorData } = {
+  USER_ALREADY_EXISTS: {
+    status: 400,
+    code: "ya_existe",
+    description: "Un usuario con ese nombre ya existe",
+  },
 };

@@ -3,8 +3,10 @@
  * @param {object} bodyData
  * @returns bodyData with formatted 'password'
  */
-export const hidePassword = (bodyData: Record<string, any>) => {
+export const hidePassword = <T extends Object>(bodyData: T): T => {
   if (bodyData.hasOwnProperty("password")) {
+    // if ("password" in bodyData) {
+    // @ts-ignore
     bodyData.password = "********";
   }
 

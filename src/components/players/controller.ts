@@ -1,7 +1,8 @@
-import { NOT_FOUND, OK } from "http-status/lib";
+import { NOT_FOUND, OK, CREATED } from "http-status/lib";
 import { Response } from "express";
 import { PlayerServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
+import { PlayerRequest } from "@/types/request/players";
 
 export class PlayersController {
   /**
@@ -26,6 +27,23 @@ export class PlayersController {
       } else {
         res.status(NOT_FOUND).json(apiResponse(null, "Player not found"));
       }
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Creates a player.
+   */
+  static create = async (req: Req, res: Res, next: NextFn) => {
+    try {
+      const playersServices = new PlayerServices();
+
+      const request: PlayerRequest = req.body;
+
+      const player = await playersServices.create(request);
+
+      res.status(CREATED).json(apiResponse(player));
     } catch (error) {
       next(error);
     }
