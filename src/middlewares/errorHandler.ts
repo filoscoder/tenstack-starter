@@ -94,4 +94,9 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "ya_existe",
     description: "Un usuario con ese nombre ya existe",
   },
+  INVALID_CREDENTIALS: {
+    status: 404,
+    code: "credenciales_invalidas",
+    description: "Usuario o contraseña incorrectos",
+  },
 };

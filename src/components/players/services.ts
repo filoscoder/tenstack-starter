@@ -1,7 +1,11 @@
-import { Player as PrismaPlayer } from "@prisma/client";
+import { compare } from "bcrypt";
 import { PlayersDAO } from "@/db/players";
-import { PlayerRequest, getPlayerId } from "@/types/request/players";
-import { PlayerResponse } from "@/types/response/players";
+import {
+  Credentials,
+  PlayerRequest,
+  getPlayerId,
+} from "@/types/request/players";
+import { PlainPlayerResponse, PlayerResponse } from "@/types/response/players";
 import { hash } from "@/utils/crypt";
 import { hidePassword } from "@/utils/auth";
 import { CustomError, ERR } from "@/middlewares/errorHandler";
@@ -20,7 +24,10 @@ export class PlayerServices {
     return player;
   };
 
-  create = async (player: PlayerRequest): Promise<PrismaPlayer> => {
+  /**
+   * Create player
+   */
+  create = async (player: PlayerRequest): Promise<PlainPlayerResponse> => {
     const panelSignUpUrl = "/pyramid/create/player/";
     const playerLoginUrl = "/accounts/login/";
     const { authedAgentApi, playerApi } = new HttpService();
@@ -56,5 +63,34 @@ export class PlayerServices {
     player.password = await hash(player.password);
     const localPlayer = await PlayersDAO.create(player);
     return hidePassword(localPlayer);
+  };
+
+  /**
+   * Log in player
+   */
+  login = async (credentials: Credentials): Promise<PlainPlayerResponse> => {
+    // Verificar user y pass en nuestra DB
+    const player = await PlayersDAO.getByUsername(credentials.username);
+
+    if (player && (await compare(credentials.password, player.password)))
+      return hidePassword(player);
+
+    // Usuario no está en local o contraseña es incorrecta
+    // Chequear en casino
+    const { playerApi } = new HttpService();
+    const loginResponse = await playerApi.post("/accounts/login/", credentials);
+
+    if (loginResponse.status == 200 && loginResponse.data.access) {
+      const localPlayer = await PlayersDAO.upsert({
+        where: { username: credentials.username },
+        update: { password: await hash(credentials.password) },
+        create: {
+          username: credentials.username,
+          password: await hash(credentials.password),
+          panel_id: loginResponse.data.id,
+        },
+      });
+      return hidePassword(localPlayer);
+    } else throw new CustomError(ERR.INVALID_CREDENTIALS);
   };
 }

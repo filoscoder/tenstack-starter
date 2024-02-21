@@ -23,3 +23,5 @@ export const validatePlayerRequest = (req: Req, res: Res, next: NextFn) => {
 
   return next();
 };
+
+export const validateCredentials = validatePlayerRequest;
