@@ -26,6 +26,22 @@ export class PlayersDAO {
     }
   };
 
+  static getByUsername = async (
+    username: string,
+  ): Promise<PrismaPlayer | null> => {
+    try {
+      const playerPrisma = await prisma.player.findUnique({
+        where: { username: username },
+      });
+
+      if (!playerPrisma) return null;
+
+      return hidePassword<PrismaPlayer>(playerPrisma);
+    } catch (error: any) {
+      throw new Error(`Error getting player by username: ${error.message}`);
+    }
+  };
+
   static create = async (details: PlayerDetails): Promise<PrismaPlayer> => {
     const player = await prisma.player.create({ data: details });
     return hidePassword(player);
