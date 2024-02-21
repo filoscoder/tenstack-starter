@@ -1,5 +1,6 @@
-import { NOT_FOUND, OK } from "http-status/lib";
-import { Response } from "express";
+import { NOT_FOUND, OK, CREATED } from "http-status/lib";
+import { Request, Response } from "express";
+import { PlayerDetails } from "usuarios";
 import { PlayerServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
 
@@ -26,6 +27,20 @@ export class PlayersController {
       } else {
         res.status(NOT_FOUND).json(apiResponse(null, "Player not found"));
       }
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  static create = async (req: Request, res: Response, next: NextFn) => {
+    try {
+      const playersServices = new PlayerServices();
+
+      const playerDetails: PlayerDetails = req.body;
+
+      const player = await playersServices.create(playerDetails);
+
+      res.status(CREATED).json(apiResponse(player));
     } catch (error) {
       next(error);
     }

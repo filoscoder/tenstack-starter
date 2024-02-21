@@ -18,6 +18,7 @@ export const notFoundError = (
   res: Response,
   _next: NextFunction,
 ) => {
+  console.log("NOT FOUND ERROR");
   res.status(NOT_FOUND).json({
     error: {
       code: NOT_FOUND,
@@ -51,3 +52,41 @@ export const genericErrorHandler = (
 
   res.status(resCode).json(resBody);
 };
+
+export const customErrorHandler = (
+  err: any,
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  console.log("CUSTOM ERROR");
+  if (err instanceof CustomError) {
+    console.log("HANDLING");
+    res.status(err.status).json({
+      code: err.code,
+      description: err.description,
+    });
+  } else {
+    return next(err);
+  }
+};
+
+export class CustomError extends Error {
+  status: number;
+  code: string;
+  description: string;
+
+  constructor(err: ErrorData) {
+    super(err.description);
+
+    this.description = err.description;
+    this.code = err.code;
+    this.status = err.status;
+  }
+}
+
+export interface ErrorData {
+  status: number; // 400
+  code: string; // bad_request
+  description: string; // Missing parameter x
+}

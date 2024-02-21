@@ -32,6 +32,7 @@ export const createApp = (): express.Application => {
   app.use(`/app/${CONFIG.APP.VER}`, mainRouter);
 
   // Error Middleware
+  app.use(errorHandler.customErrorHandler);
   app.use(errorHandler.genericErrorHandler);
   app.use(errorHandler.notFoundError);
 

@@ -1,6 +1,9 @@
 import { PrismaClient } from "@prisma/client";
+import { PlayerDetails } from "usuarios";
+import { Player as PrismaPlayer } from "@prisma/client";
 import { Player } from "@/types/response/players";
 import { getPlayerId } from "@/types/request/players";
+import { hidePassword } from "@/utils/auth";
 
 const prisma = new PrismaClient();
 
@@ -21,6 +24,11 @@ export class PlayersDAO {
     } catch (error: any) {
       throw new Error(`Error getting player by ID: ${error.message}`);
     }
+  };
+
+  static create = async (details: PlayerDetails): Promise<PrismaPlayer> => {
+    const player = await prisma.player.create({ data: details });
+    return hidePassword(player);
   };
 }
 
