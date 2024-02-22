@@ -290,7 +290,6 @@ Devuelve    | 200 OK
 
 ## TODO
 
-- Replace `atob` with `Buffer.from`
 - Usar ID en lugar de panel_id
 - No devolver panel_id
 - Implementar autenticacion de jugador

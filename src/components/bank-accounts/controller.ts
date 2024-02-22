@@ -8,7 +8,7 @@ import { ValidationError } from "@/helpers/error";
 export class BankAccountsController {
   static index = async (req: AuthedReq, res: Res, next: NextFn) => {
     try {
-      const player_id = req.user!.panel_id;
+      const player_id = req.user!.id;
       const account_id = Number(req.params.id);
       const bankAccountServices = new BankAccountServices();
 
@@ -30,7 +30,7 @@ export class BankAccountsController {
       const error = validationResult(req);
       if (!error.isEmpty()) throw new ValidationError(error.array());
 
-      const player_id = req.user!.panel_id;
+      const player_id = req.user!.id;
       const request: BankAccountRequest = req.body;
 
       const bankAccountServices = new BankAccountServices();
@@ -55,7 +55,7 @@ export class BankAccountsController {
 
       const account = await bankAccountServices.update(
         account_id,
-        req.user!.panel_id,
+        req.user!.id,
         request,
       );
 

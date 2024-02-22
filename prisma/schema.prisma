@@ -64,7 +64,7 @@ model Player {
 model Payment {
   id                Int           @id @default(autoincrement())
   player_id         Int           // Panel ID
-  Player            Player        @relation(fields: [player_id], references: [panel_id])
+  Player            Player        @relation(fields: [player_id], references: [id])
   amount            Float
   paid              DateTime?     // El dinero fue transferido (datetime) o no (null)
   bank_account      Int           // Cuenta en la que recibe el pago
@@ -79,7 +79,7 @@ model BankAccount {
   id                Int           @id @default(autoincrement())
   owner             String        // Nombre del beneficiario
   owner_id          Int           // DNI
-  Player            Player        @relation(fields: [player_id], references: [panel_id])
+  Player            Player        @relation(fields: [player_id], references: [id])
   player_id         Int           // ID de Player
   bankName          String        // Nombre del banco
   bankNumber        String        @unique // CBU
@@ -95,7 +95,7 @@ model BankAccount {
 model Deposit {
   id                Int           @id @default(autoincrement())
   player_id         Int           // Panel ID
-  Player            Player        @relation(fields: [player_id], references: [panel_id])
+  Player            Player        @relation(fields: [player_id], references: [id])
   amount            Float
   confirmed         DateTime?     // El deposito fue confirmado (datetime) o no (null)
   bank_account      Int           // Cuenta desde la que hace el deposito

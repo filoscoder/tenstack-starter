@@ -79,7 +79,6 @@ export const validateAccountUpdate = () =>
       in: ["body"],
       optional: true,
       isNumeric: true,
-      trim: true,
     },
     bankName: {
       in: ["body"],
@@ -103,6 +102,5 @@ export const validateAccountUpdate = () =>
       in: ["params"],
       notEmpty: true,
       isNumeric: true,
-      trim: true,
     },
   });
