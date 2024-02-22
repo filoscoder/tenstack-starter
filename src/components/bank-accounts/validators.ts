@@ -42,8 +42,7 @@ export const validateBankAccount = () =>
     owner_id: {
       in: ["body"],
       notEmpty: true,
-      isNumeric: true,
-      trim: true,
+      isInt: true,
       errorMessage: "Owner id is required",
     },
     bankName: {
