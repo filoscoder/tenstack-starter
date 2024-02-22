@@ -94,4 +94,9 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "ya_existe",
     description: "Un usuario con ese nombre ya existe",
   },
+  AGENT_LOGIN: {
+    status: 500,
+    code: "agent_login",
+    description: "Error al loguear el agente en el panel",
+  },
 };

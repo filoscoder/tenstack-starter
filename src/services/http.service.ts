@@ -1,6 +1,7 @@
 import axios from "axios";
 import { TokenService } from "./token.service";
 import CONFIG from "@/config";
+import { CustomError, ERR } from "@/middlewares/errorHandler";
 
 export class HttpService {
   private _tokenService: TokenService;
@@ -72,7 +73,7 @@ export class HttpService {
       if (response.status === 401) {
         this._token = await this.handleTokenExpiration();
         if (!this._token) {
-          return await this.delay(() => this.send(method, url, data));
+          throw new CustomError(ERR.AGENT_LOGIN);
         }
 
         return await this.agentAxiosInstance({ url, method, data });
