@@ -1,6 +1,9 @@
 export interface BankAccountRequest {
-  name: string;
-  number: string;
+  owner: string;
+  owner_id: number;
+  bankName: string;
+  bankNumber: string;
+  bankAlias: string | null;
 }
 
 export interface AccountUpdateRequest extends BankAccountRequest {

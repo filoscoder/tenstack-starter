@@ -14,11 +14,15 @@ export class BankAccountServices {
     return await BankAccountsDAO.create(player_id, request);
   }
 
-  async update(account_id: number, request: BankAccountRequest) {
-    return await BankAccountsDAO.update(account_id, request);
+  async update(
+    account_id: number,
+    player_id: number,
+    request: BankAccountRequest,
+  ) {
+    return await BankAccountsDAO.update(account_id, player_id, request);
   }
 
-  async delete(account_id: number) {
-    return await BankAccountsDAO.delete(account_id);
+  async delete(account_id: number, player_id: number) {
+    return await BankAccountsDAO.delete(account_id, player_id);
   }
 }

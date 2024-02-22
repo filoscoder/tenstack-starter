@@ -257,19 +257,26 @@ Devuelve    | 200 OK
 ### BankAccountRequest
 ```typescript
 {
-    name: string
-    number: string
+  owner: string                       // Nombre del beneficiario
+  owner_id: number                    // DNI
+  bankName: string                    // Nombre del banco
+  bankNumber: string                  // CBU
+  bankAlias: string?   
 }
 ```
+
 ### BankAccount
 ```typescript
 {
-    id: number
-    player_id: number                 // Player panel ID
-    name: string
-    number: string
-    created_at: string                // 2024-01-29T18:14:41.534Z
-    updated_at: string                // 2024-01-29T18:14:41.534Z
+  id: number        
+  owner: string                       // Nombre del beneficiario
+  owner_id: number                    // DNI
+  player_id: number                   // ID de Player
+  bankName: string                    // Nombre del banco
+  bankNumber: string                  // CBU
+  bankAlias: string?       
+  created_at:                         // 2024-01-29T18:14:41.534Z
+  updated_at:                         // 2024-01-29T18:14:41.534Z
 }
 ```
 

@@ -3,16 +3,19 @@ import { checkExact } from "express-validator";
 import { BankAccountsController } from "@/components/bank-accounts/controller";
 import {
   authenticatePlayer,
-  authorizeBankAccountDelete,
-  authorizeBankAccountUpdate,
   validateAccountUpdate,
   validateBankAccount,
+  validateBankAccountIndex,
 } from "@/components/bank-accounts/validators";
 
 const bankAccountsRouter = Router();
 
 bankAccountsRouter.use(authenticatePlayer);
-bankAccountsRouter.get("/:id?", BankAccountsController.index);
+bankAccountsRouter.get(
+  "/:id?",
+  validateBankAccountIndex(),
+  BankAccountsController.index,
+);
 bankAccountsRouter.post(
   "/",
   validateBankAccount(),
@@ -23,12 +26,11 @@ bankAccountsRouter.put(
   "/:id",
   validateAccountUpdate(),
   checkExact(),
-  authorizeBankAccountUpdate,
   BankAccountsController.update,
 );
 bankAccountsRouter.delete(
   "/:id",
-  authorizeBankAccountDelete,
+  validateBankAccountIndex(),
   BankAccountsController.delete,
 );
 

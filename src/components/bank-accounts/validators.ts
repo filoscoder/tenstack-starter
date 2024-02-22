@@ -2,8 +2,6 @@ import { PrismaClient } from "@prisma/client";
 import { UNAUTHORIZED } from "http-status";
 import { checkSchema } from "express-validator";
 import { apiResponse } from "@/helpers/apiResponse";
-import { BankAccountsDAO } from "@/db/bank-accounts";
-import { ForbiddenError, NotFoundException } from "@/helpers/error";
 
 // TODO implement actual authentication
 const prisma = new PrismaClient();
@@ -20,34 +18,87 @@ export const authenticatePlayer = async (
   return next();
 };
 
+export const validateBankAccountIndex = () =>
+  checkSchema({
+    id: {
+      in: ["params"],
+      isNumeric: true,
+      notEmpty: true,
+    },
+  });
+
 /**
  * Ensure all required fields for creating bank account are present
  */
 export const validateBankAccount = () =>
   checkSchema({
-    name: {
+    owner: {
       in: ["body"],
+      isString: true,
       notEmpty: true,
-      errorMessage: "Name is required",
+      trim: true,
+      errorMessage: "Owner name is required",
     },
-    number: {
+    owner_id: {
       in: ["body"],
       notEmpty: true,
-      errorMessage: "Number is required",
+      isNumeric: true,
+      trim: true,
+      errorMessage: "Owner id is required",
+    },
+    bankName: {
+      in: ["body"],
+      notEmpty: true,
+      isString: true,
+      trim: true,
+      errorMessage: "Bank name is required",
+    },
+    bankNumber: {
+      in: ["body"],
+      notEmpty: true,
+      isString: true,
+      trim: true,
+      errorMessage: "Bank number is required",
+    },
+    bankAlias: {
+      in: ["body"],
+      optional: true,
+      isString: true,
+      trim: true,
     },
   });
 
 export const validateAccountUpdate = () =>
   checkSchema({
-    name: {
+    owner: {
       in: ["body"],
       optional: true,
-      notEmpty: true,
+      isString: true,
+      trim: true,
     },
-    number: {
+    owner_id: {
       in: ["body"],
       optional: true,
-      notEmpty: true,
+      isNumeric: true,
+      trim: true,
+    },
+    bankName: {
+      in: ["body"],
+      optional: true,
+      isString: true,
+      trim: true,
+    },
+    bankNumber: {
+      in: ["body"],
+      optional: true,
+      isString: true,
+      trim: true,
+    },
+    bankAlias: {
+      in: ["body"],
+      optional: true,
+      isString: true,
+      trim: true,
     },
     id: {
       in: ["params"],
@@ -56,21 +107,3 @@ export const validateAccountUpdate = () =>
       trim: true,
     },
   });
-
-export const authorizeBankAccountUpdate = async (
-  req: AuthedReq,
-  _res: Res,
-  next: NextFn,
-) => {
-  const account_id = req.params.id;
-  const account = await BankAccountsDAO.show(Number(account_id));
-
-  if (!account) return next(new NotFoundException());
-
-  if (account.player_id !== req.user!.panel_id)
-    return next(new ForbiddenError("No autorizado"));
-
-  return next();
-};
-
-export const authorizeBankAccountDelete = authorizeBankAccountUpdate;

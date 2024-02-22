@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { BankAccountRequest } from "@/types/request/bank-account";
+import { ForbiddenError, NotFoundException } from "@/helpers/error";
 
 const prisma = new PrismaClient();
 
@@ -11,7 +12,9 @@ export class BankAccountsDAO {
       });
       return accounts;
     } catch (error: any) {
-      throw new Error(`Error fetching bank accounts: ${error.message}`);
+      // Prisma errors handled by prismaErrorHandler()
+      throw error;
+      // throw new Error(`Error fetching bank accounts: ${error.message}`);
     }
   }
 
@@ -22,7 +25,8 @@ export class BankAccountsDAO {
       });
       return account;
     } catch (error: any) {
-      throw new Error(`Error fetching bank account: ${error.message}`);
+      throw error;
+      // throw new Error(`Error fetching bank account: ${error.message}`);
     }
   }
 
@@ -33,27 +37,48 @@ export class BankAccountsDAO {
       });
       return account;
     } catch (error: any) {
-      throw new Error(`Error creating bank account: ${error.message}`);
+      throw error;
+      // throw new Error(`Error creating bank account: ${error.message}`);
     }
   }
 
-  static async update(account_id: number, request: BankAccountRequest) {
+  static async update(
+    account_id: number,
+    player_id: number,
+    request: BankAccountRequest,
+  ) {
     try {
-      const account = await prisma.bankAccount.update({
-        where: { id: account_id },
+      await this.authorizeUpdate(account_id, player_id);
+
+      const updated = await prisma.bankAccount.update({
+        where: { id: account_id, player_id },
         data: request,
       });
-      return account;
+      return updated;
     } catch (error: any) {
-      throw new Error(`Error updating bank account: ${error.message}`);
+      throw error;
     }
   }
 
-  static async delete(account_id: number) {
+  static async delete(account_id: number, player_id: number) {
     try {
+      await this.authorizeDelete(account_id, player_id);
+
       await prisma.bankAccount.delete({ where: { id: account_id } });
     } catch (error: any) {
-      throw new Error(`Error deleting bank account: ${error.message}`);
+      throw error;
+      // throw new Error(`Error deleting bank account: ${error.message}`);
     }
   }
+
+  static async authorizeUpdate(account_id: number, player_id: number) {
+    const account = await BankAccountsDAO.show(account_id);
+
+    if (!account) throw new NotFoundException();
+
+    if (account.player_id !== player_id)
+      throw new ForbiddenError("No autorizado");
+  }
+
+  static authorizeDelete = this.authorizeUpdate;
 }

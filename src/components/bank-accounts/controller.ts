@@ -11,12 +11,15 @@ export class BankAccountsController {
       const player_id = req.user!.panel_id;
       const account_id = Number(req.params.id);
 
-      const bankAccountServices = new BankAccountServices();
-
       let result = [];
       if (account_id) {
-        result[0] = await bankAccountServices.show(account_id);
-      } else result = await bankAccountServices.index(player_id);
+        // Validator injects bank_account in req.body when account_id
+        // is present
+        result[0] = req.body.bank_account;
+      } else {
+        const bankAccountServices = new BankAccountServices();
+        result = await bankAccountServices.index(player_id);
+      }
 
       res.status(OK).json(apiResponse(result));
     } catch (error) {
@@ -52,7 +55,11 @@ export class BankAccountsController {
 
       const bankAccountServices = new BankAccountServices();
 
-      const account = await bankAccountServices.update(account_id, request);
+      const account = await bankAccountServices.update(
+        account_id,
+        req.user!.panel_id,
+        request,
+      );
 
       res.status(OK).json(apiResponse(account));
     } catch (error) {
@@ -69,7 +76,7 @@ export class BankAccountsController {
 
       const bankAccountServices = new BankAccountServices();
 
-      await bankAccountServices.delete(account_id);
+      await bankAccountServices.delete(account_id, req.user!.id);
 
       res.status(OK).send();
     } catch (error) {
