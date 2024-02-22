@@ -6,8 +6,8 @@ export class BankAccountServices {
     return await BankAccountsDAO.index(player_id);
   }
 
-  async show(account_id: number) {
-    return await BankAccountsDAO.show(account_id);
+  async show(account_id: number, player_id: number) {
+    return await BankAccountsDAO.show(account_id, player_id);
   }
 
   async create(player_id: number, request: BankAccountRequest) {

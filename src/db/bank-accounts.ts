@@ -18,8 +18,10 @@ export class BankAccountsDAO {
     }
   }
 
-  static async show(account_id: number) {
+  static async show(account_id: number, player_id: number) {
     try {
+      await this.authorizeView(account_id, player_id);
+
       const account = await prisma.bankAccount.findUnique({
         where: { id: account_id },
       });
@@ -72,7 +74,9 @@ export class BankAccountsDAO {
   }
 
   static async authorizeUpdate(account_id: number, player_id: number) {
-    const account = await BankAccountsDAO.show(account_id);
+    const account = await prisma.bankAccount.findUnique({
+      where: { id: account_id },
+    });
 
     if (!account) throw new NotFoundException();
 
@@ -81,4 +85,6 @@ export class BankAccountsDAO {
   }
 
   static authorizeDelete = this.authorizeUpdate;
+
+  static authorizeView = this.authorizeUpdate;
 }

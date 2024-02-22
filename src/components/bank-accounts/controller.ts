@@ -10,14 +10,12 @@ export class BankAccountsController {
     try {
       const player_id = req.user!.panel_id;
       const account_id = Number(req.params.id);
+      const bankAccountServices = new BankAccountServices();
 
       let result = [];
       if (account_id) {
-        // Validator injects bank_account in req.body when account_id
-        // is present
-        result[0] = req.body.bank_account;
+        result[0] = bankAccountServices.show(account_id, player_id);
       } else {
-        const bankAccountServices = new BankAccountServices();
         result = await bankAccountServices.index(player_id);
       }
 
