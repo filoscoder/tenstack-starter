@@ -1,6 +1,7 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { TokenService } from "./token.service";
 import CONFIG from "@/config";
+import { CustomError, ERR } from "@/middlewares/errorHandler";
 
 export class HttpService {
   private _tokenService: TokenService;
@@ -63,33 +64,45 @@ export class HttpService {
   }
 
   private async send(method: string, url: string, data: any): Promise<any> {
-    let response: AxiosResponse<any, any> | null = null;
+    try {
+      this._token = await this._tokenService.token();
+      if (!this._token) {
+        this._token = await this.handleTokenExpiration();
+      }
+      const response = await this.agentAxiosInstance({ url, method, data });
+      if (response.status === 401) {
+        this._token = await this.handleTokenExpiration();
+        if (!this._token) {
+          throw new CustomError(ERR.AGENT_LOGIN);
+        }
 
-    // Intentar con token de memoria, bbdd o refresh token
-    this._token = await this._tokenService.token();
-    if (this._token) {
-      response = await this.agentAxiosInstance({ url, method, data });
+        return await this.agentAxiosInstance({ url, method, data });
+      }
+
+      return response;
+    } catch (error) {
+      throw error;
     }
-
-    // Token inválido o expirado.
-    // Si llegamos hasta acá es porque ambos tokens estaban expirados
-    // o fueron invalidados por un login
-    if (!response || response.status === 401) {
-      this._token = await this._tokenService.login();
-
-      // Si login() devuelve null significa que el agente está siendo logueado.
-      // Esperar 500ms y volver a empezar
-      if (!this._token)
-        return await this.delay(() => this.send(method, url, data));
-
-      // Intentar de nuevo con token fresco
-      return await this.agentAxiosInstance({ url, method, data });
-    } else return response;
   }
 
-  private async delay(cb: CallableFunction) {
+  private async handleTokenExpiration(retry = 3): Promise<string | null> {
+    if (retry <= 0) {
+      return null;
+    }
+    return this.delay(async () => {
+      this._token = await this._tokenService.login();
+
+      if (!this._token) {
+        return this.handleTokenExpiration(retry - 1);
+      }
+
+      return this._token;
+    });
+  }
+
+  private async delay(cb: CallableFunction): Promise<any> {
     return new Promise((resolve) => {
-      setTimeout(() => resolve(cb()), 500);
+      setTimeout(async () => resolve(cb ? await cb() : undefined), 500);
     });
   }
 }

@@ -107,6 +107,11 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "credenciales_invalidas",
     description: "Usuario o contraseña incorrectos",
   },
+  AGENT_LOGIN: {
+    status: 500,
+    code: "agent_login",
+    description: "Error al loguear el agente en el panel",
+  },
 };
 
 function prismaErrorHandler(
