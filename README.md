@@ -245,7 +245,7 @@ Devuelve    | 200 OK
 {
     username: string,
     password: string,
-    email?: string,
+    email: string,
     first_name?: string, 
     last_name?: string,
     date_of_birth?: DateTime,
@@ -290,6 +290,8 @@ Devuelve    | 200 OK
 
 ## TODO
 
+- Usar CONFIG en lugar de process.env
+- Replace `atob` with `Buffer.from`
 - Usar ID en lugar de panel_id
 - No devolver panel_id
 - Implementar autenticacion de jugador

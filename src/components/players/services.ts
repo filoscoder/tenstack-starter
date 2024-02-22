@@ -21,7 +21,9 @@ export class PlayerServices {
     playerId: getPlayerId,
   ): Promise<PlayerResponse | null> => {
     const player = await PlayersDAO.getById(playerId);
-    return player;
+    if (!player) return null;
+
+    return hidePassword<PlayerResponse>(player);
   };
 
   /**

@@ -1,19 +1,14 @@
-import { PrismaClient } from "@prisma/client";
 import { LoginResponse } from "usuarios";
 import { HttpService } from "./http.service";
 import { decrypt } from "@/utils/crypt";
 import { CustomError } from "@/middlewares/errorHandler";
+import { UserRootDAO } from "@/db/user-root";
 
 export class TokenService {
-  private _prisma: PrismaClient;
   private _username = "";
   private _password = "";
   private _encryptedPassword = "";
   private _token?: string;
-
-  constructor() {
-    this._prisma = new PrismaClient();
-  }
 
   public get username() {
     if (this._username) return this._username;
@@ -82,9 +77,7 @@ export class TokenService {
 
     let agent = null;
     try {
-      agent = await this._prisma.userRoot.findFirst({
-        where: { username: this.username },
-      });
+      agent = await UserRootDAO.getAgent();
     } catch (error) {
       return null;
     }
@@ -103,7 +96,7 @@ export class TokenService {
    * @returns Agent access token
    */
   async refreshToken(): Promise<string | null> {
-    const agent = await this._prisma.userRoot.findFirst();
+    const agent = await UserRootDAO.getAgent();
     if (!agent) return null;
 
     const isValid = this.verifyTokenExpiration(agent.refresh);
@@ -118,12 +111,9 @@ export class TokenService {
         data: { refresh: agent.refresh },
       });
 
-      const access = response.data.access;
+      const access: string = response.data.access;
       if (access) {
-        await this._prisma.userRoot.update({
-          where: { username: this.username },
-          data: { access },
-        });
+        await UserRootDAO.update(this.username, { access });
         return access;
       }
       return null;
@@ -137,7 +127,7 @@ export class TokenService {
    * @returns access token or null if agent login is under way
    */
   async login(): Promise<string | null> {
-    const agent = await this._prisma.userRoot.findFirst();
+    const agent = await UserRootDAO.getAgent();
     if (!agent || agent.dirty) return null;
 
     try {
@@ -197,22 +187,19 @@ export class TokenService {
 
   private setAgentDirtyFlag(dirty: boolean) {
     if (dirty) this._token = undefined;
-    return this._prisma.userRoot.update({
-      where: { username: this.username },
-      data: { dirty },
-    });
+    return UserRootDAO.update(this.username, { dirty });
   }
 
   private upsertAgent(data: LoginResponse) {
-    return this._prisma.userRoot.upsert({
-      where: { username: this.username },
-      update: {
+    return UserRootDAO.upsert(
+      this.username,
+      {
         access: data.access,
         refresh: data.refresh,
         json_response: JSON.stringify(data),
         dirty: false,
       },
-      create: {
+      {
         username: data.username,
         password: this.encryptedPassword,
         panel_id: data.id,
@@ -221,6 +208,6 @@ export class TokenService {
         json_response: JSON.stringify(data),
         dirty: false,
       },
-    });
+    );
   }
 }

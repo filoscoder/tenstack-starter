@@ -10,7 +10,7 @@ export interface PlayerRequest {
   username: string;
   password: string;
   panel_id: number;
-  email?: string;
+  email: string;
   first_name?: string;
   last_name?: string;
   date_of_birth?: string;
