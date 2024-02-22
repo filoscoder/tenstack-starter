@@ -122,10 +122,10 @@ export class TokenService {
    */
   async login(): Promise<string | null> {
     const agent = await UserRootDAO.getAgent();
-    if (!agent || agent.dirty) return null;
+    if (agent && agent.dirty) return null;
 
     try {
-      await this.setAgentLoginStatus(true);
+      if (agent) await this.setAgentLoginStatus(true);
       const data = await this.attemptLogin();
       await this.finalizeAgentLogin(data);
       return data.access;
@@ -169,7 +169,8 @@ export class TokenService {
    */
   private verifyTokenExpiration(token: string): boolean {
     try {
-      const payloadJson = atob(token.split(".")[1]);
+      const bufer = Buffer.from(token.split(".")[1], "base64");
+      const payloadJson = bufer.toString("utf8");
       const payload = JSON.parse(payloadJson);
       const currentTimeInSeconds = Math.floor(Date.now() / 1000);
 
