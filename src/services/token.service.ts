@@ -3,6 +3,7 @@ import { HttpService } from "./http.service";
 import { decrypt } from "@/utils/crypt";
 import { CustomError } from "@/middlewares/errorHandler";
 import { UserRootDAO } from "@/db/user-root";
+import CONFIG from "@/config";
 
 export class TokenService {
   private _username = "";
@@ -13,7 +14,7 @@ export class TokenService {
   public get username() {
     if (this._username) return this._username;
 
-    const encryptedUsername = process.env["AGENT_USERNAME"];
+    const encryptedUsername = CONFIG.AUTH.AGENT_USERNAME;
     if (!encryptedUsername) {
       throw new CustomError({
         status: 500,
@@ -28,7 +29,7 @@ export class TokenService {
   private get password() {
     if (this._password) return this._password;
 
-    const encryptedPassword = process.env["AGENT_PASSWORD"];
+    const encryptedPassword = CONFIG.AUTH.AGENT_PASSWORD;
     if (!encryptedPassword) {
       throw new CustomError({
         status: 500,
@@ -37,21 +38,14 @@ export class TokenService {
       });
     }
     this._password = decrypt(encryptedPassword);
+    this._encryptedPassword = encryptedPassword;
     return this._password;
   }
 
   private get encryptedPassword() {
     if (this._encryptedPassword) return this._encryptedPassword;
 
-    const encryptedPassword = process.env["AGENT_PASSWORD"];
-    if (!encryptedPassword) {
-      throw new CustomError({
-        status: 500,
-        code: "env",
-        description: "No se encontro la contraseña en la variable de entorno",
-      });
-    }
-    this._encryptedPassword = encryptedPassword;
+    this.password;
     return this._encryptedPassword;
   }
 

@@ -83,15 +83,15 @@ export class PlayerServices {
     const loginResponse = await playerApi.post("/accounts/login/", credentials);
 
     if (loginResponse.status == 200 && loginResponse.data.access) {
-      const localPlayer = await PlayersDAO.upsert({
-        where: { username: credentials.username },
-        update: { password: await hash(credentials.password) },
-        create: {
+      const localPlayer = await PlayersDAO.upsert(
+        credentials.username,
+        { password: await hash(credentials.password) },
+        {
           username: credentials.username,
           password: await hash(credentials.password),
           panel_id: loginResponse.data.id,
         },
-      });
+      );
       return hidePassword(localPlayer);
     } else throw new CustomError(ERR.INVALID_CREDENTIALS);
   };

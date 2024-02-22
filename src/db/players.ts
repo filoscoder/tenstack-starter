@@ -55,5 +55,23 @@ export class PlayersDAO {
     }
   };
 
-  static upsert = prisma.player.upsert;
+  static upsert = (
+    username: string,
+    update: PlayerUpdatableProps,
+    create: PlayerRequest,
+  ) => {
+    try {
+      return prisma.player.upsert({
+        where: { username },
+        update,
+        create,
+      });
+    } catch (error) {
+      throw error;
+    }
+  };
+}
+
+interface PlayerUpdatableProps {
+  password: string;
 }
