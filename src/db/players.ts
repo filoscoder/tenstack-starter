@@ -22,7 +22,7 @@ export class PlayersDAO {
 
       return parsePlayer(playerPrisma);
     } catch (error: any) {
-      throw new Error(`Error getting player by ID: ${error.message}`);
+      throw error;
     }
   };
 
@@ -40,7 +40,7 @@ export class PlayersDAO {
 
       return playerPrisma;
     } catch (error: any) {
-      throw new Error(`Error getting player by username: ${error.message}`);
+      throw error;
     }
   };
 
@@ -51,7 +51,7 @@ export class PlayersDAO {
       const player = await prisma.player.create({ data: request });
       return hidePassword(player);
     } catch (error: any) {
-      throw new Error(`Error creating player: ${error.message}`);
+      throw error;
     }
   };
 

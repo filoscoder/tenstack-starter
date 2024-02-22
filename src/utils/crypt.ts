@@ -55,7 +55,11 @@ export function encrypt(text: string): string {
       ciphertext: encrypted,
     });
   } catch (error) {
-    throw new Error("Error encriptando contraseña");
+    throw new CustomError({
+      status: 500,
+      code: "crypt",
+      description: "Error encriptando contraseña",
+    });
   }
 }
 

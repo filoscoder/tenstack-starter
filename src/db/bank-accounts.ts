@@ -14,7 +14,6 @@ export class BankAccountsDAO {
     } catch (error: any) {
       // Prisma errors handled by prismaErrorHandler()
       throw error;
-      // throw new Error(`Error fetching bank accounts: ${error.message}`);
     }
   }
 
@@ -28,7 +27,6 @@ export class BankAccountsDAO {
       return account;
     } catch (error: any) {
       throw error;
-      // throw new Error(`Error fetching bank account: ${error.message}`);
     }
   }
 
@@ -40,7 +38,6 @@ export class BankAccountsDAO {
       return account;
     } catch (error: any) {
       throw error;
-      // throw new Error(`Error creating bank account: ${error.message}`);
     }
   }
 
@@ -69,7 +66,6 @@ export class BankAccountsDAO {
       await prisma.bankAccount.delete({ where: { id: account_id } });
     } catch (error: any) {
       throw error;
-      // throw new Error(`Error deleting bank account: ${error.message}`);
     }
   }
 
