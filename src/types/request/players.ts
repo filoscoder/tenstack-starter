@@ -17,3 +17,8 @@ export interface PlayerRequest {
   movile_number?: string;
   country?: string;
 }
+
+export interface Credentials {
+  username: string;
+  password: string;
+}

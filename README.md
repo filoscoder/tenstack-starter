@@ -144,3 +144,151 @@ If you have any question or suggestion, don't hesitate to contact me:
 <a src="https://github.com/filoscoder">
 <img width="60px" style="border-radius: 50%;" src="https://avatars.githubusercontent.com/filoscoder">
 </a>
+
+
+# Docs
+
+## Contenidos
+
+### Endpoints Jugadores
++ [Ver Jugador](#ver-jugador)
++ [Crear Jugador](#crear-jugador)
++ [Login de Jugador](#login-jugador)
+
+### Endpoints Cuentas Bancarias
++ [Ver Cuentas Bancarias](#ver-cuentas-bancarias)
++ [Crear Cuenta Bancaria](#crear-cuenta-bancaria)
++ [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria)
++ [Eliminar Cuenta Bancaria](#eliminar-cuenta-bancaria)
+
+### Ver Jugador
+
+|Endpoint:| `/players/:id`|
+---|---|
+Método      | `GET`
+Devuelve    | [`Player & { bank_accounts: BankAccount[] }`](#player)
+
+### Crear Jugador
+
+|Endpoint:| `/players`|
+---|---|
+Método      | `POST`
+Body (json) | [`PlayerRequest`](#playerrequest)
+Devuelve    | [`Player`](#Player)
+
+### Login Jugador
+
+|Endpoint| `/players/login`|
+---|---|
+Método      |`POST`
+Body (json) | [`Credenciales`](#credenciales)
+Devuelve    | [`Player`](#player)
+
+### Ver Cuentas Bancarias
+
+|Endpoint| `/bank-account/:id?`|
+---|---|
+Método      |`GET`
+Devuelve    | [`BankAccount[]`](#bankaccount)
+
+> **Nota:** Siempre devuleve un array
+
+> **Nota:** Omitir el parámetro `id` para ver todas las cuentas bancarias del usuario
+
+### Crear Cuenta Bancaria
+
+|Endpoint| `/bank-account`|
+---|---|
+Método      |`POST`
+Body (json) | [`BankAccountRequest`](#bankaccountrequest)
+Devuelve    | [`BankAccount`](#bankaccount)
+
+### Actualizar Cuenta Bancaria
+
+|Endpoint| `/bank-account`|
+---|---|
+Método      |`PUT`
+Body (json) | [`BankAccountRequest`](#bankaccountrequest)
+Devuelve    | [`BankAccount`](#bankaccount)
+
+> **Nota:** Los campos son opcionales. Incluir los que se quiera modificar
+
+### Eliminar Cuenta Bancaria
+
+|Endpoint| `/bank-account`|
+---|---|
+Método      |`DELETE`
+Devuelve    | 200 OK
+
+## Interfaces
+
+### Player
+```typescript
+{
+  id: number;
+  panel_id: number;
+  username: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  date_of_birth?: string;
+  movile_number?: string;
+  country?: string;
+  balance_currency: string;
+  status: string;
+  created_at: string;                 // 2024-01-29T18:14:41.534Z
+}
+```
+
+### PlayerRequest
+```typescript
+{
+    username: string,
+    password: string,
+    email?: string,
+    first_name?: string, 
+    last_name?: string,
+    date_of_birth?: DateTime,
+    movile_number?: string,
+    country?: string
+}
+``` 
+
+### BankAccountRequest
+```typescript
+{
+  owner: string                       // Nombre del beneficiario
+  owner_id: number                    // DNI
+  bankName: string                    // Nombre del banco
+  bankNumber: string                  // CBU
+  bankAlias: string?   
+}
+```
+
+### BankAccount
+```typescript
+{
+  id: number        
+  owner: string                       // Nombre del beneficiario
+  owner_id: number                    // DNI
+  player_id: number                   // ID de Player
+  bankName: string                    // Nombre del banco
+  bankNumber: string                  // CBU
+  bankAlias: string?       
+  created_at:                         // 2024-01-29T18:14:41.534Z
+  updated_at:                         // 2024-01-29T18:14:41.534Z
+}
+```
+
+### Credenciales
+```typescript
+{
+    username: string,
+    password: string
+}
+```
+
+## TODO
+
+- Implementar autenticacion de jugador
+- Usar express-validator en player endpoints

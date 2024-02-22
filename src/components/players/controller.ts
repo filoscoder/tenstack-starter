@@ -2,7 +2,7 @@ import { NOT_FOUND, OK, CREATED } from "http-status/lib";
 import { Response } from "express";
 import { PlayerServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
-import { PlayerRequest } from "@/types/request/players";
+import { Credentials, PlayerRequest } from "@/types/request/players";
 
 export class PlayersController {
   /**
@@ -44,6 +44,23 @@ export class PlayersController {
       const player = await playersServices.create(request);
 
       res.status(CREATED).json(apiResponse(player));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Login player
+   */
+  static login = async (req: Req, res: Res, next: NextFn) => {
+    try {
+      const playersServices = new PlayerServices();
+
+      const credentials: Credentials = req.body;
+
+      const player = await playersServices.login(credentials);
+
+      res.status(OK).json(apiResponse(player));
     } catch (error) {
       next(error);
     }

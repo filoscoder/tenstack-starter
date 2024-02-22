@@ -1,12 +1,12 @@
-INSERT INTO `PLAYERS` (`id`, `panel_id`, `username`, `password`, `email`, `first_name`, `last_name`, `date_of_birth`, `movile_number`, `country`, `balance_currency`, `status`, `created_at`, `updated_at`) VALUES
-(2,	3900,	'test19',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'MX',	'ACTIVO',	'2024-02-02 16:01:19.264',	'2024-02-02 16:01:19.264'),
-(7,	3859,	'test17',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'MX',	'ACTIVO',	'2024-02-06 11:45:04.408',	'2024-02-06 11:45:04.408'),
-(9,	3940,	'test20',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-09 19:57:41.941',	'2024-02-09 19:57:41.941');
+INSERT INTO `PLAYERS` (`panel_id`, `username`, `password`, `email`, `first_name`, `last_name`, `date_of_birth`, `movile_number`, `country`, `balance_currency`, `status`, `created_at`, `updated_at`) VALUES
+(3900,	'test19',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'MX',	'ACTIVO',	'2024-02-02 16:01:19.264',	'2024-02-02 16:01:19.264'),
+(3859,	'test17',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'MX',	'ACTIVO',	'2024-02-06 11:45:04.408',	'2024-02-06 11:45:04.408'),
+(3940,	'test20',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-09 19:57:41.941',	'2024-02-09 19:57:41.941');
 
-INSERT INTO `BANK_ACCOUNTS` (`id`, `player_id`, `name`, `number`, `created_at`, `updated_at`) VALUES
-(7,	3900,	'Daenerys Targaryen',	'09090090900909',	'2024-02-09 16:29:01.929',	'2024-02-09 16:29:01.929'),
-(11,	3859,	'John Snow',	'1111111111',	'2024-02-09 16:31:48.257',	'2024-02-09 16:31:48.257'),
-(18,	3859,	'JohnSnow',	'0000000000',	'2024-02-09 23:01:31.448',	'2024-02-09 23:01:31.448');
+INSERT INTO `BANK_ACCOUNTS` (`id`,`owner`, `owner_id`, `player_id`, `bankName`, `bankNumber`, `bankAlias`, `created_at`, `updated_at`) VALUES
+(7,	    'Hermione Granger', 33666999, 3900,	'Gringots',     '09090090900909',	         'leviosa.not.leviosaa',        '2024-02-09 16:29:01.929',	'2024-02-09 16:29:01.929'),
+(11,	'Ron Weasley',      33999666, 3859,	'Gringots',	        '1111111111',	         'slug.eater',                  '2024-02-09 16:31:48.257',	'2024-02-09 16:31:48.257'),
+(18,	'Ron Weasley',      33999666, 3859,	'Gringots',	        '0000000000',	         'king.of.chess',               '2024-02-09 23:01:31.448',	'2024-02-09 23:01:31.448');
 
 
 INSERT INTO `DEPOSITS` (`id`, `player_id`, `amount`, `confirmed`, `bank_account`, `created_at`, `updated_at`) VALUES

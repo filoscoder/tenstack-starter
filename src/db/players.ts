@@ -26,6 +26,10 @@ export class PlayersDAO {
     }
   };
 
+  /**
+   * Find Player by username
+   * @returns Full Player, including password
+   */
   static getByUsername = async (
     username: string,
   ): Promise<PlainPlayerResponse | null> => {
@@ -34,9 +38,7 @@ export class PlayersDAO {
         where: { username: username },
       });
 
-      if (!playerPrisma) return null;
-
-      return hidePassword<PlainPlayerResponse>(playerPrisma);
+      return playerPrisma;
     } catch (error: any) {
       throw new Error(`Error getting player by username: ${error.message}`);
     }
@@ -45,9 +47,15 @@ export class PlayersDAO {
   static create = async (
     request: PlayerRequest,
   ): Promise<PlainPlayerResponse> => {
-    const player = await prisma.player.create({ data: request });
-    return hidePassword(player);
+    try {
+      const player = await prisma.player.create({ data: request });
+      return hidePassword(player);
+    } catch (error: any) {
+      throw new Error(`Error creating player: ${error.message}`);
+    }
   };
+
+  static upsert = prisma.player.upsert;
 }
 
 const parsePlayer = (playerDB: any): PlayerResponse | null => {
