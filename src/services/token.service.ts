@@ -77,23 +77,21 @@ export class TokenService {
   }
 
   private async cachedToken(): Promise<string | null> {
-    // Si hay token en memoria y está valido, devolverlo.
     if (this._token && this.verifyTokenExpiration(this._token))
       return this._token;
 
-    // Buscar agente en la bbdd y extraer el access token
-    const agent = await this._prisma.userRoot.findFirst({
-      where: { username: this.username },
-    });
-
-    // No hay token en memoria ni en bbdd
-    // O el agente está siendo logueado (tokens inválidos hasta que termine
-    // el login)
-    if (!agent || agent.dirty) return null;
-
-    if (!this.verifyTokenExpiration(agent.access))
-      // Token está expirado
+    let agent = null;
+    try {
+      agent = await this._prisma.userRoot.findFirst({
+        where: { username: this.username },
+      });
+    } catch (error) {
       return null;
+    }
+
+    if (!agent || agent.dirty || !this.verifyTokenExpiration(agent.access)) {
+      return null;
+    }
 
     this._token = agent.access;
     return this._token;
@@ -105,32 +103,33 @@ export class TokenService {
    * @returns Agent access token
    */
   async refreshToken(): Promise<string | null> {
-    const refreshUrl = "/accounts/refresh/";
     const agent = await this._prisma.userRoot.findFirst();
-    const { plainAgentApi } = new HttpService();
     if (!agent) return null;
 
     const isValid = this.verifyTokenExpiration(agent.refresh);
     if (!isValid) return null;
+    try {
+      const refreshUrl = "/accounts/refresh/";
+      const { plainAgentApi } = new HttpService();
 
-    // Conseguir un access token nuevo
-    const response = await plainAgentApi({
-      url: refreshUrl,
-      method: "POST",
-      data: { refresh: agent.refresh },
-    });
-
-    const access = response.data.access;
-    if (access) {
-      // Actualizar agente
-      await this._prisma.userRoot.update({
-        where: { username: this.username },
-        data: { access },
+      const response = await plainAgentApi({
+        url: refreshUrl,
+        method: "POST",
+        data: { refresh: agent.refresh },
       });
-      return access;
+
+      const access = response.data.access;
+      if (access) {
+        await this._prisma.userRoot.update({
+          where: { username: this.username },
+          data: { access },
+        });
+        return access;
+      }
+      return null;
+    } catch (error) {
+      return null;
     }
-    // Refresh token invalido, neceistamos reloguear
-    else return null;
   }
 
   /**
@@ -138,21 +137,32 @@ export class TokenService {
    * @returns access token or null if agent login is under way
    */
   async login(): Promise<string | null> {
-    const agentLoginUrl = "/accounts/login/";
-    const { plainAgentApi } = new HttpService();
-
     const agent = await this._prisma.userRoot.findFirst();
-    // El agente está siendo logueado
-    if (agent && agent.dirty) return null;
+    if (!agent || agent.dirty) return null;
 
-    // Indicar que estamos logueando al agente
-    if (agent) await this.setAgentDirtyFlag(true);
+    try {
+      await this.setAgentLoginStatus(true);
+      const data = await this.attemptLogin();
+      await this.finalizeAgentLogin(data);
+      return data.access;
+    } catch (error) {
+      await this.setAgentLoginStatus(false);
+      throw error;
+    }
+  }
 
-    const response = await plainAgentApi.post(agentLoginUrl, this.loginDetails);
+  private async setAgentLoginStatus(isDirty: boolean): Promise<void> {
+    await this.setAgentDirtyFlag(isDirty);
+  }
+
+  private async attemptLogin(): Promise<LoginResponse> {
+    const agentLoginUrl = "/accounts/login/";
+    const response = await new HttpService().plainAgentApi.post(
+      agentLoginUrl,
+      this.loginDetails,
+    );
 
     if (response.status !== 200) {
-      await this.setAgentDirtyFlag(false);
-
       throw new CustomError({
         status: response.status,
         code: "server_error",
@@ -160,11 +170,12 @@ export class TokenService {
       });
     }
 
-    const data: LoginResponse = response.data;
-    await this.upsertAgent(data);
+    return response.data;
+  }
 
+  private async finalizeAgentLogin(data: LoginResponse): Promise<void> {
+    await this.upsertAgent(data);
     this._token = data.access;
-    return data.access;
   }
 
   /**
@@ -173,13 +184,15 @@ export class TokenService {
    * @returns true for valid token, false for expired token
    */
   private verifyTokenExpiration(token: string): boolean {
-    // Decodificar token
-    const payloadJson = atob(token.split(".")[1]);
-    const payload = JSON.parse(payloadJson);
+    try {
+      const payloadJson = atob(token.split(".")[1]);
+      const payload = JSON.parse(payloadJson);
+      const currentTimeInSeconds = Math.floor(Date.now() / 1000);
 
-    // Chequear si el token está expirado
-    // Nos damos 10 segundos de margen
-    return !(Number(payload.exp) - 10 < Math.floor(Date.now() / 1000));
+      return !(Number(payload.exp) < currentTimeInSeconds + 10);
+    } catch (error) {
+      return false;
+    }
   }
 
   private setAgentDirtyFlag(dirty: boolean) {
@@ -192,16 +205,13 @@ export class TokenService {
 
   private upsertAgent(data: LoginResponse) {
     return this._prisma.userRoot.upsert({
-      // If user exists
       where: { username: this.username },
-      // Update following fields
       update: {
         access: data.access,
         refresh: data.refresh,
         json_response: JSON.stringify(data),
         dirty: false,
       },
-      // Else create new entry
       create: {
         username: data.username,
         password: this.encryptedPassword,
