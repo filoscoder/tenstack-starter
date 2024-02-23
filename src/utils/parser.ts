@@ -5,7 +5,6 @@ export const parsePlayer = (playerDB: any): PlayerResponse | null => {
     ? null
     : {
         id: playerDB.id,
-        // panel_id: playerDB.panel_id,
         username: playerDB.username,
         email: playerDB.email,
         first_name: playerDB.first_name,
