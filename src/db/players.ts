@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { PlainPlayerResponse, PlayerResponse } from "@/types/response/players";
-import { PlayerRequest, getPlayerId } from "@/types/request/players";
+import {
+  PlayerRequest,
+  PlayerUpdatableProps,
+  getPlayerId,
+} from "@/types/request/players";
 import { parsePlayer } from "@/utils/parser";
 
 const prisma = new PrismaClient();
@@ -78,8 +82,4 @@ export class PlayersDAO {
       prisma.$disconnect();
     }
   };
-}
-
-interface PlayerUpdatableProps {
-  password: string;
 }

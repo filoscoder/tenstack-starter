@@ -12,3 +12,15 @@ export type TransferDetails = {
   amount: number;
   currency: string;
 };
+
+export interface DepositRequest {
+  player_id: number;
+  bank_account: number;
+  amount: number;
+}
+
+export interface PaymentRequest {
+  player_id: number;
+  bank_account: number;
+  amount: number;
+}

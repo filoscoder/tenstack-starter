@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { PaymentRequest } from "@/types/request/transfers";
 
 const prisma = new PrismaClient();
 
@@ -17,10 +18,4 @@ export class PaymentsDAO {
       prisma.$disconnect();
     }
   }
-}
-
-interface PaymentRequest {
-  player_id: number;
-  bank_account: number;
-  amount: number;
 }
