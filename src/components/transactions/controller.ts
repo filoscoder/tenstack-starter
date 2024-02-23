@@ -1,5 +1,5 @@
-import { TransferRequest } from "transactions";
 import { FinanceServices } from "./services";
+import { TransferRequest } from "@/types/request/transfers";
 
 export class TransactionsController {
   static cashin = async (req: AuthedReq, res: Res, next: NextFn) => {

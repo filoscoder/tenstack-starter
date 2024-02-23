@@ -1,9 +1,9 @@
-import { LoginResponse } from "usuarios";
 import { HttpService } from "./http.service";
 import { decrypt } from "@/utils/crypt";
 import { CustomError } from "@/middlewares/errorHandler";
 import { UserRootDAO } from "@/db/user-root";
 import CONFIG from "@/config";
+import { LoginResponse } from "@/types/response/agent";
 
 export class TokenService {
   private _username = "";

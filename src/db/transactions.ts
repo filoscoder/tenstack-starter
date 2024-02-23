@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { Transaction } from "transactions";
 import { NotFoundException, UnauthorizedError } from "@/helpers/error";
+import { Transaction } from "@/types/response/transactions";
 
 const prisma = new PrismaClient();
 

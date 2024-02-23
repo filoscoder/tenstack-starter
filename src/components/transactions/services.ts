@@ -1,9 +1,3 @@
-import {
-  Transaction,
-  TransferDetails,
-  TransferRequest,
-  TransferResult,
-} from "transactions";
 import { Deposit, Payment } from "@prisma/client";
 import { TransactionsDAO } from "@/db/transactions";
 import { CustomError } from "@/middlewares/errorHandler";
@@ -13,6 +7,9 @@ import { UserRootDAO } from "@/db/user-root";
 import { PlainPlayerResponse } from "@/types/response/players";
 import { PaymentsDAO } from "@/db/payments";
 import { TokenService } from "@/services/token.service";
+import { TransferRequest, TransferDetails } from "@/types/request/transfers";
+import { Transaction } from "@/types/response/transactions";
+import { TransferResult } from "@/types/response/transfers";
 
 export class FinanceServices {
   /**
