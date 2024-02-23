@@ -3,7 +3,6 @@ declare module "transactions" {
   type TransferRequest = {
     username: string;
     password: string;
-    panel_id: number; // Panel id del jugador
     amount: number;
     currency: string;
     bank_account: number; // ID de cuenta bancaria
@@ -30,7 +29,7 @@ declare module "transactions" {
     recipient_id: number; // Panel id
     amount: number;
     date: string;
-    payment_sent: boolean; // En caso de retiro, fue enviado el
+    // payment_sent: boolean; // En caso de retiro, fue enviado el
     // pago al jugador? (default true)
   };
 

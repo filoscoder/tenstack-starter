@@ -23,6 +23,8 @@ export class PlayersDAO {
       return parsePlayer(playerPrisma);
     } catch (error: any) {
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   };
 
@@ -41,6 +43,8 @@ export class PlayersDAO {
       return playerPrisma;
     } catch (error: any) {
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   };
 
@@ -52,6 +56,8 @@ export class PlayersDAO {
       return player;
     } catch (error: any) {
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   };
 
@@ -68,6 +74,8 @@ export class PlayersDAO {
       });
     } catch (error) {
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   };
 }

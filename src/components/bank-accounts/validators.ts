@@ -1,22 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-import { UNAUTHORIZED } from "http-status";
 import { checkSchema } from "express-validator";
-import { apiResponse } from "@/helpers/apiResponse";
-
-// TODO implement actual authentication
-const prisma = new PrismaClient();
-
-export const authenticatePlayer = async (
-  req: AuthedReq,
-  res: Res,
-  next: NextFn,
-) => {
-  const player = await prisma.player.findFirst();
-  if (!player)
-    return res.status(UNAUTHORIZED).json(apiResponse(null, "No autorizado"));
-  req.user = player;
-  return next();
-};
 
 export const validateBankAccountIndex = () =>
   checkSchema({

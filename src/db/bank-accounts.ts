@@ -14,6 +14,8 @@ export class BankAccountsDAO {
     } catch (error: any) {
       // Prisma errors handled by prismaErrorHandler()
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   }
 
@@ -27,6 +29,8 @@ export class BankAccountsDAO {
       return account;
     } catch (error: any) {
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   }
 
@@ -38,6 +42,8 @@ export class BankAccountsDAO {
       return account;
     } catch (error: any) {
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   }
 
@@ -56,6 +62,8 @@ export class BankAccountsDAO {
       return updated;
     } catch (error: any) {
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   }
 
@@ -66,6 +74,8 @@ export class BankAccountsDAO {
       await prisma.bankAccount.delete({ where: { id: account_id } });
     } catch (error: any) {
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   }
 

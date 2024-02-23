@@ -290,7 +290,4 @@ Devuelve    | 200 OK
 
 ## TODO
 
-- Usar ID en lugar de panel_id
-- No devolver panel_id
 - Implementar autenticacion de jugador
-- Usar express-validator en player endpoints

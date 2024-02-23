@@ -11,7 +11,7 @@ datasource db {
 }
 
 model UserRoot {
-  id                String        @id @default(uuid())
+  id                Int           @id @default(autoincrement())
   username          String        @db.VarChar(50) @unique
   password          String        @db.Text
   panel_id          Int
@@ -32,7 +32,6 @@ model Transactions {
   amount            Float
   date              DateTime
   status            String        @db.VarChar(100)
-  // payment_sent      Boolean       @default(true)      // En caso de retiro, fue enviado el pago? 
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 

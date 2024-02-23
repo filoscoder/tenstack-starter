@@ -9,6 +9,8 @@ export class UserRootDAO {
       return prisma.userRoot.findFirst();
     } catch (error) {
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   }
 
@@ -20,6 +22,8 @@ export class UserRootDAO {
       });
     } catch (error) {
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   }
 
@@ -36,6 +40,8 @@ export class UserRootDAO {
       });
     } catch (error) {
       throw error;
+    } finally {
+      prisma.$disconnect();
     }
   }
 }
