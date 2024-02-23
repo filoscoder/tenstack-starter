@@ -1,8 +1,8 @@
 declare module "transactions" {
   /** Datos recibidos desde el front */
   type TransferRequest = {
-    username: string;
-    password: string;
+    // username: string;
+    // password: string;
     amount: number;
     currency: string;
     bank_account: number; // ID de cuenta bancaria
@@ -29,12 +29,17 @@ declare module "transactions" {
     recipient_id: number; // Panel id
     amount: number;
     date: string;
-    // payment_sent: boolean; // En caso de retiro, fue enviado el
-    // pago al jugador? (default true)
   };
 
   type BankAccount = {
-    name: string;
-    number: string;
+    id: number;
+    owner: string;
+    owner_id: number;
+    player_id: number;
+    bankName: string;
+    bankNumber: string;
+    bankAlias?: string;
+    created_at: string;
+    updated_at: string;
   };
 }

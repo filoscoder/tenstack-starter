@@ -161,6 +161,12 @@ If you have any question or suggestion, don't hesitate to contact me:
 + [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria)
 + [Eliminar Cuenta Bancaria](#eliminar-cuenta-bancaria)
 
+### Endpoints Transferencias
++ [Cargar Fichas]
++ [Retirar Premios]
+
+### [Interfaces](#interfaces)
+
 ### Ver Jugador
 
 |Endpoint:| `/players/:id`|
@@ -185,6 +191,7 @@ Body (json) | [`Credenciales`](#credenciales)
 Devuelve    | [`Player`](#player)
 
 ### Ver Cuentas Bancarias
+> Requiere que el jugador esté autenticado
 
 |Endpoint| `/bank-account/:id?`|
 ---|---|
@@ -196,6 +203,7 @@ Devuelve    | [`BankAccount[]`](#bankaccount)
 > **Nota:** Omitir el parámetro `id` para ver todas las cuentas bancarias del usuario
 
 ### Crear Cuenta Bancaria
+> Requiere que el jugador esté autenticado
 
 |Endpoint| `/bank-account`|
 ---|---|
@@ -204,6 +212,7 @@ Body (json) | [`BankAccountRequest`](#bankaccountrequest)
 Devuelve    | [`BankAccount`](#bankaccount)
 
 ### Actualizar Cuenta Bancaria
+> Requiere que el jugador esté autenticado
 
 |Endpoint| `/bank-account`|
 ---|---|
@@ -214,11 +223,30 @@ Devuelve    | [`BankAccount`](#bankaccount)
 > **Nota:** Los campos son opcionales. Incluir los que se quiera modificar
 
 ### Eliminar Cuenta Bancaria
+> Requiere que el jugador esté autenticado
 
 |Endpoint| `/bank-account`|
 ---|---|
 Método      |`DELETE`
 Devuelve    | 200 OK
+
+### Cargar Fichas
+> Requiere que el jugador esté autenticado
+
+|Endpoint| `/transactions/cashin`|
+---|---|
+Método      |`POST`
+Body (json) |[`TransferRequest`](#transferrequest)
+Devuelve    |[`TransferResult`](#transferresult)
+
+### Retirar Premios
+> Requiere que el jugador esté autenticado
+
+|Endpoint| `/transactions/cashout`|
+---|---|
+Método      |`POST`
+Body (json) |[`TransferRequest`](#transferrequest)
+Devuelve    |[`TransferResult`](#transferresult)
 
 ## Interfaces
 
@@ -283,11 +311,31 @@ Devuelve    | 200 OK
 ### Credenciales
 ```typescript
 {
-    username: string,
+    username: string
     password: string
+}
+```
+
+### TransferRequest
+```typescript
+{
+    amount: number
+    currency: string
+    bank_account: number              // ID de cuenta bancaria
+}
+```
+
+### TransferResult
+```typescript
+{
+    status: "COMPLETED" | "INCOMPLETE";
+    sender_balance: number;
+    recipient_balance?: number;       // null en caso de error
+    error?: string;                   // En caso de error, el motivo
 }
 ```
 
 ## TODO
 
+- Requerir autenticación en GET `/players/:id`?
 - Implementar autenticacion de jugador
