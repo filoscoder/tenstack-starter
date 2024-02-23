@@ -10,6 +10,7 @@ import { TokenService } from "@/services/token.service";
 import { TransferRequest, TransferDetails } from "@/types/request/transfers";
 import { Transaction } from "@/types/response/transactions";
 import { TransferResult } from "@/types/response/transfers";
+import { parseTransferResult } from "@/utils/parser";
 
 export class FinanceServices {
   /**
@@ -24,15 +25,11 @@ export class FinanceServices {
 
     const transferDetails = await this.generateTransferDetails(
       player.panel_id,
-      request,
+      deposit,
       "payment",
     );
 
-    const coinTransfer = await this.coinTransfer(transferDetails);
-    await this.logTransaction(coinTransfer, transferDetails);
-    const transferResult = this.parseTransferResult(coinTransfer);
-
-    return transferResult;
+    return await this.transfer(transferDetails);
   }
 
   /**
@@ -42,19 +39,44 @@ export class FinanceServices {
   static async cashOut(player: PlainPlayerResponse, request: TransferRequest) {
     await TransactionsDAO.authorizeTransaction(request.bank_account, player.id);
 
-    const transferDetails = await this.generateTransferDetails(
+    const transferDetails: TransferDetails = await this.generateTransferDetails(
       player.panel_id,
       request,
       "withdrawal",
     );
+    const transferResult = await this.transfer(transferDetails);
 
-    const coinTransfer = await this.coinTransfer(transferDetails);
-    await this.logTransaction(coinTransfer, transferDetails);
-    const transferResult = this.parseTransferResult(coinTransfer);
     if (transferResult.status === "COMPLETED")
       this.createPayment(player.id, request);
 
     return transferResult;
+  }
+
+  /**
+   * Player announces they have completed a pending deposit
+   */
+  static async confirmDeposit(deposit_id: number, player: PlainPlayerResponse) {
+    await DepositsDAO.authorizeConfirmation(deposit_id, player.id);
+
+    const deposit = await DepositsDAO.getById(deposit_id);
+
+    await this.verifyPayment(deposit!);
+
+    const transferDetails = await this.generateTransferDetails(
+      player.panel_id,
+      deposit!,
+      "payment",
+    );
+
+    return await this.transfer(transferDetails);
+  }
+
+  private static async transfer(
+    transferDetails: TransferDetails,
+  ): Promise<TransferResult> {
+    const coinTransfer = await this.coinTransfer(transferDetails);
+    await this.logTransaction(coinTransfer, transferDetails);
+    return parseTransferResult(coinTransfer);
   }
 
   private static async coinTransfer(
@@ -99,19 +121,6 @@ export class FinanceServices {
     await TransactionsDAO.logTransaction(transaction);
   }
 
-  private static parseTransferResult(transfer: any): TransferResult {
-    const ok = transfer.status === 201;
-    const result: TransferResult = {
-      status: ok ? "COMPLETED" : "INCOMPLETE",
-      sender_balance: ok
-        ? transfer.data.sender_balance_after
-        : transfer.data.variables.balance_amount,
-      recipient_balance: ok ? transfer.data.recipient_balance_after : null,
-      error: ok ? undefined : "Saldo insuficiente",
-    };
-    return result;
-  }
-
   private static async generateTransferDetails(
     panel_id: number,
     request: TransferRequest,
@@ -154,6 +163,7 @@ export class FinanceServices {
       player_id,
       amount: request.amount,
       bank_account: request.bank_account,
+      currency: request.currency,
     });
   }
 
@@ -165,6 +175,7 @@ export class FinanceServices {
       player_id,
       amount: request.amount,
       bank_account: request.bank_account,
+      currency: request.currency,
     });
   }
 
@@ -172,9 +183,7 @@ export class FinanceServices {
    * Verify receipt of Player's payment.
    * @throws CustomError if payment is not verified
    */
-  private static async verifyPayment(_deposit: Deposit): Promise<void> {
-    // TODO
-    // Mark deposit as confirmed
+  private static async verifyPayment(deposit: Deposit): Promise<void> {
     const paymentOk = true;
 
     if (!paymentOk) {
@@ -184,5 +193,19 @@ export class FinanceServices {
         description: "Pago no recibido",
       });
     }
+
+    await DepositsDAO.update(deposit.id, {
+      confirmed: new Date().toISOString(),
+    });
+  }
+
+  static async showPendingDeposits(player_id: number): Promise<Deposit[]> {
+    const deposits = await DepositsDAO.getPending(player_id);
+    return deposits;
+  }
+
+  static async deleteDeposit(deposit_id: number, player_id: number) {
+    await DepositsDAO.authorizeDeletion(deposit_id, player_id);
+    await DepositsDAO.delete(deposit_id);
   }
 }

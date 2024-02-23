@@ -17,10 +17,19 @@ export interface DepositRequest {
   player_id: number;
   bank_account: number;
   amount: number;
+  currency: string;
+}
+
+export interface DepositUpdatableProps {
+  player_id?: number;
+  bank_account?: number;
+  amount?: number;
+  confirmed?: string;
 }
 
 export interface PaymentRequest {
   player_id: number;
   bank_account: number;
   amount: number;
+  currency: string;
 }

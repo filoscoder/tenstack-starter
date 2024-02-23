@@ -1,4 +1,5 @@
 import { PlayerResponse } from "@/types/response/players";
+import { TransferResult } from "@/types/response/transfers";
 
 export const parsePlayer = (playerDB: any): PlayerResponse | null => {
   return !playerDB
@@ -18,4 +19,17 @@ export const parsePlayer = (playerDB: any): PlayerResponse | null => {
         created_at: playerDB.created_at,
         updated_at: playerDB.updated_at,
       };
+};
+
+export const parseTransferResult = (transfer: any): TransferResult => {
+  const ok = transfer.status === 201;
+  const result: TransferResult = {
+    status: ok ? "COMPLETED" : "INCOMPLETE",
+    sender_balance: ok
+      ? transfer.data.sender_balance_after
+      : transfer.data.variables.balance_amount,
+    recipient_balance: ok ? transfer.data.recipient_balance_after : null,
+    error: ok ? undefined : "Saldo insuficiente",
+  };
+  return result;
 };

@@ -68,6 +68,7 @@ model Payment {
   paid              DateTime?     // El dinero fue transferido (datetime) o no (null)
   bank_account      Int           // Cuenta en la que recibe el pago
   BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
+  currency          String        @default("MXN")
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
@@ -99,6 +100,7 @@ model Deposit {
   confirmed         DateTime?     // El deposito fue confirmado (datetime) o no (null)
   bank_account      Int           // Cuenta desde la que hace el deposito
   BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
+  currency          String        @default("MXN")
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 

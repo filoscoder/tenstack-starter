@@ -22,3 +22,12 @@ export const validateTransferRequest = () =>
       errorMessage: "bank_account (account id) is required",
     },
   });
+
+export const validateDepositId = () =>
+  checkSchema({
+    id: {
+      in: ["params"],
+      isInt: true,
+      isEmpty: false,
+    },
+  });
