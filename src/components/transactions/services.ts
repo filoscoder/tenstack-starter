@@ -22,9 +22,11 @@ export class FinanceServices {
   ): Promise<TransferResult & { deposit: Deposit }> {
     await TransactionsDAO.authorizeTransaction(request.bank_account, player.id);
 
-    const deposit = await this.createDeposit(player.id, request);
+    let deposit = await this.createDeposit(player.id, request);
 
-    await this.verifyPayment(deposit);
+    console.log(deposit);
+
+    deposit = await this.verifyPayment(deposit);
 
     const transferDetails = await this.generateTransferDetails(
       player.panel_id,
@@ -72,9 +74,9 @@ export class FinanceServices {
   ): Promise<TransferResult & { deposit: Deposit }> {
     await DepositsDAO.authorizeConfirmation(deposit_id, player.id);
 
-    const deposit = (await DepositsDAO.getById(deposit_id)) as Deposit;
+    let deposit = (await DepositsDAO.getById(deposit_id)) as Deposit;
 
-    await this.verifyPayment(deposit);
+    deposit = await this.verifyPayment(deposit);
 
     const transferDetails = await this.generateTransferDetails(
       player.panel_id,
@@ -203,21 +205,22 @@ export class FinanceServices {
    * Verify receipt of Player's payment.
    * @throws CustomError if payment is not verified
    */
-  private static async verifyPayment(deposit: Deposit): Promise<void> {
-    const paymentOk = true;
+  private static async verifyPayment(deposit: Deposit): Promise<Deposit> {
     const delay = 3000;
+    const paymentOk = await new Promise((resolve, _reject) => {
+      setTimeout(() => {
+        resolve(true);
+      }, delay);
+    });
 
     if (paymentOk) {
-      await DepositsDAO.update(deposit.id, {
+      return await DepositsDAO.update(deposit.id, {
         confirmed: new Date().toISOString(),
-      });
-
-      return new Promise((resolve, _reject) => {
-        setTimeout(() => {
-          resolve();
-        }, delay);
+        dirty: false,
       });
     }
+
+    await DepositsDAO.update(deposit.id, { dirty: false });
 
     throw new CustomError({
       status: 400,

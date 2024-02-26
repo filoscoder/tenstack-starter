@@ -14,7 +14,7 @@ export const authenticatePlayer = async (
   const player = await prisma.player.findFirst();
   if (!player)
     return res.status(UNAUTHORIZED).json(apiResponse(null, "No autorizado"));
-  req.user = player;
+  req.player = player;
   return next();
 };
 
