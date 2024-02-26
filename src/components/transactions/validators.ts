@@ -1,4 +1,4 @@
-import { checkSchema } from "express-validator";
+import { checkSchema, oneOf } from "express-validator";
 
 export const validateTransferRequest = () =>
   checkSchema({
@@ -31,3 +31,6 @@ export const validateDepositId = () =>
       isEmpty: false,
     },
   });
+
+export const validateDepositRequest = () =>
+  oneOf([validateTransferRequest(), validateDepositId()]);

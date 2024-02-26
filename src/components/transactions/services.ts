@@ -16,7 +16,10 @@ export class FinanceServices {
   /**
    * Create deposit, verify it, and transfer coins from agent to player.
    */
-  static async cashIn(player: PlainPlayerResponse, request: TransferRequest) {
+  static async deposit(
+    player: PlainPlayerResponse,
+    request: TransferRequest,
+  ): Promise<TransferResult & { deposit: Deposit }> {
     await TransactionsDAO.authorizeTransaction(request.bank_account, player.id);
 
     const deposit = await this.createDeposit(player.id, request);
@@ -26,17 +29,25 @@ export class FinanceServices {
     const transferDetails = await this.generateTransferDetails(
       player.panel_id,
       deposit,
-      "payment",
+      "deposit",
     );
 
-    return await this.transfer(transferDetails);
+    const transferResult = await this.transfer(transferDetails);
+
+    return {
+      ...transferResult,
+      deposit,
+    };
   }
 
   /**
    * Send payment to player, transfer coins from player to agent and create a
    * pending payment.
    */
-  static async cashOut(player: PlainPlayerResponse, request: TransferRequest) {
+  static async cashOut(
+    player: PlainPlayerResponse,
+    request: TransferRequest,
+  ): Promise<TransferResult> {
     await TransactionsDAO.authorizeTransaction(request.bank_account, player.id);
 
     const transferDetails: TransferDetails = await this.generateTransferDetails(
@@ -55,20 +66,28 @@ export class FinanceServices {
   /**
    * Player announces they have completed a pending deposit
    */
-  static async confirmDeposit(deposit_id: number, player: PlainPlayerResponse) {
+  static async confirmDeposit(
+    player: PlainPlayerResponse,
+    deposit_id: number,
+  ): Promise<TransferResult & { deposit: Deposit }> {
     await DepositsDAO.authorizeConfirmation(deposit_id, player.id);
 
-    const deposit = await DepositsDAO.getById(deposit_id);
+    const deposit = (await DepositsDAO.getById(deposit_id)) as Deposit;
 
-    await this.verifyPayment(deposit!);
+    await this.verifyPayment(deposit);
 
     const transferDetails = await this.generateTransferDetails(
       player.panel_id,
-      deposit!,
-      "payment",
+      deposit,
+      "deposit",
     );
 
-    return await this.transfer(transferDetails);
+    const transferResult = await this.transfer(transferDetails);
+
+    return {
+      ...transferResult,
+      deposit,
+    };
   }
 
   private static async transfer(
@@ -76,7 +95,7 @@ export class FinanceServices {
   ): Promise<TransferResult> {
     const coinTransfer = await this.coinTransfer(transferDetails);
     await this.logTransaction(coinTransfer, transferDetails);
-    return parseTransferResult(coinTransfer);
+    return parseTransferResult(coinTransfer, transferDetails.type);
   }
 
   private static async coinTransfer(
@@ -124,7 +143,7 @@ export class FinanceServices {
   private static async generateTransferDetails(
     panel_id: number,
     request: TransferRequest,
-    type: "payment" | "withdrawal",
+    type: "deposit" | "withdrawal",
   ): Promise<TransferDetails> {
     let agent = await UserRootDAO.getAgent();
 
@@ -137,7 +156,7 @@ export class FinanceServices {
     let recipient_id, sender_id;
 
     switch (type) {
-      case "payment":
+      case "deposit":
         recipient_id = panel_id;
         sender_id = agent!.panel_id;
         break;
@@ -152,6 +171,7 @@ export class FinanceServices {
       sender_id,
       amount: request.amount,
       currency: request.currency,
+      type,
     };
   }
 
@@ -185,17 +205,24 @@ export class FinanceServices {
    */
   private static async verifyPayment(deposit: Deposit): Promise<void> {
     const paymentOk = true;
+    const delay = 3000;
 
-    if (!paymentOk) {
-      throw new CustomError({
-        status: 400,
-        code: "error_pago",
-        description: "Pago no recibido",
+    if (paymentOk) {
+      await DepositsDAO.update(deposit.id, {
+        confirmed: new Date().toISOString(),
+      });
+
+      return new Promise((resolve, _reject) => {
+        setTimeout(() => {
+          resolve();
+        }, delay);
       });
     }
 
-    await DepositsDAO.update(deposit.id, {
-      confirmed: new Date().toISOString(),
+    throw new CustomError({
+      status: 400,
+      code: "error_pago",
+      description: "Pago no recibido",
     });
   }
 

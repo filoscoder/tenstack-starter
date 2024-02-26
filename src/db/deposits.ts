@@ -80,6 +80,10 @@ export class DepositsDAO {
     }
   }
 
+  /**
+   * Ensures deposit exists and belongs to player.
+   * @throws if checks fail.
+   */
   static async authorizeTransaction(deposit_id: number, player_id: number) {
     try {
       const deposit = await this.getById(deposit_id);
@@ -96,14 +100,26 @@ export class DepositsDAO {
     }
   }
 
+  /**
+   * Checks if:
+   *  - deposit exists and belongs to player
+   *  - deposit is not already confirmed
+   *  - deposit is not being confirmed
+   *
+   * If checks pass, sets dirty flag to true (deposit is being confirmed)
+   * @throws if checks fail
+   */
   static async authorizeConfirmation(deposit_id: number, player_id: number) {
     try {
-      const deposit = await this.authorizeTransaction(deposit_id, player_id);
+      let deposit = await this.authorizeTransaction(deposit_id, player_id);
       if (deposit.confirmed)
         throw new UnauthorizedError(
           "No se puedn modificar depositos confirmados",
         );
+      if (deposit.dirty)
+        throw new UnauthorizedError("El deposito esta siendo confirmado");
 
+      deposit = await this.update(deposit_id, { dirty: true });
       return deposit;
     } catch (error) {
       throw error;

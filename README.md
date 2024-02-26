@@ -350,8 +350,7 @@ Devuelve    | 200 OK
 ```typescript
 {
     status: "COMPLETED" | "INCOMPLETE";
-    sender_balance: number;
-    recipient_balance?: number;       // null en caso de error
+    player_balance?: number;          // undefined en caso de deposito incompleto
     error?: string;                   // En caso de error, el motivo
 }
 ```
@@ -375,3 +374,8 @@ Devuelve    | 200 OK
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
 - Requerir autenticación en GET `/players/:id`?
 - Implementar autenticacion de jugador
+- Sacar sender_balance  de TransferResponse ✅
+- Devolver deposit en TransactionsController.deposit() ✅
+- Evitar verificaciones dobles de depositos con estado "dirty" en la bbdd
+- esperar 3 segundos en verifyPayment() ✅
+- Fusionar endpoints deposit y confirmDeposit ✅

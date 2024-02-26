@@ -1,6 +1,5 @@
 export type TransferResult = {
   status: "COMPLETED" | "INCOMPLETE";
-  sender_balance: number;
-  recipient_balance?: number;
+  player_balance?: number;
   error?: string;
 };

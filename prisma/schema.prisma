@@ -101,6 +101,7 @@ model Deposit {
   bank_account      Int           // Cuenta desde la que hace el deposito
   BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
   currency          String        @default("MXN")
+  dirty             Boolean       @default(true)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
