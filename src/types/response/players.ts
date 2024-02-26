@@ -2,7 +2,6 @@ import { BankAccount, Player } from "@prisma/client";
 
 export type PlayerResponse = {
   id: number;
-  panel_id: number;
   username: string;
   email?: string;
   first_name?: string;

@@ -1,5 +1,22 @@
-import { NOT_FOUND, BAD_REQUEST } from "http-status";
+import { NOT_FOUND, UNAUTHORIZED } from "http-status";
+import { checkSchema } from "express-validator";
+import { PrismaClient } from "@prisma/client";
 import { apiResponse } from "@/helpers/apiResponse";
+
+// TODO implement actual authentication
+const prisma = new PrismaClient();
+
+export const authenticatePlayer = async (
+  req: AuthedReq,
+  res: Res,
+  next: NextFn,
+) => {
+  const player = await prisma.player.findFirst();
+  if (!player)
+    return res.status(UNAUTHORIZED).json(apiResponse(null, "No autorizado"));
+  req.user = player;
+  return next();
+};
 
 export const validatePlayerId = (req: Req, res: Res, next: NextFn) => {
   const { id } = req.params;
@@ -12,16 +29,35 @@ export const validatePlayerId = (req: Req, res: Res, next: NextFn) => {
   return next();
 };
 
-export const validatePlayerRequest = (req: Req, res: Res, next: NextFn) => {
-  const required = ["username", "password"];
-  let message = "";
-  for (const arg of required) {
-    if (!req.body[arg]) message += `Falta argumento ${arg}. `;
-  }
+export const validatePlayerRequest = () =>
+  checkSchema({
+    username: {
+      in: ["body"],
+      isString: true,
+      isEmpty: false,
+    },
+    password: {
+      in: ["body"],
+      isString: true,
+      isEmpty: false,
+    },
+    email: {
+      in: ["body"],
+      isEmail: true,
+      isEmpty: false,
+    },
+  });
 
-  if (message) res.status(BAD_REQUEST).json(apiResponse(null, message));
-
-  return next();
-};
-
-export const validateCredentials = validatePlayerRequest;
+export const validateCredentials = () =>
+  checkSchema({
+    username: {
+      in: ["body"],
+      isString: true,
+      isEmpty: false,
+    },
+    password: {
+      in: ["body"],
+      isString: true,
+      isEmpty: false,
+    },
+  });

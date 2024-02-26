@@ -2,11 +2,11 @@ import { Router } from "express";
 import { checkExact } from "express-validator";
 import { BankAccountsController } from "@/components/bank-accounts/controller";
 import {
-  authenticatePlayer,
   validateAccountUpdate,
   validateBankAccount,
   validateBankAccountIndex,
 } from "@/components/bank-accounts/validators";
+import { authenticatePlayer } from "@/components/players/validators";
 
 const bankAccountsRouter = Router();
 

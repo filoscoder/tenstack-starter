@@ -161,6 +161,15 @@ If you have any question or suggestion, don't hesitate to contact me:
 + [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria)
 + [Eliminar Cuenta Bancaria](#eliminar-cuenta-bancaria)
 
+### Endpoints Transferencias
++ [Cargar Fichas](#cargar-fichas)
++ [Retirar Premios](#retirar-premios)
++ [Ver Depósitos Pendientes](#ver-depósitos-pendientes)
++ [Confirmar Depósito Pendiente](#confirmar-depósito-pendiente)
++ [Eliminar Depósito Pendiente](#eliminar-depósito-pendiente)
+
+### [Interfaces](#interfaces)
+
 ### Ver Jugador
 
 |Endpoint:| `/players/:id`|
@@ -186,6 +195,7 @@ Devuelve    | [`Player`](#player)
 
 ### Ver Cuentas Bancarias
 
+
 |Endpoint| `/bank-account/:id?`|
 ---|---|
 Método      |`GET`
@@ -196,6 +206,7 @@ Devuelve    | [`BankAccount[]`](#bankaccount)
 > **Nota:** Omitir el parámetro `id` para ver todas las cuentas bancarias del usuario
 
 ### Crear Cuenta Bancaria
+
 
 |Endpoint| `/bank-account`|
 ---|---|
@@ -216,6 +227,44 @@ Devuelve    | [`BankAccount`](#bankaccount)
 ### Eliminar Cuenta Bancaria
 
 |Endpoint| `/bank-account`|
+---|---|
+Método      |`DELETE`
+Devuelve    | 200 OK
+
+### Cargar Fichas
+
+|Endpoint| `/transactions/deposit`|
+---|---|
+Método      |`POST`
+Body (json) |[`TransferRequest`](#transferrequest)
+Devuelve    |[`TransferResult`](#transferresult)
+
+### Retirar Premios
+
+|Endpoint| `/transactions/cashout`|
+---|---|
+Método      |`POST`
+Body (json) |[`TransferRequest`](#transferrequest)
+Devuelve    |[`TransferResult`](#transferresult)
+
+### Ver Depósitos Pendientes
+
+|Endpoint| `/transactions/deposit/pending`|
+---|---|
+Método      |`GET`
+Devuelve    |[`Deposit[]`](#deposit)
+
+> **Nota:** siempre devuelve un array
+
+### Confirmar Depósito Pendiente
+
+|Endpoint| `/transactions/deposit/:id/confirm`|
+---|---|
+Método      |`PUT`
+Devuelve    |[`TransferResult`](#transferresult)
+
+### Eliminar Depósito Pendiente
+|Endpoint| `/transactions/deposit/:id`|
 ---|---|
 Método      |`DELETE`
 Devuelve    | 200 OK
@@ -245,7 +294,7 @@ Devuelve    | 200 OK
 {
     username: string,
     password: string,
-    email?: string,
+    email: string,
     first_name?: string, 
     last_name?: string,
     date_of_birth?: DateTime,
@@ -283,12 +332,46 @@ Devuelve    | 200 OK
 ### Credenciales
 ```typescript
 {
-    username: string,
+    username: string
     password: string
+}
+```
+
+### TransferRequest
+```typescript
+{
+    amount: number
+    currency: string
+    bank_account: number              // ID de cuenta bancaria
+}
+```
+
+### TransferResult
+```typescript
+{
+    status: "COMPLETED" | "INCOMPLETE";
+    sender_balance: number;
+    recipient_balance?: number;       // null en caso de error
+    error?: string;                   // En caso de error, el motivo
+}
+```
+
+### Deposit
+```typescript
+{
+    id: number
+    player_id: number
+    amount: number
+    confirmed?: datetime              // 2024-02-23T12:35:51.017Z
+    bank_account: number
+    currency: string
+    created_at: datetime              // 2024-02-23T12:35:51.017Z
+    updated_at: datetime              // 2024-02-23T12:35:51.017Z
 }
 ```
 
 ## TODO
 
+- Requerir autenticación en GET `/players/:id`?
 - Implementar autenticacion de jugador
-- Usar express-validator en player endpoints
+- req.user! => req.player!

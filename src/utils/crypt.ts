@@ -55,7 +55,11 @@ export function encrypt(text: string): string {
       ciphertext: encrypted,
     });
   } catch (error) {
-    throw new Error("Error encriptando contraseña");
+    throw new CustomError({
+      status: 500,
+      code: "crypt",
+      description: "Error encriptando contraseña",
+    });
   }
 }
 
@@ -81,7 +85,7 @@ export function decrypt(encrypted: string): string {
 
 function getConfig() {
   const algorithm = "aes-192-cbc";
-  const password = process.env["CYPHER_PASS"];
+  const password = CONFIG.APP.CYPHER_PASS;
   const PASS_NOT_FOUND_ERROR: ErrorData = {
     status: 500,
     code: "env",

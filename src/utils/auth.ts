@@ -5,9 +5,12 @@
  */
 export const hidePassword = <T extends Object>(bodyData: T): T => {
   if (bodyData.hasOwnProperty("password")) {
-    // if ("password" in bodyData) {
     // @ts-ignore
     bodyData.password = "********";
+  }
+  if (bodyData.hasOwnProperty("panel_id")) {
+    // @ts-ignore
+    bodyData.panel_id = "********";
   }
 
   return bodyData;

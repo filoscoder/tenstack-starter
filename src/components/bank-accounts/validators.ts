@@ -1,22 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-import { UNAUTHORIZED } from "http-status";
 import { checkSchema } from "express-validator";
-import { apiResponse } from "@/helpers/apiResponse";
-
-// TODO implement actual authentication
-const prisma = new PrismaClient();
-
-export const authenticatePlayer = async (
-  req: AuthedReq,
-  res: Res,
-  next: NextFn,
-) => {
-  const player = await prisma.player.findFirst();
-  if (!player)
-    return res.status(UNAUTHORIZED).json(apiResponse(null, "No autorizado"));
-  req.user = player;
-  return next();
-};
 
 export const validateBankAccountIndex = () =>
   checkSchema({
@@ -42,8 +24,7 @@ export const validateBankAccount = () =>
     owner_id: {
       in: ["body"],
       notEmpty: true,
-      isNumeric: true,
-      trim: true,
+      isInt: true,
       errorMessage: "Owner id is required",
     },
     bankName: {
@@ -80,7 +61,6 @@ export const validateAccountUpdate = () =>
       in: ["body"],
       optional: true,
       isNumeric: true,
-      trim: true,
     },
     bankName: {
       in: ["body"],
@@ -104,6 +84,5 @@ export const validateAccountUpdate = () =>
       in: ["params"],
       notEmpty: true,
       isNumeric: true,
-      trim: true,
     },
   });

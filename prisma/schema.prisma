@@ -11,7 +11,7 @@ datasource db {
 }
 
 model UserRoot {
-  id                String        @id @default(uuid())
+  id                Int           @id @default(autoincrement())
   username          String        @db.VarChar(50) @unique
   password          String        @db.Text
   panel_id          Int
@@ -32,7 +32,6 @@ model Transactions {
   amount            Float
   date              DateTime
   status            String        @db.VarChar(100)
-  // payment_sent      Boolean       @default(true)      // En caso de retiro, fue enviado el pago? 
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 
@@ -44,7 +43,7 @@ model Player {
   panel_id          Int           @unique
   username          String        @db.VarChar(100) @unique
   password          String        @db.Text
-  email             String?       @db.VarChar(50) @unique
+  email             String?        @db.VarChar(50) @unique
   first_name        String?       @db.VarChar(50)
   last_name         String?       @db.VarChar(50)
   date_of_birth     DateTime?
@@ -64,11 +63,12 @@ model Player {
 model Payment {
   id                Int           @id @default(autoincrement())
   player_id         Int           // Panel ID
-  Player            Player        @relation(fields: [player_id], references: [panel_id])
+  Player            Player        @relation(fields: [player_id], references: [id])
   amount            Float
   paid              DateTime?     // El dinero fue transferido (datetime) o no (null)
   bank_account      Int           // Cuenta en la que recibe el pago
   BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
+  currency          String        @default("MXN")
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
@@ -79,7 +79,7 @@ model BankAccount {
   id                Int           @id @default(autoincrement())
   owner             String        // Nombre del beneficiario
   owner_id          Int           // DNI
-  Player            Player        @relation(fields: [player_id], references: [panel_id])
+  Player            Player        @relation(fields: [player_id], references: [id])
   player_id         Int           // ID de Player
   bankName          String        // Nombre del banco
   bankNumber        String        @unique // CBU
@@ -95,11 +95,12 @@ model BankAccount {
 model Deposit {
   id                Int           @id @default(autoincrement())
   player_id         Int           // Panel ID
-  Player            Player        @relation(fields: [player_id], references: [panel_id])
+  Player            Player        @relation(fields: [player_id], references: [id])
   amount            Float
   confirmed         DateTime?     // El deposito fue confirmado (datetime) o no (null)
   bank_account      Int           // Cuenta desde la que hace el deposito
   BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
+  currency          String        @default("MXN")
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
