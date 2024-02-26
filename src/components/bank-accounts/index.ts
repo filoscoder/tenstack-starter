@@ -1,1 +1,1 @@
-export { BankAccountServices } from "./services";
+export { BankAccountsController } from "./controller";

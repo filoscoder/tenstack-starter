@@ -33,3 +33,10 @@ export interface PaymentRequest {
   amount: number;
   currency: string;
 }
+
+export interface PaymentUpdatableProps {
+  bank_account?: number;
+  amount?: number;
+  currency?: string;
+  paid?: string;
+}

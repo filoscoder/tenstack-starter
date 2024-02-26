@@ -14,5 +14,5 @@ declare global {
   /**
    * Authenticated request
    */
-  type AuthedReq = Request & { user?: PlainPlayerResponse };
+  type AuthedReq = Request & { player?: PlainPlayerResponse };
 }

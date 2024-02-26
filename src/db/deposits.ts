@@ -4,6 +4,7 @@ import {
   DepositUpdatableProps,
 } from "@/types/request/transfers";
 import { NotFoundException, UnauthorizedError } from "@/helpers/error";
+import { hidePassword } from "@/utils/auth";
 
 const prisma = new PrismaClient();
 
@@ -14,6 +15,24 @@ export class DepositsDAO {
   static create(data: DepositRequest) {
     try {
       return prisma.deposit.create({ data });
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static async index(all = true) {
+    try {
+      const deposits = await prisma.deposit.findMany({
+        where: all ? {} : { confirmed: null },
+        include: { Player: true, BankAccount: true },
+      });
+
+      deposits.forEach(
+        (deposit) => (deposit.Player = hidePassword(deposit.Player)),
+      );
+      return deposits;
     } catch (error) {
       throw error;
     } finally {

@@ -372,6 +372,6 @@ Devuelve    | 200 OK
 
 ## TODO
 
+- Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
 - Requerir autenticación en GET `/players/:id`?
 - Implementar autenticacion de jugador
-- req.user! => req.player!
