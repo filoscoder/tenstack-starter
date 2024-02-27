@@ -15,6 +15,7 @@ const CONFIG = {
     BASE_URL: process.env.API_BASE_URL,
     PORT: process.env.NODE_ENV === "test" ? 8888 : process.env.PORT || 8080,
     ENV: process.env.NODE_ENV,
+    CYPHER_PASS: process.env.CYPHER_PASS,
   },
   SERVER: {
     TIMEOUT: 60000, // 1m
@@ -30,6 +31,10 @@ const CONFIG = {
     REFRESH_TOKEN_EXPIRE: process.env.REFRESH_TOKEN_DURATION || "86400000",
     ACCESS_TOKEN_SALT: process.env.ACCESS_TOKEN_SALT,
     REFRESH_TOKEN_SALT: process.env.REFRESH_TOKEN_SALT,
+    AGENT_USERNAME: process.env.AGENT_USERNAME,
+    AGENT_PASSWORD: process.env.AGENT_PASSWORD,
+    AGENT_FRONT_USERNAME: process.env.AGENT_FRONT_USERNAME,
+    AGENT_FRONT_PASSWORD: process.env.AGENT_FRONT_PASSWORD,
   },
   AWS: {
     ACCESS_KEY: process.env.AWS_ACCESS_KEY,
@@ -46,6 +51,8 @@ const CONFIG = {
   },
   EXTERNAL: {
     API_KEY: process.env.API_KEY,
+    AGENT_BASE_URL: process.env.AGENT_API_BASE_URL,
+    PLAYER_BASE_URL: process.env.PLAYER_API_BASE_URL,
   },
 } as const;
 

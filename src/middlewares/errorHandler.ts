@@ -5,6 +5,7 @@ import HttpStatus, {
   INTERNAL_SERVER_ERROR,
   REQUEST_TIMEOUT,
 } from "http-status/lib";
+import { Prisma } from "@prisma/client";
 import { TimeOutError } from "@/helpers/error";
 
 /**
@@ -40,6 +41,13 @@ export const genericErrorHandler = (
   res: Response,
   _next: NextFunction,
 ) => {
+  // Handle Prisma errors
+  if (
+    err instanceof Prisma.PrismaClientKnownRequestError ||
+    err instanceof Prisma.PrismaClientValidationError
+  ) {
+    prismaErrorHandler(err, res);
+  }
   let resCode: number = err.status || INTERNAL_SERVER_ERROR;
   let resBody = err;
 
@@ -47,7 +55,136 @@ export const genericErrorHandler = (
     resCode = REQUEST_TIMEOUT;
     resBody = new TimeOutError(req.originalUrl);
   }
-  console.log("[genericErrorHandler]", resBody);
+  // console.log("[genericErrorHandler]", resBody);
 
   res.status(resCode).json(resBody);
 };
+
+export const customErrorHandler = (
+  err: any,
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (err instanceof CustomError) {
+    res.status(err.status).json({
+      code: err.code,
+      description: err.description,
+    });
+  } else {
+    return next(err);
+  }
+};
+
+export class CustomError extends Error {
+  status: number;
+  code: string;
+  description: string;
+
+  constructor(err: ErrorData) {
+    super(err.description);
+
+    this.description = err.description;
+    this.code = err.code;
+    this.status = err.status;
+  }
+}
+
+export interface ErrorData {
+  status: number; // 400
+  code: string; // bad_request
+  description: string; // Missing parameter x
+}
+
+export const ERR: { [key: string]: ErrorData } = {
+  USER_ALREADY_EXISTS: {
+    status: 400,
+    code: "ya_existe",
+    description: "Un usuario con ese nombre ya existe",
+  },
+  INVALID_CREDENTIALS: {
+    status: 404,
+    code: "credenciales_invalidas",
+    description: "Usuario o contraseña incorrectos",
+  },
+  AGENT_LOGIN: {
+    status: 500,
+    code: "agent_login",
+    description: "Error al loguear el agente en el panel",
+  },
+};
+
+function prismaErrorHandler(
+  err:
+    | Prisma.PrismaClientKnownRequestError
+    | Prisma.PrismaClientValidationError,
+  res: Res,
+) {
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    let status, code, description;
+    console.log(err);
+    switch (err.code) {
+      case "P2025":
+        status = 404;
+        code = "not_found";
+        description = "No se encontro el recurso";
+        break;
+      case "P2002":
+        const key = err.message.split("\n").at(-1)?.split("`")[1];
+        status = 409;
+        code = "unique_constraint";
+        description = `Una entrada con ese ${key} ya existe. Error: `;
+        break;
+      case "P2003":
+        status = 409;
+        code = "dependencias_pendientes";
+        description = "No se puede eliminar, otras entidades dependen de esta";
+        break;
+      case "P2005":
+        status = 400;
+        code = "restringido";
+        description =
+          "Una restricion fallo en la BD: " + err.meta?.["database_error"];
+        break;
+      case "P2006":
+        status = 400;
+        code = "valor_invalido";
+        description = `El valor provisto ${err.meta?.["field_value"]} para el campo ${err.meta?.["field_name"]} del ${err.meta?.["model_name"]} no es válido`;
+        break;
+      case "P2011":
+        status = 400;
+        code = "null_constraint";
+        description = `Violacion de null_constraint en ${err.meta?.constraint}`;
+        break;
+      case "P2014":
+        status = 400;
+        code = "restringido";
+        description = `El cambio que estas intentando hacer violaria la relacion ${err.meta?.["relation_name"]} entre los modelos ${err.meta?.["model_a_name"]} y ${err.meta?.["model_b_name"]}`;
+        break;
+      case "P2019":
+        status = 400;
+        code = "input_error";
+        description = `Input error: ${err.meta?.details}`;
+        break;
+      case "P2020":
+        status = 400;
+        code = "fuera_de_rango";
+        description = `Valor fuera de rango. ${err.meta?.details}`;
+        break;
+      default:
+        res.status(500).json({
+          code: "error_bbdd",
+          description: `Error en la base de datos: ${err.message}`,
+        });
+    }
+    res.send({ status, code, description });
+  } else if (err instanceof Prisma.PrismaClientValidationError) {
+    let description = "Error de validacion de datos ";
+    description += err.message.split("Argument")[1].split(" at")[0];
+    res.send({
+      status: 400,
+      code: "error_validacion",
+      description,
+    });
+  }
+}

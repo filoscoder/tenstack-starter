@@ -1,8 +1,7 @@
-import { BankAccount } from "@prisma/client";
+import { BankAccount, Player } from "@prisma/client";
 
-export type Player = {
+export type PlayerResponse = {
   id: number;
-  panel_id: number;
   username: string;
   email?: string;
   first_name?: string;
@@ -16,3 +15,5 @@ export type Player = {
   created_at: string;
   updated_at: string;
 };
+
+export type PlainPlayerResponse = Player;

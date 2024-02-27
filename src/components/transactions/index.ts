@@ -1,0 +1,1 @@
+export { TransactionsController } from "./controller";

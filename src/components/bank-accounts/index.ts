@@ -1,0 +1,1 @@
+export { BankAccountsController } from "./controller";

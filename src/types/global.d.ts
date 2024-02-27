@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { PlainPlayerResponse } from "./response/players";
 
 declare global {
   type TodoType = any;
@@ -10,4 +11,8 @@ declare global {
     message: string;
     data?: T;
   };
+  /**
+   * Authenticated request
+   */
+  type AuthedReq = Request & { player?: PlainPlayerResponse };
 }

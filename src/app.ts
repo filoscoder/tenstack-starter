@@ -3,8 +3,10 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import timeout from "connect-timeout";
+import passport from "passport";
 import CONFIG from "./config";
 import { expressPinoLogger } from "./helpers";
+import { AgentServices } from "./components/agent/services";
 import * as errorHandler from "@/middlewares/errorHandler";
 import mainRouter from "@/routes";
 
@@ -32,8 +34,11 @@ export const createApp = (): express.Application => {
   app.use(`/app/${CONFIG.APP.VER}`, mainRouter);
 
   // Error Middleware
+  app.use(errorHandler.customErrorHandler);
   app.use(errorHandler.genericErrorHandler);
   app.use(errorHandler.notFoundError);
+
+  passport.use(AgentServices.jwtStrategy());
 
   return app;
 };
