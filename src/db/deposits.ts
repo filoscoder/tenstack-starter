@@ -114,7 +114,7 @@ export class DepositsDAO {
       let deposit = await this.authorizeTransaction(deposit_id, player_id);
       if (deposit.confirmed)
         throw new UnauthorizedError(
-          "No se puedn modificar depositos confirmados",
+          "No se pueden modificar depositos confirmados",
         );
       if (deposit.dirty)
         throw new UnauthorizedError("El deposito esta siendo confirmado");

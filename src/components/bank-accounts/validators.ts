@@ -5,7 +5,7 @@ export const validateBankAccountIndex = () =>
     id: {
       in: ["params"],
       isNumeric: true,
-      notEmpty: true,
+      optional: true,
     },
   });
 

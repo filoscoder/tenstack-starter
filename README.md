@@ -378,8 +378,5 @@ Devuelve    | 200 OK
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
 - Requerir autenticación en GET `/players/:id`?
 - Implementar autenticacion de jugador
-- Sacar sender_balance  de TransferResponse ✅
-- Devolver deposit en TransactionsController.deposit() ✅
-- Evitar verificaciones dobles de depositos con estado "dirty" en la bbdd ✅
-- esperar 3 segundos en verifyPayment() ✅
-- Fusionar endpoints deposit y confirmDeposit ✅
+- Mejorar request validators y arreglar errores de logica ✅
+- Refactor FinanceServices deposit() y confirmDeposit() ✅

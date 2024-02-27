@@ -52,6 +52,24 @@ export class PlayersDAO {
     }
   };
 
+  /**
+   * Find Player by email
+   * @returns { PlayerResponse }
+   */
+  static getByEmail = async (email: string): Promise<PlayerResponse | null> => {
+    try {
+      const playerPrisma = await prisma.player.findUnique({
+        where: { email },
+      });
+
+      return parsePlayer(playerPrisma);
+    } catch (error: any) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  };
+
   static create = async (
     request: PlayerRequest,
   ): Promise<PlainPlayerResponse> => {

@@ -22,24 +22,23 @@ export class FinanceServices {
   ): Promise<TransferResult & { deposit: Deposit }> {
     await TransactionsDAO.authorizeTransaction(request.bank_account, player.id);
 
-    let deposit = await this.createDeposit(player.id, request);
+    const deposit = await this.createDeposit(player.id, request);
 
-    console.log(deposit);
+    return await this.verifyAndTransfer(deposit, player);
+  }
 
-    deposit = await this.verifyPayment(deposit);
+  /**
+   * Player announces they have completed a pending deposit
+   */
+  static async confirmDeposit(
+    player: PlainPlayerResponse,
+    deposit_id: number,
+  ): Promise<TransferResult & { deposit: Deposit }> {
+    await DepositsDAO.authorizeConfirmation(deposit_id, player.id);
 
-    const transferDetails = await this.generateTransferDetails(
-      player.panel_id,
-      deposit,
-      "deposit",
-    );
+    const deposit = (await DepositsDAO.getById(deposit_id)) as Deposit;
 
-    const transferResult = await this.transfer(transferDetails);
-
-    return {
-      ...transferResult,
-      deposit,
-    };
+    return await this.verifyAndTransfer(deposit, player);
   }
 
   /**
@@ -65,18 +64,22 @@ export class FinanceServices {
     return transferResult;
   }
 
-  /**
-   * Player announces they have completed a pending deposit
-   */
-  static async confirmDeposit(
+  private static async verifyAndTransfer(
+    deposit: Deposit,
     player: PlainPlayerResponse,
-    deposit_id: number,
   ): Promise<TransferResult & { deposit: Deposit }> {
-    await DepositsDAO.authorizeConfirmation(deposit_id, player.id);
-
-    let deposit = (await DepositsDAO.getById(deposit_id)) as Deposit;
-
     deposit = await this.verifyPayment(deposit);
+
+    if (!deposit.confirmed) {
+      const result: TransferResult = {
+        status: "INCOMPLETE",
+        error: "Deposito no confirmado",
+      };
+      return {
+        ...result,
+        deposit,
+      };
+    }
 
     const transferDetails = await this.generateTransferDetails(
       player.panel_id,
@@ -209,7 +212,7 @@ export class FinanceServices {
     const delay = 3000;
     const paymentOk = await new Promise((resolve, _reject) => {
       setTimeout(() => {
-        resolve(true);
+        resolve(false);
       }, delay);
     });
 
@@ -222,11 +225,12 @@ export class FinanceServices {
 
     await DepositsDAO.update(deposit.id, { dirty: false });
 
-    throw new CustomError({
-      status: 400,
-      code: "error_pago",
-      description: "Pago no recibido",
-    });
+    return deposit;
+    // throw new CustomError({
+    //   status: 400,
+    //   code: "error_pago",
+    //   description: "Pago no recibido",
+    // });
   }
 
   static async showPendingDeposits(player_id: number): Promise<Deposit[]> {
