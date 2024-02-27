@@ -122,6 +122,7 @@ function prismaErrorHandler(
 ) {
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     let status, code, description;
+    console.log(err);
     switch (err.code) {
       case "P2025":
         status = 404;
@@ -129,9 +130,10 @@ function prismaErrorHandler(
         description = "No se encontro el recurso";
         break;
       case "P2002":
+        const key = err.message.split("\n").at(-1)?.split("`")[1];
         status = 409;
         code = "unique_constraint";
-        description = "Ya existe";
+        description = `Una entrada con ese ${key} ya existe. Error: `;
         break;
       case "P2003":
         status = 409;

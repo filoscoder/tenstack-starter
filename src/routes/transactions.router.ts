@@ -2,25 +2,21 @@ import { Router } from "express";
 import { checkExact } from "express-validator";
 import { TransactionsController } from "@/components/transactions";
 import {
-  validateDepositId,
+  // validateDepositRequest,
   validateTransferRequest,
 } from "@/components/transactions/validators";
 import { authenticatePlayer } from "@/components/players/validators";
+import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
 
 const transactionsRouter = Router();
 
 transactionsRouter.use(authenticatePlayer);
 transactionsRouter.post(
-  "/deposit",
+  "/deposit/:id?",
   validateTransferRequest(),
   checkExact(),
+  throwIfBadRequest,
   TransactionsController.deposit,
-);
-transactionsRouter.put(
-  "/deposit/:id/confirm",
-  validateDepositId(),
-  checkExact(),
-  TransactionsController.confirmDeposit,
 );
 transactionsRouter.get(
   "/deposit/pending",
@@ -31,6 +27,7 @@ transactionsRouter.post(
   "/cashout",
   validateTransferRequest(),
   checkExact(),
+  throwIfBadRequest,
   TransactionsController.cashout,
 );
 
