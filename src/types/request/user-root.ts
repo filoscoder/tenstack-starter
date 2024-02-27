@@ -1,3 +1,5 @@
+import { AgentBankAccount } from "../response/agent";
+
 export interface RootUpdatableProps {
   username?: string;
   password?: string;
@@ -6,6 +8,7 @@ export interface RootUpdatableProps {
   refresh?: string;
   json_response?: string;
   dirty?: boolean;
+  bankAccount?: AgentBankAccount;
 }
 
 export interface RootRequest {

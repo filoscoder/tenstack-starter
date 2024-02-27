@@ -3,7 +3,10 @@ import { checkExact } from "express-validator";
 import passport from "passport";
 import { AgentController } from "@/components/agent/controller";
 import { validateCredentials } from "@/components/players/validators";
-import { validatePaymentIndex } from "@/components/agent/validators";
+import {
+  validateBankAccountUpdate,
+  validatePaymentIndex,
+} from "@/components/agent/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
 
 const agentRouter = Router();
@@ -28,5 +31,13 @@ agentRouter.put(
 );
 agentRouter.get("/deposits", AgentController.showDeposits);
 agentRouter.get("/qr", AgentController.qr);
+agentRouter.get("/bank-account", AgentController.getBankAccount);
+agentRouter.put(
+  "/bank-account",
+  validateBankAccountUpdate(),
+  checkExact(),
+  throwIfBadRequest,
+  AgentController.updateBankAccount,
+);
 
 export default agentRouter;

@@ -8,6 +8,9 @@ import { decrypt, hash } from "@/utils/crypt";
 import { PaymentsDAO } from "@/db/payments";
 import { DepositsDAO } from "@/db/deposits";
 import { UnauthorizedError } from "@/helpers/error";
+import { AgentBankAccount } from "@/types/response/agent";
+import { UserRootDAO } from "@/db/user-root";
+import { TokenService } from "@/services/token.service";
 
 export class AgentServices {
   private static get username(): string {
@@ -76,6 +79,21 @@ export class AgentServices {
   static async showDeposits(): Promise<Deposit[] | null> {
     const deposits = DepositsDAO.index();
     return deposits;
+  }
+
+  static async getBankAccount(): Promise<AgentBankAccount> {
+    const account = UserRootDAO.getBankAccount();
+    return account;
+  }
+
+  static async updateBankAccount(
+    data: AgentBankAccount,
+  ): Promise<AgentBankAccount> {
+    const tokenService = new TokenService();
+    const agent = await UserRootDAO.update(tokenService.username, {
+      bankAccount: data,
+    });
+    return agent.bankAccount as AgentBankAccount;
   }
 
   /**

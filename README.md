@@ -373,10 +373,27 @@ Devuelve    | 200 OK
 }
 ```
 
+### RootBankAccount
+```typescript
+{
+    name: string
+    dni: string
+    bankName: string
+    accountNumber: string
+    clabe: string
+    alias: string
+}
+```
+
 ## TODO
 
+- Instanciar servicios en lugar de usar metodos estaticos
+- Cambiar contraseña (no funciona en el casino, vamos por este lado)
+  - Endpoint https://agent.casinomex.vip/api/users/5941/change-password/
+  - Body: `{ new_password:	string }`
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
 - Requerir autenticación en GET `/players/:id`?
 - Implementar autenticacion de jugador
-- Mejorar request validators y arreglar errores de logica ✅
-- Refactor FinanceServices deposit() y confirmDeposit() ✅
+- Front de agente: cuenta bancaria
+- Mostrar balance de agente
+- Login token
