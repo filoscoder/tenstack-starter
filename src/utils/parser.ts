@@ -21,14 +21,26 @@ export const parsePlayer = (playerDB: any): PlayerResponse | null => {
       };
 };
 
-export const parseTransferResult = (transfer: any): TransferResult => {
+export const parseTransferResult = (
+  transfer: any,
+  type: "deposit" | "withdrawal",
+): TransferResult => {
   const ok = transfer.status === 201;
+  let player_balance: number | undefined = undefined;
+
+  ok && type === "deposit"
+    ? (player_balance = transfer.data.recipient_balance_after)
+    : "";
+  ok && type === "withdrawal"
+    ? (player_balance = transfer.data.sender_balance_after)
+    : "";
+  !ok && type === "withdrawal"
+    ? (player_balance = transfer.data.variables.balance_amount)
+    : "";
+
   const result: TransferResult = {
     status: ok ? "COMPLETED" : "INCOMPLETE",
-    sender_balance: ok
-      ? transfer.data.sender_balance_after
-      : transfer.data.variables.balance_amount,
-    recipient_balance: ok ? transfer.data.recipient_balance_after : null,
+    player_balance,
     error: ok ? undefined : "Saldo insuficiente",
   };
   return result;

@@ -232,12 +232,14 @@ Método      |`DELETE`
 Devuelve    | 200 OK
 
 ### Cargar Fichas
+Incluir el id en la URL y omitir el body para confirmar un depósito pendiente
+Omitir el id en la URL e incluir los datos en el body para crear un depósito nuevo
 
-|Endpoint| `/transactions/deposit`|
+|Endpoint| `/transactions/deposit/:id?`|
 ---|---|
 Método      |`POST`
 Body (json) |[`TransferRequest`](#transferrequest)
-Devuelve    |[`TransferResult`](#transferresult)
+Devuelve    |[`TransferResult & { deposit: Deposit }`](#transferresult)
 
 ### Retirar Premios
 
@@ -349,10 +351,10 @@ Devuelve    | 200 OK
 ### TransferResult
 ```typescript
 {
-    status: "COMPLETED" | "INCOMPLETE";
-    sender_balance: number;
-    recipient_balance?: number;       // null en caso de error
-    error?: string;                   // En caso de error, el motivo
+    status: "COMPLETED" | "INCOMPLETE"
+    player_balance?: number           // undefined en caso de deposito incompleto
+    error?: string                    // En caso de error, el motivo
+    deposit: Deposit
 }
 ```
 
@@ -365,6 +367,7 @@ Devuelve    | 200 OK
     confirmed?: datetime              // 2024-02-23T12:35:51.017Z
     bank_account: number
     currency: string
+    dirty: boolean
     created_at: datetime              // 2024-02-23T12:35:51.017Z
     updated_at: datetime              // 2024-02-23T12:35:51.017Z
 }
@@ -372,6 +375,8 @@ Devuelve    | 200 OK
 
 ## TODO
 
+- Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
 - Requerir autenticación en GET `/players/:id`?
 - Implementar autenticacion de jugador
-- req.user! => req.player!
+- Mejorar request validators y arreglar errores de logica ✅
+- Refactor FinanceServices deposit() y confirmDeposit() ✅

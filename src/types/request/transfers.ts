@@ -11,6 +11,7 @@ export type TransferDetails = {
   sender_id: number;
   amount: number;
   currency: string;
+  type: "deposit" | "withdrawal";
 };
 
 export interface DepositRequest {
@@ -25,6 +26,7 @@ export interface DepositUpdatableProps {
   bank_account?: number;
   amount?: number;
   confirmed?: string;
+  dirty?: boolean;
 }
 
 export interface PaymentRequest {
@@ -32,4 +34,11 @@ export interface PaymentRequest {
   bank_account: number;
   amount: number;
   currency: string;
+}
+
+export interface PaymentUpdatableProps {
+  bank_account?: number;
+  amount?: number;
+  currency?: string;
+  paid?: string;
 }

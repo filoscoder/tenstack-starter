@@ -5,12 +5,15 @@ import { apiResponse } from "@/helpers/apiResponse";
 
 export class TransactionsController {
   static deposit = async (req: AuthedReq, res: Res, next: NextFn) => {
+    const deposit_id = Number(req.params.id);
     const request: TransferRequest = req.body;
-    // Panel ID needed for transfer
-    const player = req.user!;
+    const player = req.player!;
 
     try {
-      const result = await FinanceServices.cashIn(player, request);
+      let result;
+      if (isNaN(deposit_id))
+        result = await FinanceServices.deposit(player, request);
+      else result = await FinanceServices.confirmDeposit(player, deposit_id);
 
       res.status(OK).json(apiResponse(result));
     } catch (e) {
@@ -20,7 +23,7 @@ export class TransactionsController {
 
   static cashout = async (req: AuthedReq, res: Res, next: NextFn) => {
     const request: TransferRequest = req.body;
-    const player = req.user!;
+    const player = req.player!;
 
     try {
       const result = await FinanceServices.cashOut(player, request);
@@ -31,20 +34,8 @@ export class TransactionsController {
     }
   };
 
-  static confirmDeposit = async (req: AuthedReq, res: Res, next: NextFn) => {
-    const player = req.user!;
-    const deposit_id = Number(req.params.id);
-
-    try {
-      const deposit = await FinanceServices.confirmDeposit(deposit_id, player);
-      res.status(OK).json(apiResponse(deposit));
-    } catch (err) {
-      next(err);
-    }
-  };
-
   static pendingDeposits = async (req: AuthedReq, res: Res, next: NextFn) => {
-    const player = req.user!;
+    const player = req.player!;
 
     try {
       const deposits = await FinanceServices.showPendingDeposits(player.id);
@@ -55,7 +46,7 @@ export class TransactionsController {
   };
 
   static deleteDeposit = async (req: AuthedReq, res: Res, next: NextFn) => {
-    const player = req.user!;
+    const player = req.player!;
     const deposit_id = Number(req.params.id);
 
     try {
