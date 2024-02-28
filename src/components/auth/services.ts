@@ -21,10 +21,6 @@ export class AuthService extends JwtService {
     return secret;
   }
 
-  constructor() {
-    super();
-  }
-
   /**
    * Generate access/refresh pair and link them to DB object
    * @param sub User ID
@@ -53,7 +49,6 @@ export class AuthService extends JwtService {
 
     if (token.invalid) {
       while (token!.next) {
-        console.log("INVALIDATING TOKEN " + token.next);
         token = await TokenDAO.update(token!.next, { invalid: true });
       }
       notify("Uso duplicado de refresh token");
