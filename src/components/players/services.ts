@@ -96,7 +96,6 @@ export class PlayerServices {
           panel_id: loginResponse.data.id,
         },
       );
-      // return hidePassword(localPlayer);
       return authService.tokens(localPlayer.id, CONFIG.ROLES.PLAYER);
     } else throw new CustomError(ERR.INVALID_CREDENTIALS);
   };
