@@ -1,0 +1,177 @@
+# Players
+curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test17", "password": "1234"}'
+curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test17", "password": "1234"}' -i
+ 
+curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test17", "password": "1234"}' -i
+curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test17", "password": "1234"}' | json
+curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test21", "password": "1234"}' | json
+curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test21", "password": "12345"}' | json
+curl localhost:8080/app/v1/players/2
+curl localhost:8080/app/v1/players/2 | json
+curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test21", "password": "12345"}' | json
+curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test21", "password": "12345"}'
+curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test21", "password": "12345"}' | json
+curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test21", "password": "1234"}' | json
+curl localhost:8080/app/v1/players/2 | json
+curl localhost:8080/app/v1/players/login -X POST -H 'Content-Type: application/json' -d '{"username": "test21", "password": "1234"}' | json
+curl localhost:8080/app/v1/players/login -X POST -H 'Content-Type: application/json' -d '{"username": "test21", "password": "12346"}' | json
+
+# Bank Accounts
+curl localhost:8080/app/v1/bank-accounts
+curl localhost:8080/app/v1/bank-account
+curl localhost:8080/app/v1/bank-account | JSON
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"name": "Arya Stark", "number": "010101010101"}' | json
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"name": "Arya Stark", "number": ""}' | json
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"name": "", "number": "010101010101"}' | json
+curl localhost:8080/app/v1/bank-account/7 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "020202020202"}' | json
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "020202020202"}' | json
+curl localhost:8080/app/v1/bank-account/7 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "0303030303"}' | json
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "020202020202"}' | json
+curl localhost:8080/app/v1/bank-account/99 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "020202020202"}' | json
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "020202020202"}' | json
+curl localhost:8080/app/v1/bank-account/ -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "020202020202"}' | json
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "020202020202"}' | json
+curl localhost:8080/app/v1/bank-account/99 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "020202020202"}' | json
+curl localhost:8080/app/v1/bank-account/7 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "0303030303"}' | json
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"name": "Robert Baratheon", "number": "040404040404"}' | json
+curl localhost:8080/app/v1/bank-account/20 -X DELETE
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"name": "Robert Baratheon", "number": "040404040404"}' | json
+curl localhost:8080/app/v1/bank-account/21 -X DELETE -i
+curl localhost:8080/app/v1/bank-account/18 -X DELETE | json
+curl localhost:8080/app/v1/bank-account/ -X GET | json
+curl localhost:8080/app/v1/bank-account/19 -X GET | json
+curl localhost:8080/app/v1/bank-account/ -X GET | json
+curl localhost:8080/app/v1/bank-account/7 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "040404040404"}' | json
+curl localhost:8080/app/v1/bank-account/7 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "040404040404", "id": 99}' | json
+curl localhost:8080/app/v1/bank-account/7 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "040404040404", "id": 7}' | json
+curl localhost:8080/app/v1/bank-account/99 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "040404040404", "id": 7}' | json
+curl localhost:8080/app/v1/bank-account/7 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "040404040404", "id": 99}' | json
+curl localhost:8080/app/v1/bank-account/7 -X PUT -H 'Content-Type: application/json' -d '{"name": "Daenerys Targaryen", "number": "05050505050"}' | json
+curl localhost:8080/app/v1/bank-account/7 -X GET | json
+curl localhost:8080/app/v1/bank-account/ -X GET | json
+curl localhost:8080/app/v1/bank-account/7 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}' | json
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}' | json
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}' -i
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}' | json
+curl localhost:8080/app/v1/bank-account/100 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}' | json
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}' | json
+curl localhost:8080/app/v1/bank-account/7 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}' | json
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}' | json
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}'
+curl localhost:8080/app/v1/bank-account/7 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}' | json
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}'
+curl localhost:8080/app/v1/bank-account/11 -X PUT -H 'Content-Type: application/json' -d '{"bankAlias": "leviosa.not.leviosaaa"}' | json
+curl localhost:8080/app/v1/players/1 | json
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"name": "Robert Baratheon", "number": "040404040404"}' | json
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"owner": "Robert Baratheon", "owner_id": "36988666", "bankName": "The Rock", "bankNumber": "1010101010101"}' | json
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"owner": "Robert Baratheon", "owner_id": 36988666, "bankName": "The Rock", "bankNumber": "1010101010101"}' | json
+curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test17", "password": "1234"}' | json
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"owner": "Robert Baratheon", "owner_id": 36988666, "bankName": "The Rock", "bankNumber": "1010101010101"}' | json
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"owner": "Robert Baratheon", "owner_id": 36988666, "bankName": "The Rock", "bankNumber": "1010101010101", "bankAlias": "I.am.your.father"}' | json
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"owner": "Robert Baratheon", "owner_id": 36988666, "bankName": "The Rock", "bankNumber": "1010101010101"}' | json
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"owner": "Robert Baratheon", "owner_id": 36988666, "bankName": "The Rock", "bankNumber": "202020202020"}' | json
+curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"owner": "Robert Baratheon", "owner_id": 36988666, "bankName": "The Rock", "bankNumber": "3030303030"}' | json
+curl localhost:8080/app/v1/bank-account/19 -X PUT -H 'Content-Type: application/json' -d '{"owner": "Robert Baratheon", "owner_id": 36988666, "bankName": "The Rock", "bankNumber": "404040404040"}' | json
+
+# Transactions
+curl localhost:8080/app/v1/transactions/cashin -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+curl localhost:8080/app/v1/transactions/cashout -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+curl localhost:8080/app/v1/agent/login -X POST -H 'Content-Type: application/json' -d '{"username": "agente", "password": "E8DaacEN/G5pdWS/FjHYlpw+csU6OKpU"}' | json
+curl localhost:8080/app/v1/agent/payments -X GET -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDg2OTkyNzksImV4cCI6MTcwODc0MjQ3OX0.6LeU1qgsMaM1LYL-3TKZbwoYfogbrp1QrQuIdcXEMeQ' | json
+curl localhost:8080/app/v1/agent/payments/20/paid -X PUT -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDg2OTkyNzksImV4cCI6MTcwODc0MjQ3OX0.6LeU1qgsMaM1LYL-3TKZbwoYfogbrp1QrQuIdcXEMeQ' | json
+curl localhost:8080/app/v1/agent/deposits -X GET -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDg2OTkyNzksImV4cCI6MTcwODc0MjQ3OX0.6LeU1qgsMaM1LYL-3TKZbwoYfogbrp1QrQuIdcXEMeQ' | json
+curl localhost:8080/app/v1/transactions/deposit -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+curl localhost:8080/app/v1/transactions/cashout -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+curl localhost:8080/app/v1/transactions/deposit -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+curl localhost:8080/app/v1/transactions/cashout -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+curl localhost:8080/app/v1/transactions/deposit -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+curl localhost:8080/app/v1/transactions/deposit/21/confirm -X GET -H | json
+curl localhost:8080/app/v1/transactions/deposit/21/confirm -X GET | json
+curl localhost:8080/app/v1/transactions/deposit/16/confirm -X GET | json
+curl localhost:8080/app/v1/transactions/deposit/21/confirm -X GET | json
+curl localhost:8080/app/v1/transactions/deposit -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+curl localhost:8080/app/v1/transactions/deposit/3/confirm -X GET | json
+curl localhost:8080/app/v1/transactions/deposit/11/confirm -X GET | json
+ curl localhost:8080/app/v1/transactions/cashout -X POST -H 'Content-Type: application/json' -d '{"amount": 0.02, "currency": "MXN", "bank_account": 7}' | json
+ curl localhost:8080/app/v1/transactions/deposit/11 -X DELETE | json
+ curl localhost:8080/app/v1/transactions/deposit/9 -X DELETE -i
+ curl localhost:8080/app/v1/transactions/deposit/pending -X GET | json
+ curl localhost:8080/app/v1/transactions/deposit/8/confirm -X GET | json
+
+# Agent
+ curl localhost:8080/app/v1/agent/deposits -X GET -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDg2OTkyNzksImV4cCI6MTcwODc0MjQ3OX0.6LeU1qgsMaM1LYL-3TKZbwoYfogbrp1QrQuIdcXEMeQ' | json
+ curl localhost:8080/app/v1/agent/deposits -X GET -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDg2OTkyNzksImV4cCI6MTcwODc0MjQ3OX0.6LeU1qgsMaM1LYL-3TKZbwoYfogbrp1QrQuIdcXEMeQ'
+ curl localhost:8080/app/v1/agent/deposits -X GET -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDg2OTkyNzksImV4cCI6MTcwODc0MjQ3OX0.6LeU1qgsMaM1LYL-3TKZbwoYfogbrp1QrQuIdcXEMeQ' -i
+ curl localhost:8080/app/v1/agent/deposits -X GET -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDg2OTkyNzksImV4cCI6MTcwODc0MjQ3OX0.6LeU1qgsMaM1LYL-3TKZbwoYfogbrp1QrQuIdcXEMeQ'
+ curl localhost:8080/app/v1/transactions/deposit -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+ curl localhost:8080/app/v1/transactions/cashout -X POST -H 'Content-Type: application/json' -d '{"amount": 0.03, "currency": "MXN", "bank_account": 7}' | json
+
+ curl localhost:8080/app/v1/players/2
+ curl localhost:8080/app/v1/players/2 | json
+ curl localhost:8080/app/v1/players/ | json
+ curl localhost:8080/app/v1/players/99 | json
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test18", "password": "1234", "email": "hello1@example.com"}' | json
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test18", "password": "1234", "email": "hello1@example.com", "first_name": ""}' | json
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test18", "password": "1234", "first_name": ""}' | json
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test18", "password": "1234", "email": "hello1@example.com", "first_name": ""}' | json
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test18", "password": "1234", "email": "hello1@example.com", "first_name": "Tom Bombadil"}' | jsons
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test21", "password": "1234", "email": "hello1@example.com", "first_name": "Tom Bombadil"}' | json
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test22", "password": "1234", "email": "hello1@example.com", "first_name": "Tom Bombadil"}' | json
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test23", "password": "1234", "email": "hello1@example.com", "first_name": "Tom Bombadil"}' | json
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test24", "password": "1234", "email": "hello1@example.com", "first_name": "Tom Bombadil"}' | json
+ curl localhost:8080/app/v1/players/login -X POST -H 'Content-Type: application/json' -d '{"username": "test24", "password": "1234", "email": "hello1@example.com", "first_name": "Tom Bombadil"}' | json
+ curl localhost:8080/app/v1/players/login -X POST -H 'Content-Type: application/json' -d '{"username": "test24", "password": "1234"}' | json
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test24", "password": "1234", "email": "hello1@example.com", "first_name": "Tom ", "last_name": "Bombadil"}' | json
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test24", "password": "1234", "email": "hello2@example.com", "first_name": "Tom ", "last_name": "Bombadil"}' | json
+ curl localhost:8080/app/v1/players -X POST -H 'Content-Type: application/json' -d '{"username": "test25", "password": "1234", "email": "hello2@example.com", "first_name": "Tom ", "last_name": "Bombadil"}' | json
+ curl localhost:8080/app/v1/bank-account 
+ curl localhost:8080/app/v1/bank-account | JSON
+ curl localhost:8080/app/v1/bank-account | json
+ curl localhost:8080/app/v1/bank-account/1 | json
+ curl localhost:8080/app/v1/bank-account/ | json
+ curl localhost:8080/app/v1/bank-account/1 | json
+ curl localhost:8080/app/v1/bank-account/7 | json
+ curl localhost:8080/app/v1/bank-account -X POST 
+ curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"owner": "Jaimie Lannister", "owner_id": 33555777, "bankName": "The Rock", "0001112222333", "bankAlias": "king.slayer"}' | json
+ curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"owner": "Jaimie Lannister", "owner_id": 33555777, "bankName": "The Rock", "bankNumber": "0001112222333", "bankAlias": "king.slayer"}' | json
+ curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"owner": "Jaimie Lannister", "owner_id": 33555777, "bankName": "The Rock", "bankNumber": "0001112222333", "bankAlias": "king.slayer", "foo": "baaz"}' | json
+ curl localhost:8080/app/v1/bank-account -X POST -H 'Content-Type: application/json' -d '{"owner": "Jaimie Lannister", "owner_id": 33555777, "bankName": "The Rock", "bankAlias": "king.slayer"}' | json
+ curl localhost:8080/app/v1/bank-account -X PUT -H 'Content-Type: application/json' -d '{"owner_id": 33555778}' | json
+ curl localhost:8080/app/v1/bank-account/20 -X PUT -H 'Content-Type: application/json' -d '{"owner_id": 33555778}' | json
+ curl localhost:8080/app/v1/bank-account/20 -X PUT -H 'Content-Type: application/json' -d '{"owner_id": 33555778, "foo": "baz"}' | json
+ curl localhost:8080/app/v1/bank-account/20 -X PUT -H 'Content-Type: application/json' -d '{"owner_id": 33555778, "id": 21}' | json
+ curl localhost:8080/app/v1/bank-account/20 -X DELETE
+ curl localhost:8080/app/v1/transactions/deposit -X POST
+
+ # Bank accounts
+ curl localhost:8080/app/v1/transactions/deposit -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+ curl localhost:8080/app/v1/transactions/deposit/15 -X POST
+ curl localhost:8080/app/v1/transactions/deposit/16 -X POST | json
+ curl localhost:8080/app/v1/transactions/deposit/pending -X GET | json
+ curl localhost:8080/app/v1/transactions/deposit -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+ curl localhost:8080/app/v1/transactions/deposit/pending -X GET | json
+ curl localhost:8080/app/v1/transactions/deposit -X POST -H 'Content-Type: application/json' -d '{"amount": 0.01, "currency": "MXN", "bank_account": 7}' | json
+ curl localhost:8080/app/v1/transactions/deposit/pending -X GET | json
+ curl localhost:8080/app/v1/transactions/deposit/18 -X POST | json
+ curl localhost:8080/app/v1/transactions/deposit/18 -X DELETE -i
+ curl localhost:8080/app/v1/transactions/deposit/17 -X DELETE -i
+ curl localhost:8080/app/v1/transactions/deposit/17 -X DELETE | json
+ curl localhost:8080/app/v1/transactions/deposit/2 -X DELETE | json
+ curl localhost:8080/app/v1/transactions/deposit/18 -X POST | json
+ curl localhost:8080/app/v1/transactions/deposit/17 -X POST | json
+ curl localhost:8080/app/v1/transactions/cashout -X POST -H 'Content-Type: application/json' -d '{"amount": 0.04, "currency": "MXN", "bank_account": 7}' | json
+ curl localhost:8080/app/v1/transactions/cashout/1 -X POST -H 'Content-Type: application/json' -d '{"amount": 0.04, "currency": "MXN", "bank_account": 7}' | json
+ curl localhost:8080/app/v1/transactions/cashout -X POST -H 'Content-Type: application/json' -d '{"amount": 0.04, "currency": "MXN", "bank_account": 2}' | json
+ curl localhost:8080/app/v1/transactions/cashout -X POST -H 'Content-Type: application/json' -d '{"amount": 0.04, "currency": "MXN", "bank_account": 11}' | json
+ curl localhost:8080/app/v1/transactions/cashout -X POST -H 'Content-Type: application/json' -d '{"amount": 0.04, "currency": "MXN", "bank_account": 7}' | json
+ curl localhost:8080/app/v1/agent/login -X POST -H 'Content-Type: application/json' -d '{"username": "agente", "password": "E8DaacEN/G5pdWS/FjHYlpw+csU6OKpU"}' | json
+
+ # Agent Bank Account
+ curl localhost:8080/app/v1/agent/bank-account -X GET -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDkwNTczODYsImV4cCI6MTcwOTEwMDU4Nn0.V8HOUSCax57aeHCRwtUOP7sjmRT3RwUpG-gG12xwF98'
+ curl localhost:8080/app/v1/agent/bank-account -X PUT -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDkwNTczODYsImV4cCI6MTcwOTEwMDU4Nn0.V8HOUSCax57aeHCRwtUOP7sjmRT3RwUpG-gG12xwF98' -H 'Content-Type: application/json' -d '{"name": "Luquin"}'
+ curl localhost:8080/app/v1/agent/bank-account -X GET -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDkwNTczODYsImV4cCI6MTcwOTEwMDU4Nn0.V8HOUSCax57aeHCRwtUOP7sjmRT3RwUpG-gG12xwF98'
+ curl localhost:8080/app/v1/agent/bank-account -X PUT -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDkwNTczODYsImV4cCI6MTcwOTEwMDU4Nn0.V8HOUSCax57aeHCRwtUOP7sjmRT3RwUpG-gG12xwF98' -H 'Content-Type: application/json' -d '{"name": "Luquin"}'
+ curl localhost:8080/app/v1/agent/bank-account -X PUT -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDkwNTczODYsImV4cCI6MTcwOTEwMDU4Nn0.V8HOUSCax57aeHCRwtUOP7sjmRT3RwUpG-gG12xwF98' -H 'Content-Type: application/json' -d '{"name": "Luquin", "foo": 1}'
+ curl localhost:8080/app/v1/agent/bank-account -X PUT -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDkwNTczODYsImV4cCI6MTcwOTEwMDU4Nn0.V8HOUSCax57aeHCRwtUOP7sjmRT3RwUpG-gG12xwF98' -H 'Content-Type: application/json' -d '{"name": "Luquin", "foo": 1}' | json
+ curl localhost:8080/app/v1/agent/bank-account -X PUT -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZ2VudCIsImlzcyI6ImNhc2luby1tZXhfYWdlbnRfcGFuZWwiLCJpYXQiOjE3MDkwNTczODYsImV4cCI6MTcwOTEwMDU4Nn0.V8HOUSCax57aeHCRwtUOP7sjmRT3RwUpG-gG12xwF98' -H 'Content-Type: application/json' -d '{"name": "Luquin", "dni": "22555888", "bankName": "Lemon"}' | json
+

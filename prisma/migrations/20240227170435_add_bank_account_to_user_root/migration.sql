@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `USERS_ROOT` ADD COLUMN `bankAccount` JSON NULL;

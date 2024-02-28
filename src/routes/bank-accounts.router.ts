@@ -1,17 +1,21 @@
 import { Router } from "express";
 import { checkExact } from "express-validator";
+import passport from "passport";
 import { BankAccountsController } from "@/components/bank-accounts/controller";
 import {
   validateAccountUpdate,
   validateBankAccount,
   validateBankAccountIndex,
 } from "@/components/bank-accounts/validators";
-import { authenticatePlayer } from "@/components/players/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
+import { requireUserRole } from "@/middlewares/auth";
 
 const bankAccountsRouter = Router();
 
-bankAccountsRouter.use(authenticatePlayer);
+bankAccountsRouter.use(
+  passport.authenticate("jwt", { session: false, failWithError: true }),
+);
+bankAccountsRouter.use(requireUserRole);
 bankAccountsRouter.get(
   "/:id?",
   validateBankAccountIndex(),

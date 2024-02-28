@@ -1,4 +1,5 @@
 import { compare } from "bcrypt";
+import { AuthService } from "../auth/services";
 import { PlayersDAO } from "@/db/players";
 import {
   Credentials,
@@ -10,6 +11,8 @@ import { hash } from "@/utils/crypt";
 import { hidePassword } from "@/utils/auth";
 import { CustomError, ERR } from "@/middlewares/errorHandler";
 import { HttpService } from "@/services/http.service";
+import CONFIG from "@/config";
+import { TokenResult } from "@/types/response/jwt";
 
 export class PlayerServices {
   /**
@@ -70,12 +73,13 @@ export class PlayerServices {
   /**
    * Log in player
    */
-  login = async (credentials: Credentials): Promise<PlainPlayerResponse> => {
+  login = async (credentials: Credentials): Promise<TokenResult> => {
     // Verificar user y pass en nuestra DB
+    const authService = new AuthService();
     const player = await PlayersDAO.getByUsername(credentials.username);
 
     if (player && (await compare(credentials.password, player.password)))
-      return hidePassword(player);
+      return authService.tokens(player.id, CONFIG.ROLES.PLAYER);
 
     // Usuario no está en local o contraseña es incorrecta
     // Chequear en casino
@@ -92,7 +96,8 @@ export class PlayerServices {
           panel_id: loginResponse.data.id,
         },
       );
-      return hidePassword(localPlayer);
+      // return hidePassword(localPlayer);
+      return authService.tokens(localPlayer.id, CONFIG.ROLES.PLAYER);
     } else throw new CustomError(ERR.INVALID_CREDENTIALS);
   };
 }
