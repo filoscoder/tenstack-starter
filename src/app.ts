@@ -13,7 +13,11 @@ import mainRouter from "@/routes";
 export const createApp = (): express.Application => {
   const app = express();
 
-  app.use(cors({ origin: "localhost:3000" }));
+  const origin = CONFIG.APP.ENV?.includes("dev")
+    ? "http://localhost:3000"
+    : "https://agent.casino-mex.com";
+
+  app.use(cors({ origin }));
   app.use(helmet());
   app.use(express.json());
   app.use(
