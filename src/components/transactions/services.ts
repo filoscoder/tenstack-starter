@@ -24,7 +24,7 @@ export class FinanceServices {
 
     const deposit = await this.createDeposit(player.id, request);
 
-    return await this.verifyAndTransfer(deposit, player);
+    return await this.verifyAndTransfer(deposit, player, false);
   }
 
   /**
@@ -38,7 +38,7 @@ export class FinanceServices {
 
     const deposit = (await DepositsDAO.getById(deposit_id)) as Deposit;
 
-    return await this.verifyAndTransfer(deposit, player);
+    return await this.verifyAndTransfer(deposit, player, true);
   }
 
   /**
@@ -67,8 +67,9 @@ export class FinanceServices {
   private static async verifyAndTransfer(
     deposit: Deposit,
     player: PlainPlayerResponse,
+    verify: boolean,
   ): Promise<TransferResult & { deposit: Deposit }> {
-    deposit = await this.verifyPayment(deposit);
+    deposit = await this.verifyPayment(deposit, verify);
 
     if (!deposit.confirmed) {
       const result: TransferResult = {
@@ -86,6 +87,7 @@ export class FinanceServices {
       deposit,
       "deposit",
     );
+    console.log("TRANSFER DETAILS", transferDetails);
 
     const transferResult = await this.transfer(transferDetails);
 
@@ -142,6 +144,7 @@ export class FinanceServices {
     ) {
       transaction.status = "INCOMPLETE";
     }
+    console.log("TRANSFER RESULT", transfer.data);
     await TransactionsDAO.logTransaction(transaction);
   }
 
@@ -208,11 +211,15 @@ export class FinanceServices {
    * Verify receipt of Player's payment.
    * @throws CustomError if payment is not verified
    */
-  private static async verifyPayment(deposit: Deposit): Promise<Deposit> {
+  private static async verifyPayment(
+    deposit: Deposit,
+    // TODO delete
+    verify = false,
+  ): Promise<Deposit> {
     const delay = 3000;
     const paymentOk = await new Promise((resolve, _reject) => {
       setTimeout(() => {
-        resolve(false);
+        resolve(verify);
       }, delay);
     });
 
@@ -226,11 +233,6 @@ export class FinanceServices {
     await DepositsDAO.update(deposit.id, { dirty: false });
 
     return deposit;
-    // throw new CustomError({
-    //   status: 400,
-    //   code: "error_pago",
-    //   description: "Pago no recibido",
-    // });
   }
 
   static async showPendingDeposits(player_id: number): Promise<Deposit[]> {

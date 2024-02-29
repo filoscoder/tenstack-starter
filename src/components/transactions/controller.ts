@@ -9,6 +9,8 @@ export class TransactionsController {
     const request: TransferRequest = req.body;
     const player = req.user!;
 
+    console.log("PLAYER", player);
+
     try {
       let result;
       if (isNaN(deposit_id))

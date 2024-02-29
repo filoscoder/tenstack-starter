@@ -395,10 +395,9 @@ Devuelve    | 200 OK
 - Hacer email opcional en player request validator
 - Documentar endpoints agente
 - Encriptar JWT
-- Mostrar balance de agente
-- Front de agente: cuenta bancaria
+- Inhabilitar tokens anteriores al loguear un usuario (borrarlos de la bbdd, seleccionando por player_id)
 
-- GET /players/:id (id invalido)
+- GET /players/:id (id invalido) ✅
 - PUT bank-account (ruta no existe)
 - DELETE bank-account (acceso denegado)
 - Confirmar/rejectar depositos con parametro en el body

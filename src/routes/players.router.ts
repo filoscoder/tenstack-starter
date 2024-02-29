@@ -34,7 +34,6 @@ playersRouter.use(requireUserRole);
 playersRouter.get(
   "/:id",
   validatePlayerId,
-  checkExact(),
   throwIfBadRequest,
   PlayersController.getPlayerById,
 );
