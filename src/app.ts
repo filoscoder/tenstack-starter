@@ -6,14 +6,18 @@ import timeout from "connect-timeout";
 import passport from "passport";
 import CONFIG from "./config";
 import { expressPinoLogger } from "./helpers";
-import { AgentServices } from "./components/agent/services";
+import { AuthService } from "./components/auth/services";
 import * as errorHandler from "@/middlewares/errorHandler";
 import mainRouter from "@/routes";
 
 export const createApp = (): express.Application => {
   const app = express();
 
-  app.use(cors());
+  const origin = CONFIG.APP.ENV?.includes("dev")
+    ? "http://localhost:3000"
+    : "https://agent.casino-mex.com";
+
+  app.use(cors({ origin }));
   app.use(helmet());
   app.use(express.json());
   app.use(
@@ -38,7 +42,8 @@ export const createApp = (): express.Application => {
   app.use(errorHandler.genericErrorHandler);
   app.use(errorHandler.notFoundError);
 
-  passport.use(AgentServices.jwtStrategy());
+  const authService = new AuthService();
+  passport.use(authService.jwtStrategy());
 
   return app;
 };

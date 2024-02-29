@@ -378,5 +378,12 @@ Devuelve    | 200 OK
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
 - Requerir autenticación en GET `/players/:id`?
 - Implementar autenticacion de jugador
-- Mejorar request validators y arreglar errores de logica ✅
-- Refactor FinanceServices deposit() y confirmDeposit() ✅
+- Hacer email opcional en player request validator
+- Documentar endpoints agente
+- Encriptar JWT
+- Mostrar balance de agente
+- Login token
+
+## Optimizaciones
+
+- Invalidar tokens en conjunto con una sola petición SQL

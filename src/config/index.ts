@@ -54,6 +54,10 @@ const CONFIG = {
     AGENT_BASE_URL: process.env.AGENT_API_BASE_URL,
     PLAYER_BASE_URL: process.env.PLAYER_API_BASE_URL,
   },
+  ROLES: {
+    AGENT: "agent",
+    PLAYER: "player",
+  },
 } as const;
 
 export default CONFIG;

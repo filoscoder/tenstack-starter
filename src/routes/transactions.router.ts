@@ -1,16 +1,17 @@
 import { Router } from "express";
 import { checkExact } from "express-validator";
+import passport from "passport";
 import { TransactionsController } from "@/components/transactions";
-import {
-  // validateDepositRequest,
-  validateTransferRequest,
-} from "@/components/transactions/validators";
-import { authenticatePlayer } from "@/components/players/validators";
+import { validateTransferRequest } from "@/components/transactions/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
+import { requireUserRole } from "@/middlewares/auth";
 
 const transactionsRouter = Router();
 
-transactionsRouter.use(authenticatePlayer);
+transactionsRouter.use(
+  passport.authenticate("jwt", { session: false, failWithError: true }),
+);
+transactionsRouter.use(requireUserRole);
 transactionsRouter.post(
   "/deposit/:id?",
   validateTransferRequest(),
