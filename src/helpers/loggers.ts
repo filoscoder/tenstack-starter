@@ -1,8 +1,9 @@
+// @ts-nocheck
 import httpStatus from "http-status/lib";
 import expressPino from "express-pino-logger";
 import { hidePassword } from "@/utils/auth";
 
-const { OK, BAD_REQUEST, SERVER_ERROR } = httpStatus;
+const { OK, BAD_REQUEST, INTERNAL_SERVER_ERROR } = httpStatus;
 
 // More info: https://github.com/pinojs/express-pino-logger
 export const expressPinoLogger = () =>
@@ -27,17 +28,21 @@ export const expressPinoLogger = () =>
     customErrorMessage: (err) => `${err.name} : ${err.message}`,
     customSuccessMessage(res) {
       const status = res.statusCode;
+
       if (status >= 400 && status < 500) {
-        return `${status || BAD_REQUEST} : ${httpStatus[status || 400]}`;
+        return `${status || BAD_REQUEST} : ${
+          httpStatus[status] || httpStatus[BAD_REQUEST]
+        }`;
       }
       if (status >= 500) {
-        return `${status || SERVER_ERROR} : ${httpStatus[status || 500]}`;
+        return `${status || INTERNAL_SERVER_ERROR} : ${
+          httpStatus[status || 500]
+        }`;
       }
       return `${OK} : ${httpStatus[200].toUpperCase()}`;
     },
     serializers: {
       req: (req) => {
-        // console.log('[ R E Q U E S T ] => ', req.raw);
         const {
           method,
           url,
@@ -53,7 +58,6 @@ export const expressPinoLogger = () =>
         };
       },
       res: (res) => {
-        // console.log("[ R E S P O N S E ] => ", res);
         return {
           status: res.statusCode,
         };

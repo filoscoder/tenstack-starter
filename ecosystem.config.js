@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: '<app-name>',
+      name: 'timba-api',
       script: 'dist/src/index.js',
       // Options reference: https://pm2.keymetrics.io/docs/usage/application-declaration/
       exec_mode: 'cluster',
@@ -19,7 +19,7 @@ module.exports = {
       },
       env_production: {
         NODE_ENV: 'production',
-        port: 8080,
+        port: process.env.PORT,
       },
       merge_logs: true,
       log_date_format: 'YYYY-MM-DDTHH:mm:ss.sssZ',
