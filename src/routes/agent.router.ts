@@ -41,5 +41,6 @@ agentRouter.put(
   throwIfBadRequest,
   AgentController.updateBankAccount,
 );
+agentRouter.get("/balance", AgentController.getBalance);
 
 export default agentRouter;

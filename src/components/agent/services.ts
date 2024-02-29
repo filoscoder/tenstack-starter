@@ -6,10 +6,11 @@ import { Credentials } from "@/types/request/players";
 import { decrypt, hash } from "@/utils/crypt";
 import { PaymentsDAO } from "@/db/payments";
 import { DepositsDAO } from "@/db/deposits";
-import { AgentBankAccount } from "@/types/response/agent";
+import { AgentBankAccount, BalanceResponse } from "@/types/response/agent";
 import { UserRootDAO } from "@/db/user-root";
 import { TokenService } from "@/services/token.service";
 import { TokenPair } from "@/types/response/jwt";
+import { HttpService } from "@/services/http.service";
 
 export class AgentServices {
   private static get username(): string {
@@ -75,5 +76,21 @@ export class AgentServices {
       bankAccount: data,
     });
     return agent.bankAccount as AgentBankAccount;
+  }
+
+  static async getBalance(): Promise<BalanceResponse> {
+    const url = "accounts/user";
+    const httpService = new HttpService();
+    const response = await httpService.authedAgentApi.get(url);
+    if (response.status !== 200)
+      throw new CustomError({
+        code: "error_balance",
+        status: response.status,
+        description: "Error en el panel al obtener el balance",
+      });
+    return {
+      balance: Number(response.data.balance),
+      currency: response.data.balance_currency,
+    };
   }
 }

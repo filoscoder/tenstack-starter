@@ -63,12 +63,6 @@ export class AgentController {
     }
   }
 
-  // static async createBankAccount(req: Req, res: Res, next: NextFn) {
-  //   try {
-
-  //   }
-  // }
-
   static async getBankAccount(_req: Req, res: Res, next: NextFn) {
     try {
       const bankAccount = await AgentServices.getBankAccount();
@@ -86,6 +80,16 @@ export class AgentController {
       const bankAccount = await AgentServices.updateBankAccount(data);
 
       res.status(OK).json(apiResponse(bankAccount));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getBalance(_req: Req, res: Res, next: NextFn) {
+    try {
+      const balance = await AgentServices.getBalance();
+
+      res.status(OK).json(apiResponse(balance));
     } catch (error) {
       next(error);
     }

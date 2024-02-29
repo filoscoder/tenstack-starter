@@ -398,6 +398,13 @@ Devuelve    | 200 OK
 - Mostrar balance de agente
 - Front de agente: cuenta bancaria
 
+- GET /players/:id (id invalido)
+- PUT bank-account (ruta no existe)
+- DELETE bank-account (acceso denegado)
+- Confirmar/rejectar depositos con parametro en el body
+- Cashout ("Error al transferir fichas")
+
+
 ## Optimizaciones
 
 - Invalidar tokens en conjunto con una sola petición SQL

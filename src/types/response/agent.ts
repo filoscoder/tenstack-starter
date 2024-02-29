@@ -16,3 +16,8 @@ export type AgentBankAccount = {
   clabe: string;
   alias: string;
 };
+
+export interface BalanceResponse {
+  balance: number;
+  currency: string;
+}
