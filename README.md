@@ -243,16 +243,36 @@ Devuelve    | 200 OK
 }
 ```
 
+### RootBankAccount
+```typescript
+{
+    name: string
+    dni: string
+    bankName: string
+    accountNumber: string
+    clabe: string
+    alias: string
+}
+```
+
 ## TODO
 
+- Instanciar servicios en lugar de usar metodos estaticos
+- Cambiar contraseña (no funciona en el casino, vamos por este lado)
+  - Endpoint https://agent.casinomex.vip/api/users/5941/change-password/
+  - Body: `{ new_password:	string }`
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
-- Requerir autenticación en GET `/players/:id`?
-- Implementar autenticacion de jugador
 - Hacer email opcional en player request validator
 - Documentar endpoints agente
 - Encriptar JWT
-- Mostrar balance de agente
-- Login token
+- Inhabilitar tokens anteriores al loguear un usuario (borrarlos de la bbdd, seleccionando por player_id)
+
+- GET /players/:id (id invalido) ✅
+- PUT bank-account (ruta no existe)
+- DELETE bank-account (acceso denegado)
+- Confirmar/rejectar depositos con parametro en el body
+- Cashout ("Error al transferir fichas")
+
 
 ## Optimizaciones
 

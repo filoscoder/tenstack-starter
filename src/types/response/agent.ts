@@ -7,3 +7,17 @@ export type LoginResponse = {
   refresh: string;
   id: number;
 };
+
+export type AgentBankAccount = {
+  name: string;
+  dni: string;
+  bankName: string;
+  accountNumber: string;
+  clabe: string;
+  alias: string;
+};
+
+export interface BalanceResponse {
+  balance: number;
+  currency: string;
+}

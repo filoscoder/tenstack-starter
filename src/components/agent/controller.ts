@@ -4,6 +4,7 @@ import { OK } from "http-status";
 import { AgentServices } from "./services";
 import { Credentials } from "@/types/request/players";
 import { apiResponse } from "@/helpers/apiResponse";
+import { AgentBankAccount } from "@/types/response/agent";
 
 export class AgentController {
   static async login(req: Req, res: Res, next: NextFn) {
@@ -57,6 +58,38 @@ export class AgentController {
 
       res.writeHead(200, { "Content-Type": "image/png" });
       fileStream.pipe(res);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getBankAccount(_req: Req, res: Res, next: NextFn) {
+    try {
+      const bankAccount = await AgentServices.getBankAccount();
+
+      res.status(OK).json(apiResponse(bankAccount));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async updateBankAccount(req: Req, res: Res, next: NextFn) {
+    try {
+      const data: AgentBankAccount = req.body;
+
+      const bankAccount = await AgentServices.updateBankAccount(data);
+
+      res.status(OK).json(apiResponse(bankAccount));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getBalance(_req: Req, res: Res, next: NextFn) {
+    try {
+      const balance = await AgentServices.getBalance();
+
+      res.status(OK).json(apiResponse(balance));
     } catch (error) {
       next(error);
     }

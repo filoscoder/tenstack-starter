@@ -25,6 +25,7 @@ export class HttpService {
    */
   public get authedAgentApi() {
     return {
+      get: (url: string) => this.agentGet(url),
       post: (url: string, data: any) => this.agentPost(url, data),
       patch: (url: string, data: any) => this.agentPatch(url, data),
     };
@@ -53,6 +54,10 @@ export class HttpService {
 
   constructor() {
     this._tokenService = new TokenService();
+  }
+
+  private async agentGet(url: string) {
+    return await this.send("get", url, null);
   }
 
   private async agentPost(url: string, data: any) {

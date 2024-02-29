@@ -84,7 +84,7 @@ export class AuthService extends JwtService {
         return done(null, { username: "agent", role: payload.role });
 
       if (payload.role === CONFIG.ROLES.PLAYER) {
-        const player = await PlayersDAO.getById(payload.sub);
+        const player = await PlayersDAO._getById(payload.sub);
         return done(null, { ...player, role: payload.role });
       } else return done(new UnauthorizedError("No autenticado"));
     };

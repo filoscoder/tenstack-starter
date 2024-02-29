@@ -1,4 +1,4 @@
-import { checkSchema } from "express-validator";
+import { Location, checkSchema } from "express-validator";
 
 export const validateCredentials = () =>
   checkSchema({
@@ -24,3 +24,25 @@ export const validatePaymentIndex = () =>
       isEmpty: false,
     },
   });
+
+export const validateBankAccountUpdate = () => {
+  const optionalString: {
+    in: Location[];
+    isString: boolean;
+    optional: boolean;
+    trim: boolean;
+  } = {
+    in: ["body"],
+    isString: true,
+    optional: true,
+    trim: true,
+  };
+  return checkSchema({
+    name: optionalString,
+    dni: optionalString,
+    bankName: optionalString,
+    accountNumber: optionalString,
+    clabe: optionalString,
+    alias: optionalString,
+  });
+};

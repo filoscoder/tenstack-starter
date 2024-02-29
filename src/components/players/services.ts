@@ -1,4 +1,5 @@
 import { compare } from "bcrypt";
+import { Player } from "@prisma/client";
 import { AuthService } from "../auth/services";
 import { PlayersDAO } from "@/db/players";
 import {
@@ -6,7 +7,7 @@ import {
   PlayerRequest,
   getPlayerId,
 } from "@/types/request/players";
-import { PlainPlayerResponse, PlayerResponse } from "@/types/response/players";
+import { PlainPlayerResponse } from "@/types/response/players";
 import { hash } from "@/utils/crypt";
 import { hidePassword } from "@/utils/auth";
 import { CustomError, ERR } from "@/middlewares/errorHandler";
@@ -20,13 +21,11 @@ export class PlayerServices {
    * @param playerId ID of the player to retrieve information.
    * @returns Player
    */
-  getPlayerById = async (
-    playerId: getPlayerId,
-  ): Promise<PlayerResponse | null> => {
-    const player = await PlayersDAO.getById(playerId);
+  getPlayerById = async (playerId: getPlayerId): Promise<Player | null> => {
+    const player = await PlayersDAO._getById(playerId);
     if (!player) return null;
 
-    return hidePassword<PlayerResponse>(player);
+    return hidePassword<Player>(player);
   };
 
   /**
