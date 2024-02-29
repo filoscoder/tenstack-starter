@@ -112,6 +112,16 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "agent_login",
     description: "Error al loguear el agente en el panel",
   },
+  TOKEN_EXPIRED: {
+    status: 401,
+    code: "token_expirado",
+    description: "Token expirado",
+  },
+  TOKEN_INVALID: {
+    status: 401,
+    code: "token_invalido",
+    description: "Token invalido",
+  },
 };
 
 function prismaErrorHandler(

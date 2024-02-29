@@ -1,16 +1,15 @@
-import jwt from "jsonwebtoken";
-import jwtStrategy, { StrategyOptionsWithoutRequest } from "passport-jwt";
 import { Deposit, Payment } from "@prisma/client";
+import { AuthService } from "../auth/services";
 import CONFIG from "@/config";
 import { CustomError } from "@/middlewares/errorHandler";
 import { Credentials } from "@/types/request/players";
 import { decrypt, hash } from "@/utils/crypt";
 import { PaymentsDAO } from "@/db/payments";
 import { DepositsDAO } from "@/db/deposits";
-import { UnauthorizedError } from "@/helpers/error";
 import { AgentBankAccount } from "@/types/response/agent";
 import { UserRootDAO } from "@/db/user-root";
 import { TokenService } from "@/services/token.service";
+import { TokenPair } from "@/types/response/jwt";
 
 export class AgentServices {
   private static get username(): string {
@@ -25,19 +24,7 @@ export class AgentServices {
     return decrypt(encryptedUsername);
   }
 
-  private static get cypherPass(): string {
-    const secret = CONFIG.APP.CYPHER_PASS;
-    if (!secret) {
-      throw new CustomError({
-        status: 500,
-        code: "variables_entorno",
-        description: "No se encontró CYPHER_PASS en .env",
-      });
-    }
-    return secret;
-  }
-
-  static async login(credentials: Credentials): Promise<string> {
+  static async login(credentials: Credentials): Promise<TokenPair> {
     const { username, password } = credentials;
     const hashedPass = await hash(password);
     if (
@@ -50,15 +37,9 @@ export class AgentServices {
         description: "Usuario o contraseña incorrectos",
       });
     }
-    const token = jwt.sign(
-      // Payload
-      { sub: "agent", iss: "casino-mex_agent_panel" },
-      // Secret
-      this.cypherPass,
-      // Options
-      { expiresIn: "12h" },
-    );
-    return token;
+    const authService = new AuthService();
+    const { tokens } = await authService.tokens(1, CONFIG.ROLES.AGENT);
+    return tokens;
   }
 
   static async showPayments(): Promise<Payment[] | null> {
@@ -94,22 +75,5 @@ export class AgentServices {
       bankAccount: data,
     });
     return agent.bankAccount as AgentBankAccount;
-  }
-
-  /**
-   * Configure the JWT strategy for passport
-   * @returns Strategy
-   */
-  static jwtStrategy() {
-    const options: StrategyOptionsWithoutRequest = {
-      secretOrKey: this.cypherPass,
-      jwtFromRequest: jwtStrategy.ExtractJwt.fromAuthHeaderAsBearerToken(),
-      issuer: "casino-mex_agent_panel",
-    };
-
-    return new jwtStrategy.Strategy(options, (payload, done) => {
-      if (payload.sub === "agent") return done(null, "agent");
-      else return done(new UnauthorizedError("No autenticado"));
-    });
   }
 }

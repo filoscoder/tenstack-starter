@@ -7,7 +7,7 @@ export class TransactionsController {
   static deposit = async (req: AuthedReq, res: Res, next: NextFn) => {
     const deposit_id = Number(req.params.id);
     const request: TransferRequest = req.body;
-    const player = req.player!;
+    const player = req.user!;
 
     try {
       let result;
@@ -23,7 +23,7 @@ export class TransactionsController {
 
   static cashout = async (req: AuthedReq, res: Res, next: NextFn) => {
     const request: TransferRequest = req.body;
-    const player = req.player!;
+    const player = req.user!;
 
     try {
       const result = await FinanceServices.cashOut(player, request);
@@ -35,7 +35,7 @@ export class TransactionsController {
   };
 
   static pendingDeposits = async (req: AuthedReq, res: Res, next: NextFn) => {
-    const player = req.player!;
+    const player = req.user!;
 
     try {
       const deposits = await FinanceServices.showPendingDeposits(player.id);
@@ -46,7 +46,7 @@ export class TransactionsController {
   };
 
   static deleteDeposit = async (req: AuthedReq, res: Res, next: NextFn) => {
-    const player = req.player!;
+    const player = req.user!;
     const deposit_id = Number(req.params.id);
 
     try {

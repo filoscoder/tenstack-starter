@@ -55,6 +55,7 @@ model Player {
   status            String?       @db.VarChar(20) @default("ACTIVO")
   Payments          Payment[]       
   Deposits          Deposit[]
+  Tokens            Token[]
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt     
 
@@ -107,4 +108,14 @@ model Deposit {
   updated_at        DateTime      @updatedAt    
 
   @@map("DEPOSITS")   
+}
+
+model Token {
+  id                String        @id @default(uuid())
+  invalid           Boolean       @default(false)
+  next              String?       
+  player_id         Int           
+  player            Player        @relation(fields: [player_id], references: [id])
+
+  @@map("TOKENS")   
 }

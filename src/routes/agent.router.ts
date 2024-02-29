@@ -8,6 +8,7 @@ import {
   validatePaymentIndex,
 } from "@/components/agent/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
+import { requireAgentRole } from "@/middlewares/auth";
 
 const agentRouter = Router();
 
@@ -21,6 +22,7 @@ agentRouter.post(
 agentRouter.use(
   passport.authenticate("jwt", { session: false, failWithError: true }),
 );
+agentRouter.use(requireAgentRole);
 agentRouter.get("/payments", AgentController.showPayments);
 agentRouter.put(
   "/payments/:id/paid",
