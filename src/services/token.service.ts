@@ -1,11 +1,15 @@
 import { HttpService } from "./http.service";
+import { JwtService } from "./jwt.service";
 import { decrypt } from "@/utils/crypt";
 import { CustomError } from "@/middlewares/errorHandler";
 import { UserRootDAO } from "@/db/user-root";
 import CONFIG from "@/config";
 import { LoginResponse } from "@/types/response/agent";
 
-export class TokenService {
+/**
+ * Generates and refreshes Agent's panel token
+ */
+export class TokenService extends JwtService {
   private _username = "";
   private _password = "";
   private _encryptedPassword = "";
@@ -160,24 +164,6 @@ export class TokenService {
   private async finalizeAgentLogin(data: LoginResponse): Promise<void> {
     await this.upsertAgent(data);
     this._token = data.access;
-  }
-
-  /**
-   * Verificar si el token está expirado
-   * @param token the token to check
-   * @returns true for valid token, false for expired token
-   */
-  private verifyTokenExpiration(token: string): boolean {
-    try {
-      const bufer = Buffer.from(token.split(".")[1], "base64");
-      const payloadJson = bufer.toString("utf8");
-      const payload = JSON.parse(payloadJson);
-      const currentTimeInSeconds = Math.floor(Date.now() / 1000);
-
-      return !(Number(payload.exp) < currentTimeInSeconds + 10);
-    } catch (error) {
-      return false;
-    }
   }
 
   private setAgentDirtyFlag(dirty: boolean) {

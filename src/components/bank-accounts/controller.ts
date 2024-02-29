@@ -6,7 +6,7 @@ import { BankAccountRequest } from "@/types/request/bank-account";
 export class BankAccountsController {
   static index = async (req: AuthedReq, res: Res, next: NextFn) => {
     try {
-      const player_id = req.player!.id;
+      const player_id = req.user!.id;
       const account_id = Number(req.params.id);
       const bankAccountServices = new BankAccountServices();
 
@@ -25,7 +25,7 @@ export class BankAccountsController {
 
   static create = async (req: AuthedReq, res: Res, next: NextFn) => {
     try {
-      const player_id = req.player!.id;
+      const player_id = req.user!.id;
       const request: BankAccountRequest = req.body;
 
       const bankAccountServices = new BankAccountServices();
@@ -47,7 +47,7 @@ export class BankAccountsController {
 
       const account = await bankAccountServices.update(
         account_id,
-        req.player!.id,
+        req.user!.id,
         request,
       );
 
@@ -63,7 +63,7 @@ export class BankAccountsController {
 
       const bankAccountServices = new BankAccountServices();
 
-      await bankAccountServices.delete(account_id, req.player!.id);
+      await bankAccountServices.delete(account_id, req.user!.id);
 
       res.status(OK).send();
     } catch (error) {

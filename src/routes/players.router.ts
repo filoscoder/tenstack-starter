@@ -1,21 +1,16 @@
 import { Router } from "express";
 import { checkExact } from "express-validator";
+import passport from "passport";
 import { PlayersController, validatePlayerId } from "@/components/players";
 import {
   validateCredentials,
   validatePlayerRequest,
 } from "@/components/players/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
+import { requireUserRole } from "@/middlewares/auth";
 
 const playersRouter = Router();
 
-playersRouter.get(
-  "/:id",
-  validatePlayerId,
-  checkExact(),
-  throwIfBadRequest,
-  PlayersController.getPlayerById,
-);
 // Post para crear usuarios
 playersRouter.post(
   "/",
@@ -31,6 +26,17 @@ playersRouter.post(
   checkExact(),
   throwIfBadRequest,
   PlayersController.login,
+);
+playersRouter.use(
+  passport.authenticate("jwt", { session: false, failWithError: true }),
+);
+playersRouter.use(requireUserRole);
+playersRouter.get(
+  "/:id",
+  validatePlayerId,
+  checkExact(),
+  throwIfBadRequest,
+  PlayersController.getPlayerById,
 );
 // Edicion de datos de usuarios: ej: Password
 export default playersRouter;

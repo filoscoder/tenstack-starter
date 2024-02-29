@@ -58,9 +58,9 @@ export class PlayersController {
 
       const credentials: Credentials = req.body;
 
-      const player = await playersServices.login(credentials);
+      const { tokens } = await playersServices.login(credentials);
 
-      res.status(OK).json(apiResponse(player));
+      res.status(OK).json(apiResponse(tokens));
     } catch (error) {
       next(error);
     }
