@@ -16,7 +16,6 @@ export class PlayersController {
     next: NextFn,
   ) => {
     try {
-      // const playerId = parseInt(req.params.id);
       const playerId = req.user!.id;
 
       const playersServices = new PlayerServices();
