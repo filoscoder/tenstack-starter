@@ -40,9 +40,9 @@ Comes with:
 
 ### [Interfaces](#interfaces)
 
-### Ver Jugador
+### Ver Jugador [🔒](#👉-🔒)
 
-|Endpoint:| `/players/:id`|
+|Endpoint:| `/players/`|
 ---|---|
 Método      | `GET`
 Devuelve    | [`Player & { bank_accounts: BankAccount[] }`](#player)
@@ -63,8 +63,7 @@ Método      |`POST`
 Body (json) | [`Credenciales`](#credenciales)
 Devuelve    | [`LoginResponse`](#loginresponse)
 
-### Ver Cuentas Bancarias
-
+### Ver Cuentas Bancarias [🔒](#👉-🔒)
 
 |Endpoint| `/bank-account/:id?`|
 ---|---|
@@ -75,8 +74,7 @@ Devuelve    | [`BankAccount[]`](#bankaccount)
 
 > **Nota:** Omitir el parámetro `id` para ver todas las cuentas bancarias del usuario
 
-### Crear Cuenta Bancaria
-
+### Crear Cuenta Bancaria [🔒](#👉-🔒)
 
 |Endpoint| `/bank-account`|
 ---|---|
@@ -84,7 +82,7 @@ Método      |`POST`
 Body (json) | [`BankAccountRequest`](#bankaccountrequest)
 Devuelve    | [`BankAccount`](#bankaccount)
 
-### Actualizar Cuenta Bancaria
+### Actualizar Cuenta Bancaria [🔒](#👉-🔒)
 
 |Endpoint| `/bank-account`|
 ---|---|
@@ -94,14 +92,14 @@ Devuelve    | [`BankAccount`](#bankaccount)
 
 > **Nota:** Los campos son opcionales. Incluir los que se quiera modificar
 
-### Eliminar Cuenta Bancaria
+### Eliminar Cuenta Bancaria [🔒](#👉-🔒)
 
 |Endpoint| `/bank-account`|
 ---|---|
 Método      |`DELETE`
 Devuelve    | 200 OK
 
-### Cargar Fichas
+### Cargar Fichas [🔒](#👉-🔒)
 Incluir el id en la URL y omitir el body para confirmar un depósito pendiente
 Omitir el id en la URL e incluir los datos en el body para crear un depósito nuevo
 
@@ -111,7 +109,7 @@ Método      |`POST`
 Body (json) |[`TransferRequest`](#transferrequest)
 Devuelve    |[`TransferResult & { deposit: Deposit }`](#transferresult)
 
-### Retirar Premios
+### Retirar Premios [🔒](#👉-🔒)
 
 |Endpoint| `/transactions/cashout`|
 ---|---|
@@ -119,7 +117,7 @@ Método      |`POST`
 Body (json) |[`TransferRequest`](#transferrequest)
 Devuelve    |[`TransferResult`](#transferresult)
 
-### Ver Depósitos Pendientes
+### Ver Depósitos Pendientes [🔒](#👉-🔒)
 
 |Endpoint| `/transactions/deposit/pending`|
 ---|---|
@@ -128,18 +126,23 @@ Devuelve    |[`Deposit[]`](#deposit)
 
 > **Nota:** siempre devuelve un array
 
-### Confirmar Depósito Pendiente
+### Confirmar Depósito Pendiente [🔒](#👉-🔒)
 
 |Endpoint| `/transactions/deposit/:id/confirm`|
 ---|---|
 Método      |`PUT`
 Devuelve    |[`TransferResult`](#transferresult)
 
-### Eliminar Depósito Pendiente
+### Eliminar Depósito Pendiente [🔒](#👉-🔒)
+
 |Endpoint| `/transactions/deposit/:id`|
 ---|---|
 Método      |`DELETE`
 Devuelve    | 200 OK
+
+### 👉 🔒
+
+Endpoints marcados con 🔒 requieren Bearer token
 
 ## Interfaces
 
