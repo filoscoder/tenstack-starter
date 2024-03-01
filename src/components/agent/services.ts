@@ -27,7 +27,7 @@ export class AgentServices {
 
   static async login(credentials: Credentials): Promise<TokenPair> {
     const { username, password } = credentials;
-    const hashedPass = await hash(password);
+    const hashedPass = hash(password);
     if (
       username !== this.username ||
       hashedPass !== CONFIG.AUTH.AGENT_FRONT_PASSWORD

@@ -132,7 +132,6 @@ function prismaErrorHandler(
 ) {
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     let status, code, description;
-    console.log(err);
     switch (err.code) {
       case "P2025":
         status = 404;

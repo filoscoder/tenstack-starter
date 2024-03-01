@@ -53,7 +53,7 @@ Devuelve    | [`Player & { bank_accounts: BankAccount[] }`](#player)
 ---|---|
 Método      | `POST`
 Body (json) | [`PlayerRequest`](#playerrequest)
-Devuelve    | [`Player`](#Player)
+Devuelve    | [`Player`](#player)
 
 ### Login Jugador
 
@@ -61,7 +61,7 @@ Devuelve    | [`Player`](#Player)
 ---|---|
 Método      |`POST`
 Body (json) | [`Credenciales`](#credenciales)
-Devuelve    | [`Player`](#player)
+Devuelve    | [`LoginResponse`](#loginresponse)
 
 ### Ver Cuentas Bancarias
 
@@ -160,6 +160,16 @@ Devuelve    | 200 OK
   created_at: string;                 // 2024-01-29T18:14:41.534Z
 }
 ```
+
+### LoginResponse
+```typescript
+{
+  access: string;
+  refresh: string;
+  player: Player;
+}
+```
+
 
 ### PlayerRequest
 ```typescript
@@ -262,17 +272,12 @@ Devuelve    | 200 OK
   - Endpoint https://agent.casinomex.vip/api/users/5941/change-password/
   - Body: `{ new_password:	string }`
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
-- Hacer email opcional en player request validator
 - Documentar endpoints agente
 - Encriptar JWT
 - Inhabilitar tokens anteriores al loguear un usuario (borrarlos de la bbdd, seleccionando por player_id)
+- **Que pasa cuando un pago se verifica pero el agente no tiene fichas suficientes? o algo sale mal en el servidor del casino?**
 
-- GET /players/:id (id invalido) ✅
-- PUT bank-account (ruta no existe)
-- DELETE bank-account (acceso denegado)
-- Confirmar/rejectar depositos con parametro en el body
-- Cashout ("Error al transferir fichas")
-
+- Sacar console.logs ✅
 
 ## Optimizaciones
 

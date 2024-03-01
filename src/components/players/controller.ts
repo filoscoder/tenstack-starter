@@ -16,7 +16,8 @@ export class PlayersController {
     next: NextFn,
   ) => {
     try {
-      const playerId = parseInt(req.params.id);
+      // const playerId = parseInt(req.params.id);
+      const playerId = req.user!.id;
 
       const playersServices = new PlayerServices();
 
@@ -58,9 +59,9 @@ export class PlayersController {
 
       const credentials: Credentials = req.body;
 
-      const { tokens } = await playersServices.login(credentials);
+      const loginResponse = await playersServices.login(credentials);
 
-      res.status(OK).json(apiResponse(tokens));
+      res.status(OK).json(apiResponse(loginResponse));
     } catch (error) {
       next(error);
     }
