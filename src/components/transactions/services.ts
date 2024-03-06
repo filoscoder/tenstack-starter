@@ -87,7 +87,6 @@ export class FinanceServices {
       deposit,
       "deposit",
     );
-    console.log("TRANSFER DETAILS", transferDetails);
 
     const transferResult = await this.transfer(transferDetails);
 
@@ -144,7 +143,6 @@ export class FinanceServices {
     ) {
       transaction.status = "INCOMPLETE";
     }
-    console.log("TRANSFER RESULT", transfer.data);
     await TransactionsDAO.logTransaction(transaction);
   }
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { checkExact } from "express-validator";
 import passport from "passport";
-import { PlayersController, validatePlayerId } from "@/components/players";
+import { PlayersController } from "@/components/players";
 import {
   validateCredentials,
   validatePlayerRequest,
@@ -31,11 +31,5 @@ playersRouter.use(
   passport.authenticate("jwt", { session: false, failWithError: true }),
 );
 playersRouter.use(requireUserRole);
-playersRouter.get(
-  "/:id",
-  validatePlayerId,
-  throwIfBadRequest,
-  PlayersController.getPlayerById,
-);
-// Edicion de datos de usuarios: ej: Password
+playersRouter.get("/", PlayersController.getPlayerById);
 export default playersRouter;

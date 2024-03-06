@@ -40,9 +40,9 @@ Comes with:
 
 ### [Interfaces](#interfaces)
 
-### Ver Jugador
+### Ver Jugador [🔒](#👉-🔒)
 
-|Endpoint:| `/players/:id`|
+|Endpoint:| `/players/`|
 ---|---|
 Método      | `GET`
 Devuelve    | [`Player & { bank_accounts: BankAccount[] }`](#player)
@@ -53,7 +53,7 @@ Devuelve    | [`Player & { bank_accounts: BankAccount[] }`](#player)
 ---|---|
 Método      | `POST`
 Body (json) | [`PlayerRequest`](#playerrequest)
-Devuelve    | [`Player`](#Player)
+Devuelve    | [`LoginResponse`](#loginresponse)
 
 ### Login Jugador
 
@@ -61,10 +61,9 @@ Devuelve    | [`Player`](#Player)
 ---|---|
 Método      |`POST`
 Body (json) | [`Credenciales`](#credenciales)
-Devuelve    | [`Player`](#player)
+Devuelve    | [`LoginResponse`](#loginresponse)
 
-### Ver Cuentas Bancarias
-
+### Ver Cuentas Bancarias [🔒](#👉-🔒)
 
 |Endpoint| `/bank-account/:id?`|
 ---|---|
@@ -75,8 +74,7 @@ Devuelve    | [`BankAccount[]`](#bankaccount)
 
 > **Nota:** Omitir el parámetro `id` para ver todas las cuentas bancarias del usuario
 
-### Crear Cuenta Bancaria
-
+### Crear Cuenta Bancaria [🔒](#👉-🔒)
 
 |Endpoint| `/bank-account`|
 ---|---|
@@ -84,7 +82,7 @@ Método      |`POST`
 Body (json) | [`BankAccountRequest`](#bankaccountrequest)
 Devuelve    | [`BankAccount`](#bankaccount)
 
-### Actualizar Cuenta Bancaria
+### Actualizar Cuenta Bancaria [🔒](#👉-🔒)
 
 |Endpoint| `/bank-account`|
 ---|---|
@@ -94,14 +92,14 @@ Devuelve    | [`BankAccount`](#bankaccount)
 
 > **Nota:** Los campos son opcionales. Incluir los que se quiera modificar
 
-### Eliminar Cuenta Bancaria
+### Eliminar Cuenta Bancaria [🔒](#👉-🔒)
 
 |Endpoint| `/bank-account`|
 ---|---|
 Método      |`DELETE`
 Devuelve    | 200 OK
 
-### Cargar Fichas
+### Cargar Fichas [🔒](#👉-🔒)
 Incluir el id en la URL y omitir el body para confirmar un depósito pendiente
 Omitir el id en la URL e incluir los datos en el body para crear un depósito nuevo
 
@@ -111,7 +109,7 @@ Método      |`POST`
 Body (json) |[`TransferRequest`](#transferrequest)
 Devuelve    |[`TransferResult & { deposit: Deposit }`](#transferresult)
 
-### Retirar Premios
+### Retirar Premios [🔒](#👉-🔒)
 
 |Endpoint| `/transactions/cashout`|
 ---|---|
@@ -119,7 +117,7 @@ Método      |`POST`
 Body (json) |[`TransferRequest`](#transferrequest)
 Devuelve    |[`TransferResult`](#transferresult)
 
-### Ver Depósitos Pendientes
+### Ver Depósitos Pendientes [🔒](#👉-🔒)
 
 |Endpoint| `/transactions/deposit/pending`|
 ---|---|
@@ -128,18 +126,22 @@ Devuelve    |[`Deposit[]`](#deposit)
 
 > **Nota:** siempre devuelve un array
 
-### Confirmar Depósito Pendiente
+### Confirmar Depósito Pendiente [🔒](#👉-🔒)
 
 |Endpoint| `/transactions/deposit/:id/confirm`|
 ---|---|
 Método      |`PUT`
 Devuelve    |[`TransferResult`](#transferresult)
 
-### Eliminar Depósito Pendiente
+### Eliminar Depósito Pendiente [🔒](#👉-🔒)
+
 |Endpoint| `/transactions/deposit/:id`|
 ---|---|
 Método      |`DELETE`
 Devuelve    | 200 OK
+
+### 👉 🔒 
+Endpoints marcados con 🔒 requieren Bearer token
 
 ## Interfaces
 
@@ -160,6 +162,16 @@ Devuelve    | 200 OK
   created_at: string;                 // 2024-01-29T18:14:41.534Z
 }
 ```
+
+### LoginResponse
+```typescript
+{
+  access: string;
+  refresh: string;
+  player: Player;
+}
+```
+
 
 ### PlayerRequest
 ```typescript
@@ -262,17 +274,12 @@ Devuelve    | 200 OK
   - Endpoint https://agent.casinomex.vip/api/users/5941/change-password/
   - Body: `{ new_password:	string }`
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
-- Hacer email opcional en player request validator
 - Documentar endpoints agente
 - Encriptar JWT
 - Inhabilitar tokens anteriores al loguear un usuario (borrarlos de la bbdd, seleccionando por player_id)
+- **Que pasa cuando un pago se verifica pero el agente no tiene fichas suficientes? o algo sale mal en el servidor del casino?**
 
-- GET /players/:id (id invalido) ✅
-- PUT bank-account (ruta no existe)
-- DELETE bank-account (acceso denegado)
-- Confirmar/rejectar depositos con parametro en el body
-- Cashout ("Error al transferir fichas")
-
+- Sacar console.logs ✅
 
 ## Optimizaciones
 
