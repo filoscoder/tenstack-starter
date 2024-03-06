@@ -1,19 +1,18 @@
 import { compare } from "bcrypt";
 import { Player } from "@prisma/client";
-import { AuthService } from "../auth/services";
+import { AuthServices } from "../auth/services";
 import { PlayersDAO } from "@/db/players";
 import {
   Credentials,
   PlayerRequest,
   getPlayerId,
 } from "@/types/request/players";
-import { PlainPlayerResponse } from "@/types/response/players";
+import { LoginResponse, PlainPlayerResponse } from "@/types/response/players";
 import { hash } from "@/utils/crypt";
 import { hidePassword } from "@/utils/auth";
 import { CustomError, ERR } from "@/middlewares/errorHandler";
 import { HttpService } from "@/services/http.service";
 import CONFIG from "@/config";
-import { TokenResult } from "@/types/response/jwt";
 
 export class PlayerServices {
   /**
@@ -30,6 +29,7 @@ export class PlayerServices {
 
   /**
    * Create player
+   * @throws if user exists or something goes wrong
    */
   create = async (player: PlayerRequest): Promise<PlainPlayerResponse> => {
     const panelSignUpUrl = "/pyramid/create/player/";
@@ -64,7 +64,7 @@ export class PlayerServices {
 
     // Crear usuario en local
     player.panel_id = response.data.id;
-    player.password = await hash(player.password);
+    player.password = hash(player.password);
     const localPlayer = await PlayersDAO.create(player);
     return hidePassword(localPlayer);
   };
@@ -72,13 +72,18 @@ export class PlayerServices {
   /**
    * Log in player
    */
-  login = async (credentials: Credentials): Promise<TokenResult> => {
+  login = async (credentials: Credentials): Promise<LoginResponse> => {
     // Verificar user y pass en nuestra DB
-    const authService = new AuthService();
+    const authServices = new AuthServices();
     const player = await PlayersDAO.getByUsername(credentials.username);
 
-    if (player && (await compare(credentials.password, player.password)))
-      return authService.tokens(player.id, CONFIG.ROLES.PLAYER);
+    if (player && (await compare(credentials.password, player.password))) {
+      const { tokens } = await authServices.tokens(
+        player.id,
+        CONFIG.ROLES.PLAYER,
+      );
+      return { ...tokens, player: hidePassword(player) };
+    }
 
     // Usuario no está en local o contraseña es incorrecta
     // Chequear en casino
@@ -86,16 +91,27 @@ export class PlayerServices {
     const loginResponse = await playerApi.post("/accounts/login/", credentials);
 
     if (loginResponse.status == 200 && loginResponse.data.access) {
-      const localPlayer = await PlayersDAO.upsert(
-        credentials.username,
-        { password: await hash(credentials.password) },
-        {
-          username: credentials.username,
-          password: await hash(credentials.password),
-          panel_id: loginResponse.data.id,
-        },
+      const localPlayer = await this.updatePlayerPassword(
+        credentials,
+        loginResponse.data.id,
       );
-      return authService.tokens(localPlayer.id, CONFIG.ROLES.PLAYER);
+      const { tokens } = await authServices.tokens(
+        localPlayer.id,
+        CONFIG.ROLES.PLAYER,
+      );
+      return { ...tokens, player: hidePassword(localPlayer) };
     } else throw new CustomError(ERR.INVALID_CREDENTIALS);
   };
+
+  private async updatePlayerPassword(credentials: Credentials, id: number) {
+    return PlayersDAO.upsert(
+      credentials.username,
+      { password: hash(credentials.password) },
+      {
+        username: credentials.username,
+        password: hash(credentials.password),
+        panel_id: id,
+      },
+    );
+  }
 }

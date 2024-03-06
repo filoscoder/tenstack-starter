@@ -17,3 +17,9 @@ export type PlayerResponse = {
 };
 
 export type PlainPlayerResponse = Player;
+
+export type LoginResponse = {
+  access: string;
+  refresh: string;
+  player: Player;
+};
