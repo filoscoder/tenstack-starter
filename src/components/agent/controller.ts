@@ -94,4 +94,14 @@ export class AgentController {
       next(error);
     }
   }
+
+  static async completePendingDeposits(_req: Req, res: Res, next: NextFn) {
+    try {
+      const deposits = await AgentServices.completePendingDeposits();
+
+      res.status(OK).json(apiResponse(deposits));
+    } catch (error) {
+      next(error);
+    }
+  }
 }

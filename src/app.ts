@@ -6,7 +6,7 @@ import timeout from "connect-timeout";
 import passport from "passport";
 import CONFIG from "./config";
 import { expressPinoLogger } from "./helpers";
-import { AuthService } from "./components/auth/services";
+import { AuthServices } from "./components/auth/services";
 import * as errorHandler from "@/middlewares/errorHandler";
 import mainRouter from "@/routes";
 
@@ -15,7 +15,7 @@ export const createApp = (): express.Application => {
 
   const origin = CONFIG.APP.ENV?.includes("dev")
     ? "http://localhost:3000"
-    : "https://agent.casino-mex.com";
+    : "http://localhost";
 
   app.use(cors({ origin }));
   app.use(helmet());
@@ -42,8 +42,8 @@ export const createApp = (): express.Application => {
   app.use(errorHandler.genericErrorHandler);
   app.use(errorHandler.notFoundError);
 
-  const authService = new AuthService();
-  passport.use(authService.jwtStrategy());
+  const authServices = new AuthServices();
+  passport.use(authServices.jwtStrategy());
 
   return app;
 };

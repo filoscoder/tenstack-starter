@@ -1,5 +1,6 @@
 import { Deposit, Payment } from "@prisma/client";
-import { AuthService } from "../auth/services";
+import { FinanceServices } from "../transactions/services";
+import { AuthServices } from "../auth/services";
 import CONFIG from "@/config";
 import { CustomError } from "@/middlewares/errorHandler";
 import { Credentials } from "@/types/request/players";
@@ -11,6 +12,7 @@ import { UserRootDAO } from "@/db/user-root";
 import { TokenService } from "@/services/token.service";
 import { TokenPair } from "@/types/response/jwt";
 import { HttpService } from "@/services/http.service";
+import { hidePassword } from "@/utils/auth";
 
 export class AgentServices {
   private static get username(): string {
@@ -27,7 +29,7 @@ export class AgentServices {
 
   static async login(credentials: Credentials): Promise<TokenPair> {
     const { username, password } = credentials;
-    const hashedPass = await hash(password);
+    const hashedPass = hash(password);
     if (
       username !== this.username ||
       hashedPass !== CONFIG.AUTH.AGENT_FRONT_PASSWORD
@@ -38,8 +40,8 @@ export class AgentServices {
         description: "Usuario o contraseña incorrectos",
       });
     }
-    const authService = new AuthService();
-    const { tokens } = await authService.tokens(1, CONFIG.ROLES.AGENT);
+    const authServices = new AuthServices();
+    const { tokens } = await authServices.tokens(1, CONFIG.ROLES.AGENT);
     return tokens;
   }
 
@@ -92,5 +94,24 @@ export class AgentServices {
       balance: Number(response.data.balance),
       currency: response.data.balance_currency,
     };
+  }
+
+  static async completePendingDeposits(): Promise<Deposit[]> {
+    const deposits = await DepositsDAO.getPendingCoinTransfers();
+    for (const deposit of deposits) {
+      const financeServices = new FinanceServices(
+        "deposit",
+        deposit.amount,
+        deposit.currency,
+        deposit.Player.panel_id,
+      );
+      const result = await financeServices.transfer(deposit.id);
+      if (result.status === "COMPLETED") deposit.coins_transfered = new Date();
+      deposit.Player = hidePassword(deposit.Player);
+      console.log("DEPOSIT", deposit);
+      console.log("RESULT", result);
+    }
+
+    return deposits;
   }
 }

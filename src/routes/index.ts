@@ -5,6 +5,7 @@ import bankAccountsRouter from "./bank-accounts.router";
 import transactionsRouter from "./transactions.router";
 import agentRouter from "./agent.router";
 import authRouter from "./auth.router";
+import webPushRouter from "./web-push";
 
 const mainRouter = Router();
 
@@ -14,5 +15,6 @@ mainRouter.use("/bank-account", bankAccountsRouter);
 mainRouter.use("/transactions", transactionsRouter);
 mainRouter.use("/agent", agentRouter);
 mainRouter.use("/auth", authRouter);
+mainRouter.use("/web-push", webPushRouter);
 
 export default mainRouter;

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Deposit, PrismaClient } from "@prisma/client";
 import {
   DepositRequest,
   DepositUpdatableProps,
@@ -12,9 +12,9 @@ export class DepositsDAO {
   /**
    * Create a DB entry for a deposit
    */
-  static create(data: DepositRequest) {
+  static create(data: DepositRequest): Promise<Deposit> {
     try {
-      return prisma.deposit.create({ data });
+      return prisma.deposit.create({ data, include: { Player: true } });
     } catch (error) {
       throw error;
     } finally {
@@ -42,7 +42,10 @@ export class DepositsDAO {
 
   static getById(id: number) {
     try {
-      return prisma.deposit.findUnique({ where: { id } });
+      return prisma.deposit.findUnique({
+        where: { id },
+        include: { Player: true },
+      });
     } catch (error) {
       throw error;
     } finally {
@@ -53,6 +56,19 @@ export class DepositsDAO {
   static getPending(player_id: number) {
     try {
       return prisma.deposit.findMany({ where: { player_id, confirmed: null } });
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static getPendingCoinTransfers() {
+    try {
+      return prisma.deposit.findMany({
+        where: { coins_transfered: null },
+        include: { Player: true, BankAccount: true },
+      });
     } catch (error) {
       throw error;
     } finally {
@@ -119,7 +135,11 @@ export class DepositsDAO {
       if (deposit.dirty)
         throw new UnauthorizedError("El deposito esta siendo confirmado");
 
-      deposit = await this.update(deposit_id, { dirty: true });
+      deposit = await prisma.deposit.update({
+        where: { id: deposit_id },
+        data: { dirty: true },
+        include: { Player: true },
+      });
       return deposit;
     } catch (error) {
       throw error;
