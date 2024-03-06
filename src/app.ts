@@ -15,7 +15,7 @@ export const createApp = (): express.Application => {
 
   const origin = CONFIG.APP.ENV?.includes("dev")
     ? "http://localhost:3000"
-    : "https://agent.casino-mex.com";
+    : "http://localhost";
 
   app.use(cors({ origin }));
   app.use(helmet());

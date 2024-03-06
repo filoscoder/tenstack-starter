@@ -122,6 +122,11 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "token_invalido",
     description: "Token invalido",
   },
+  KEY_NOT_FOUND: {
+    status: 500,
+    code: "env",
+    description: "No se encontro la llave en .env",
+  },
 };
 
 function prismaErrorHandler(
@@ -132,7 +137,6 @@ function prismaErrorHandler(
 ) {
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     let status, code, description;
-    console.log(err);
     switch (err.code) {
       case "P2025":
         status = 404;
@@ -190,7 +194,8 @@ function prismaErrorHandler(
     res.send({ status, code, description });
   } else if (err instanceof Prisma.PrismaClientValidationError) {
     let description = "Error de validacion de datos ";
-    description += err.message.split("Argument")[1].split(" at")[0];
+    console.log("ERROR MESSAGE", err.message);
+    description += err.message.split("Unknown")[1];
     res.send({
       status: 400,
       code: "error_validacion",

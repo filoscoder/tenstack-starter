@@ -24,7 +24,6 @@ export class TransactionsDAO {
       if (account.player_id !== player_id)
         throw new UnauthorizedError("No autorizado");
     } catch (error) {
-      console.log(error);
       throw error;
     } finally {
       prisma.$disconnect();

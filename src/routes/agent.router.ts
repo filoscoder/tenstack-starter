@@ -42,5 +42,6 @@ agentRouter.put(
   AgentController.updateBankAccount,
 );
 agentRouter.get("/balance", AgentController.getBalance);
+agentRouter.get("/deposits/complete", AgentController.completePendingDeposits);
 
 export default agentRouter;

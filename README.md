@@ -264,14 +264,14 @@ Devuelve    | 200 OK
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
 - Hacer email opcional en player request validator
 - Documentar endpoints agente
-- Encriptar JWT
 - Inhabilitar tokens anteriores al loguear un usuario (borrarlos de la bbdd, seleccionando por player_id)
-
-- GET /players/:id (id invalido) ✅
-- PUT bank-account (ruta no existe)
-- DELETE bank-account (acceso denegado)
-- Confirmar/rejectar depositos con parametro en el body
-- Cashout ("Error al transferir fichas")
+- **Que pasa cuando un pago se verifica pero el agente no tiene fichas suficientes? o algo sale mal en el servidor del casino?**
+  + Si el agente no tiene fichas, mandar push al panel de agente con total pendiente
+  + Botón liberar fichas
+  + Chequear que total pendiente sea menor a nuevo stock
+  + Liberar transferencias
+  
+- Encriptar JWT 
 
 
 ## Optimizaciones

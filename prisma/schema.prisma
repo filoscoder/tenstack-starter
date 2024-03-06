@@ -104,6 +104,7 @@ model Deposit {
   BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
   currency          String        @default("MXN")
   dirty             Boolean       @default(true)
+  coins_transfered  DateTime?     
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
@@ -116,6 +117,19 @@ model Token {
   next              String?       
   player_id         Int           
   player            Player        @relation(fields: [player_id], references: [id])
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt 
 
   @@map("TOKENS")   
+}
+
+model PushSubscription {
+  id                String        @id @default(uuid())
+  endpoint          String        @unique @db.VarChar(512)
+  keys              Json          
+  expirationTime    Float?
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt 
+  
+  @@map("WEB_PUSH_SUBSCRIPTIONS")
 }

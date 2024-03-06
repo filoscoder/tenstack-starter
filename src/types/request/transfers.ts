@@ -27,6 +27,7 @@ export interface DepositUpdatableProps {
   amount?: number;
   confirmed?: string;
   dirty?: boolean;
+  coins_transfered?: string;
 }
 
 export interface PaymentRequest {

@@ -1,3 +1,6 @@
+import { PushSubscription } from "@prisma/client";
+import { JsonObject } from "@prisma/client/runtime/library";
+import CONFIG from "@/config";
 import { PlayerResponse } from "@/types/response/players";
 import { TransferResult } from "@/types/response/transfers";
 
@@ -41,7 +44,18 @@ export const parseTransferResult = (
   const result: TransferResult = {
     status: ok ? "COMPLETED" : "INCOMPLETE",
     player_balance,
-    error: ok ? undefined : "Saldo insuficiente",
+    error: ok ? undefined : CONFIG.SD.INSUFICIENT_BALANCE,
   };
   return result;
+};
+
+export const parseSubscription = (subscription: PushSubscription) => {
+  subscription.keys = JSON.parse(subscription.keys as string);
+  return {
+    endpoint: subscription.endpoint,
+    keys: {
+      p256dh: (subscription.keys as JsonObject).p256dh as string,
+      auth: (subscription.keys as JsonObject).auth as string,
+    },
+  };
 };
