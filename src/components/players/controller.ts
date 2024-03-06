@@ -45,10 +45,11 @@ export class PlayersController {
       const request: PlayerRequest = req.body;
 
       const player = await playersServices.create(request);
-      const response = await authServices.tokens(
+      const { tokens } = await authServices.tokens(
         player.id,
         CONFIG.ROLES.PLAYER,
       );
+      const response = { ...tokens, player };
 
       res.status(CREATED).json(apiResponse(response));
     } catch (error) {
