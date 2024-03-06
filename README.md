@@ -275,11 +275,14 @@ Endpoints marcados con 🔒 requieren Bearer token
   - Body: `{ new_password:	string }`
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
 - Documentar endpoints agente
-- Encriptar JWT
 - Inhabilitar tokens anteriores al loguear un usuario (borrarlos de la bbdd, seleccionando por player_id)
 - **Que pasa cuando un pago se verifica pero el agente no tiene fichas suficientes? o algo sale mal en el servidor del casino?**
-
-- Sacar console.logs ✅
+  + Si el agente no tiene fichas, mandar push al panel de agente con total pendiente
+  + Botón liberar fichas
+  + Chequear que total pendiente sea menor a nuevo stock
+  + Liberar transferencias
+  
+- Encriptar JWT 
 
 ## Optimizaciones
 

@@ -2,6 +2,8 @@ import { OK } from "http-status";
 import { FinanceServices } from "./services";
 import { TransferRequest } from "@/types/request/transfers";
 import { apiResponse } from "@/helpers/apiResponse";
+import { DepositsDAO } from "@/db/deposits";
+import { NotFoundException } from "@/helpers/error";
 
 export class TransactionsController {
   static deposit = async (req: AuthedReq, res: Res, next: NextFn) => {
@@ -11,9 +13,27 @@ export class TransactionsController {
 
     try {
       let result;
-      if (isNaN(deposit_id))
-        result = await FinanceServices.deposit(player, request);
-      else result = await FinanceServices.confirmDeposit(player, deposit_id);
+      if (isNaN(deposit_id)) {
+        const financeServices = new FinanceServices(
+          "deposit",
+          request.amount,
+          request.currency,
+          player.panel_id,
+        );
+
+        result = await financeServices.deposit(player, request);
+      } else {
+        const deposit = await DepositsDAO.getById(deposit_id);
+        if (!deposit) throw new NotFoundException();
+        const financeServices = new FinanceServices(
+          "deposit",
+          deposit.amount,
+          deposit.currency,
+          deposit.Player.panel_id,
+        );
+
+        result = await financeServices.confirmDeposit(player, deposit_id);
+      }
 
       res.status(OK).json(apiResponse(result));
     } catch (e) {
@@ -26,7 +46,13 @@ export class TransactionsController {
     const player = req.user!;
 
     try {
-      const result = await FinanceServices.cashOut(player, request);
+      const financeServices = new FinanceServices(
+        "withdrawal",
+        request.amount,
+        request.currency,
+        player.panel_id,
+      );
+      const result = await financeServices.cashOut(player, request);
 
       res.status(OK).json(apiResponse(result));
     } catch (e) {

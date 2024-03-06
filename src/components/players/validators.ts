@@ -1,23 +1,7 @@
-import { NOT_FOUND, UNAUTHORIZED } from "http-status";
+import { NOT_FOUND } from "http-status";
 import { Location, checkSchema } from "express-validator";
-import { PrismaClient } from "@prisma/client";
 import { apiResponse } from "@/helpers/apiResponse";
 import { PlayersDAO } from "@/db/players";
-
-// TODO implement actual authentication
-const prisma = new PrismaClient();
-
-export const authenticatePlayer = async (
-  req: AuthedReq,
-  res: Res,
-  next: NextFn,
-) => {
-  const player = await prisma.player.findFirst();
-  if (!player)
-    return res.status(UNAUTHORIZED).json(apiResponse(null, "No autorizado"));
-  req.player = player;
-  return next();
-};
 
 export const validatePlayerId = (req: Req, res: Res, next: NextFn) => {
   const { id } = req.params;

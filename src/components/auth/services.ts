@@ -4,7 +4,7 @@ import CONFIG from "@/config";
 import { UnauthorizedError } from "@/helpers/error";
 import { CustomError, ERR } from "@/middlewares/errorHandler";
 import { TokenDAO } from "@/db/token";
-import { notify } from "@/helpers/notification";
+// import { notify } from "@/helpers/notification";
 import { JWTPayload, TokenPair, TokenResult } from "@/types/response/jwt";
 import { PlayersDAO } from "@/db/players";
 
@@ -51,7 +51,8 @@ export class AuthServices extends JwtService {
       while (token!.next) {
         token = await TokenDAO.update(token!.next, { invalid: true });
       }
-      notify("Uso duplicado de refresh token");
+      // TODO
+      // notify("Uso duplicado de refresh token");
       throw new CustomError(ERR.TOKEN_INVALID);
     }
     // If it was not used:

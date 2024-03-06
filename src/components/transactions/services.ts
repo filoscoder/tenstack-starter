@@ -11,52 +11,58 @@ import { TransferRequest, TransferDetails } from "@/types/request/transfers";
 import { Transaction } from "@/types/response/transactions";
 import { TransferResult } from "@/types/response/transfers";
 import { parseTransferResult } from "@/utils/parser";
+import { Notify } from "@/helpers/notification";
+import CONFIG from "@/config";
 
+/**
+ * Services to be consumed by Player endpoints
+ */
 export class FinanceServices {
+  constructor(
+    private _type: "deposit" | "withdrawal",
+    private _amount: number,
+    private _currency: string,
+    private _playerPanelId: number,
+  ) {}
   /**
    * Create deposit, verify it, and transfer coins from agent to player.
    */
-  static async deposit(
+  async deposit(
     player: PlainPlayerResponse,
     request: TransferRequest,
-  ): Promise<TransferResult & { deposit: Deposit }> {
+  ): Promise<TransferResult> {
     await TransactionsDAO.authorizeTransaction(request.bank_account, player.id);
 
     const deposit = await this.createDeposit(player.id, request);
 
-    return await this.verifyAndTransfer(deposit, player, false);
+    return await this.finalizeTransfer(deposit, false);
   }
 
   /**
    * Player announces they have completed a pending deposit
    */
-  static async confirmDeposit(
+  async confirmDeposit(
     player: PlainPlayerResponse,
     deposit_id: number,
   ): Promise<TransferResult & { deposit: Deposit }> {
     await DepositsDAO.authorizeConfirmation(deposit_id, player.id);
 
-    const deposit = (await DepositsDAO.getById(deposit_id)) as Deposit;
+    const deposit = (await DepositsDAO.getById(deposit_id))!;
 
-    return await this.verifyAndTransfer(deposit, player, true);
+    return await this.finalizeTransfer(deposit, true);
   }
 
   /**
    * Send payment to player, transfer coins from player to agent and create a
    * pending payment.
    */
-  static async cashOut(
+  async cashOut(
     player: PlainPlayerResponse,
     request: TransferRequest,
   ): Promise<TransferResult> {
     await TransactionsDAO.authorizeTransaction(request.bank_account, player.id);
 
-    const transferDetails: TransferDetails = await this.generateTransferDetails(
-      player.panel_id,
-      request,
-      "withdrawal",
-    );
-    const transferResult = await this.transfer(transferDetails);
+    const transferResult = await this.transfer();
 
     if (transferResult.status === "COMPLETED")
       this.createPayment(player.id, request);
@@ -64,67 +70,73 @@ export class FinanceServices {
     return transferResult;
   }
 
-  private static async verifyAndTransfer(
+  private async finalizeTransfer(
     deposit: Deposit,
-    player: PlainPlayerResponse,
     verify: boolean,
   ): Promise<TransferResult & { deposit: Deposit }> {
-    deposit = await this.verifyPayment(deposit, verify);
+    const verifiedDeposit = await this.verifyPayment(deposit, verify);
 
-    if (!deposit.confirmed) {
+    if (!verifiedDeposit.confirmed) {
       const result: TransferResult = {
         status: "INCOMPLETE",
         error: "Deposito no confirmado",
       };
       return {
         ...result,
-        deposit,
+        deposit: verifiedDeposit,
       };
     }
 
-    const transferDetails = await this.generateTransferDetails(
-      player.panel_id,
-      deposit,
-      "deposit",
-    );
-
-    const transferResult = await this.transfer(transferDetails);
+    const transferResult = await this.transfer(deposit.id);
 
     return {
       ...transferResult,
-      deposit,
+      deposit: verifiedDeposit,
     };
   }
 
-  private static async transfer(
-    transferDetails: TransferDetails,
-  ): Promise<TransferResult> {
-    const coinTransfer = await this.coinTransfer(transferDetails);
-    await this.logTransaction(coinTransfer, transferDetails);
-    return parseTransferResult(coinTransfer, transferDetails.type);
+  async transfer(deposit_id?: number): Promise<TransferResult> {
+    const transferDetails = await this.generateTransferDetails();
+    const result = await this.panelTransfer(transferDetails);
+
+    if (result.status === 201 && transferDetails.type === "deposit")
+      await DepositsDAO.update(deposit_id!, {
+        coins_transfered: new Date().toISOString(),
+      });
+
+    if (transferDetails.type === "deposit" && result.status !== 201) {
+      const difference =
+        transferDetails.amount - result.data.variables.balance_amount;
+      await Notify.agent({
+        title: "Fichas insuficientes",
+        body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
+        tag: CONFIG.SD.INSUFICIENT_CREDITS,
+      });
+    }
+
+    await this.logTransaction(result, transferDetails);
+    return parseTransferResult(result, transferDetails.type);
   }
 
-  private static async coinTransfer(
-    transferDetails: TransferDetails,
-  ): Promise<any> {
+  private async panelTransfer(transferDetails: TransferDetails): Promise<any> {
     const { authedAgentApi } = new HttpService();
     const url = "/backoffice/transactions/";
-    const transfer = await authedAgentApi.post(url, transferDetails);
+    const result = await authedAgentApi.post(url, transferDetails);
 
-    if (transfer.status !== 201 && transfer.status !== 400)
+    if (result.status !== 201 && result.status !== 400)
       throw new CustomError({
         code: "error_transferencia",
-        status: transfer.status,
+        status: result.status,
         description: "Error al transferir fichas", //transfer.data
       });
 
-    return transfer;
+    return result;
   }
 
   /**
    * Log into Transaction History table
    */
-  private static async logTransaction(
+  private async logTransaction(
     transfer: any,
     transferDetails: TransferDetails,
   ) {
@@ -146,11 +158,7 @@ export class FinanceServices {
     await TransactionsDAO.logTransaction(transaction);
   }
 
-  private static async generateTransferDetails(
-    panel_id: number,
-    request: TransferRequest,
-    type: "deposit" | "withdrawal",
-  ): Promise<TransferDetails> {
+  private async generateTransferDetails(): Promise<TransferDetails> {
     let agent = await UserRootDAO.getAgent();
 
     if (!agent) {
@@ -161,27 +169,27 @@ export class FinanceServices {
 
     let recipient_id, sender_id;
 
-    switch (type) {
+    switch (this._type) {
       case "deposit":
-        recipient_id = panel_id;
+        recipient_id = this._playerPanelId;
         sender_id = agent!.panel_id;
         break;
       case "withdrawal":
         recipient_id = agent!.panel_id;
-        sender_id = panel_id;
+        sender_id = this._playerPanelId;
         break;
     }
 
     return {
       recipient_id,
       sender_id,
-      amount: request.amount,
-      currency: request.currency,
-      type,
+      amount: this._amount,
+      currency: this._currency,
+      type: this._type,
     };
   }
 
-  private static async createDeposit(
+  private async createDeposit(
     player_id: number,
     request: TransferRequest,
   ): Promise<Deposit> {
@@ -193,7 +201,7 @@ export class FinanceServices {
     });
   }
 
-  private static async createPayment(
+  private async createPayment(
     player_id: number,
     request: TransferRequest,
   ): Promise<Payment> {
@@ -209,7 +217,7 @@ export class FinanceServices {
    * Verify receipt of Player's payment.
    * @throws CustomError if payment is not verified
    */
-  private static async verifyPayment(
+  private async verifyPayment(
     deposit: Deposit,
     // TODO delete
     verify = false,

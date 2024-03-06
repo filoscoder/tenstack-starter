@@ -35,6 +35,8 @@ const CONFIG = {
     AGENT_PASSWORD: process.env.AGENT_PASSWORD,
     AGENT_FRONT_USERNAME: process.env.AGENT_FRONT_USERNAME,
     AGENT_FRONT_PASSWORD: process.env.AGENT_FRONT_PASSWORD,
+    WEB_PUSH_PUBLIC_KEY: process.env.WEB_PUSH_PUBLIC_KEY,
+    WEB_PUSH_PRIVATE_KEY: process.env.WEB_PUSH_PRIVATE_KEY,
   },
   AWS: {
     ACCESS_KEY: process.env.AWS_ACCESS_KEY,
@@ -57,6 +59,11 @@ const CONFIG = {
   ROLES: {
     AGENT: "agent",
     PLAYER: "player",
+  },
+  /** Static Details */
+  SD: {
+    INSUFICIENT_BALANCE: "Saldo insuficiente",
+    INSUFICIENT_CREDITS: "FichasInsuficientes",
   },
 } as const;
 
