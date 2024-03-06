@@ -14,7 +14,7 @@ import { CustomError, ErrorData } from "@/middlewares/errorHandler";
  * @param {string} value
  * @returns {Promise<any>}
  */
-export const hash = async (value: string): Promise<any> => {
+export const hash = (value: string): string => {
   // const saltRounds = parseInt(CONFIG.AUTH.SALT_ROUNDS, 10);
 
   // return bcrypt.hash(value, saltRounds);
