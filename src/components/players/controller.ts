@@ -1,8 +1,10 @@
 import { NOT_FOUND, OK, CREATED } from "http-status/lib";
 import { Response } from "express";
+import { AuthServices } from "../auth/services";
 import { PlayerServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
 import { Credentials, PlayerRequest } from "@/types/request/players";
+import CONFIG from "@/config";
 
 export class PlayersController {
   /**
@@ -38,12 +40,17 @@ export class PlayersController {
   static create = async (req: Req, res: Res, next: NextFn) => {
     try {
       const playersServices = new PlayerServices();
+      const authServices = new AuthServices();
 
       const request: PlayerRequest = req.body;
 
       const player = await playersServices.create(request);
+      const response = await authServices.tokens(
+        player.id,
+        CONFIG.ROLES.PLAYER,
+      );
 
-      res.status(CREATED).json(apiResponse(player));
+      res.status(CREATED).json(apiResponse(response));
     } catch (error) {
       next(error);
     }

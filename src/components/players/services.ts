@@ -1,6 +1,6 @@
 import { compare } from "bcrypt";
 import { Player } from "@prisma/client";
-import { AuthService } from "../auth/services";
+import { AuthServices } from "../auth/services";
 import { PlayersDAO } from "@/db/players";
 import {
   Credentials,
@@ -29,6 +29,7 @@ export class PlayerServices {
 
   /**
    * Create player
+   * @throws if user exists or something goes wrong
    */
   create = async (player: PlayerRequest): Promise<PlainPlayerResponse> => {
     const panelSignUpUrl = "/pyramid/create/player/";
@@ -73,11 +74,11 @@ export class PlayerServices {
    */
   login = async (credentials: Credentials): Promise<LoginResponse> => {
     // Verificar user y pass en nuestra DB
-    const authService = new AuthService();
+    const authServices = new AuthServices();
     const player = await PlayersDAO.getByUsername(credentials.username);
 
     if (player && (await compare(credentials.password, player.password))) {
-      const { tokens } = await authService.tokens(
+      const { tokens } = await authServices.tokens(
         player.id,
         CONFIG.ROLES.PLAYER,
       );
@@ -94,7 +95,7 @@ export class PlayerServices {
         credentials,
         loginResponse.data.id,
       );
-      const { tokens } = await authService.tokens(
+      const { tokens } = await authServices.tokens(
         localPlayer.id,
         CONFIG.ROLES.PLAYER,
       );

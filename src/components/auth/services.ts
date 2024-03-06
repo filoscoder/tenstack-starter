@@ -8,7 +8,7 @@ import { notify } from "@/helpers/notification";
 import { JWTPayload, TokenPair, TokenResult } from "@/types/response/jwt";
 import { PlayersDAO } from "@/db/players";
 
-export class AuthService extends JwtService {
+export class AuthServices extends JwtService {
   private get cypherPass(): string {
     const secret = CONFIG.APP.CYPHER_PASS;
     if (!secret) {

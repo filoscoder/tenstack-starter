@@ -53,7 +53,7 @@ Devuelve    | [`Player & { bank_accounts: BankAccount[] }`](#player)
 ---|---|
 Método      | `POST`
 Body (json) | [`PlayerRequest`](#playerrequest)
-Devuelve    | [`Player`](#player)
+Devuelve    | [`LoginResponse`](#loginresponse)
 
 ### Login Jugador
 
@@ -140,8 +140,7 @@ Devuelve    |[`TransferResult`](#transferresult)
 Método      |`DELETE`
 Devuelve    | 200 OK
 
-### 👉 🔒
-
+### 👉 🔒 
 Endpoints marcados con 🔒 requieren Bearer token
 
 ## Interfaces

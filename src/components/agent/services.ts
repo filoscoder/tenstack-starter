@@ -1,5 +1,5 @@
 import { Deposit, Payment } from "@prisma/client";
-import { AuthService } from "../auth/services";
+import { AuthServices } from "../auth/services";
 import CONFIG from "@/config";
 import { CustomError } from "@/middlewares/errorHandler";
 import { Credentials } from "@/types/request/players";
@@ -38,8 +38,8 @@ export class AgentServices {
         description: "Usuario o contraseña incorrectos",
       });
     }
-    const authService = new AuthService();
-    const { tokens } = await authService.tokens(1, CONFIG.ROLES.AGENT);
+    const authServices = new AuthServices();
+    const { tokens } = await authServices.tokens(1, CONFIG.ROLES.AGENT);
     return tokens;
   }
 
