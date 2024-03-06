@@ -1,4 +1,3 @@
-import { compare } from "bcrypt";
 import { Player } from "@prisma/client";
 import { AuthServices } from "../auth/services";
 import { PlayersDAO } from "@/db/players";
@@ -8,7 +7,7 @@ import {
   getPlayerId,
 } from "@/types/request/players";
 import { LoginResponse, PlainPlayerResponse } from "@/types/response/players";
-import { hash } from "@/utils/crypt";
+import { compare, hash } from "@/utils/crypt";
 import { hidePassword } from "@/utils/auth";
 import { CustomError, ERR } from "@/middlewares/errorHandler";
 import { HttpService } from "@/services/http.service";
@@ -64,7 +63,7 @@ export class PlayerServices {
 
     // Crear usuario en local
     player.panel_id = response.data.id;
-    player.password = hash(player.password);
+    player.password = await hash(player.password);
     const localPlayer = await PlayersDAO.create(player);
     return hidePassword(localPlayer);
   };
@@ -106,10 +105,10 @@ export class PlayerServices {
   private async updatePlayerPassword(credentials: Credentials, id: number) {
     return PlayersDAO.upsert(
       credentials.username,
-      { password: hash(credentials.password) },
+      { password: await hash(credentials.password) },
       {
         username: credentials.username,
-        password: hash(credentials.password),
+        password: await hash(credentials.password),
         panel_id: id,
       },
     );
