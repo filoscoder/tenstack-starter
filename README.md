@@ -20,25 +20,42 @@ Comes with:
 
 ## Contenidos
 
-### Endpoints Jugadores
+### Jugadores
 + [Ver Jugador](#ver-jugador)
 + [Crear Jugador](#crear-jugador)
 + [Login de Jugador](#login-jugador)
 
-### Endpoints Cuentas Bancarias
-+ [Ver Cuentas Bancarias](#ver-cuentas-bancarias)
-+ [Crear Cuenta Bancaria](#crear-cuenta-bancaria)
-+ [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria)
-+ [Eliminar Cuenta Bancaria](#eliminar-cuenta-bancaria)
+#### Cuentas Bancarias
++ [Ver Cuentas Bancarias](#ver-cuentas-bancarias-🔒)
++ [Crear Cuenta Bancaria](#crear-cuenta-bancaria-🔒)
++ [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-🔒)
++ [Eliminar Cuenta Bancaria](#eliminar-cuenta-bancaria-🔒)
 
-### Endpoints Transferencias
-+ [Cargar Fichas](#cargar-fichas)
-+ [Retirar Premios](#retirar-premios)
-+ [Ver Depósitos Pendientes](#ver-depósitos-pendientes)
-+ [Confirmar Depósito Pendiente](#confirmar-depósito-pendiente)
-+ [Eliminar Depósito Pendiente](#eliminar-depósito-pendiente)
+### Transferencias
++ [Cargar Fichas](#cargar-fichas-🔒)
++ [Retirar Premios](#retirar-premios-🔒)
++ [Ver Depósitos Pendientes](#ver-depósitos-pendientes-🔒)
++ [Confirmar Depósito Pendiente](#confirmar-depósito-pendiente-🔒)
++ [Eliminar Depósito Pendiente](#eliminar-depósito-pendiente-🔒)
+
+### Agente
++ [Login de Agente](#login-agente)
++ [Ver Pagos](#ver-pagos-🔒)
++ [Marcar Pago Como Completado](#marcar-pago-como-completado-🔒)
++ [Ver Depósitos](#ver-depósitos-🔒)
++ [Ver QR](#ver-qr-🔒)
++ [Ver Cuenta Bancaria](#ver-cuenta-bancaria-🔒)
++ [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-🔒)
++ [Ver Balance](#ver-balance-🔒)
++ [Liberar Fichas Pendientes](#liberar-fichas-pendientes-🔒)
+
+### Auth
++ [Refrescar Token](#refrescar-token)
 
 ### [Interfaces](#interfaces)
+
+Jugadores
+---------
 
 ### Ver Jugador [🔒](#👉-🔒)
 
@@ -140,6 +157,86 @@ Devuelve    |[`TransferResult`](#transferresult)
 Método      |`DELETE`
 Devuelve    | 200 OK
 
+### Refrescar Token
+
+|Endpoint| `/auth/refresh`|
+---|---|
+Método      |`POST`
+Body (json) |[`RefreshRequest`](#refreshrequest)
+Devuelve    |[`Tokens`](#tokens)
+
+Agente
+------
+
+### Login Agente
+
+|Endpoint| `/agent/login`|
+---|---|
+Método      |`POST`
+Body (json) |[`Credenciales`](#credenciales)
+Devuelve    |[`Tokens`](#tokens)
+
+### Ver Pagos [🔒](#👉-🔒)
+
+|Endpoint| `/auth/refresh`|
+---|---|
+Método      |`GET`
+Devuelve    |[`Payment[]`](#payment)
+
+### Marcar Pago Como Completado [🔒](#👉-🔒)
+
+|Endpoint| `/agent/payments/:id/paid`|
+---|---|
+Método      |`PUT`
+Devuelve    |[`Payment`](#payment)
+
+### Ver Depósitos [🔒](#👉-🔒)
+
+|Endpoint| `/agent/deposits`|
+---|---|
+Método      |`GET`
+Devuelve    |[`Deposit[]`](#deposit )
+
+### Ver QR [🔒](#👉-🔒)
+
+|Endpoint| `/agent/qr`|
+---|---|
+Método      |`GET`
+Devuelve    |`Blob`
+
+### Ver Cuenta Bancaria [🔒](#👉-🔒)
+
+|Endpoint| `/agent/bank-account`|
+---|---|
+Método      |`GET`
+Devuelve    |[`RootBankAccount`](#rootbankaccount)
+
+### Actualizar Cuenta Bancaria [🔒](#👉-🔒)
+
+|Endpoint| `/agent/bank-account`|
+---|---|
+Método      |`PUT`
+Body (json) |[`RootBankAccount`](#rootbankaccount)
+Devuelve    |[`RootBankAccount`](#rootbankaccount)
+
+**Nota** Todos los parámetros son opcionales, incluir solo los que se quiera actualizar.
+
+### Ver Balance [🔒](#👉-🔒)
+
+|Endpoint| `/agent/balance`|
+---|---|
+Método      |`GET`
+Devuelve    |[`Balance`](#balance)
+
+### Liberar Fichas Pendientes [🔒](#👉-🔒)
+Liberar transferencias que hayan quedado pendientes en el caso que un jugador quiera comprar mas fichas de las que tiene dispoibles el agente
+
+|Endpoint| `/agent/deposits/complete`|
+---|---|
+Método      |`GET`
+Devuelve    |[`Deposit[]`](#deposit) - los depositos afectados
+
+
 ### 👉 🔒 
 Endpoints marcados con 🔒 requieren Bearer token
 
@@ -148,27 +245,27 @@ Endpoints marcados con 🔒 requieren Bearer token
 ### Player
 ```typescript
 {
-  id: number;
-  panel_id: number;
-  username: string;
-  email?: string;
-  first_name?: string;
-  last_name?: string;
-  date_of_birth?: string;
-  movile_number?: string;
-  country?: string;
-  balance_currency: string;
-  status: string;
-  created_at: string;                 // 2024-01-29T18:14:41.534Z
+  id: number
+  panel_id: number
+  username: string
+  email: string?
+  first_name: string?
+  last_name: string?
+  date_of_birth: string?
+  movile_number: string?
+  country: string?
+  balance_currency: string
+  status: string
+  created_at: string                  // 2024-01-29T18:14:41.534Z
 }
 ```
 
 ### LoginResponse
 ```typescript
 {
-  access: string;
-  refresh: string;
-  player: Player;
+  access: string
+  refresh: string
+  player: Player
 }
 ```
 
@@ -176,14 +273,14 @@ Endpoints marcados con 🔒 requieren Bearer token
 ### PlayerRequest
 ```typescript
 {
-    username: string,
-    password: string,
-    email: string,
-    first_name?: string, 
-    last_name?: string,
-    date_of_birth?: DateTime,
-    movile_number?: string,
-    country?: string
+  username: string
+  password: string
+  email: string
+  first_name: string?
+  last_name: string?
+  date_of_birth: DateTime?
+  movile_number: string?
+  country: string?
 }
 ``` 
 
@@ -208,62 +305,99 @@ Endpoints marcados con 🔒 requieren Bearer token
   bankName: string                    // Nombre del banco
   bankNumber: string                  // CBU
   bankAlias: string?       
-  created_at:                         // 2024-01-29T18:14:41.534Z
-  updated_at:                         // 2024-01-29T18:14:41.534Z
+  created_at: datetime                // 2024-01-29T18:14:41.534Z
+  updated_at: datetime                // 2024-01-29T18:14:41.534Z
 }
 ```
 
 ### Credenciales
 ```typescript
 {
-    username: string
-    password: string
+  username: string
+  password: string
 }
 ```
 
 ### TransferRequest
 ```typescript
 {
-    amount: number
-    currency: string
-    bank_account: number              // ID de cuenta bancaria
+  amount: number
+  currency: string
+  bank_account: number                // ID de cuenta bancaria
 }
 ```
 
 ### TransferResult
 ```typescript
 {
-    status: "COMPLETED" | "INCOMPLETE"
-    player_balance?: number           // undefined en caso de deposito incompleto
-    error?: string                    // En caso de error, el motivo
-    deposit: Deposit
+  status: "COMPLETED" | "INCOMPLETE"
+  player_balance: number?             // undefined en caso de deposito incompleto
+  error: string?                      // En caso de error, el motivo
+  deposit: Deposit
 }
 ```
 
 ### Deposit
 ```typescript
 {
-    id: number
-    player_id: number
-    amount: number
-    confirmed?: datetime              // 2024-02-23T12:35:51.017Z
-    bank_account: number
-    currency: string
-    dirty: boolean
-    created_at: datetime              // 2024-02-23T12:35:51.017Z
-    updated_at: datetime              // 2024-02-23T12:35:51.017Z
+  id: number
+  player_id: number
+  amount: number
+  confirmed?: datetime                // 2024-02-23T12:35:51.017Z
+  bank_account: number
+  currency: string
+  dirty: boolean
+  created_at: datetime                // 2024-02-23T12:35:51.017Z
+  updated_at: datetime                // 2024-02-23T12:35:51.017Z
+}
+```
+
+### Payment
+```typescript
+{
+  id: number
+  player_id: number
+  amount: number
+  paid: datetime | null               // 2024-02-23T12:35:51.017Z
+  bank_account: number
+  currency: string
+  created_at: datetime                // 2024-02-23T12:35:51.017Z                  
+  updated_at: datetime                // 2024-02-23T12:35:51.017Z
 }
 ```
 
 ### RootBankAccount
 ```typescript
 {
-    name: string
-    dni: string
-    bankName: string
-    accountNumber: string
-    clabe: string
-    alias: string
+  name: string
+  dni: string
+  bankName: string
+  accountNumber: string
+  clabe: string
+  alias: string
+}
+```
+
+### RefreshRequest
+```typescript
+{
+  token: string
+}
+```
+
+### Tokens
+```typescript
+{
+  access: string
+  refresh: string
+}
+```
+
+### Balance
+```typescript
+{
+  balance: number
+  currency: string
 }
 ```
 
