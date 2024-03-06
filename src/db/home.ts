@@ -5,10 +5,10 @@ import { getAppInfoQuery } from "@/types/request/home";
 export class HomeDAO {
   get = (key?: getAppInfoQuery): Promise<AppInformation | any> => {
     if (!key) {
-      return Promise.resolve(CONFIG.APP);
+      return Promise.resolve(CONFIG.INFO);
     }
-    const upperKey = key.toUpperCase() as keyof typeof CONFIG.APP;
+    const upperKey = key.toUpperCase() as keyof typeof CONFIG.INFO;
 
-    return Promise.resolve({ [upperKey]: CONFIG.APP[upperKey] });
+    return Promise.resolve({ [upperKey]: CONFIG.INFO[upperKey] });
   };
 }
