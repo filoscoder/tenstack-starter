@@ -434,6 +434,7 @@ Endpoints marcados con 🔒 requieren Bearer token
 - Encriptar JWT 
 
 
+
 ## Optimizaciones
 
 - Invalidar tokens en conjunto con una sola petición SQL

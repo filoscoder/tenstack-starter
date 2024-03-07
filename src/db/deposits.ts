@@ -14,7 +14,7 @@ export class DepositsDAO {
    */
   static create(data: DepositRequest): Promise<Deposit> {
     try {
-      return prisma.deposit.create({ data });
+      return prisma.deposit.create({ data, include: { Player: true } });
     } catch (error) {
       throw error;
     } finally {
