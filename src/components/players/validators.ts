@@ -28,7 +28,11 @@ export const validatePlayerRequest = () => {
   };
   return checkSchema({
     username: string,
-    password: string,
+    password: {
+      ...string,
+      custom: { options: checkByteLength },
+      errorMessage: "Contraseña demasiado larga",
+    },
     email: {
       in: ["body"],
       isEmail: true,
@@ -47,6 +51,13 @@ export const validatePlayerRequest = () => {
 async function checkEmailNotInUse(value: string): Promise<void> {
   const player = await PlayersDAO.getByEmail(value);
   if (player) throw new Error("Usuario con ese email ya existe");
+}
+
+/**
+ * bcrypt only accepts passwords of up to 72 bytes in length
+ */
+function checkByteLength(value: string): boolean {
+  return new TextEncoder().encode(value).length <= 72;
 }
 
 export const validateCredentials = () =>
