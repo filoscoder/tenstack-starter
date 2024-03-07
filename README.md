@@ -411,7 +411,6 @@ Endpoints marcados con 🔒 requieren Bearer token
 - Restringir largo de las contraseñas a 72 bytes (segun bcrypt)
 
 ### Access Token
-- Guardar user-agent string en bbdd
 - Inhabilitar tokens anteriores que tengan la misma user-agent string al loguear un usuario
 - Implementar Logout e inhabilitar token
 - Chequear la user-agent string durante el flujo de autenticación, revisar que sea el mismo que está en la bbdd

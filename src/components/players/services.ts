@@ -73,19 +73,13 @@ export class PlayerServices {
    */
   login = async (
     credentials: Credentials,
-    userAgent?: string,
+    user_agent?: string,
   ): Promise<LoginResponse> => {
     // Verificar user y pass en nuestra DB
-    const authServices = new AuthServices();
     const player = await PlayersDAO.getByUsername(credentials.username);
 
     if (player && (await compare(credentials.password, player.password))) {
-      const { tokens } = await authServices.tokens(
-        player.id,
-        CONFIG.ROLES.PLAYER,
-        userAgent,
-      );
-      return { ...tokens, player: hidePassword(player) };
+      return await this.loginResponse(player, user_agent);
     }
 
     // Usuario no está en local o contraseña es incorrecta
@@ -98,12 +92,7 @@ export class PlayerServices {
         credentials,
         loginResponse.data.id,
       );
-      const { tokens } = await authServices.tokens(
-        localPlayer.id,
-        CONFIG.ROLES.PLAYER,
-        userAgent,
-      );
-      return { ...tokens, player: hidePassword(localPlayer) };
+      return await this.loginResponse(localPlayer, user_agent);
     } else throw new CustomError(ERR.INVALID_CREDENTIALS);
   };
 
@@ -117,5 +106,19 @@ export class PlayerServices {
         panel_id: id,
       },
     );
+  }
+
+  private async loginResponse(
+    player: Player,
+    user_agent?: string,
+  ): Promise<LoginResponse> {
+    const authServices = new AuthServices();
+    await authServices.invalidateTokensByUserAgent(player.id, user_agent);
+    const { tokens } = await authServices.tokens(
+      player.id,
+      CONFIG.ROLES.PLAYER,
+      user_agent,
+    );
+    return { ...tokens, player: hidePassword(player) };
   }
 }

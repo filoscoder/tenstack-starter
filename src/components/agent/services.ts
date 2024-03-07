@@ -35,7 +35,7 @@ export class AgentServices {
 
   static async login(
     credentials: Credentials,
-    userAgent?: string,
+    user_agent?: string,
   ): Promise<TokenPair> {
     const { username, password } = credentials;
     const passwordCheck = await compare(password, this.password);
@@ -47,10 +47,11 @@ export class AgentServices {
       });
     }
     const authServices = new AuthServices();
+    authServices.invalidateTokensByUserAgent(1, user_agent);
     const { tokens } = await authServices.tokens(
       1,
       CONFIG.ROLES.AGENT,
-      userAgent,
+      user_agent,
     );
     return tokens;
   }
@@ -118,8 +119,6 @@ export class AgentServices {
       const result = await financeServices.transfer(deposit.id);
       if (result.status === "COMPLETED") deposit.coins_transfered = new Date();
       deposit.Player = hidePassword(deposit.Player);
-      console.log("DEPOSIT", deposit);
-      console.log("RESULT", result);
     }
 
     return deposits;

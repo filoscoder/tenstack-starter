@@ -1,5 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { CreateTokenDetails, TokenUpdatableProps } from "@/types/request/token";
+import {
+  CreateTokenDetails,
+  TokenLookUpBy,
+  TokenUpdatableProps,
+} from "@/types/request/token";
 
 const prisma = new PrismaClient();
 
@@ -25,10 +29,20 @@ export class TokenDAO {
     }
   }
 
-  static async update(id: string, data: TokenUpdatableProps) {
+  static async updateById(id: string, data: TokenUpdatableProps) {
     try {
       const token = await prisma.token.update({ where: { id }, data });
       return token;
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static async update(where: TokenLookUpBy, data: TokenUpdatableProps) {
+    try {
+      await prisma.token.updateMany({ where, data });
     } catch (error) {
       throw error;
     } finally {

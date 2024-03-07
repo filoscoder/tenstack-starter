@@ -29,9 +29,9 @@ export class AuthServices extends JwtService {
   async tokens(
     sub: number,
     role: string,
-    userAgent?: string,
+    user_agent?: string,
   ): Promise<TokenResult> {
-    const dbToken = await TokenDAO.create({ player_id: sub, userAgent });
+    const dbToken = await TokenDAO.create({ player_id: sub, user_agent });
     return {
       tokens: this.generateTokenPair(sub, role, dbToken.id, this.cypherPass),
       jti: dbToken.id,
@@ -41,7 +41,7 @@ export class AuthServices extends JwtService {
   /**
    * Generate new pair from refresh token
    */
-  async refresh(refresh: string, userAgent?: string): Promise<TokenPair> {
+  async refresh(refresh: string, user_agent?: string): Promise<TokenPair> {
     if (!this.verifyTokenExpiration(refresh))
       throw new CustomError(ERR.TOKEN_EXPIRED);
 
@@ -51,12 +51,12 @@ export class AuthServices extends JwtService {
     let token = await TokenDAO.getById(payload.jti);
     if (!token) throw new CustomError(ERR.TOKEN_INVALID);
 
-    if (token.userAgent != userAgent)
-      token = await this.invalidateToken(token);
+    if (token.user_agent != user_agent)
+      token = await this.invalidateTokenById(token);
 
     if (token.invalid) {
       while (token!.next) {
-        token = await this.invalidateToken(token);
+        token = await this.invalidateTokenById(token);
       }
       // TODO
       // notify("Uso duplicado de refresh token");
@@ -66,10 +66,10 @@ export class AuthServices extends JwtService {
     const { tokens, jti } = await this.tokens(
       payload.sub,
       payload.role,
-      userAgent,
+      user_agent,
     );
     // Invalidate received token and link it to newly created one.
-    await TokenDAO.update(token.id, { invalid: true, next: jti });
+    await TokenDAO.updateById(token.id, { invalid: true, next: jti });
     return tokens;
   }
 
@@ -95,7 +95,7 @@ export class AuthServices extends JwtService {
         !token ||
         token.invalid ||
         payload.type !== "access" ||
-        token.userAgent != request.headers["user-agent"]
+        token.user_agent != request.headers["user-agent"]
       )
         return done(new CustomError(ERR.TOKEN_INVALID), false);
 
@@ -111,7 +111,11 @@ export class AuthServices extends JwtService {
     return new jwtStrategy.Strategy(options, deserialize);
   }
 
-  private invalidateToken(token: Token) {
-    return TokenDAO.update(token.id, { invalid: true });
+  private invalidateTokenById(token: Token) {
+    return TokenDAO.updateById(token.id, { invalid: true });
+  }
+
+  invalidateTokensByUserAgent(player_id: number, user_agent?: string) {
+    return TokenDAO.update({ player_id, user_agent }, { invalid: true });
   }
 }

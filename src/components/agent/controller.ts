@@ -10,9 +10,9 @@ export class AgentController {
   static async login(req: Req, res: Res, next: NextFn) {
     try {
       const credentials: Credentials = req.body;
-      const userAgent = req.headers["user-agent"];
+      const user_agent = req.headers["user-agent"];
 
-      const token = await AgentServices.login(credentials, userAgent);
+      const token = await AgentServices.login(credentials, user_agent);
 
       res.status(OK).json(apiResponse({ access: token }));
     } catch (error) {
