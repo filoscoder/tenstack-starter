@@ -51,6 +51,7 @@ Comes with:
 
 ### Auth
 + [Refrescar Token](#refrescar-token)
++ [Logout](#logout)
 
 ### [Interfaces](#interfaces)
 
@@ -157,6 +158,9 @@ Devuelve    |[`TransferResult`](#transferresult)
 Método      |`DELETE`
 Devuelve    | 200 OK
 
+Auth
+----
+
 ### Refrescar Token
 
 |Endpoint| `/auth/refresh`|
@@ -164,6 +168,16 @@ Devuelve    | 200 OK
 Método      |`POST`
 Body (json) |[`RefreshRequest`](#refreshrequest)
 Devuelve    |[`Tokens`](#tokens)
+
+### Logout
+
+|Endpoint| `/auth/logout`|
+---|---|
+Método      |`POST`
+Body (json) |[`RefreshRequest`](#refreshrequest)
+Devuelve    |200 OK
+
+**Nota** el token puede ser un access o refresh token y puede estar expirado. El backend solo espera recibir uno e invalida los dos.
 
 Agente
 ------
@@ -411,9 +425,7 @@ Endpoints marcados con 🔒 requieren Bearer token
 - Restringir largo de las contraseñas a 72 bytes (segun bcrypt)
 
 ### Access Token
-- Inhabilitar tokens anteriores que tengan la misma user-agent string al loguear un usuario
 - Implementar Logout e inhabilitar token
-- Chequear la user-agent string durante el flujo de autenticación, revisar que sea el mismo que está en la bbdd
 - Al refrescar un access token, darle la misma exp que al anterior en lugar de renovarla
 
 ### Fichas insuficientes

@@ -16,4 +16,17 @@ export class AuthController {
       next(error);
     }
   }
+
+  static async logout(req: Req, res: Res, next: NextFn) {
+    try {
+      const authServices = new AuthServices();
+      const { token } = req.body;
+
+      await authServices.logout(token);
+
+      res.status(OK).send(apiResponse(null));
+    } catch (error) {
+      next(error);
+    }
+  }
 }

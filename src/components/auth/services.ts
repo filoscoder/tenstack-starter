@@ -1,5 +1,6 @@
 import jwtStrategy, { StrategyOptions } from "passport-jwt";
 import { Token } from "@prisma/client";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { JwtService } from "../../services/jwt.service";
 import CONFIG from "@/config";
 import { UnauthorizedError } from "@/helpers/error";
@@ -52,12 +53,10 @@ export class AuthServices extends JwtService {
     if (!token) throw new CustomError(ERR.TOKEN_INVALID);
 
     if (token.user_agent != user_agent)
-      token = await this.invalidateTokenById(token);
+      token = await this.invalidateTokenById(token.id);
 
     if (token.invalid) {
-      while (token!.next) {
-        token = await this.invalidateTokenById(token);
-      }
+      await this.invalidateChildren(token);
       // TODO
       // notify("Uso duplicado de refresh token");
       throw new CustomError(ERR.TOKEN_INVALID);
@@ -111,11 +110,29 @@ export class AuthServices extends JwtService {
     return new jwtStrategy.Strategy(options, deserialize);
   }
 
-  private invalidateTokenById(token: Token) {
-    return TokenDAO.updateById(token.id, { invalid: true });
+  private invalidateTokenById(token_id: string) {
+    return TokenDAO.updateById(token_id, { invalid: true });
   }
 
   invalidateTokensByUserAgent(player_id: number, user_agent?: string) {
     return TokenDAO.update({ player_id, user_agent }, { invalid: true });
+  }
+
+  /**
+   * Invalidate given token and all its children
+   */
+  private async invalidateChildren(token: Token) {
+    do {
+      token = await this.invalidateTokenById(token.id);
+    } while (token!.next);
+  }
+
+  async logout(encoded: string) {
+    const payload = jwt.verify(encoded, this.cypherPass, {
+      ignoreExpiration: true,
+    }) as JwtPayload;
+    const token = await TokenDAO.getById(payload.jti as string);
+    if (!token) return;
+    await this.invalidateChildren(token);
   }
 }
