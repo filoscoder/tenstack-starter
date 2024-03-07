@@ -7,8 +7,9 @@ export class AuthController {
     try {
       const authServices = new AuthServices();
       const { token } = req.body;
+      const userAgent = req.headers["user-agent"];
 
-      const refreshed = await authServices.refresh(token);
+      const refreshed = await authServices.refresh(token, userAgent);
 
       res.status(OK).send(apiResponse(refreshed));
     } catch (error) {

@@ -408,13 +408,17 @@ Endpoints marcados con 🔒 requieren Bearer token
   - Endpoint https://agent.casinomex.vip/api/users/5941/change-password/
   - Body: `{ new_password:	string }`
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
-- Documentar endpoints agente
-- Inhabilitar tokens anteriores al loguear un usuario (borrarlos de la bbdd, seleccionando por player_id)
-- **Que pasa cuando un pago se verifica pero el agente no tiene fichas suficientes? o algo sale mal en el servidor del casino?**
-  + Si el agente no tiene fichas, mandar push al panel de agente con total pendiente
-  + Botón liberar fichas
-  + Chequear que total pendiente sea menor a nuevo stock
-  + Liberar transferencias
+- Restringir largo de las contraseñas a 72 bytes (segun bcrypt)
+
+### Access Token
+- Guardar user-agent string en bbdd
+- Inhabilitar tokens anteriores que tengan la misma user-agent string al loguear un usuario
+- Implementar Logout e inhabilitar token
+- Chequear la user-agent string durante el flujo de autenticación, revisar que sea el mismo que está en la bbdd
+- Al refrescar un access token, darle la misma exp que al anterior en lugar de renovarla
+
+### Fichas insuficientes
+- Revisar respuesta y avisarle al agente si quedaron transferencias sin liberar
   
 - Encriptar JWT 
 

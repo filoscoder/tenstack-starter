@@ -71,7 +71,10 @@ export class PlayerServices {
   /**
    * Log in player
    */
-  login = async (credentials: Credentials): Promise<LoginResponse> => {
+  login = async (
+    credentials: Credentials,
+    userAgent?: string,
+  ): Promise<LoginResponse> => {
     // Verificar user y pass en nuestra DB
     const authServices = new AuthServices();
     const player = await PlayersDAO.getByUsername(credentials.username);
@@ -80,6 +83,7 @@ export class PlayerServices {
       const { tokens } = await authServices.tokens(
         player.id,
         CONFIG.ROLES.PLAYER,
+        userAgent,
       );
       return { ...tokens, player: hidePassword(player) };
     }
@@ -97,6 +101,7 @@ export class PlayerServices {
       const { tokens } = await authServices.tokens(
         localPlayer.id,
         CONFIG.ROLES.PLAYER,
+        userAgent,
       );
       return { ...tokens, player: hidePassword(localPlayer) };
     } else throw new CustomError(ERR.INVALID_CREDENTIALS);

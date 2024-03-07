@@ -43,11 +43,13 @@ export class PlayersController {
       const authServices = new AuthServices();
 
       const request: PlayerRequest = req.body;
+      const userAgent = req.headers["user-agent"];
 
       const player = await playersServices.create(request);
       const { tokens } = await authServices.tokens(
         player.id,
         CONFIG.ROLES.PLAYER,
+        userAgent,
       );
       const response = { ...tokens, player };
 
@@ -65,8 +67,12 @@ export class PlayersController {
       const playersServices = new PlayerServices();
 
       const credentials: Credentials = req.body;
+      const userAgent = req.headers["user-agent"];
 
-      const loginResponse = await playersServices.login(credentials);
+      const loginResponse = await playersServices.login(
+        credentials,
+        userAgent,
+      );
 
       res.status(OK).json(apiResponse(loginResponse));
     } catch (error) {

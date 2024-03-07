@@ -127,6 +127,11 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "env",
     description: "No se encontro la llave en .env",
   },
+  AGENT_PASS_NOT_SET: {
+    status: 500,
+    code: "env",
+    description: "No se encontro la clave de agente en .env",
+  },
 };
 
 function prismaErrorHandler(

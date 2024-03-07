@@ -1,12 +1,12 @@
 import { PrismaClient } from "@prisma/client";
-import { TokenUpdatableProps } from "@/types/request/token";
+import { CreateTokenDetails, TokenUpdatableProps } from "@/types/request/token";
 
 const prisma = new PrismaClient();
 
 export class TokenDAO {
-  static async create(player_id: number) {
+  static async create(data: CreateTokenDetails) {
     try {
-      const token = await prisma.token.create({ data: { player_id } });
+      const token = await prisma.token.create({ data });
       return token;
     } catch (error) {
       throw error;

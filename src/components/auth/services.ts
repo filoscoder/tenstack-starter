@@ -1,10 +1,10 @@
-import jwtStrategy, { StrategyOptionsWithoutRequest } from "passport-jwt";
+import jwtStrategy, { StrategyOptions } from "passport-jwt";
+import { Token } from "@prisma/client";
 import { JwtService } from "../../services/jwt.service";
 import CONFIG from "@/config";
 import { UnauthorizedError } from "@/helpers/error";
 import { CustomError, ERR } from "@/middlewares/errorHandler";
 import { TokenDAO } from "@/db/token";
-// import { notify } from "@/helpers/notification";
 import { JWTPayload, TokenPair, TokenResult } from "@/types/response/jwt";
 import { PlayersDAO } from "@/db/players";
 
@@ -26,18 +26,22 @@ export class AuthServices extends JwtService {
    * @param sub User ID
    * @param role User role
    */
-  async tokens(sub: number, role: string): Promise<TokenResult> {
-    const dbToken = await TokenDAO.create(sub);
+  async tokens(
+    sub: number,
+    role: string,
+    userAgent?: string,
+  ): Promise<TokenResult> {
+    const dbToken = await TokenDAO.create({ player_id: sub, userAgent });
     return {
       tokens: this.generateTokenPair(sub, role, dbToken.id, this.cypherPass),
-      id: dbToken.id,
+      jti: dbToken.id,
     };
   }
 
   /**
    * Generate new pair from refresh token
    */
-  async refresh(refresh: string): Promise<TokenPair> {
+  async refresh(refresh: string, userAgent?: string): Promise<TokenPair> {
     if (!this.verifyTokenExpiration(refresh))
       throw new CustomError(ERR.TOKEN_EXPIRED);
 
@@ -47,18 +51,25 @@ export class AuthServices extends JwtService {
     let token = await TokenDAO.getById(payload.jti);
     if (!token) throw new CustomError(ERR.TOKEN_INVALID);
 
+    if (token.userAgent != userAgent)
+      token = await this.invalidateToken(token);
+
     if (token.invalid) {
       while (token!.next) {
-        token = await TokenDAO.update(token!.next, { invalid: true });
+        token = await this.invalidateToken(token);
       }
       // TODO
       // notify("Uso duplicado de refresh token");
       throw new CustomError(ERR.TOKEN_INVALID);
     }
-    // If it was not used:
-    const { tokens, id } = await this.tokens(payload.sub, payload.role);
+
+    const { tokens, jti } = await this.tokens(
+      payload.sub,
+      payload.role,
+      userAgent,
+    );
     // Invalidate received token and link it to newly created one.
-    await TokenDAO.update(token.id, { invalid: true, next: id });
+    await TokenDAO.update(token.id, { invalid: true, next: jti });
     return tokens;
   }
 
@@ -67,18 +78,25 @@ export class AuthServices extends JwtService {
    * @returns Strategy
    */
   jwtStrategy() {
-    const options: StrategyOptionsWithoutRequest = {
+    const options: StrategyOptions = {
       secretOrKey: this.cypherPass,
       jwtFromRequest: jwtStrategy.ExtractJwt.fromAuthHeaderAsBearerToken(),
+      passReqToCallback: true,
     };
 
-    const deserialize: jwtStrategy.VerifyCallback = async (
+    const deserialize: jwtStrategy.VerifyCallbackWithRequest = async (
+      request: Req,
       payload: JWTPayload,
       done: jwtStrategy.VerifiedCallback,
     ) => {
       // Check token validity
       const token = await TokenDAO.getById(payload.jti);
-      if (!token || token.invalid || payload.type !== "access")
+      if (
+        !token ||
+        token.invalid ||
+        payload.type !== "access" ||
+        token.userAgent != request.headers["user-agent"]
+      )
         return done(new CustomError(ERR.TOKEN_INVALID), false);
 
       if (payload.role === CONFIG.ROLES.AGENT)
@@ -91,5 +109,9 @@ export class AuthServices extends JwtService {
     };
 
     return new jwtStrategy.Strategy(options, deserialize);
+  }
+
+  private invalidateToken(token: Token) {
+    return TokenDAO.update(token.id, { invalid: true });
   }
 }

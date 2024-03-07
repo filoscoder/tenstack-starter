@@ -117,6 +117,7 @@ model Token {
   next              String?       
   player_id         Int           
   player            Player        @relation(fields: [player_id], references: [id])
+  user_agent        String?       @db.VarChar(256)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt 
 

@@ -2,9 +2,9 @@ import { Deposit, Payment } from "@prisma/client";
 import { FinanceServices } from "../transactions/services";
 import { AuthServices } from "../auth/services";
 import CONFIG from "@/config";
-import { CustomError } from "@/middlewares/errorHandler";
+import { CustomError, ERR } from "@/middlewares/errorHandler";
 import { Credentials } from "@/types/request/players";
-import { decrypt, hash } from "@/utils/crypt";
+import { compare, decrypt } from "@/utils/crypt";
 import { PaymentsDAO } from "@/db/payments";
 import { DepositsDAO } from "@/db/deposits";
 import { AgentBankAccount, BalanceResponse } from "@/types/response/agent";
@@ -26,14 +26,20 @@ export class AgentServices {
     }
     return decrypt(encryptedUsername);
   }
+  private static get password(): string {
+    if (!CONFIG.AUTH.AGENT_FRONT_PASSWORD)
+      throw new CustomError(ERR.AGENT_PASS_NOT_SET);
 
-  static async login(credentials: Credentials): Promise<TokenPair> {
+    return CONFIG.AUTH.AGENT_FRONT_PASSWORD;
+  }
+
+  static async login(
+    credentials: Credentials,
+    userAgent?: string,
+  ): Promise<TokenPair> {
     const { username, password } = credentials;
-    const hashedPass = await hash(password);
-    if (
-      username !== this.username ||
-      hashedPass !== CONFIG.AUTH.AGENT_FRONT_PASSWORD
-    ) {
+    const passwordCheck = await compare(password, this.password);
+    if (username !== this.username || !passwordCheck) {
       throw new CustomError({
         status: 401,
         code: "credenciales_invalidas",
@@ -41,7 +47,11 @@ export class AgentServices {
       });
     }
     const authServices = new AuthServices();
-    const { tokens } = await authServices.tokens(1, CONFIG.ROLES.AGENT);
+    const { tokens } = await authServices.tokens(
+      1,
+      CONFIG.ROLES.AGENT,
+      userAgent,
+    );
     return tokens;
   }
 
