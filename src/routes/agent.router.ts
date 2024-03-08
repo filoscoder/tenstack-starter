@@ -9,14 +9,9 @@ import {
 } from "@/components/agent/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
 import { requireAgentRole } from "@/middlewares/auth";
-import { hash } from "@/utils/crypt";
 
 const agentRouter = Router();
 
-agentRouter.get("/test", async (_req, res, _next) => {
-  // console.log(req);
-  res.json(await hash("E8DaacEN/G5pdWS/FjHYlpw+csU6OKpU"));
-});
 agentRouter.post(
   "/login",
   validateCredentials(),

@@ -4,6 +4,7 @@ import {
   TokenLookUpBy,
   TokenUpdatableProps,
 } from "@/types/request/token";
+import { ForbiddenError, NotFoundException } from "@/helpers/error";
 
 const prisma = new PrismaClient();
 
@@ -43,6 +44,21 @@ export class TokenDAO {
   static async update(where: TokenLookUpBy, data: TokenUpdatableProps) {
     try {
       await prisma.token.updateMany({ where, data });
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static async authorizeRevocation(user_id: number, jti: string) {
+    try {
+      const token = await this.getById(jti);
+      if (!token) throw new NotFoundException();
+      if (token.player_id !== user_id) {
+        throw new ForbiddenError("No autorizado");
+      }
+      return token;
     } catch (error) {
       throw error;
     } finally {

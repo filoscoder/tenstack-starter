@@ -422,11 +422,11 @@ Endpoints marcados con 🔒 requieren Bearer token
   - Endpoint https://agent.casinomex.vip/api/users/5941/change-password/
   - Body: `{ new_password:	string }`
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
-- Restringir largo de las contraseñas a 72 bytes (segun bcrypt)
+
+- Handle sudden token revokation in frontend
+- Seed db with agent
 
 ### Access Token
-- Implementar Logout e inhabilitar token
-- Al refrescar un access token, darle la misma exp que al anterior en lugar de renovarla
 
 ### Fichas insuficientes
 - Revisar respuesta y avisarle al agente si quedaron transferencias sin liberar

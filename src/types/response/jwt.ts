@@ -9,7 +9,7 @@ export interface JWTPayload {
 
 export interface TokenResult {
   tokens: TokenPair;
-  jti: string; // JWT ID
+  jti: string;
 }
 
 export interface TokenPair {

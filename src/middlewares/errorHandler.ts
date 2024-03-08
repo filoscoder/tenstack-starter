@@ -199,7 +199,6 @@ function prismaErrorHandler(
     res.send({ status, code, description });
   } else if (err instanceof Prisma.PrismaClientValidationError) {
     let description = "Error de validacion de datos ";
-    console.log("ERROR MESSAGE", err.message);
     description += err.message.split("Unknown")[1];
     res.send({
       status: 400,

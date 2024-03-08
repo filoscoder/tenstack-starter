@@ -21,8 +21,9 @@ export class AuthController {
     try {
       const authServices = new AuthServices();
       const { token } = req.body;
+      const user_id = req.user!.id;
 
-      await authServices.logout(token);
+      await authServices.logout(user_id, token);
 
       res.status(OK).send(apiResponse(null));
     } catch (error) {

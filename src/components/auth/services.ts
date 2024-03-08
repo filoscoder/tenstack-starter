@@ -88,7 +88,6 @@ export class AuthServices extends JwtService {
       payload: JWTPayload,
       done: jwtStrategy.VerifiedCallback,
     ) => {
-      // Check token validity
       const token = await TokenDAO.getById(payload.jti);
       if (
         !token ||
@@ -127,12 +126,18 @@ export class AuthServices extends JwtService {
     } while (token!.next);
   }
 
-  async logout(encoded: string) {
-    const payload = jwt.verify(encoded, this.cypherPass, {
-      ignoreExpiration: true,
-    }) as JwtPayload;
-    const token = await TokenDAO.getById(payload.jti as string);
-    if (!token) return;
-    await this.invalidateChildren(token);
+  async logout(user_id: number, encoded: string) {
+    try {
+      const payload = jwt.verify(encoded, this.cypherPass) as JwtPayload;
+      if (payload === undefined) return;
+      const token = await TokenDAO.authorizeRevocation(
+        user_id,
+        payload.jti as string,
+      );
+      await this.invalidateChildren(token);
+    } catch (error: any) {
+      if (error.name && error.name === "TokenExpiredError") return;
+      throw error;
+    }
   }
 }

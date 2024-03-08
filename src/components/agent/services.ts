@@ -47,7 +47,7 @@ export class AgentServices {
       });
     }
     const authServices = new AuthServices();
-    authServices.invalidateTokensByUserAgent(1, user_agent);
+    authServices.invalidateTokensByUserAgent(-1, user_agent);
     const { tokens } = await authServices.tokens(
       1,
       CONFIG.ROLES.AGENT,
