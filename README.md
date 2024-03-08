@@ -51,7 +51,7 @@ Comes with:
 
 ### Auth
 + [Refrescar Token](#refrescar-token)
-+ [Logout](#logout)
++ [Logout](#logout-🔒)
 
 ### [Interfaces](#interfaces)
 
@@ -169,15 +169,16 @@ Método      |`POST`
 Body (json) |[`RefreshRequest`](#refreshrequest)
 Devuelve    |[`Tokens`](#tokens)
 
-### Logout
+### Logout [🔒](#👉-🔒)
 
 |Endpoint| `/auth/logout`|
 ---|---|
 Método      |`POST`
 Body (json) |[`RefreshRequest`](#refreshrequest)
-Devuelve    |200 OK
+Devuelve    |200 OK si el token es invalidado
+Error       |403 si el token no le pertenece al usuario, 404 si el token no se encuentra
 
-**Nota** el token puede ser un access o refresh token y puede estar expirado. El backend solo espera recibir uno e invalida los dos.
+**Nota** el token puede ser un access o refresh token. Al recibir uno, los dos serán invalidados.
 
 Agente
 ------
