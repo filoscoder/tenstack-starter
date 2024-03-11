@@ -3,7 +3,6 @@ import { Token } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JwtService } from "../../services/jwt.service";
 import CONFIG from "@/config";
-import { UnauthorizedError } from "@/helpers/error";
 import { CustomError, ERR } from "@/middlewares/errorHandler";
 import { TokenDAO } from "@/db/token";
 import { JWTPayload, TokenPair, TokenResult } from "@/types/response/jwt";
@@ -27,14 +26,10 @@ export class AuthServices extends JwtService {
    * @param sub User ID
    * @param role User role
    */
-  async tokens(
-    sub: number,
-    role: string,
-    user_agent?: string,
-  ): Promise<TokenResult> {
+  async tokens(sub: number, user_agent?: string): Promise<TokenResult> {
     const dbToken = await TokenDAO.create({ player_id: sub, user_agent });
     return {
-      tokens: this.generateTokenPair(sub, role, dbToken.id, this.cypherPass),
+      tokens: this.generateTokenPair(sub, dbToken.id, this.cypherPass),
       jti: dbToken.id,
     };
   }
@@ -62,11 +57,7 @@ export class AuthServices extends JwtService {
       throw new CustomError(ERR.TOKEN_INVALID);
     }
 
-    const { tokens, jti } = await this.tokens(
-      payload.sub,
-      payload.role,
-      user_agent,
-    );
+    const { tokens, jti } = await this.tokens(payload.sub, user_agent);
     // Invalidate received token and link it to newly created one.
     await TokenDAO.updateById(token.id, { invalid: true, next: jti });
     return tokens;
@@ -97,13 +88,8 @@ export class AuthServices extends JwtService {
       )
         return done(new CustomError(ERR.TOKEN_INVALID), false);
 
-      if (payload.role === CONFIG.ROLES.AGENT)
-        return done(null, { username: "agent", role: payload.role });
-
-      if (payload.role === CONFIG.ROLES.PLAYER) {
-        const player = await PlayersDAO._getById(payload.sub);
-        return done(null, { ...player, role: payload.role });
-      } else return done(new UnauthorizedError("No autenticado"));
+      const user = await PlayersDAO._getById(payload.sub);
+      return done(null, user);
     };
 
     return new jwtStrategy.Strategy(options, deserialize);

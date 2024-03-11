@@ -1,6 +1,5 @@
 export interface JWTPayload {
   sub: number;
-  role: string;
   jti: string;
   type: "access" | "refresh";
   exp: number;

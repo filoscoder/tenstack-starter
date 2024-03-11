@@ -1,58 +1,39 @@
 import { Deposit, Payment } from "@prisma/client";
 import { FinanceServices } from "../transactions/services";
 import { AuthServices } from "../auth/services";
-import CONFIG from "@/config";
 import { CustomError, ERR } from "@/middlewares/errorHandler";
 import { Credentials } from "@/types/request/players";
-import { compare, decrypt } from "@/utils/crypt";
+import { compare } from "@/utils/crypt";
 import { PaymentsDAO } from "@/db/payments";
 import { DepositsDAO } from "@/db/deposits";
 import { AgentBankAccount, BalanceResponse } from "@/types/response/agent";
 import { UserRootDAO } from "@/db/user-root";
-import { TokenService } from "@/services/token.service";
 import { TokenPair } from "@/types/response/jwt";
 import { HttpService } from "@/services/http.service";
 import { hidePassword } from "@/utils/auth";
+import { NotFoundException, UnauthorizedError } from "@/helpers/error";
+import { PlayersDAO } from "@/db/players";
+import CONFIG from "@/config";
 
 export class AgentServices {
-  private static get username(): string {
-    const encryptedUsername = CONFIG.AUTH.AGENT_FRONT_USERNAME;
-    if (!encryptedUsername) {
-      throw new CustomError({
-        status: 500,
-        code: "variables_entorno",
-        description: "No se encontró el username de agente en .env",
-      });
-    }
-    return decrypt(encryptedUsername);
-  }
-  private static get password(): string {
-    if (!CONFIG.AUTH.AGENT_FRONT_PASSWORD)
-      throw new CustomError(ERR.AGENT_PASS_NOT_SET);
-
-    return CONFIG.AUTH.AGENT_FRONT_PASSWORD;
-  }
-
   static async login(
     credentials: Credentials,
     user_agent?: string,
   ): Promise<TokenPair> {
     const { username, password } = credentials;
-    const passwordCheck = await compare(password, this.password);
-    if (username !== this.username || !passwordCheck) {
-      throw new CustomError({
-        status: 401,
-        code: "credenciales_invalidas",
-        description: "Usuario o contraseña incorrectos",
-      });
-    }
+    const agent = await PlayersDAO.getByUsername(username);
+    if (!agent) throw new NotFoundException();
+
+    if (!agent.roles.some((r) => r.name === CONFIG.ROLES.AGENT))
+      throw new UnauthorizedError("Solo agentes");
+
+    const passwordCheck = await compare(password, agent?.password);
+    if (username !== agent.username || !passwordCheck)
+      throw new CustomError(ERR.INVALID_CREDENTIALS);
+
     const authServices = new AuthServices();
-    authServices.invalidateTokensByUserAgent(-1, user_agent);
-    const { tokens } = await authServices.tokens(
-      1,
-      CONFIG.ROLES.AGENT,
-      user_agent,
-    );
+    authServices.invalidateTokensByUserAgent(agent.id, user_agent);
+    const { tokens } = await authServices.tokens(agent.id, user_agent);
     return tokens;
   }
 
@@ -84,8 +65,7 @@ export class AgentServices {
   static async updateBankAccount(
     data: AgentBankAccount,
   ): Promise<AgentBankAccount> {
-    const tokenService = new TokenService();
-    const agent = await UserRootDAO.update(tokenService.username, {
+    const agent = await UserRootDAO.update({
       bankAccount: data,
     });
     return agent.bankAccount as AgentBankAccount;

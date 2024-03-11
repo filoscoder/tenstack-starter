@@ -53,7 +53,9 @@ Comes with:
 + [Refrescar Token](#refrescar-token)
 + [Logout](#logout-🔒)
 
-### [Interfaces](#interfaces)
+### [Interfaces](#interfaces-1)
+
+### [Despliegue](#despliegue-1)
 
 Jugadores
 ---------
@@ -416,6 +418,11 @@ Endpoints marcados con 🔒 requieren Bearer token
 }
 ```
 
+## Despliegue
+
+- `npx prisma migrate deploy` Para levantar la base de datos.
+- `npm run seed` Para registrar al agente en nuestra base de datos. El comando pide el usuario y contraseña del casino y de nuestro panel propio. Las credenciales que se ingresen serán las que se usen para loguear al agente en el casino y en nuestro panel.
+
 ## TODO
 
 - Instanciar servicios en lugar de usar metodos estaticos
@@ -423,17 +430,21 @@ Endpoints marcados con 🔒 requieren Bearer token
   - Endpoint https://agent.casinomex.vip/api/users/5941/change-password/
   - Body: `{ new_password:	string }`
 - Recibir clave de rastreo en endpoints de cashIn y confirmarDeposito
-
 - Handle sudden token revokation in frontend
+- Log errors to file
+- Usar endpoint /auth/logout en frontend
+
 - Seed db with agent
+- [Bot Whatsapp](https://bot-whatsapp.netlify.app/)
+  + [Diagrama Flujo](https://www.figma.com/file/rtxhrNqQxdEdYzOfPl1mRc/Whatsapp-Bot?type=whiteboard&node-id=0%3A1&t=5ACojRhp99vrh24S-1)
+- Cambiar IDs incrementales por UUIDs en producción
+- Configurar bbdd distintas para dev y prod
 
 ### Access Token
 
 ### Fichas insuficientes
-- Revisar respuesta y avisarle al agente si quedaron transferencias sin liberar
-  
-- Encriptar JWT 
 
+- Revisar respuesta y avisarle al agente si quedaron transferencias sin liberar
 
 
 ## Optimizaciones

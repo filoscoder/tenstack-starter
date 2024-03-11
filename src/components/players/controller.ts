@@ -4,7 +4,6 @@ import { AuthServices } from "../auth/services";
 import { PlayerServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
 import { Credentials, PlayerRequest } from "@/types/request/players";
-import CONFIG from "@/config";
 
 export class PlayersController {
   /**
@@ -46,11 +45,7 @@ export class PlayersController {
       const user_agent = req.headers["user-agent"];
 
       const player = await playersServices.create(request);
-      const { tokens } = await authServices.tokens(
-        player.id,
-        CONFIG.ROLES.PLAYER,
-        user_agent,
-      );
+      const { tokens } = await authServices.tokens(player.id, user_agent);
       const response = { ...tokens, player };
 
       res.status(CREATED).json(apiResponse(response));

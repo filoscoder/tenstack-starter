@@ -11,7 +11,6 @@ import { compare, hash } from "@/utils/crypt";
 import { hidePassword } from "@/utils/auth";
 import { CustomError, ERR } from "@/middlewares/errorHandler";
 import { HttpService } from "@/services/http.service";
-import CONFIG from "@/config";
 
 export class PlayerServices {
   /**
@@ -114,11 +113,7 @@ export class PlayerServices {
   ): Promise<LoginResponse> {
     const authServices = new AuthServices();
     await authServices.invalidateTokensByUserAgent(player.id, user_agent);
-    const { tokens } = await authServices.tokens(
-      player.id,
-      CONFIG.ROLES.PLAYER,
-      user_agent,
-    );
+    const { tokens } = await authServices.tokens(player.id, user_agent);
     return { ...tokens, player: hidePassword(player) };
   }
 }

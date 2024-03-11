@@ -91,9 +91,9 @@ export class CustomError extends Error {
 }
 
 export interface ErrorData {
-  status: number; // 400
-  code: string; // bad_request
-  description: string; // Missing parameter x
+  status: number;
+  code: string;
+  description: string;
 }
 
 export const ERR: { [key: string]: ErrorData } = {
@@ -131,6 +131,11 @@ export const ERR: { [key: string]: ErrorData } = {
     status: 500,
     code: "env",
     description: "No se encontro la clave de agente en .env",
+  },
+  AGENT_UNSET: {
+    status: 500,
+    code: "agent_unset",
+    description: "No se encontro el agente en la BD. ¿Corriste npm run seed?",
   },
 };
 
