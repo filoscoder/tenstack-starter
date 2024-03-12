@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { Player } from "@prisma/client";
+import { Player, Role } from "@prisma/client";
 import { PlainPlayerResponse } from "./response/players";
 
 declare global {
@@ -19,7 +19,7 @@ declare global {
 
   namespace Express {
     interface User extends Player {
-      role: string;
+      roles: Role[];
     }
   }
 }

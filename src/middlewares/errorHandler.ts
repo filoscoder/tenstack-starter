@@ -91,9 +91,9 @@ export class CustomError extends Error {
 }
 
 export interface ErrorData {
-  status: number; // 400
-  code: string; // bad_request
-  description: string; // Missing parameter x
+  status: number;
+  code: string;
+  description: string;
 }
 
 export const ERR: { [key: string]: ErrorData } = {
@@ -126,6 +126,16 @@ export const ERR: { [key: string]: ErrorData } = {
     status: 500,
     code: "env",
     description: "No se encontro la llave en .env",
+  },
+  AGENT_PASS_NOT_SET: {
+    status: 500,
+    code: "env",
+    description: "No se encontro la clave de agente en .env",
+  },
+  AGENT_UNSET: {
+    status: 500,
+    code: "agent_unset",
+    description: "No se encontro el agente en la BD. ¿Corriste npm run seed?",
   },
 };
 
@@ -194,7 +204,6 @@ function prismaErrorHandler(
     res.send({ status, code, description });
   } else if (err instanceof Prisma.PrismaClientValidationError) {
     let description = "Error de validacion de datos ";
-    console.log("ERROR MESSAGE", err.message);
     description += err.message.split("Unknown")[1];
     res.send({
       status: 400,

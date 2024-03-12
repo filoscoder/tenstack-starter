@@ -1,4 +1,4 @@
-import { BankAccount, Player } from "@prisma/client";
+import { BankAccount, Player, Role } from "@prisma/client";
 
 export type PlayerResponse = {
   id: number;
@@ -17,6 +17,8 @@ export type PlayerResponse = {
 };
 
 export type PlainPlayerResponse = Player;
+
+export type RoledPlayer = Player & { roles: Role[] };
 
 export type LoginResponse = {
   access: string;

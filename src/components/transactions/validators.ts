@@ -43,6 +43,3 @@ export const validateDepositId = () =>
       isEmpty: false,
     },
   });
-
-// export const validateDepositRequest = () =>
-//   oneOf([validateTransferRequest(), validateDepositId()]);

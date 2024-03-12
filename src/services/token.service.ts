@@ -1,9 +1,8 @@
 import { HttpService } from "./http.service";
 import { JwtService } from "./jwt.service";
 import { decrypt } from "@/utils/crypt";
-import { CustomError } from "@/middlewares/errorHandler";
+import { CustomError, ERR } from "@/middlewares/errorHandler";
 import { UserRootDAO } from "@/db/user-root";
-import CONFIG from "@/config";
 import { LoginResponse } from "@/types/response/agent";
 
 /**
@@ -12,51 +11,33 @@ import { LoginResponse } from "@/types/response/agent";
 export class TokenService extends JwtService {
   private _username = "";
   private _password = "";
-  private _encryptedPassword = "";
   private _token?: string;
 
-  public get username() {
+  async username(): Promise<string> {
     if (this._username) return this._username;
 
-    const encryptedUsername = CONFIG.AUTH.AGENT_USERNAME;
-    if (!encryptedUsername) {
-      throw new CustomError({
-        status: 500,
-        code: "env",
-        description: "No se encontro el usuario en la variable de entorno",
-      });
-    }
-    this._username = decrypt(encryptedUsername);
+    const agent = await UserRootDAO.getAgent();
+    if (!agent?.username) throw new CustomError(ERR.AGENT_UNSET);
+
+    this._username = agent.username;
     return this._username;
   }
 
-  private get password() {
+  private async password(): Promise<string> {
     if (this._password) return this._password;
 
-    const encryptedPassword = CONFIG.AUTH.AGENT_PASSWORD;
-    if (!encryptedPassword) {
-      throw new CustomError({
-        status: 500,
-        code: "env",
-        description: "No se encontro la contraseña en la variable de entorno",
-      });
-    }
+    const agent = await UserRootDAO.getAgent();
+    const encryptedPassword = agent?.password;
+    if (!encryptedPassword) throw new CustomError(ERR.AGENT_UNSET);
+
     this._password = decrypt(encryptedPassword);
-    this._encryptedPassword = encryptedPassword;
     return this._password;
   }
 
-  private get encryptedPassword() {
-    if (this._encryptedPassword) return this._encryptedPassword;
-
-    this.password;
-    return this._encryptedPassword;
-  }
-
-  private get loginDetails() {
+  private async loginDetails() {
     return {
-      username: this.username,
-      password: this.password,
+      username: await this.username(),
+      password: await this.password(),
     };
   }
 
@@ -111,7 +92,7 @@ export class TokenService extends JwtService {
 
       const access: string = response.data.access;
       if (access) {
-        await UserRootDAO.update(this.username, { access });
+        await UserRootDAO.update({ access });
         return access;
       }
       return null;
@@ -147,7 +128,7 @@ export class TokenService extends JwtService {
     const agentLoginUrl = "/accounts/login/";
     const response = await new HttpService().plainAgentApi.post(
       agentLoginUrl,
-      this.loginDetails,
+      await this.loginDetails(),
     );
 
     if (response.status !== 200) {
@@ -162,33 +143,22 @@ export class TokenService extends JwtService {
   }
 
   private async finalizeAgentLogin(data: LoginResponse): Promise<void> {
-    await this.upsertAgent(data);
+    await this.updateAgent(data);
     this._token = data.access;
   }
 
   private setAgentDirtyFlag(dirty: boolean) {
     if (dirty) this._token = undefined;
-    return UserRootDAO.update(this.username, { dirty });
+    return UserRootDAO.update({ dirty });
   }
 
-  private upsertAgent(data: LoginResponse) {
-    return UserRootDAO.upsert(
-      this.username,
-      {
-        access: data.access,
-        refresh: data.refresh,
-        json_response: JSON.stringify(data),
-        dirty: false,
-      },
-      {
-        username: data.username,
-        password: this.encryptedPassword,
-        panel_id: data.id,
-        access: data.access,
-        refresh: data.refresh,
-        json_response: JSON.stringify(data),
-        dirty: false,
-      },
-    );
+  private updateAgent(data: LoginResponse) {
+    return UserRootDAO.update({
+      access: data.access,
+      refresh: data.refresh,
+      json_response: JSON.stringify(data),
+      panel_id: data.id,
+      dirty: false,
+    });
   }
 }

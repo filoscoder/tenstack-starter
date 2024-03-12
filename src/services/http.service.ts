@@ -74,6 +74,7 @@ export class HttpService {
       if (!this._token) {
         this._token = await this.handleTokenExpiration();
       }
+
       const response = await this.agentAxiosInstance({ url, method, data });
       if (response.status === 401) {
         this._token = await this.handleTokenExpiration();

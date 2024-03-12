@@ -3,7 +3,6 @@ import {
   randomFillSync,
   createCipheriv,
   createDecipheriv,
-  createHash,
 } from "crypto";
 import bcrypt from "bcrypt";
 import CONFIG from "@/config";
@@ -14,13 +13,10 @@ import { CustomError, ErrorData } from "@/middlewares/errorHandler";
  * @param {string} value
  * @returns {Promise<any>}
  */
-export const hash = (value: string): string => {
-  // const saltRounds = parseInt(CONFIG.AUTH.SALT_ROUNDS, 10);
+export const hash = async (value: string): Promise<string> => {
+  const saltRounds = parseInt(CONFIG.AUTH.SALT_ROUNDS, 10);
 
-  // return bcrypt.hash(value, saltRounds);
-  const hash = createHash("sha256");
-  hash.update(value);
-  return hash.digest("hex");
+  return bcrypt.hash(value, saltRounds);
 };
 
 /**
