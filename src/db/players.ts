@@ -1,11 +1,16 @@
 import { Player, PrismaClient } from "@prisma/client";
-import { PlainPlayerResponse, PlayerResponse } from "@/types/response/players";
+import {
+  PlainPlayerResponse,
+  PlayerResponse,
+  RoledPlayer,
+} from "@/types/response/players";
 import {
   PlayerRequest,
   PlayerUpdatableProps,
   getPlayerId,
 } from "@/types/request/players";
 import { parsePlayer } from "@/utils/parser";
+import CONFIG from "@/config";
 
 const prisma = new PrismaClient();
 
@@ -19,7 +24,7 @@ export class PlayersDAO {
     try {
       const playerPrisma = await prisma.player.findUnique({
         where: { id: playerId },
-        include: { BankAccounts: true },
+        include: { BankAccounts: true, roles: true },
       });
 
       return playerPrisma;
@@ -36,10 +41,11 @@ export class PlayersDAO {
    */
   static getByUsername = async (
     username: string,
-  ): Promise<PlainPlayerResponse | null> => {
+  ): Promise<RoledPlayer | null> => {
     try {
       const playerPrisma = await prisma.player.findUnique({
         where: { username: username },
+        include: { roles: true },
       });
 
       return playerPrisma;
@@ -68,11 +74,34 @@ export class PlayersDAO {
     }
   };
 
+  static getAgent = () => {
+    try {
+      return prisma.player.findFirst({
+        where: {
+          roles: {
+            some: { name: CONFIG.ROLES.AGENT },
+          },
+        },
+      });
+    } catch (error: any) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  };
+
   static create = async (
     request: PlayerRequest,
   ): Promise<PlainPlayerResponse> => {
     try {
-      const player = await prisma.player.create({ data: request });
+      const player = await prisma.player.create({
+        data: {
+          ...request,
+          roles: {
+            connect: { name: CONFIG.ROLES.PLAYER },
+          },
+        },
+      });
       return player;
     } catch (error: any) {
       throw error;

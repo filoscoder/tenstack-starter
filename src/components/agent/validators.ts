@@ -31,11 +31,13 @@ export const validateBankAccountUpdate = () => {
     isString: boolean;
     optional: boolean;
     trim: boolean;
+    isEmpty: boolean;
   } = {
     in: ["body"],
     isString: true,
     optional: true,
     trim: true,
+    isEmpty: false,
   };
   return checkSchema({
     name: optionalString,

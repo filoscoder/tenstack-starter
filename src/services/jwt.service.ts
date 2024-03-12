@@ -31,30 +31,20 @@ export class JwtService {
    * @param sub User ID
    * @param role User role ("player" | "agent")
    */
-  generateTokenPair(
-    sub: number,
-    role: string,
-    jti: string,
-    pass: string,
-  ): TokenPair {
+  generateTokenPair(sub: number, jti: string, pass: string): TokenPair {
     return {
-      access: this.generateAccessToken(pass, sub, role, jti),
-      refresh: this.generateRefreshToken(pass, sub, role, jti),
+      access: this.generateAccessToken(pass, sub, jti),
+      refresh: this.generateRefreshToken(pass, sub, jti),
     };
   }
 
   /**
    * Generate access token
    */
-  private generateAccessToken(
-    pass: string,
-    sub: number,
-    role: string,
-    jti: string,
-  ): string {
+  private generateAccessToken(pass: string, sub: number, jti: string): string {
     const token = jwt.sign(
       // Payload
-      { sub, role, jti, type: "access" },
+      { sub, jti, type: "access" },
       // Secret
       pass,
       // Options
@@ -67,15 +57,10 @@ export class JwtService {
   /**
    * Generate refresh token
    */
-  private generateRefreshToken(
-    pass: string,
-    sub: number,
-    role: string,
-    jti: string,
-  ) {
+  private generateRefreshToken(pass: string, sub: number, jti: string) {
     const token = jwt.sign(
       // Payload
-      { sub, role, jti, type: "refresh" },
+      { sub, jti, type: "refresh" },
       // Secret
       pass,
       // Options

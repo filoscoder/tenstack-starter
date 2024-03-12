@@ -1,12 +1,17 @@
 import { PrismaClient } from "@prisma/client";
-import { TokenUpdatableProps } from "@/types/request/token";
+import {
+  CreateTokenDetails,
+  TokenLookUpBy,
+  TokenUpdatableProps,
+} from "@/types/request/token";
+import { ForbiddenError, NotFoundException } from "@/helpers/error";
 
 const prisma = new PrismaClient();
 
 export class TokenDAO {
-  static async create(player_id: number) {
+  static async create(data: CreateTokenDetails) {
     try {
-      const token = await prisma.token.create({ data: { player_id } });
+      const token = await prisma.token.create({ data });
       return token;
     } catch (error) {
       throw error;
@@ -25,9 +30,34 @@ export class TokenDAO {
     }
   }
 
-  static async update(id: string, data: TokenUpdatableProps) {
+  static async updateById(id: string, data: TokenUpdatableProps) {
     try {
       const token = await prisma.token.update({ where: { id }, data });
+      return token;
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static async update(where: TokenLookUpBy, data: TokenUpdatableProps) {
+    try {
+      await prisma.token.updateMany({ where, data });
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static async authorizeRevocation(user_id: number, jti: string) {
+    try {
+      const token = await this.getById(jti);
+      if (!token) throw new NotFoundException();
+      if (token.player_id !== user_id) {
+        throw new ForbiddenError("No autorizado");
+      }
       return token;
     } catch (error) {
       throw error;

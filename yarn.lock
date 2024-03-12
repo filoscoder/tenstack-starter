@@ -3094,6 +3094,11 @@
   resolved "https://registry.npmjs.org/@types/range-parser/-/range-parser-1.2.4.tgz"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
+"@types/readline-sync@^1.4.8":
+  version "1.4.8"
+  resolved "https://registry.npmjs.org/@types/readline-sync/-/readline-sync-1.4.8.tgz"
+  integrity sha512-BL7xOf0yKLA6baAX6MMOnYkoflUyj/c7y3pqMRfU0va7XlwHAOTOIo4x55P/qLfMsuaYdJJKubToLqRVmRtRZA==
+
 "@types/serve-static@*":
   version "1.15.0"
   resolved "https://registry.npmjs.org/@types/serve-static/-/serve-static-1.15.0.tgz"
@@ -8241,6 +8246,11 @@ readdirp@~3.6.0:
   integrity sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==
   dependencies:
     picomatch "^2.2.1"
+
+readline-sync@^1.4.10:
+  version "1.4.10"
+  resolved "https://registry.npmjs.org/readline-sync/-/readline-sync-1.4.10.tgz"
+  integrity sha512-gNva8/6UAe8QYepIQH/jQ2qn91Qj0B9sYjMBBs3QOB8F2CXcKgLxQaJRP76sWVRQt+QU+8fAkCbCvjjMFu7Ycw==
 
 real-require@^0.1.0:
   version "0.1.0"

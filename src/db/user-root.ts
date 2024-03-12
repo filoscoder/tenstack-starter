@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { RootUpdatableProps, RootRequest } from "@/types/request/user-root";
 import { AgentBankAccount } from "@/types/response/agent";
+import { CustomError, ERR } from "@/middlewares/errorHandler";
 
 const prisma = new PrismaClient();
 
@@ -26,10 +27,13 @@ export class UserRootDAO {
     }
   }
 
-  static update(username: string, data: RootUpdatableProps) {
+  static async update(data: RootUpdatableProps) {
     try {
+      const agent = await this.getAgent();
+      if (!agent) throw new CustomError(ERR.AGENT_UNSET);
+
       return prisma.userRoot.update({
-        where: { username: username },
+        where: { username: agent?.username },
         data,
       });
     } catch (error) {

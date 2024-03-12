@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `TOKENS` MODIFY `user_agent` VARCHAR(256) NULL;

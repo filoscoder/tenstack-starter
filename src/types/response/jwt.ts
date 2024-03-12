@@ -1,6 +1,5 @@
 export interface JWTPayload {
   sub: number;
-  role: string;
   jti: string;
   type: "access" | "refresh";
   exp: number;
@@ -9,7 +8,7 @@ export interface JWTPayload {
 
 export interface TokenResult {
   tokens: TokenPair;
-  id: string;
+  jti: string;
 }
 
 export interface TokenPair {
