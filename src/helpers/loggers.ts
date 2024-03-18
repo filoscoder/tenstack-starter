@@ -69,6 +69,7 @@ export const expressPinoLogger = () =>
 export const exitLog = (err: any, evt: string) => {
   if (err) {
     process.stdout.write(`\n\n[!ERROR][${evt}] => ${err}\n\n`);
+    console.error(err);
   } else {
     process.stdout.write(`\n\n![${evt}] EVENT CAUSE EXIT\n\n`);
   }

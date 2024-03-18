@@ -107,9 +107,10 @@ export class AuthServices extends JwtService {
    * Invalidate given token and all its children
    */
   private async invalidateChildren(token: Token) {
-    do {
-      token = await this.invalidateTokenById(token.id);
-    } while (token!.next);
+    await this.invalidateTokenById(token.id);
+    while (token!.next) {
+      token = await this.invalidateTokenById(token.next);
+    }
   }
 
   async logout(user_id: number, encoded: string) {
