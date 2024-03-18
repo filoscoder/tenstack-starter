@@ -112,3 +112,7 @@ dist
 mysql-data
 
 test.txt
+
+# Bot stuff
+bot.qr.png
+bot_sessions

@@ -144,3 +144,10 @@ model Role {
   @@map("ROLES")
 }
 
+model BotMessages {
+  id                String      @id @default(uuid())
+  menus             Json      
+  messages          Json
+
+  @@map("BOT_MESSAGES")
+}
