@@ -127,7 +127,7 @@ export class FinanceServices {
       throw new CustomError({
         code: "error_transferencia",
         status: result.status,
-        description: "Error al transferir fichas", //transfer.data
+        description: "Error al transferir fichas", //result.data
       });
 
     return result;
@@ -222,7 +222,7 @@ export class FinanceServices {
     // TODO delete
     verify = false,
   ): Promise<Deposit> {
-    const delay = 3000;
+    const delay = 1500;
     const paymentOk = await new Promise((resolve, _reject) => {
       setTimeout(() => {
         resolve(verify);

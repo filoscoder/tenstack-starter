@@ -7,23 +7,27 @@ export const validatePushSubscriptionRequest = () =>
       isString: true,
       isEmpty: false,
       trim: true,
+      errorMessage: "endpoint is required",
     },
     keys: {
       in: ["body"],
       isObject: true,
       isEmpty: false,
+      errorMessage: "keys is required",
     },
     "keys.p256dh": {
       in: ["body"],
       isString: true,
       isEmpty: false,
       trim: true,
+      errorMessage: "p256dh is required",
     },
     "keys.auth": {
       in: ["body"],
       isString: true,
       isEmpty: false,
       trim: true,
+      errorMessage: "auth is required",
     },
     expirationTime: {
       in: ["body"],
@@ -37,5 +41,6 @@ export const validateDeleteRequest = () =>
       isString: true,
       isEmpty: false,
       trim: true,
+      errorMessage: "endpoint is required",
     },
   });

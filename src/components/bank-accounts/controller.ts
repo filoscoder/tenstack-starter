@@ -1,4 +1,4 @@
-import { OK } from "http-status";
+import { CREATED, OK } from "http-status";
 import { BankAccountServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
 import { BankAccountRequest } from "@/types/request/bank-account";
@@ -32,7 +32,7 @@ export class BankAccountsController {
 
       const account = await bankAccountServices.create(player_id, request);
 
-      res.status(OK).json(apiResponse(account));
+      res.status(CREATED).json(apiResponse(account));
     } catch (error) {
       next(error);
     }

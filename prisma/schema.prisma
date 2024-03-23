@@ -65,11 +65,11 @@ model Player {
 
 model Payment {
   id                Int           @id @default(autoincrement())
-  player_id         Int           // Panel ID
+  player_id         Int           
   Player            Player        @relation(fields: [player_id], references: [id])
   amount            Float
-  paid              DateTime?     // El dinero fue transferido (datetime) o no (null)
-  bank_account      Int           // Cuenta en la que recibe el pago
+  paid              DateTime?     
+  bank_account      Int           
   BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
   currency          String        @default("MXN")
   created_at        DateTime      @default(now())
@@ -97,11 +97,11 @@ model BankAccount {
 
 model Deposit {
   id                Int           @id @default(autoincrement())
-  player_id         Int           // Panel ID
+  player_id         Int           
   Player            Player        @relation(fields: [player_id], references: [id])
   amount            Float
-  confirmed         DateTime?     // El deposito fue confirmado (datetime) o no (null)
-  bank_account      Int           // Cuenta desde la que hace el deposito
+  confirmed         DateTime?     
+  bank_account      Int           
   BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
   currency          String        @default("MXN")
   dirty             Boolean       @default(true)

@@ -2,7 +2,10 @@ import { Router } from "express";
 import { checkExact } from "express-validator";
 import passport from "passport";
 import { TransactionsController } from "@/components/transactions";
-import { validateTransferRequest } from "@/components/transactions/validators";
+import {
+  validateDepositId,
+  validateTransferRequest,
+} from "@/components/transactions/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
 import { requireUserRole } from "@/middlewares/auth";
 
@@ -23,7 +26,12 @@ transactionsRouter.get(
   "/deposit/pending",
   TransactionsController.pendingDeposits,
 );
-transactionsRouter.delete("/deposit/:id", TransactionsController.deleteDeposit);
+transactionsRouter.delete(
+  "/deposit/:id",
+  validateDepositId(),
+  throwIfBadRequest,
+  TransactionsController.deleteDeposit,
+);
 transactionsRouter.post(
   "/cashout",
   validateTransferRequest(),

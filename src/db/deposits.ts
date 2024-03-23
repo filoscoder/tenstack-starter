@@ -3,7 +3,7 @@ import {
   DepositRequest,
   DepositUpdatableProps,
 } from "@/types/request/transfers";
-import { NotFoundException, UnauthorizedError } from "@/helpers/error";
+import { ForbiddenError, NotFoundException } from "@/helpers/error";
 import { hidePassword } from "@/utils/auth";
 
 const prisma = new PrismaClient();
@@ -106,7 +106,7 @@ export class DepositsDAO {
       if (!deposit) throw new NotFoundException();
 
       if (deposit.player_id !== player_id)
-        throw new UnauthorizedError("No autorizado");
+        throw new ForbiddenError("No autorizado");
 
       return deposit;
     } catch (error) {
@@ -129,11 +129,11 @@ export class DepositsDAO {
     try {
       let deposit = await this.authorizeTransaction(deposit_id, player_id);
       if (deposit.confirmed)
-        throw new UnauthorizedError(
+        throw new ForbiddenError(
           "No se pueden modificar depositos confirmados",
         );
       if (deposit.dirty)
-        throw new UnauthorizedError("El deposito esta siendo confirmado");
+        throw new ForbiddenError("El deposito esta siendo confirmado");
 
       deposit = await prisma.deposit.update({
         where: { id: deposit_id },

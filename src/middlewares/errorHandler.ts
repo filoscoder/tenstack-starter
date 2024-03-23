@@ -7,6 +7,7 @@ import HttpStatus, {
 } from "http-status/lib";
 import { Prisma } from "@prisma/client";
 import { TimeOutError } from "@/helpers/error";
+import CONFIG from "@/config";
 
 /**
  * @description Error response middleware for 404 not found. This middleware function should be at the very bottom of the stack.
@@ -55,7 +56,6 @@ export const genericErrorHandler = (
     resCode = REQUEST_TIMEOUT;
     resBody = new TimeOutError(req.originalUrl);
   }
-  // console.log("[genericErrorHandler]", resBody);
 
   res.status(resCode).json(resBody);
 };
@@ -201,11 +201,15 @@ function prismaErrorHandler(
           description: `Error en la base de datos: ${err.message}`,
         });
     }
-    res.send({ status, code, description });
+    res.status(status || 400).send({ status, code, description });
   } else if (err instanceof Prisma.PrismaClientValidationError) {
     let description = "Error de validacion de datos ";
-    description += err.message.split("Unknown")[1];
-    res.send({
+    if (CONFIG.APP.ENV?.includes("test") || CONFIG.APP.ENV?.includes("dev")) {
+      description += err.message;
+    } else {
+      description += err.message.split("Unknown")[1];
+    }
+    res.status(400).send({
       status: 400,
       code: "error_validacion",
       description,

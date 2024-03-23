@@ -23,6 +23,12 @@ webPushRouter.post(
   throwIfBadRequest,
   WebPushController.create,
 );
-webPushRouter.delete("/", validateDeleteRequest(), WebPushController.delete);
+webPushRouter.delete(
+  "/",
+  validateDeleteRequest(),
+  checkExact(),
+  throwIfBadRequest,
+  WebPushController.delete,
+);
 
 export default webPushRouter;

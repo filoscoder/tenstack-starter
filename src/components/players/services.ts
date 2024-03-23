@@ -45,7 +45,11 @@ export class PlayerServices {
       });
     }
 
-    if (response.status === 400 && response.data.code === "already_exists") {
+    if (
+      response.status === 400 &&
+      (response.data.code === "already_exists" ||
+        response.data.code === "user_already_exists")
+    ) {
       // Usuario existe en el panel, verificar que esté en local
       const localPlayer = await PlayersDAO.getByUsername(player.username);
 

@@ -438,6 +438,7 @@ Endpoints marcados con 🔒 requieren Bearer token
 - Cambiar IDs incrementales por UUIDs en producción
 - Configurar bbdd distintas para dev y prod
 - Chequear si agent existe en la bbdd en `seed.ts`
+- Subir la duracion del refresh token a 24 horas
 
 ### Alquimia
 
@@ -451,3 +452,9 @@ Endpoints marcados con 🔒 requieren Bearer token
 ## Optimizaciones
 
 - Invalidar tokens en conjunto con una sola petición SQL
+
+
+## Cambios
+- Responder 201 en lugar de 200 en POST /bank-accounts
+- Responder 403 en lugar de 401 cuando el rol no tiene permitido acceder al recurso
+- Responder 403 en lugar de 401 cuando el deposito no le pertenece al jugador autenticado en POST /transactions/deposit/:id

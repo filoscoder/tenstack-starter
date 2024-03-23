@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { NotFoundException, UnauthorizedError } from "@/helpers/error";
+import { ForbiddenError, NotFoundException } from "@/helpers/error";
 import { Transaction } from "@/types/response/transactions";
 
 const prisma = new PrismaClient();
@@ -22,7 +22,7 @@ export class TransactionsDAO {
       if (!account) throw new NotFoundException();
 
       if (account.player_id !== player_id)
-        throw new UnauthorizedError("No autorizado");
+        throw new ForbiddenError("No autorizado");
     } catch (error) {
       throw error;
     } finally {
