@@ -1,4 +1,5 @@
-import { Deposit, Payment } from "@prisma/client";
+import { Deposit, Payment, Player } from "@prisma/client";
+import { AxiosResponse } from "axios";
 import { TransactionsDAO } from "@/db/transactions";
 import { CustomError } from "@/middlewares/errorHandler";
 import { DepositsDAO } from "@/db/deposits";
@@ -6,36 +7,33 @@ import { HttpService } from "@/services/http.service";
 import { UserRootDAO } from "@/db/user-root";
 import { PlainPlayerResponse } from "@/types/response/players";
 import { PaymentsDAO } from "@/db/payments";
-import { TokenService } from "@/services/token.service";
-import { TransferRequest, TransferDetails } from "@/types/request/transfers";
+import {
+  TransferRequest,
+  TransferDetails,
+  DepositRequest,
+} from "@/types/request/transfers";
 import { Transaction } from "@/types/response/transactions";
-import { TransferResult } from "@/types/response/transfers";
 import { parseTransferResult } from "@/utils/parser";
 import { Notify } from "@/helpers/notification";
 import CONFIG from "@/config";
+import { CasinoTokenService } from "@/services/casino-token.service";
+import { AlqMovement } from "@/types/response/alquimia";
+import { CoinTransferResult } from "@/types/response/transfers";
 
 /**
  * Services to be consumed by Player endpoints
  */
 export class FinanceServices {
-  constructor(
-    private _type: "deposit" | "withdrawal",
-    private _amount: number,
-    private _currency: string,
-    private _playerPanelId: number,
-  ) {}
   /**
    * Create deposit, verify it, and transfer coins from agent to player.
    */
   async deposit(
     player: PlainPlayerResponse,
-    request: TransferRequest,
-  ): Promise<TransferResult> {
-    await TransactionsDAO.authorizeTransaction(request.bank_account, player.id);
-
+    request: DepositRequest,
+  ): Promise<CoinTransferResult> {
     const deposit = await this.createDeposit(player.id, request);
 
-    return await this.finalizeTransfer(deposit, false);
+    return await this.finalizeTransfer(deposit, player);
   }
 
   /**
@@ -44,12 +42,12 @@ export class FinanceServices {
   async confirmDeposit(
     player: PlainPlayerResponse,
     deposit_id: number,
-  ): Promise<TransferResult & { deposit: Deposit }> {
+  ): Promise<CoinTransferResult & { deposit: Deposit }> {
     await DepositsDAO.authorizeConfirmation(deposit_id, player.id);
 
     const deposit = (await DepositsDAO.getById(deposit_id))!;
 
-    return await this.finalizeTransfer(deposit, true);
+    return await this.finalizeTransfer(deposit, player);
   }
 
   /**
@@ -59,12 +57,16 @@ export class FinanceServices {
   async cashOut(
     player: PlainPlayerResponse,
     request: TransferRequest,
-  ): Promise<TransferResult> {
+  ): Promise<CoinTransferResult> {
     await TransactionsDAO.authorizeTransaction(request.bank_account, player.id);
 
-    const transferResult = await this.transfer();
+    const transferResult = await this.transfer(
+      "withdrawal",
+      request,
+      player.panel_id,
+    );
 
-    if (transferResult.status === "COMPLETED")
+    if (transferResult.status === CONFIG.SD.COIN_TRANSFER_STATUS.COMPLETED)
       this.createPayment(player.id, request);
 
     return transferResult;
@@ -72,13 +74,13 @@ export class FinanceServices {
 
   private async finalizeTransfer(
     deposit: Deposit,
-    verify: boolean,
-  ): Promise<TransferResult & { deposit: Deposit }> {
-    const verifiedDeposit = await this.verifyPayment(deposit, verify);
+    player: Player,
+  ): Promise<CoinTransferResult & { deposit: Deposit }> {
+    const verifiedDeposit = await this.verifyPayment(deposit);
 
-    if (!verifiedDeposit.confirmed) {
-      const result: TransferResult = {
-        status: "INCOMPLETE",
+    if (verifiedDeposit.status !== CONFIG.SD.DEPOSIT_STATUS.CONFIRMED) {
+      const result: CoinTransferResult = {
+        status: CONFIG.SD.COIN_TRANSFER_STATUS.INCOMPLETE,
         error: "Deposito no confirmado",
       };
       return {
@@ -87,24 +89,40 @@ export class FinanceServices {
       };
     }
 
-    const transferResult = await this.transfer(deposit.id);
+    const coinTransferResult = await this.transfer(
+      "deposit",
+      verifiedDeposit,
+      player.panel_id,
+    );
 
     return {
-      ...transferResult,
+      ...coinTransferResult,
       deposit: verifiedDeposit,
     };
   }
 
-  async transfer(deposit_id?: number): Promise<TransferResult> {
-    const transferDetails = await this.generateTransferDetails();
-    const result = await this.panelTransfer(transferDetails);
+  async transfer(
+    type: "deposit" | "withdrawal",
+    data: TransferRequest | Deposit,
+    playerPanelId: number,
+  ): Promise<CoinTransferResult> {
+    const transferDetails = await this.generateTransferDetails(
+      type,
+      playerPanelId,
+      data.amount!,
+      data.currency,
+    );
 
-    if (result.status === 201 && transferDetails.type === "deposit")
-      await DepositsDAO.update(deposit_id!, {
+    const result = await this.panelTransfer(transferDetails);
+    if (result.status === 201 && type === "deposit")
+      await DepositsDAO.update((data as Deposit).id, {
         coins_transfered: new Date().toISOString(),
       });
 
-    if (transferDetails.type === "deposit" && result.status !== 201) {
+    if (
+      transferDetails.type === "deposit" &&
+      result.data.code == "insuficient_balance"
+    ) {
       const difference =
         transferDetails.amount - result.data.variables.balance_amount;
       await Notify.agent({
@@ -118,7 +136,9 @@ export class FinanceServices {
     return parseTransferResult(result, transferDetails.type);
   }
 
-  private async panelTransfer(transferDetails: TransferDetails): Promise<any> {
+  private async panelTransfer(
+    transferDetails: TransferDetails,
+  ): Promise<AxiosResponse> {
     const { authedAgentApi } = new HttpService();
     const url = "/backoffice/transactions/";
     const result = await authedAgentApi.post(url, transferDetails);
@@ -145,59 +165,57 @@ export class FinanceServices {
       recipient_id: transferDetails.recipient_id,
       amount: transferDetails.amount,
       date: new Date().toISOString(),
-      status: "INCOMPLETE",
+      status: CONFIG.SD.COIN_TRANSFER_STATUS.INCOMPLETE,
     };
     if (transfer.status === 201) {
-      transaction.status = "COMPLETED";
-    } else if (
-      transfer.status === 400 &&
-      transfer.data.code === "transaction_insufficient_balance"
-    ) {
-      transaction.status = "INCOMPLETE";
+      transaction.status = CONFIG.SD.COIN_TRANSFER_STATUS.COMPLETED;
     }
     await TransactionsDAO.logTransaction(transaction);
   }
 
-  private async generateTransferDetails(): Promise<TransferDetails> {
+  private async generateTransferDetails(
+    type: "deposit" | "withdrawal",
+    playerPanelId: number,
+    amount: number,
+    currency: string,
+  ): Promise<TransferDetails> {
     let agent = await UserRootDAO.getAgent();
 
     if (!agent) {
-      const tokenService = new TokenService();
-      await tokenService.login();
+      const casinoTokenService = new CasinoTokenService();
+      await casinoTokenService.login();
       agent = await UserRootDAO.getAgent();
     }
 
     let recipient_id, sender_id;
 
-    switch (this._type) {
+    switch (type) {
       case "deposit":
-        recipient_id = this._playerPanelId;
+        recipient_id = playerPanelId;
         sender_id = agent!.panel_id;
         break;
       case "withdrawal":
         recipient_id = agent!.panel_id;
-        sender_id = this._playerPanelId;
+        sender_id = playerPanelId;
         break;
     }
 
     return {
       recipient_id,
       sender_id,
-      amount: this._amount,
-      currency: this._currency,
-      type: this._type,
+      amount: amount,
+      currency: currency,
+      type,
     };
   }
 
   private async createDeposit(
     player_id: number,
-    request: TransferRequest,
+    request: DepositRequest,
   ): Promise<Deposit> {
     return await DepositsDAO.create({
+      ...request,
       player_id,
-      amount: request.amount,
-      bank_account: request.bank_account,
-      currency: request.currency,
     });
   }
 
@@ -217,28 +235,51 @@ export class FinanceServices {
    * Verify receipt of Player's payment.
    * @throws CustomError if payment is not verified
    */
-  private async verifyPayment(
-    deposit: Deposit,
-    // TODO delete
-    verify = false,
-  ): Promise<Deposit> {
-    const delay = 1500;
-    const paymentOk = await new Promise((resolve, _reject) => {
-      setTimeout(() => {
-        resolve(verify);
-      }, delay);
-    });
+  public async verifyPayment(deposit: Deposit): Promise<Deposit> {
+    const confirmed = await this.alquimiaDepositLookup(
+      deposit.tracking_number,
+      deposit.paid_at,
+    );
 
-    if (paymentOk) {
+    if (confirmed) {
       return await DepositsDAO.update(deposit.id, {
-        confirmed: new Date().toISOString(),
+        status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED,
         dirty: false,
+        amount: confirmed.valor_real,
       });
     }
 
     await DepositsDAO.update(deposit.id, { dirty: false });
 
     return deposit;
+  }
+
+  // TODO buscar hasta 30 dias atras
+  private async alquimiaDepositLookup(
+    tracking_number: string,
+    date: Date,
+    page = 1,
+  ): Promise<AlqMovement | undefined> {
+    const endpoint = "cuenta-ahorro-cliente/120902/transaccion";
+    const searchParams = new URLSearchParams();
+    const startDate = date.toISOString().split("T")[0];
+    searchParams.set("fecha_inicio", startDate);
+    searchParams.set("registros", "20");
+    searchParams.set("page", page.toString());
+
+    const httpService = new HttpService();
+    const movements = await httpService.authedAlqApi.get(
+      endpoint + "?" + searchParams.toString(),
+    );
+
+    const found = (movements.data as AlqMovement[]).find(
+      (movement) => movement.clave_rastreo === tracking_number,
+    );
+
+    if (!found && movements.length >= 20)
+      return await this.alquimiaDepositLookup(tracking_number, date, page + 1);
+
+    return found;
   }
 
   static async showPendingDeposits(player_id: number): Promise<Deposit[]> {

@@ -15,19 +15,23 @@ export type TransferDetails = {
 };
 
 export interface DepositRequest {
-  player_id: number;
-  bank_account: number;
-  amount: number;
   currency: string;
+  tracking_number: string;
+  paid_at: string;
+}
+
+export interface CreateDepositProps extends DepositRequest {
+  player_id: number;
 }
 
 export interface DepositUpdatableProps {
   player_id?: number;
-  bank_account?: number;
-  amount?: number;
-  confirmed?: string;
   dirty?: boolean;
+  status?: string;
+  tracking_number?: string;
   coins_transfered?: string;
+  paid_at?: string;
+  amount?: number;
 }
 
 export interface PaymentRequest {

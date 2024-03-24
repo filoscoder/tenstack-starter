@@ -1,17 +1,20 @@
 import { HttpService } from "./http.service";
 import { JwtService } from "./jwt.service";
 import { decrypt } from "@/utils/crypt";
-import { CustomError, ERR } from "@/middlewares/errorHandler";
+import { CustomError } from "@/middlewares/errorHandler";
 import { UserRootDAO } from "@/db/user-root";
 import { LoginResponse } from "@/types/response/agent";
+import { ERR } from "@/config/errors";
+import { ITokenRetreiver } from "@/types/services/http";
 
 /**
  * Generates and refreshes Agent's panel token
  */
-export class TokenService extends JwtService {
+export class CasinoTokenService extends JwtService implements ITokenRetreiver {
   private _username = "";
   private _password = "";
   private _token?: string;
+  tokenNames = ["access"];
 
   async username(): Promise<string> {
     if (this._username) return this._username;
@@ -48,6 +51,12 @@ export class TokenService extends JwtService {
    */
   async token(): Promise<string | null> {
     return (await this.cachedToken()) || (await this.refreshToken());
+  }
+
+  async getAuth(): Promise<string[] | null> {
+    const access = await this.token();
+    if (!access) return null;
+    return [access];
   }
 
   private async cachedToken(): Promise<string | null> {
@@ -118,6 +127,12 @@ export class TokenService extends JwtService {
       await this.setAgentLoginStatus(false);
       throw error;
     }
+  }
+
+  async authenticate(): Promise<string[] | null> {
+    const access = await this.login();
+    if (!access) return null;
+    return [access];
   }
 
   private async setAgentLoginStatus(isDirty: boolean): Promise<void> {

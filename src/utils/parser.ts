@@ -2,7 +2,7 @@ import { PushSubscription } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
 import CONFIG from "@/config";
 import { PlayerResponse } from "@/types/response/players";
-import { TransferResult } from "@/types/response/transfers";
+import { CoinTransferResult } from "@/types/response/transfers";
 
 export const parsePlayer = (playerDB: any): PlayerResponse | null => {
   return !playerDB
@@ -27,7 +27,7 @@ export const parsePlayer = (playerDB: any): PlayerResponse | null => {
 export const parseTransferResult = (
   transfer: any,
   type: "deposit" | "withdrawal",
-): TransferResult => {
+): CoinTransferResult => {
   const ok = transfer.status === 201;
   let player_balance: number | undefined = undefined;
 
@@ -41,7 +41,7 @@ export const parseTransferResult = (
     ? (player_balance = transfer.data.variables.balance_amount)
     : "";
 
-  const result: TransferResult = {
+  const result: CoinTransferResult = {
     status: ok ? "COMPLETED" : "INCOMPLETE",
     player_balance,
     error: ok ? undefined : CONFIG.SD.INSUFICIENT_BALANCE,

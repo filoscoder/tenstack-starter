@@ -126,7 +126,7 @@ Omitir el id en la URL e incluir los datos en el body para crear un depósito nu
 |Endpoint| `/transactions/deposit/:id?`|
 ---|---|
 Método      |`POST`
-Body (json) |[`TransferRequest`](#transferrequest)
+Body (json) |[`DepositRequest`](#depositrequest)
 Devuelve    |[`TransferResult & { deposit: Deposit }`](#transferresult)
 
 ### Retirar Premios [🔒](#👉-🔒)
@@ -134,7 +134,7 @@ Devuelve    |[`TransferResult & { deposit: Deposit }`](#transferresult)
 |Endpoint| `/transactions/cashout`|
 ---|---|
 Método      |`POST`
-Body (json) |[`TransferRequest`](#transferrequest)
+Body (json) |[`CashoutRequest`](#cashoutrequest)
 Devuelve    |[`TransferResult`](#transferresult)
 
 ### Ver Depósitos Pendientes [🔒](#👉-🔒)
@@ -335,7 +335,16 @@ Endpoints marcados con 🔒 requieren Bearer token
 }
 ```
 
-### TransferRequest
+### DepositRequest
+```typescript
+{
+  currency: string;
+  tracking_number: string;
+  paid_at: string;                    // 2024-01-29T18:14:41.534Z fecha en que el jugador pagó
+}
+```
+
+### CashoutRequest
 ```typescript
 {
   amount: number
@@ -345,6 +354,7 @@ Endpoints marcados con 🔒 requieren Bearer token
 ```
 
 ### TransferResult
+Estado de transferencia de fichas
 ```typescript
 {
   status: "COMPLETED" | "INCOMPLETE"
@@ -359,11 +369,14 @@ Endpoints marcados con 🔒 requieren Bearer token
 {
   id: number
   player_id: number
-  amount: number
-  confirmed?: datetime                // 2024-02-23T12:35:51.017Z
-  bank_account: number
   currency: string
   dirty: boolean
+  // Esperando confirmacion | no encontrado en alquimia | confirmado | cancelado por jugador | eliminado por agente
+  status: "pending"|"rejected"|"confirmed"|"cancelled"|"deleted"
+  tracking_number: string
+  amount: number
+  coins_transfered?: datetime         // 2024-02-23T12:35:51.017Z
+  paid_at?: datetime                  // 2024-02-23T12:35:51.017Z
   created_at: datetime                // 2024-02-23T12:35:51.017Z
   updated_at: datetime                // 2024-02-23T12:35:51.017Z
 }
@@ -439,6 +452,7 @@ Endpoints marcados con 🔒 requieren Bearer token
 - Configurar bbdd distintas para dev y prod
 - Chequear si agent existe en la bbdd en `seed.ts`
 - Subir la duracion del refresh token a 24 horas
+- Buscar transferencias por numero de rastreo en panel agente
 
 ### Alquimia
 
@@ -454,7 +468,44 @@ Endpoints marcados con 🔒 requieren Bearer token
 - Invalidar tokens en conjunto con una sola petición SQL
 
 
-## Cambios
-- Responder 201 en lugar de 200 en POST /bank-accounts
-- Responder 403 en lugar de 401 cuando el rol no tiene permitido acceder al recurso
-- Responder 403 en lugar de 401 cuando el deposito no le pertenece al jugador autenticado en POST /transactions/deposit/:id
+## Alquimia 
+
+- ID Cuenta ahorro: 120902
+
+
+Listar cuentas de ahorro 
+```bash
+curl -X GET \
+-H "Authorization: Bearer $API_TOKEN" \
+-H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
+${BASE_URL}1.0.0/v2/cuenta-ahorro-cliente \
+-H 'Content-Type: x-www-form-urlencoded' \
+-d 'id_cliente=2733226' 
+```
+
+Listar TX pendientes
+```bash
+curl -X GET \
+-H "Authorization: Bearer $API_TOKEN" \
+-H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
+"${BASE_URL}1.0.0/v2/ordenes-importador?id_cuenta=120902"
+```
+
+Consultar status TX
+```bash
+curl -X GET\
+-H "Authorization: Bearer $API_TOKEN" \
+-H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
+"${BASE_URL}1.0.0/v2/consulta-status-tx" \
+-d 'id_cuenta=120902&id_transaccion=18489885' \
+-H 'Content-Type: x-www-form-urlencoded'
+```
+Devuelve 404 al intentar confirmar el ingreso de $10 con su id_transaccion
+
+Consulta de movimientos
+- Consulta movimientos `/1.0.0/v2/cuenta-ahorro-cliente`
+  + Si el movimiento figura en la lista devuelta por "Consulta de Movimientos", esta confirmado? 
+  + Cuales son los posibles valors del campo `estatus_transaccion` en el resultado de este endpoint?
+- el endpoint "Consulta estatus TX `/1.0.0/v2/consulta-estatus-tx`" nos sirve para confirmar transferencias recibidas? o solo pagos salientes?
+
+

@@ -33,6 +33,9 @@ const CONFIG = {
     REFRESH_TOKEN_SALT: process.env.REFRESH_TOKEN_SALT,
     WEB_PUSH_PUBLIC_KEY: process.env.WEB_PUSH_PUBLIC_KEY,
     WEB_PUSH_PRIVATE_KEY: process.env.WEB_PUSH_PRIVATE_KEY,
+    ALQUIMIA_BASIC_AUTH: process.env.ALQUIMIA_BASIC_AUTH,
+    ALQUIMIA_USERNAME: process.env.ALQUIMIA_USERNAME,
+    ALQUIMIA_PASSWORD: process.env.ALQUIMIA_PASSWORD,
   },
   AWS: {
     ACCESS_KEY: process.env.AWS_ACCESS_KEY,
@@ -51,6 +54,9 @@ const CONFIG = {
     API_KEY: process.env.API_KEY,
     AGENT_BASE_URL: process.env.AGENT_API_BASE_URL,
     PLAYER_BASE_URL: process.env.PLAYER_API_BASE_URL,
+    ALQ_BASE_URL: process.env.ALQ_BASE_URL,
+    ALQ_API_VERSION: process.env.ALQ_API_VERSION,
+    ALQ_TOKEN_URL: process.env.ALQ_TOKEN_URL,
   },
   ROLES: {
     AGENT: "agent",
@@ -60,6 +66,22 @@ const CONFIG = {
   SD: {
     INSUFICIENT_BALANCE: "Saldo insuficiente",
     INSUFICIENT_CREDITS: "FichasInsuficientes",
+    DEPOSIT_STATUS: {
+      /** Created by user, pending confirmation at alquimia */
+      PENDING: "pending",
+      /** Not found at alquimia */
+      REJECTED: "rejected",
+      /** Allisgood */
+      CONFIRMED: "confirmed",
+      /** Cancelled by user */
+      CANCELED: "cancelled",
+      /** Deleted by agent */
+      DELETED: "deleted",
+    },
+    COIN_TRANSFER_STATUS: {
+      COMPLETED: "COMPLETED",
+      INCOMPLETE: "INCOMPLETE",
+    },
   },
 } as const;
 

@@ -1,7 +1,7 @@
 import { Deposit, Payment } from "@prisma/client";
 import { FinanceServices } from "../transactions/services";
 import { AuthServices } from "../auth/services";
-import { CustomError, ERR } from "@/middlewares/errorHandler";
+import { CustomError } from "@/middlewares/errorHandler";
 import { Credentials } from "@/types/request/players";
 import { compare } from "@/utils/crypt";
 import { PaymentsDAO } from "@/db/payments";
@@ -14,6 +14,7 @@ import { hidePassword } from "@/utils/auth";
 import { NotFoundException, UnauthorizedError } from "@/helpers/error";
 import { PlayersDAO } from "@/db/players";
 import CONFIG from "@/config";
+import { ERR } from "@/config/errors";
 
 export class AgentServices {
   static async login(
@@ -89,15 +90,15 @@ export class AgentServices {
 
   static async completePendingDeposits(): Promise<Deposit[]> {
     const deposits = await DepositsDAO.getPendingCoinTransfers();
+    const financeServices = new FinanceServices();
     for (const deposit of deposits) {
-      const financeServices = new FinanceServices(
+      const result = await financeServices.transfer(
         "deposit",
-        deposit.amount,
-        deposit.currency,
+        deposit,
         deposit.Player.panel_id,
       );
-      const result = await financeServices.transfer(deposit.id);
-      if (result.status === "COMPLETED") deposit.coins_transfered = new Date();
+      if (result.status === CONFIG.SD.COIN_TRANSFER_STATUS.COMPLETED)
+        deposit.coins_transfered = new Date();
       deposit.Player = hidePassword(deposit.Player);
     }
 

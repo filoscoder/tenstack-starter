@@ -1,10 +1,11 @@
 import { Deposit, PrismaClient } from "@prisma/client";
 import {
-  DepositRequest,
+  CreateDepositProps,
   DepositUpdatableProps,
 } from "@/types/request/transfers";
 import { ForbiddenError, NotFoundException } from "@/helpers/error";
 import { hidePassword } from "@/utils/auth";
+import CONFIG from "@/config";
 
 const prisma = new PrismaClient();
 
@@ -12,9 +13,12 @@ export class DepositsDAO {
   /**
    * Create a DB entry for a deposit
    */
-  static create(data: DepositRequest): Promise<Deposit> {
+  static create(data: CreateDepositProps): Promise<Deposit> {
     try {
-      return prisma.deposit.create({ data, include: { Player: true } });
+      return prisma.deposit.create({
+        data: { ...data, status: CONFIG.SD.DEPOSIT_STATUS.PENDING },
+        // include: { Player: true },
+      });
     } catch (error) {
       throw error;
     } finally {
@@ -25,8 +29,15 @@ export class DepositsDAO {
   static async index(all = true) {
     try {
       const deposits = await prisma.deposit.findMany({
-        where: all ? {} : { confirmed: null },
-        include: { Player: true, BankAccount: true },
+        where: all
+          ? {}
+          : {
+              OR: [
+                { status: CONFIG.SD.DEPOSIT_STATUS.PENDING },
+                { status: CONFIG.SD.DEPOSIT_STATUS.REJECTED },
+              ],
+            },
+        include: { Player: true },
       });
 
       deposits.forEach(
@@ -53,9 +64,20 @@ export class DepositsDAO {
     }
   }
 
+  // TODO test
   static getPending(player_id: number) {
     try {
-      return prisma.deposit.findMany({ where: { player_id, confirmed: null } });
+      return prisma.deposit.findMany({
+        where: {
+          player_id,
+          AND: {
+            OR: [
+              { status: CONFIG.SD.DEPOSIT_STATUS.PENDING },
+              { status: CONFIG.SD.DEPOSIT_STATUS.REJECTED },
+            ],
+          },
+        },
+      });
     } catch (error) {
       throw error;
     } finally {
@@ -67,7 +89,7 @@ export class DepositsDAO {
     try {
       return prisma.deposit.findMany({
         where: { coins_transfered: null },
-        include: { Player: true, BankAccount: true },
+        include: { Player: true },
       });
     } catch (error) {
       throw error;
@@ -128,7 +150,10 @@ export class DepositsDAO {
   static async authorizeConfirmation(deposit_id: number, player_id: number) {
     try {
       let deposit = await this.authorizeTransaction(deposit_id, player_id);
-      if (deposit.confirmed)
+      if (
+        deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED ||
+        deposit.status === CONFIG.SD.DEPOSIT_STATUS.DELETED
+      )
         throw new ForbiddenError(
           "No se pueden modificar depositos confirmados",
         );

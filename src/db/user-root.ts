@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { RootUpdatableProps, RootRequest } from "@/types/request/user-root";
 import { AgentBankAccount } from "@/types/response/agent";
-import { CustomError, ERR } from "@/middlewares/errorHandler";
+import { CustomError } from "@/middlewares/errorHandler";
+import { ERR } from "@/config/errors";
 
 const prisma = new PrismaClient();
 

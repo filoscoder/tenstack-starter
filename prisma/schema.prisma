@@ -19,7 +19,9 @@ model UserRoot {
   refresh           String        @db.VarChar(800)
   json_response     String        @db.Text
   dirty             Boolean       @default(false)     // El agente está siendo logueado
-  bankAccount       Json?          
+  bankAccount       Json?      
+  alq_api_manager   String?       @db.Text
+  alq_token         String?       @db.VarChar(800)    
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 
@@ -88,7 +90,6 @@ model BankAccount {
   bankNumber        String        @unique // CBU
   bankAlias         String?       @unique
   Payments          Payment[]
-  Deposits          Deposit[]
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
@@ -99,13 +100,13 @@ model Deposit {
   id                Int           @id @default(autoincrement())
   player_id         Int           
   Player            Player        @relation(fields: [player_id], references: [id])
-  amount            Float
-  confirmed         DateTime?     
-  bank_account      Int           
-  BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
   currency          String        @default("MXN")
   dirty             Boolean       @default(true)
-  coins_transfered  DateTime?     
+  status            String
+  tracking_number   String        @unique
+  amount            Float?         
+  coins_transfered  DateTime?    
+  paid_at           DateTime
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 

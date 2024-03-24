@@ -9,8 +9,9 @@ import {
 import { LoginResponse, PlainPlayerResponse } from "@/types/response/players";
 import { compare, hash } from "@/utils/crypt";
 import { hidePassword } from "@/utils/auth";
-import { CustomError, ERR } from "@/middlewares/errorHandler";
+import { CustomError } from "@/middlewares/errorHandler";
 import { HttpService } from "@/services/http.service";
+import { ERR } from "@/config/errors";
 
 export class PlayerServices {
   /**

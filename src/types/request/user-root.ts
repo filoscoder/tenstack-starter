@@ -9,6 +9,8 @@ export interface RootUpdatableProps {
   json_response?: string;
   dirty?: boolean;
   bankAccount?: AgentBankAccount;
+  alq_api_manager?: string;
+  alq_token?: string;
 }
 
 export interface RootRequest {
