@@ -193,16 +193,16 @@ describe("[UNIT] => AGENT ROUTER", () => {
       expect(Object.keys(response.body.data[0])).toStrictEqual([
         "id",
         "player_id",
-        "amount",
-        "confirmed",
-        "bank_account",
         "currency",
         "dirty",
+        "status",
+        "tracking_number",
+        "amount",
         "coins_transfered",
+        "paid_at",
         "created_at",
         "updated_at",
         "Player",
-        "BankAccount",
       ]);
     });
 
@@ -439,9 +439,11 @@ async function initialize() {
   deposit = await prisma.deposit.create({
     data: {
       amount: 0.01,
-      bank_account: player.BankAccounts[0].id,
       player_id: player.id,
       currency: "MXN",
+      status: CONFIG.SD.DEPOSIT_STATUS.PENDING,
+      tracking_number: "test_tracking_number3" + Date.now(),
+      paid_at: new Date().toISOString(),
       coins_transfered: new Date().toISOString(),
     },
   });

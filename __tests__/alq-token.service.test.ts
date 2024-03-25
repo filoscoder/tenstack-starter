@@ -13,8 +13,7 @@ describe("AlquimiaTokenService", () => {
       const auth = await service.authenticate();
 
       expect(auth).toBeTruthy();
-      //@ts-ignore
-      expect(Object.keys(auth)).toEqual(["apiManagerToken", "alquimiaToken"]);
+      expect(auth?.length).toBe(2);
     });
 
     it("Ensures token was saved in DB", async () => {
@@ -29,8 +28,7 @@ describe("AlquimiaTokenService", () => {
       const auth: string[] | null = await service.getAuth();
 
       expect(auth).toBeTruthy();
-      //@ts-ignore
-      expect(Object.keys(auth)).toEqual(["apiManagerToken", "alquimiaToken"]);
+      expect(auth?.length).toBe(2);
     });
   });
 });

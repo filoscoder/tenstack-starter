@@ -1,6 +1,6 @@
 import { OK } from "http-status";
 import { FinanceServices } from "./services";
-import { DepositRequest, TransferRequest } from "@/types/request/transfers";
+import { CashoutRequest, DepositRequest } from "@/types/request/transfers";
 import { apiResponse } from "@/helpers/apiResponse";
 import { DepositsDAO } from "@/db/deposits";
 import { NotFoundException } from "@/helpers/error";
@@ -31,7 +31,7 @@ export class TransactionsController {
   };
 
   static cashout = async (req: AuthedReq, res: Res, next: NextFn) => {
-    const request: TransferRequest = req.body;
+    const request: CashoutRequest = req.body;
     const player = req.user!;
 
     try {

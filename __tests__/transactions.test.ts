@@ -5,14 +5,16 @@ import { initAgent } from "./helpers";
 import { TokenPair } from "@/types/response/jwt";
 import { AuthServices } from "@/components/auth/services";
 import CONFIG from "@/config";
-import { DepositRequest } from "@/types/request/transfers";
+import { CashoutRequest, DepositRequest } from "@/types/request/transfers";
 
 let agent: SuperAgentTest;
 let prisma: PrismaClient;
 let players: (Player & { BankAccounts: BankAccount[] })[];
-let transferRequests: DepositRequest[];
+let depositRequests: DepositRequest[];
+let cashoutRequest: CashoutRequest;
 const tokens: TokenPair[] = [];
 const deposits: Deposit[] = [];
+let confirmedDeposit: Deposit;
 
 const USER_AGENT = "jest_test";
 
@@ -24,7 +26,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
     it("Should create a deposit", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
-        .send(transferRequests[0])
+        .send(depositRequests[0])
         .set("Authorization", `Bearer ${tokens[0].access}`)
         .set("User-Agent", USER_AGENT);
 
@@ -35,18 +37,18 @@ describe("[UNIT] => TRANSACTIONS", () => {
       deposits[0] = response.body.data.deposit;
     });
 
-    // it("Should create a deposit for player 2", async () => {
-    //   const response = await agent
-    //     .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
-    //     .send(transferRequests[1])
-    //     .set("Authorization", `Bearer ${tokens[1].access}`)
-    //     .set("User-Agent", USER_AGENT);
-    //   expect(response.status).toBe(OK);
-    //   expect(response.body.data.status).toBeDefined();
-    //   expect(response.body.data.deposit).toBeDefined();
+    it("Should create a deposit for player 2", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
+        .send(depositRequests[1])
+        .set("Authorization", `Bearer ${tokens[1].access}`)
+        .set("User-Agent", USER_AGENT);
+      expect(response.status).toBe(OK);
+      expect(response.body.data.status).toBeDefined();
+      expect(response.body.data.deposit).toBeDefined();
 
-    //   deposits[1] = response.body.data.deposit;
-    // });
+      deposits[1] = response.body.data.deposit;
+    });
 
     it.each`
       field                | message
@@ -57,7 +59,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
         .send({
-          ...transferRequests[0],
+          ...depositRequests[0],
           [field]: undefined,
         })
         .set("Authorization", `Bearer ${tokens[0].access}`)
@@ -72,7 +74,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
         .send({
-          ...transferRequests[0],
+          ...depositRequests[0],
           unknown_field: "unknown",
         })
         .set("Authorization", `Bearer ${tokens[0].access}`)
@@ -85,7 +87,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
     it("Should return 401", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
-        .send(transferRequests[0]);
+        .send(depositRequests[0]);
 
       expect(response.status).toBe(UNAUTHORIZED);
     });
@@ -100,6 +102,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
 
       expect(response.status).toBe(OK);
       expect(response.body.data.status).toBeDefined();
+      expect(response.body.data.deposit).toBeDefined();
     });
 
     it("Should return 401", async () => {
@@ -143,15 +146,19 @@ describe("[UNIT] => TRANSACTIONS", () => {
       expect(Object.keys(deposits[0])).toEqual([
         "id",
         "player_id",
-        "amount",
-        "confirmed",
-        "bank_account",
         "currency",
         "dirty",
+        "status",
+        "tracking_number",
+        "amount",
         "coins_transfered",
+        "paid_at",
         "created_at",
         "updated_at",
       ]);
+      /**
+       * Expect it only returns deposits belonging to the authenticated player
+       */
       expect(
         deposits.map((deposit: Deposit) => Number(deposit.player_id)),
       ).toEqual(Array(deposits.length).fill(players[1].id));
@@ -206,7 +213,9 @@ describe("[UNIT] => TRANSACTIONS", () => {
     /** Attempt to delete a confirmed deposit */
     it("Should return 403 [deposit confirmed]", async () => {
       const response = await agent
-        .delete(`/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}`)
+        .delete(
+          `/app/${CONFIG.APP.VER}/transactions/deposit/${confirmedDeposit.id}`,
+        )
         .set("Authorization", `Bearer ${tokens[0].access}`)
         .set("User-Agent", USER_AGENT);
 
@@ -227,7 +236,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
     it("Should create a withdrawal", async () => {
       const result = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
-        .send(transferRequests[0])
+        .send(cashoutRequest)
         .set("Authorization", `Bearer ${tokens[0].access}`)
         .set("User-Agent", USER_AGENT);
 
@@ -237,13 +246,13 @@ describe("[UNIT] => TRANSACTIONS", () => {
     it.each`
       field             | message
       ${"amount"}       | ${"amount is required"}
-      ${"currency"}     | ${"currency is required"}
+      ${"currency"}     | ${"currency must be a string of length 3"}
       ${"bank_account"} | ${"bank_account (account id) is required"}
     `("Should return 400 missing_fields", async ({ field, message }) => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
         .send({
-          ...transferRequests[0],
+          ...cashoutRequest,
           [field]: undefined,
         })
         .set("Authorization", `Bearer ${tokens[0].access}`)
@@ -258,7 +267,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
         .send({
-          ...transferRequests[0],
+          ...cashoutRequest,
           unknown_field: "unknown",
         })
         .set("Authorization", `Bearer ${tokens[0].access}`)
@@ -271,7 +280,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
     it("Should return 401", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
-        .send(transferRequests[0]);
+        .send(cashoutRequest);
 
       expect(response.status).toBe(UNAUTHORIZED);
     });
@@ -293,7 +302,7 @@ async function initialize() {
 
   players = result;
 
-  transferRequests = [
+  depositRequests = [
     {
       currency: "MXN",
       tracking_number: "test_tracking_number" + Date.now(),
@@ -305,6 +314,23 @@ async function initialize() {
       paid_at: new Date().toISOString(),
     },
   ];
+
+  cashoutRequest = {
+    amount: 0.01,
+    currency: "MXN",
+    bank_account: players[0].BankAccounts[0].id,
+  };
+
+  confirmedDeposit = await prisma.deposit.create({
+    data: {
+      status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED,
+      player_id: players[0].id,
+      currency: "MXN",
+      paid_at: new Date().toISOString(),
+      tracking_number: "test_tracking_number4" + Date.now(),
+      amount: 0.01,
+    },
+  });
 
   const authServices = new AuthServices();
   const auth1 = await authServices.tokens(players[0].id, USER_AGENT);

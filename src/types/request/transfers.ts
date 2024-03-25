@@ -1,9 +1,9 @@
 /** Datos que recibe nuestra API */
-// export type TransferRequest = {
-//   amount: number;
-//   currency: string;
-//   bank_account: number;
-// };
+export type CashoutRequest = {
+  amount: number;
+  currency: string;
+  bank_account: number;
+};
 
 /** Datos para API del casino */
 export type TransferDetails = {
