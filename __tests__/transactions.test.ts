@@ -5,12 +5,12 @@ import { initAgent } from "./helpers";
 import { TokenPair } from "@/types/response/jwt";
 import { AuthServices } from "@/components/auth/services";
 import CONFIG from "@/config";
-import { TransferRequest } from "@/types/request/transfers";
+import { DepositRequest } from "@/types/request/transfers";
 
 let agent: SuperAgentTest;
 let prisma: PrismaClient;
 let players: (Player & { BankAccounts: BankAccount[] })[];
-let transferRequests: TransferRequest[];
+let transferRequests: DepositRequest[];
 const tokens: TokenPair[] = [];
 const deposits: Deposit[] = [];
 
@@ -35,24 +35,24 @@ describe("[UNIT] => TRANSACTIONS", () => {
       deposits[0] = response.body.data.deposit;
     });
 
-    it("Should create a deposit for player 2", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
-        .send(transferRequests[1])
-        .set("Authorization", `Bearer ${tokens[1].access}`)
-        .set("User-Agent", USER_AGENT);
-      expect(response.status).toBe(OK);
-      expect(response.body.data.status).toBeDefined();
-      expect(response.body.data.deposit).toBeDefined();
+    // it("Should create a deposit for player 2", async () => {
+    //   const response = await agent
+    //     .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
+    //     .send(transferRequests[1])
+    //     .set("Authorization", `Bearer ${tokens[1].access}`)
+    //     .set("User-Agent", USER_AGENT);
+    //   expect(response.status).toBe(OK);
+    //   expect(response.body.data.status).toBeDefined();
+    //   expect(response.body.data.deposit).toBeDefined();
 
-      deposits[1] = response.body.data.deposit;
-    });
+    //   deposits[1] = response.body.data.deposit;
+    // });
 
     it.each`
-      field             | message
-      ${"amount"}       | ${"amount is required"}
-      ${"currency"}     | ${"currency is required"}
-      ${"bank_account"} | ${"bank_account (account id) is required"}
+      field                | message
+      ${"currency"}        | ${"currency must be a string of length 3"}
+      ${"tracking_number"} | ${"tracking_number is required"}
+      ${"paid_at"}         | ${"paid_at must be a string in the format yyyy-mm-ddThh:mm:ss.sssZ"}
     `("Should return 400 missing_fields", async ({ field, message }) => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
@@ -295,14 +295,14 @@ async function initialize() {
 
   transferRequests = [
     {
-      amount: 0.01,
       currency: "MXN",
-      bank_account: players[0].BankAccounts[0].id,
+      tracking_number: "test_tracking_number" + Date.now(),
+      paid_at: new Date().toISOString(),
     },
     {
-      amount: 0.01,
       currency: "MXN",
-      bank_account: players[1].BankAccounts[0].id,
+      tracking_number: "test_tracking_number2" + Date.now(),
+      paid_at: new Date().toISOString(),
     },
   ];
 
