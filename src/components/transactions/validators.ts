@@ -1,7 +1,4 @@
-import { CustomValidator, checkSchema } from "express-validator";
-
-const emptyBody: CustomValidator = (_value, { req }) => !req.body;
-const noId: CustomValidator = (_value, { req }) => !req.params?.id;
+import { checkSchema } from "express-validator";
 
 export const validateCashoutRequest = () =>
   checkSchema({
@@ -30,12 +27,9 @@ export const validateDepositRequest = () =>
   checkSchema({
     id: {
       in: ["params"],
-      exists: {
-        if: emptyBody,
-      },
+      optional: true,
     },
     currency: {
-      exists: { if: noId },
       in: ["body"],
       isEmpty: false,
       isString: true,
@@ -43,14 +37,12 @@ export const validateDepositRequest = () =>
       errorMessage: "currency must be a string of length 3",
     },
     tracking_number: {
-      exists: { if: noId },
       in: ["body"],
       isEmpty: false,
       isString: true,
       errorMessage: "tracking_number is required",
     },
     paid_at: {
-      exists: { if: noId },
       in: ["body"],
       isEmpty: false,
       isISO8601: true,

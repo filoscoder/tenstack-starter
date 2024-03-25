@@ -31,6 +31,8 @@ export class FinanceServices {
     player: PlainPlayerResponse,
     request: DepositRequest,
   ): Promise<CoinTransferResult> {
+    await DepositsDAO.authorizeCreation(request);
+
     const deposit = await this.createDeposit(player.id, request);
 
     return await this.finalizeTransfer(deposit, player);
@@ -42,10 +44,11 @@ export class FinanceServices {
   async confirmDeposit(
     player: PlainPlayerResponse,
     deposit_id: number,
+    request: DepositRequest,
   ): Promise<CoinTransferResult & { deposit: Deposit }> {
     await DepositsDAO.authorizeConfirmation(deposit_id, player.id);
 
-    const deposit = (await DepositsDAO.getById(deposit_id))!;
+    const deposit = (await DepositsDAO.update(deposit_id, request))!;
 
     return await this.finalizeTransfer(deposit, player);
   }
@@ -236,25 +239,30 @@ export class FinanceServices {
    * @throws CustomError if payment is not verified
    */
   public async verifyPayment(deposit: Deposit): Promise<Deposit> {
-    const confirmed = await this.alquimiaDepositLookup(
+    // let movement = await AlquimiaDepositsDAO.getByTrackingNumber(deposit.tracking_number);
+
+    // if (movement) return this.markDepositAsConfirmed(deposit, movement);
+
+    const movement = await this.alquimiaDepositLookup(
       deposit.tracking_number,
       deposit.paid_at,
     );
 
-    if (confirmed) {
-      return await DepositsDAO.update(deposit.id, {
-        status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED,
-        dirty: false,
-        amount: confirmed.valor_real,
-      });
-    }
+    if (movement) return this.markDepositAsConfirmed(deposit, movement);
 
     await DepositsDAO.update(deposit.id, { dirty: false });
 
     return deposit;
   }
 
-  // TODO buscar hasta 30 dias atras
+  private markDepositAsConfirmed(deposit: Deposit, movement: AlqMovement) {
+    return DepositsDAO.update(deposit.id, {
+      status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED,
+      dirty: false,
+      amount: movement.valor_real,
+    });
+  }
+
   private async alquimiaDepositLookup(
     tracking_number: string,
     from: Date,

@@ -21,7 +21,11 @@ export class TransactionsController {
         const deposit = await DepositsDAO.getById(deposit_id);
         if (!deposit) throw new NotFoundException();
 
-        result = await financeServices.confirmDeposit(player, deposit_id);
+        result = await financeServices.confirmDeposit(
+          player,
+          deposit_id,
+          request,
+        );
       }
 
       res.status(OK).json(apiResponse(result));

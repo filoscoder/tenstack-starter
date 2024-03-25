@@ -1,6 +1,7 @@
 import { Deposit, PrismaClient } from "@prisma/client";
 import {
   CreateDepositProps,
+  DepositRequest,
   DepositUpdatableProps,
 } from "@/types/request/transfers";
 import { ForbiddenError, NotFoundException } from "@/helpers/error";
@@ -150,13 +151,12 @@ export class DepositsDAO {
   static async authorizeConfirmation(deposit_id: number, player_id: number) {
     try {
       let deposit = await this.authorizeTransaction(deposit_id, player_id);
-      if (
-        deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED ||
-        deposit.status === CONFIG.SD.DEPOSIT_STATUS.DELETED
-      )
+      if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED)
         throw new ForbiddenError(
           "No se pueden modificar depositos confirmados",
         );
+      if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.DELETED)
+        throw new ForbiddenError("No se pueden modificar depositos eliminados");
       if (deposit.dirty)
         throw new ForbiddenError("El deposito esta siendo confirmado");
 
@@ -174,4 +174,18 @@ export class DepositsDAO {
   }
 
   static authorizeDeletion = this.authorizeConfirmation;
+
+  static async authorizeCreation(request: DepositRequest) {
+    try {
+      const deposit = await prisma.deposit.findUnique({
+        where: { tracking_number: request.tracking_number },
+      });
+      if (deposit) throw new ForbiddenError("already exists");
+      return deposit;
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
 }
