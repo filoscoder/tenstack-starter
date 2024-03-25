@@ -257,16 +257,24 @@ export class FinanceServices {
   // TODO buscar hasta 30 dias atras
   private async alquimiaDepositLookup(
     tracking_number: string,
-    date: Date,
+    from: Date,
+    to?: Date,
     page = 1,
   ): Promise<AlqMovement | undefined> {
-    const endpoint = "cuenta-ahorro-cliente/120902/transaccion";
+    const accountId = CONFIG.EXTERNAL.ALQ_SAVINGS_ACCOUNT_ID;
+    const endpoint = `cuenta-ahorro-cliente/${accountId}/transaccion`;
+
     const searchParams = new URLSearchParams();
-    const startDate = date.toISOString().split("T")[0];
+    const startDate = from.toISOString().split("T")[0];
+    const endDate = to?.toISOString().split("T")[0];
     searchParams.set("fecha_inicio", startDate);
+    endDate && searchParams.set("fecha_fin", endDate);
     searchParams.set("registros", "20");
     searchParams.set("page", page.toString());
 
+    console.log("LOOKING FROM", startDate);
+    console.log("LOOKING TO", endDate);
+    console.log("PAGE", page);
     const httpService = new HttpService();
     const movements = await httpService.authedAlqApi.get(
       endpoint + "?" + searchParams.toString(),
@@ -276,9 +284,20 @@ export class FinanceServices {
       (movement) => movement.clave_rastreo === tracking_number,
     );
 
-    if (!found && movements.length >= 20)
-      return await this.alquimiaDepositLookup(tracking_number, date, page + 1);
+    if (!found && movements.length === 20)
+      return await this.alquimiaDepositLookup(
+        tracking_number,
+        from,
+        undefined,
+        page + 1,
+      );
 
+    if (!found && movements.length < 20) {
+      const dayInSeconds = 60 * 60 * 24;
+      to = from;
+      from = new Date(from.getTime() / 1000 - dayInSeconds);
+      return await this.alquimiaDepositLookup(tracking_number, from, to);
+    }
     return found;
   }
 

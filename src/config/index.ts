@@ -57,6 +57,7 @@ const CONFIG = {
     ALQ_BASE_URL: process.env.ALQ_BASE_URL,
     ALQ_API_VERSION: process.env.ALQ_API_VERSION,
     ALQ_TOKEN_URL: process.env.ALQ_TOKEN_URL,
+    ALQ_SAVINGS_ACCOUNT_ID: process.env.ALQ_SAVINGS_ACCOUNT_ID,
   },
   ROLES: {
     AGENT: "agent",

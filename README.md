@@ -452,11 +452,11 @@ Estado de transferencia de fichas
 - Configurar bbdd distintas para dev y prod
 - Chequear si agent existe en la bbdd en `seed.ts`
 - Subir la duracion del refresh token a 24 horas
-- Buscar transferencias por numero de rastreo en panel agente
-
-### Alquimia
-
-[Documentacion](https://docs.alquimiapay.com/#introduccion)
+- Buscar depositos por numero de rastreo en panel agente
+- Actualizar tabla depositos en panel agente
+- Hacer endpoint de cancelar deposito para jugador
+- Tener en cuenta que pasa si el casino devuelve 200 a una transfer de fichas pero la transferencia no pasa
+- Balance Alquimia en panel agente
 
 ### Fichas insuficientes
 
@@ -471,7 +471,6 @@ Estado de transferencia de fichas
 ## Alquimia 
 
 - ID Cuenta ahorro: 120902
-
 
 Listar cuentas de ahorro 
 ```bash
