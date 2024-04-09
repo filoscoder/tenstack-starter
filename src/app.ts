@@ -13,12 +13,11 @@ import mainRouter from "@/routes";
 export const createApp = (): express.Application => {
   const app = express();
 
-  // const allowedOrigin = CONFIG.APP.ENV?.includes("dev")
-  //   ? "http://localhost:3000"
-  //   : CONFIG.APP.ALLOWED_ORIGIN;
+  const allowedOrigin = CONFIG.APP.ENV?.includes("dev")
+    ? "http://localhost:3000"
+    : CONFIG.APP.ALLOWED_ORIGIN;
 
-  app.use(cors());
-  // allowedOrigin !== "" && app.use(cors({ origin: allowedOrigin }));
+  allowedOrigin !== "" && app.use(cors({ origin: allowedOrigin }));
   app.use(helmet());
   app.use(express.json());
   app.use(
