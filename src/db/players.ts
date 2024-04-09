@@ -119,7 +119,12 @@ export class PlayersDAO {
       return prisma.player.upsert({
         where: { username },
         update,
-        create,
+        create: {
+          ...create,
+          roles: {
+            connect: { name: CONFIG.ROLES.PLAYER },
+          },
+        },
       });
     } catch (error) {
       throw error;

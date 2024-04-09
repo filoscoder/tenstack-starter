@@ -11,7 +11,7 @@ datasource db {
 }
 
 model UserRoot {
-  id                Int           @id @default(autoincrement())
+  id                String        @id @default(uuid())
   username          String        @db.VarChar(50) @unique
   password          String        @db.Text
   panel_id          Int
@@ -19,7 +19,9 @@ model UserRoot {
   refresh           String        @db.VarChar(800)
   json_response     String        @db.Text
   dirty             Boolean       @default(false)     // El agente está siendo logueado
-  bankAccount       Json?          
+  bankAccount       Json?      
+  alq_api_manager   String?       @db.Text
+  alq_token         String?       @db.VarChar(800)    
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 
@@ -27,12 +29,12 @@ model UserRoot {
 }
 
 model Transactions {
-  id                Int           @id @default(autoincrement())
+  id                String        @id @default(uuid())
   sender_id         Int           // Panel ID
   recipient_id      Int           // Panel ID
   amount            Float
   date              DateTime
-  status            String        @db.VarChar(100)
+  ok                Boolean
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 
@@ -40,7 +42,7 @@ model Transactions {
 }
 
 model Player {
-  id                Int           @id @default(autoincrement())
+  id                String        @id @default(uuid())
   panel_id          Int           @unique
   username          String        @db.VarChar(100) @unique
   password          String        @db.Text
@@ -50,8 +52,8 @@ model Player {
   date_of_birth     DateTime?
   movile_number     String?       @db.VarChar(50)
   country           String?       @db.VarChar(50)
-  BankAccounts      BankAccount[]  
-  balance_currency  String?       @db.VarChar(10) @default("MXN")
+  BankAccounts      BankAccount[]
+  balance_currency  String       @db.VarChar(10) @default("MXN")
   status            String?       @db.VarChar(20) @default("ACTIVO")
   Payments          Payment[]       
   Deposits          Deposit[]
@@ -64,12 +66,12 @@ model Player {
 }
 
 model Payment {
-  id                Int           @id @default(autoincrement())
-  player_id         Int           // Panel ID
-  Player            Player        @relation(fields: [player_id], references: [id])
+  id                String        @id @default(uuid())
+  player_id         String           
+  Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
   amount            Float
-  paid              DateTime?     // El dinero fue transferido (datetime) o no (null)
-  bank_account      Int           // Cuenta en la que recibe el pago
+  paid              DateTime?     
+  bank_account      String           
   BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
   currency          String        @default("MXN")
   created_at        DateTime      @default(now())
@@ -79,16 +81,15 @@ model Payment {
 }
 
 model BankAccount {
-  id                Int           @id @default(autoincrement())
+  id                String        @id @default(uuid())
   owner             String        // Nombre del beneficiario
-  owner_id          Int           // DNI
-  Player            Player        @relation(fields: [player_id], references: [id])
-  player_id         Int           // ID de Player
+  owner_id          Int           @db.UnsignedInt // DNI
+  Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  player_id         String        // ID de Player
   bankName          String        // Nombre del banco
   bankNumber        String        @unique // CBU
   bankAlias         String?       @unique
   Payments          Payment[]
-  Deposits          Deposit[]
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
@@ -96,16 +97,14 @@ model BankAccount {
 }
 
 model Deposit {
-  id                Int           @id @default(autoincrement())
-  player_id         Int           // Panel ID
-  Player            Player        @relation(fields: [player_id], references: [id])
-  amount            Float
-  confirmed         DateTime?     // El deposito fue confirmado (datetime) o no (null)
-  bank_account      Int           // Cuenta desde la que hace el deposito
-  BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
+  id                String        @id @default(uuid())
+  player_id         String           
+  Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
   currency          String        @default("MXN")
   dirty             Boolean       @default(true)
-  coins_transfered  DateTime?     
+  status            String
+  tracking_number   String        @unique
+  amount            Float?         
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
@@ -116,8 +115,8 @@ model Token {
   id                String        @id @default(uuid())
   invalid           Boolean       @default(false)
   next              String?       
-  player_id         Int           
-  player            Player        @relation(fields: [player_id], references: [id])
+  player_id         String           
+  player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
   user_agent        String?       @db.VarChar(256)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt 
@@ -137,10 +136,41 @@ model PushSubscription {
 }
 
 model Role {
-  id                Int           @id @default(autoincrement())
+  id                String        @id @default(uuid())
   name              String        @unique
   players           Player[]
 
   @@map("ROLES")
 }
 
+model BotFlow {
+  id                String        @id @default(uuid())
+  menus             Json      
+  messages          Json
+  on_call           Boolean
+  active            Boolean
+
+  @@map("BOT_FLOWS")
+}
+
+model AlquimiaDeposit {
+  id_transaccion              Int       @id
+  tipo_transaccion            Int
+  id_cuenta_ahorro            Int
+  id_medio_pago               Int
+  id_cliente                  Int
+  tipo_movimiento             Int
+  tipo_cargo                  Int
+  tipo_operacion              Int
+  fecha_alta                  DateTime
+  fecha_actualizacion         DateTime
+  concepto                    String
+  estatus_transaccion         Int
+  clave_rastreo               String    @unique
+  id_cuenta_ahorro_medio_pago Int
+  fecha_operacion             DateTime
+  monto                       String
+  valor_real                  Float
+
+  @@map("ALQ_DEPOSITS")
+}

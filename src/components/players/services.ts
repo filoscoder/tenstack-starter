@@ -9,8 +9,9 @@ import {
 import { LoginResponse, PlainPlayerResponse } from "@/types/response/players";
 import { compare, hash } from "@/utils/crypt";
 import { hidePassword } from "@/utils/auth";
-import { CustomError, ERR } from "@/middlewares/errorHandler";
+import { CustomError } from "@/middlewares/errorHandler";
 import { HttpService } from "@/services/http.service";
+import { ERR } from "@/config/errors";
 
 export class PlayerServices {
   /**
@@ -38,14 +39,14 @@ export class PlayerServices {
     let response = await authedAgentApi.post(panelSignUpUrl, player);
 
     if (response.status !== 201 && response.status !== 400) {
-      throw new CustomError({
-        status: 500,
-        code: "error_panel",
-        description: "Error en el panel al crear el usuario",
-      });
+      throw new CustomError(ERR.PLAYER_CREATE);
     }
 
-    if (response.status === 400 && response.data.code === "already_exists") {
+    if (
+      response.status === 400 &&
+      (response.data.code === "already_exists" ||
+        response.data.code === "user_already_exists")
+    ) {
       // Usuario existe en el panel, verificar que esté en local
       const localPlayer = await PlayersDAO.getByUsername(player.username);
 

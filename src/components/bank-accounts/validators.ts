@@ -4,7 +4,7 @@ export const validateBankAccountIndex = () =>
   checkSchema({
     id: {
       in: ["params"],
-      isNumeric: true,
+      isString: true,
       optional: true,
     },
   });
@@ -24,8 +24,12 @@ export const validateBankAccount = () =>
     owner_id: {
       in: ["body"],
       notEmpty: true,
-      isInt: true,
-      errorMessage: "Owner id is required",
+      custom: {
+        // 4294967295: max value of UNSIGNED INT in mariadb
+        options: (value) => typeof value === "number" && value < 4294967295,
+      },
+      customSanitizer: { options: (value) => Number(value) },
+      errorMessage: "owner_id must be an integer lower than 2**32",
     },
     bankName: {
       in: ["body"],
@@ -37,7 +41,7 @@ export const validateBankAccount = () =>
     bankNumber: {
       in: ["body"],
       notEmpty: true,
-      isString: true,
+      isNumeric: true,
       trim: true,
       errorMessage: "Bank number is required",
     },
@@ -83,6 +87,6 @@ export const validateAccountUpdate = () =>
     id: {
       in: ["params"],
       notEmpty: true,
-      isNumeric: true,
+      isString: true,
     },
   });

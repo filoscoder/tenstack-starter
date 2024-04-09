@@ -5,7 +5,7 @@ import { ForbiddenError, NotFoundException } from "@/helpers/error";
 const prisma = new PrismaClient();
 
 export class BankAccountsDAO {
-  static async index(player_id: number) {
+  static async index(player_id: string) {
     try {
       const accounts = await prisma.bankAccount.findMany({
         where: { player_id },
@@ -19,7 +19,7 @@ export class BankAccountsDAO {
     }
   }
 
-  static async show(account_id: number, player_id: number) {
+  static async show(account_id: string, player_id: string) {
     try {
       await this.authorizeView(account_id, player_id);
 
@@ -34,7 +34,7 @@ export class BankAccountsDAO {
     }
   }
 
-  static async create(player_id: number, request: BankAccountRequest) {
+  static async create(player_id: string, request: BankAccountRequest) {
     try {
       const account = await prisma.bankAccount.create({
         data: { player_id, ...request },
@@ -48,8 +48,8 @@ export class BankAccountsDAO {
   }
 
   static async update(
-    account_id: number,
-    player_id: number,
+    account_id: string,
+    player_id: string,
     request: BankAccountRequest,
   ) {
     try {
@@ -67,7 +67,7 @@ export class BankAccountsDAO {
     }
   }
 
-  static async delete(account_id: number, player_id: number) {
+  static async delete(account_id: string, player_id: string) {
     try {
       await this.authorizeDelete(account_id, player_id);
 
@@ -79,7 +79,7 @@ export class BankAccountsDAO {
     }
   }
 
-  static async authorizeUpdate(account_id: number, player_id: number) {
+  static async authorizeUpdate(account_id: string, player_id: string) {
     const account = await prisma.bankAccount.findUnique({
       where: { id: account_id },
     });

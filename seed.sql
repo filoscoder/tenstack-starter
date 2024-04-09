@@ -6,6 +6,19 @@ SET foreign_key_checks = 0;
 SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
 SET NAMES utf8mb4;
+INSERT INTO `PLAYERS` (`id`, `panel_id`, `username`, `password`, `email`, `first_name`, `last_name`, `date_of_birth`, `movile_number`, `country`, `balance_currency`, `status`, `created_at`, `updated_at`) VALUES
+(1,	3900,	'test19',	'$2b$10$4ReAbWcT.Q8PLGO2Gkc6H.qFTJabPC.cgPDAPfclAt1/ssLWMwh52',	'hello@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MX',	'ACTIVO',	'2024-02-02 16:01:19.264',	'2024-03-06 17:05:28.401'),
+(2,	3859,	'test17',	'$2b$10$twY7L8HNkIlYqFIOg5I9u.gluleI55wFGZ5L.iyw4SNISlJrIH9iy',	'bye@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MX',	'ACTIVO',	'2024-02-06 11:45:04.408',	'2024-03-06 17:06:24.766'),
+(3,	3940,	'test20',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	'me@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-09 19:57:41.941',	'2024-02-09 19:57:41.941'),
+(4,	3885,	'test18',	'$2b$10$J.Dh5d6Y0vnwuoph.a9piu6XqNy20TSyJzLJkGNjqIkkKISq1WNyu',	'hello1@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-27 12:19:14.510',	'2024-03-06 17:09:08.893'),
+(16,	5940,	'test24',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-27 13:22:09.299',	'2024-02-28 22:25:35.356'),
+(17,	5941,	'test25',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	'hello2@example.com',	'Tom',	'Bombadil',	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-27 13:23:00.607',	'2024-02-27 13:23:00.607'),
+(18,	6026,	'test26',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-29 17:55:07.367',	'2024-02-29 17:55:07.367'),
+(19,	6446,	'test28',	'$2b$10$bll0tNIl9yPNgop2jwUuM.t1f0d6dnfHG0S8DU9fQ51Ba7ntuGaiu',	'hello28@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-03-06 17:15:33.685',	'2024-03-06 17:15:33.685'),
+(28,	-1,	'agente',	'$2b$10$v1QyyPNEfEaRIpbzR9yHgOpmGkA3i7kSvoCWIvzm.Be8gtFNX8LlS',	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-03-11 16:41:03.161',	'2024-03-11 16:41:03.161'),
+(29,	6820,	'test37',	'$2b$10$VzuKTv8tiYp.U3n3mpd4K.j.xzIpT4NYcn9Me2FZUZevsaLw8z3nK',	'hello37@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-03-11 17:26:07.900',	'2024-03-11 17:26:07.900'),
+(164,	8265,	'jest_test1711379544959',	'$2b$10$EhNMrc3BjqJbkvqQ2EDqp.652f6VqprebNkL2XyHe3Fd/9QZRWbuC',	'jest_test1711379544959@test.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-03-25 15:12:27.337',	'2024-03-25 15:12:27.337'),
+(172,	8267,	'jest_test1711379986415',	'$2b$10$qcWfdDvuJw5K2uoiG2.1eeo.N6vsJSULR8somKSrL5PIorSNet3nO',	'jest_test1711379986415@test.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-03-25 15:19:48.734',	'2024-03-25 15:19:48.734');
 
 INSERT INTO `BANK_ACCOUNTS` (`id`, `owner_id`, `bankName`, `bankNumber`, `bankAlias`, `created_at`, `updated_at`, `owner`, `player_id`) VALUES
 (7,	33666999,	'Gringots',	'09090090900909',	'leviosa.not.leviosaaa',	'2024-02-09 16:29:01.929',	'2024-02-29 17:59:58.943',	'Hermione Granger',	1),
@@ -13,12 +26,12 @@ INSERT INTO `BANK_ACCOUNTS` (`id`, `owner_id`, `bankName`, `bankNumber`, `bankAl
 (18,	33999666,	'Gringots',	'0000000000',	'king.of.chess',	'2024-02-09 23:01:31.448',	'2024-02-09 23:01:31.448',	'Ron Weasley',	2),
 (19,	36988666,	'The Rock',	'404040404040',	NULL,	'2024-02-22 20:43:42.048',	'2024-02-22 20:45:04.037',	'Robert Baratheon',	1);
 
-INSERT INTO `DEPOSITS` (`id`, `player_id`, `amount`, `confirmed`, `created_at`, `updated_at`, `bank_account`, `currency`, `dirty`, `coins_transfered`) VALUES
-(24,	1,	0.01,	'2024-03-05 20:54:37.157',	'2024-03-05 14:14:28.640',	'2024-03-05 20:54:38.128',	7,	'MXN',	0,	'2024-03-05 20:40:41.159'),
-(25,	1,	1,	'2024-03-05 14:24:48.624',	'2024-03-05 14:15:56.846',	'2024-03-05 20:40:41.161',	7,	'MXN',	0,	'2024-03-05 20:40:41.159'),
-(26,	1,	10,	'2024-03-06 11:23:58.974',	'2024-03-05 21:13:53.800',	'2024-03-06 11:23:58.986',	7,	'MXN',	0,	NULL),
-(27,	1,	0.01,	NULL,	'2024-03-06 17:10:00.065',	'2024-03-06 17:10:03.125',	7,	'MXN',	0,	NULL),
-(28,	1,	0.01,	NULL,	'2024-03-06 17:16:57.672',	'2024-03-06 17:17:00.688',	7,	'MXN',	0,	NULL);
+INSERT INTO `BOT_MESSAGES` (`id`, `messages`, `menus`) VALUES
+('',	'[[[\"Hola 😃\", \"\", \"Bienvenido/a a *CASINO-MEX.COM* 🎰\", \"La plataforma de apuestas en línea más grande y segura de México 🇲🇽\", \"\", \"*OPEN LAS 24HS*\"], [\"Apuesta, diviértete y *gana* con:\", \"\", \"🎰 *Slots / Tragamonedas*\", \"⚽ *Apuestas Deportivas*\", \"⭕ *Ruleta*\", \"♠ *Poker*\", \"♦ *Blackjack*\", \"➕ ¡Y muchos otros juegos mas!\"]], [[\"🌟 *CREAR USUARIO*\", \"_¡Crear tu cuenta es *GRATIS* y se realiza de inmediato *las 24hs, los 365 días del año!* Unicamente necesitas desplegar el menu lateral y cargar tus datos para que comiences a disfrutar en nuestra plataforma, solo te tomara un minuto ⏱️_\", \"📝 *DATOS PERSONALES:*\", \"\", \"_Datos Obligatorios_\", \"🤠 *Nombre completo* _Obligatorio_\", \"🔐 *Contraseña* _Obligatorio_\", \"📧 *Correo electrónico* _Obligatorio_\", \"\", \"_Datos Opcionales_\", \"👤 *Nombre/s* _Opcional_\", \"👤 *Apellido/s* _Opcional_\", \"📞 *Telefono* _Opcional_\", \"🐣 *Fecha de Nacimiento* _Opcional_\", \"\", \"_*¡Bienvenido/a a la diversión instantánea!*_ 🚀🎰,\"], [\"🔒 *PROTECCION DE MIS DATOS:*\", \"\", \"La seguridad de tus datos es nuestra máxima prioridad💪\", \"\", \"Utilizamos tecnologías avanzadas de encriptación para proteger toda la información personal y financiera de nuestros jugadores. Además, cumplimos con todas las regulaciones y estándares de seguridad para garantizar la confidencialidad y protección de tus datos en todo momento.\", \"\", \"Puedes estar tranquilo sabiendo que tu privacidad está en buenas manos con nosotros🛡️.\"], [\"🔐 *OLVIDÉ MI CONTRASEÑA:*\", \"\", \"¡No te preocupes en absoluto! Si has olvidado tu contraseña, simplemente ve al menu superior de *ACCEDER/ENTRAR* y haz click sobre el texto de *_¿Ha Olvidado Su Contraseña?_* y te enviaremos una nueva por mail.\", \"\", \"*Estamos aquí para asegurarnos de que tu única preocupación sea ¡divertirte al máximo!* 🎉\"]], [[\"🎰 *COMO CARGAR CREDITOS:*\", \"\", \"Cargar créditos es sencillo! \", \"\", \"Solo desliza el menú lateral, verifica tu usuario y contraseña, ingresa cuantos pesos quieres cargar, elige la cuenta desde la que deseas transferir 💳💰 y realiza la transferencia. (Si no tienes una cuenta asociada, puedes ingresar los datos en el momento)\", \"\", \"¡Así de fácil y rápido! 🚀✨\"], [\"💰 *MEDIOS DE PAGO:*\", \"\", \"Nuestro medio de pago es por transferencia bancaria 💳🏦.\", \"\", \"Te garantizamos total seguridad en todas tus transacciones y la rapidez que necesitas para disfrutar al máximo de nuestros servicios.\", \"\", \"¡Haz tus transacciones con total confianza y comodidad!\"], [\"🎰 *CARGA MINIMA Y MAXIMA:*\", \"\", \"La carga *mínima de créditos es de $10 (MXN)*, brindándote un inicio emocionante.\", \"\", \"¡Y la carga *máxima es sin límite!* Tú decides cuánto quieres disfrutar en nuestra plataforma.🍀\", \"\", \"¡Elige la cantidad que se ajuste a tu diversión! 🚀💰\"], [\"⏱️ *DEMORA DE CARGA DE CREDITOS:*\", \"\", \"La carga es prácticamente instantánea!\", \"\", \"Una vez acreditado el pago, los créditos se añaden a tu cuenta automáticamente en el momento. \", \"\", \"stamos en línea realizando cargas las *24hs del día, los 365 días del año*, para que puedas sumergirte en la diversión sin demoras.*\", \"\", \"Listo para jugar en segundos!* 🚀💳✨\"], [\"🎰 *CARGA DE CREDITOS:*\", \"\", \"Puedes cargar créditos tantas veces como desees, ¡incluso *varias veces en el mismo día*! Nos adaptamos a tu ritmo para que disfrutes de la diversión sin límites.\", \"\", \"*¡La emoción está en tus manos!* 💳🔄✨\"]], [[\"💰 *RETIRO DE DINERO:*\", \" \", \"Retirar dinero es más fácil que nunca. Simplemente despliega el menú lateral, elige *Retirar Dinero*, selecciona la cantidad deseada y la cuenta destino.\", \"     \", \"¿No tienes cuenta destino? ¡No te preocupes! Puedes agregarla en el momento. 💳💸\", \"     \", \"¡Listo para disfrutar de tus ganancias en un abrir y cerrar de ojos! 🎉✨\"], [\"🍀*RETIRO MINIMO Y MAXIMO:*\", \" \", \"El *retiro mínimo de premios es de $40* (MXN), asegurándote que tus ganancias sean significativas.\", \" \", \"En cuanto al *retiro máximo, ¡NO HAY LIMITES!* Puedes retirar todas tus ganancias sin preocupaciones.\", \" \", \"*¡Tu éxito merece ser celebrado sin restricciones!* 🎉💸🌟\"], [\"🎰 *DEMORA DE RETIRO DE PREMIOS:*\", \" \", \"Los retiros se procesan en *menos de 24hs*. Queremos que disfrutes de tus premios rápidamente, por lo que trabajamos de manera eficiente para que tengas acceso a tus ganancias en el menor tiempo posible.\", \" \", \"*¡Tu diversión y comodidad son nuestra prioridad!* 🕒💸🌟\"], [\"💰 *CANTIDAD DE RETIROS*\", \"     \", \"Puedes retirar tus premios *una vez cada 24 horas.* Este límite asegura un manejo eficiente y seguro de tus retiros, proporcionándote la flexibilidad para disfrutar de tus ganancias de manera regular.\", \"      \", \"*¡Tu comodidad y seguridad son nuestra prioridad!* 🕒💸🔄\"]], [[\"🎰 *QUIENES SOMOS:*\", \"    \", \"Somos *CASINO-MEX.COM*, la plataforma de apuestas en línea más grande y segura de *México* 🇲🇽. Además, estamos presentes en otras increíbles ubicaciones como *Brasil* 🇧🇷, *Argentina* 🇦🇷, *Perú* 🇵🇪 y *Paraguay* 🇵🇾.\", \"  \", \"Queremos que sepas que tanto nuestra plataforma de pago como nuestra base de datos y juegos están certificados internacionalmente en *seguridad* 🔒 y *aleatoriedad* 🔀, con auditorías constantes para garantizar tu *tranquilidad y diversión*.\", \"   \", \"*¡Estamos aquí para ofrecerte la mejor experiencia de juego!* 🥳❤️\"], [\"🌟 🎰 *NUESTROS JUEGOS:*\", \"\", \"En *CASINO-MEX.COM* _La Casa de la Diversión y Emoción_ 🎉 Puedes encontrar mas de *1400 juegos*, estas son algunos de las categorias que tenemos en nuestra plataforma:\", \"\", \"- Apuestas Deportivas Programadas\", \"- Apuestas de Diversión EN VIVO\", \"- Apuestas en E-Sports\", \"- Slots / Tragamonedas\", \"- Ruleta\", \"- Ruleta en Vivo\", \"- Blackjack\", \"- Poker\", \"- Torneos\", \"- Sorteos\", \"¡Y mucho más!\", \"\", \"Es por esto somos la plataforma de apuestas más grande del país. Aquí, seguro encuentras el juego que va contigo.\", \"\", \"*¡Que empiece la diversión, compa!* 🚀🎰\"], [\"📍 *NUESTRA UBICACION:*\", \"\", \"¡Orgullosos de tener nuestros servidores y oficinas de soporte en la vibrante Ciudad de México! 🇲🇽 Esta elección no es casualidad, ya que la capital mexicana no solo es el epicentro cultural y financiero del país, sino también un punto de encuentro para amantes del entretenimiento y la emoción.\", \"\", \"Descubre la emoción del juego en la palma de tu mano con nuestra plataforma en línea, estés donde estés. 📱🎰\", \"\", \"📍https://maps.app.goo.gl/2qEj7Ve6Fw3vPDeE9\", \"\", \"¡Te esperamos para vivir la experiencia única de nuestro casino en línea! 🌟\"]], [[\"😱 *ERROR EN FUNCIONAMIENTO DE JUEGOS:*\", \"\", \"Si durante el juego ocurre algún error, como que se tilde, se cierre o se pierda la conexión a Internet, ¡no te preocupes!\", \"   \", \"Tu saldo y premios se actualizan automáticamente en nuestra base de datos *en el momento en que ocurren*.\", \"    \", \"Así podrás seguir disfrutando de la emoción del juego sin interrupciones. 😊🎰\"], [\"🔄 *OTRA CONSULTA:*\", \"\", \"Si tu consulta no se encuentra dentro de las opciones anteriores, no dudes en comunicarte al 1111111111.\", \"\", \"Sin embargo, ten en cuenta que nuestros agentes pueden estar ocupados con muchos mensajes. Para obtener una respuesta más rápida, envíanos un mensaje a ese número con tu usuario o correo electrónico en la parte superior y, debajo, detalla tu consulta.\", \"\", \"¡Nos pondremos en contacto contigo lo antes posible! 🚀✉️ ¡Gracias por tu comprensión! 😊\"]]]',	'[[\"¿Con cual de estos temas podemos ayudarte?\", \"\", \"*1 - Registro y Cuenta*\", \"*2 - Carga de Creditos*\", \"*3 - Retiro de Dinero*\", \"*4 - Acerca de Nosotros*\", \"*5 - Otras consultas*\", \"\", \"_(Elige un numero)_\"], [\"👤 *REGISTRO Y CUENTA*\", \"\", \"*1 - ¿Cómo me registro?*\", \"*2 - ¿Mis datos están protegidos?*\", \"*3 - ¿Que pasa si olvido mi contraseña?*\", \"*4 - ¿Volver atras?*\", \"\", \"_(Elige un numero)_\"], [\"🎰 *CARGA DE CREDITOS:*\", \"\", \"*1 - ¿Como cargo creditos?*\", \"*2 - ¿Que medio de pago ofrecen?*\", \"*3 - ¿Cual es la carga mínima y máxima de créditos?*\", \"*4 - ¿Cuanto demora la carga de créditos?*\", \"*5 - ¿Cuantas veces puedo cargar créditos?*\", \"*6 - Volver atras*\", \"\", \"_(Elige un numero)_\"], [\"💰 *RETIRO DE DINERO:*\", \"\", \"*1 - ¿Como retiro mi dinero?*\", \"*2 - ¿Cual es el retiro minimo y máximo?*\", \"*3 - ¿Cuanto demora el retiro?*\", \"*4 - ¿Cuantos retiros puedo realizar?*\", \"*5 - Volver atras*\", \"\", \"_(Elige un numero)_\"], [\"🎰 *ACERCA DE NOSOTROS:*\", \"\", \"*1 - ¿Quienes somos?*\", \"*2 - ¿Que juegos tenemos?*\", \"*3 - ¿Donde nos encontramos?*\", \"*4 - Volver atras*\", \"\", \"_(Elige un numero)_\"], [\"🔄 *OTRAS CONSULTAS:*\", \"\", \"*1 - ¿Que sucede si hay un error en un juego?*\", \"*2 - No encuentro una opción para mi consulta*\", \"*3  - Volver atras*\", \"\", \"_(Elige un numero)_\"]]');
+
+INSERT INTO `DEPOSITS` (`id`, `player_id`, `created_at`, `updated_at`, `currency`, `dirty`, `coins_transfered`, `paid_at`, `status`, `tracking_number`, `amount`) VALUES
+(152,	1,	'2024-03-23 15:06:59.829',	'2024-03-25 15:19:51.903',	'MXN',	0,	NULL,	'2024-03-15 00:00:00.000',	'confirmed',	'53771ALBO11032024195558814',	10),
+(183,	1,	'2024-03-25 15:19:35.576',	'2024-03-25 15:19:42.486',	'MXN',	1,	'2024-03-25 15:19:42.485',	'2024-03-25 15:19:35.575',	'confirmed',	'test_tracking_number41711379975575',	0.01);
 
 INSERT INTO `PAYMENTS` (`id`, `player_id`, `amount`, `paid`, `created_at`, `updated_at`, `bank_account`, `currency`) VALUES
 (14,	1,	0.01,	'2024-02-10 17:21:33.262',	'2024-02-09 16:53:58.353',	'2024-02-10 17:21:33.266',	7,	'MXN'),
@@ -33,93 +46,56 @@ INSERT INTO `PAYMENTS` (`id`, `player_id`, `amount`, `paid`, `created_at`, `upda
 (23,	1,	0.03,	NULL,	'2024-02-26 19:19:30.725',	'2024-02-26 19:19:30.725',	7,	'MXN'),
 (24,	1,	0.04,	NULL,	'2024-02-27 14:38:50.896',	'2024-02-27 14:38:50.896',	7,	'MXN'),
 (25,	1,	0.01,	NULL,	'2024-02-29 18:51:14.752',	'2024-02-29 18:51:14.752',	7,	'MXN'),
-(26,	1,	6.13,	NULL,	'2024-03-05 20:55:27.642',	'2024-03-05 20:55:27.642',	7,	'MXN');
+(26,	1,	6.13,	NULL,	'2024-03-05 20:55:27.642',	'2024-03-05 20:55:27.642',	7,	'MXN'),
+(70,	1,	0.01,	NULL,	'2024-03-19 22:32:58.207',	'2024-03-19 22:32:58.207',	7,	'MXN'),
+(71,	1,	0.01,	NULL,	'2024-03-19 22:33:16.592',	'2024-03-19 22:33:16.592',	7,	'MXN'),
+(73,	1,	0.01,	NULL,	'2024-03-20 02:06:43.107',	'2024-03-20 02:06:43.107',	7,	'MXN'),
+(76,	1,	0.01,	NULL,	'2024-03-20 02:08:07.068',	'2024-03-20 02:08:07.068',	7,	'MXN'),
+(81,	1,	0.01,	NULL,	'2024-03-20 02:20:05.199',	'2024-03-20 02:20:05.199',	7,	'MXN'),
+(84,	1,	0.01,	NULL,	'2024-03-23 23:18:16.524',	'2024-03-23 23:18:16.524',	7,	'MXN'),
+(85,	1,	0.01,	NULL,	'2024-03-25 13:33:29.953',	'2024-03-25 13:33:29.953',	7,	'MXN'),
+(87,	1,	0.01,	NULL,	'2024-03-25 14:36:08.896',	'2024-03-25 14:36:08.896',	7,	'MXN'),
+(88,	1,	0.01,	NULL,	'2024-03-25 15:02:31.110',	'2024-03-25 15:02:31.110',	7,	'MXN'),
+(89,	1,	0.01,	NULL,	'2024-03-25 15:12:22.784',	'2024-03-25 15:12:22.784',	7,	'MXN'),
+(94,	1,	0.01,	NULL,	'2024-03-25 15:19:39.836',	'2024-03-25 15:19:39.836',	7,	'MXN');
 
-INSERT INTO `PLAYERS` (`id`, `panel_id`, `username`, `password`, `email`, `first_name`, `last_name`, `date_of_birth`, `movile_number`, `country`, `balance_currency`, `status`, `created_at`, `updated_at`) VALUES
-(1,	3900,	'test19',	'$2b$10$4ReAbWcT.Q8PLGO2Gkc6H.qFTJabPC.cgPDAPfclAt1/ssLWMwh52',	'hello@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MX',	'ACTIVO',	'2024-02-02 16:01:19.264',	'2024-03-06 17:05:28.401'),
-(2,	3859,	'test17',	'$2b$10$twY7L8HNkIlYqFIOg5I9u.gluleI55wFGZ5L.iyw4SNISlJrIH9iy',	'bye@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MX',	'ACTIVO',	'2024-02-06 11:45:04.408',	'2024-03-06 17:06:24.766'),
-(3,	3940,	'test20',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	'me@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-09 19:57:41.941',	'2024-02-09 19:57:41.941'),
-(4,	3885,	'test18',	'$2b$10$J.Dh5d6Y0vnwuoph.a9piu6XqNy20TSyJzLJkGNjqIkkKISq1WNyu',	'hello1@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-27 12:19:14.510',	'2024-03-06 17:09:08.893'),
-(16,	5940,	'test24',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-27 13:22:09.299',	'2024-02-28 22:25:35.356'),
-(17,	5941,	'test25',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	'hello2@example.com',	'Tom',	'Bombadil',	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-27 13:23:00.607',	'2024-02-27 13:23:00.607'),
-(18,	6026,	'test26',	'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-02-29 17:55:07.367',	'2024-02-29 17:55:07.367'),
-(19,	6446,	'test28',	'$2b$10$bll0tNIl9yPNgop2jwUuM.t1f0d6dnfHG0S8DU9fQ51Ba7ntuGaiu',	'hello28@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-03-06 17:15:33.685',	'2024-03-06 17:15:33.685'),
-(29,	6820,	'test37',	'$2b$10$VzuKTv8tiYp.U3n3mpd4K.j.xzIpT4NYcn9Me2FZUZevsaLw8z3nK',	'hello37@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-03-11 17:26:07.900',	'2024-03-11 17:26:07.900');
+
 
 INSERT INTO `ROLES` (`id`, `name`) VALUES
 (1,	'agent'),
 (2,	'player');
 
 INSERT INTO `TOKENS` (`id`, `invalid`, `next`, `player_id`, `created_at`, `updated_at`, `user_agent`) VALUES
-('1d7c1d92-2374-4782-b144-fe7a55cbb38c',	0,	NULL,	29,	'2024-03-11 17:26:07.911',	'2024-03-11 17:26:07.911',	'curl/7.81.0'),
-('b5d93a4c-6edc-41d5-bd94-6b28482815b1',	0,	NULL,	1,	'2024-03-11 17:24:49.098',	'2024-03-11 17:24:49.098',	'curl/7.81.0');
+('0557b2a0-98fc-4161-8acc-de68b65e628b',	1,	NULL,	1,	'2024-03-23 15:01:28.396',	'2024-03-25 15:19:52.203',	'curl/7.81.0'),
+('264e852c-438b-4331-9fba-198f1f7bcbe1',	0,	NULL,	164,	'2024-03-25 15:12:27.843',	'2024-03-25 15:12:27.843',	NULL),
+('41e9c274-edd2-45b0-af9c-cf2f85c99f65',	1,	NULL,	1,	'2024-03-23 23:18:22.764',	'2024-03-25 15:19:52.203',	NULL),
+('45d2a598-30f5-49dd-a7aa-c25d191d45ea',	0,	NULL,	1,	'2024-03-25 15:19:52.211',	'2024-03-25 15:19:52.211',	NULL),
+('4c2f2182-0ba2-43ba-b3ea-0ff778e3c392',	1,	NULL,	172,	'2024-03-25 15:19:48.748',	'2024-03-25 15:19:49.320',	NULL),
+('66471d55-f928-4f8b-b6ee-af30392bee20',	1,	NULL,	164,	'2024-03-25 15:12:27.350',	'2024-03-25 15:12:27.836',	NULL),
+('88c51f52-6fb6-4291-b52a-40fb6d0f3d4e',	0,	NULL,	172,	'2024-03-25 15:19:49.326',	'2024-03-25 15:19:49.326',	NULL),
+('9b19f6b3-9dca-4c80-86f4-1be1d67f0521',	1,	NULL,	1,	'2024-03-25 14:36:18.892',	'2024-03-25 15:19:52.203',	NULL),
+('a10bc328-802c-40a0-a034-00fd942f27ed',	1,	NULL,	1,	'2024-03-25 13:33:42.826',	'2024-03-25 15:19:52.203',	NULL),
+('af287ffa-3f7f-4724-88dd-ef98deefac6f',	1,	NULL,	1,	'2024-03-25 15:12:34.557',	'2024-03-25 15:19:52.203',	NULL),
+('d44f3333-109f-4844-a025-e72daa342bd4',	1,	NULL,	1,	'2024-03-25 14:19:17.616',	'2024-03-25 15:19:52.203',	NULL);
 
 INSERT INTO `TRANSACTIONS` (`id`, `sender_id`, `recipient_id`, `amount`, `date`, `status`, `created_at`, `updated_at`) VALUES
-(56,	414,	3900,	0.01,	'2024-02-23 12:35:51.005',	'COMPLETED',	'2024-02-23 12:35:51.006',	'2024-02-23 12:35:51.006'),
-(57,	414,	3900,	0.01,	'2024-02-23 13:18:24.453',	'COMPLETED',	'2024-02-23 13:18:24.456',	'2024-02-23 13:18:24.456'),
-(58,	3900,	414,	0.01,	'2024-02-23 13:19:29.499',	'COMPLETED',	'2024-02-23 13:19:29.502',	'2024-02-23 13:19:29.502'),
-(59,	3900,	414,	0.01,	'2024-02-23 13:19:35.740',	'COMPLETED',	'2024-02-23 13:19:35.743',	'2024-02-23 13:19:35.743'),
-(60,	3900,	414,	0.01,	'2024-02-23 13:19:38.848',	'INCOMPLETE',	'2024-02-23 13:19:38.851',	'2024-02-23 13:19:38.851'),
-(61,	3900,	414,	0.01,	'2024-02-23 13:22:01.326',	'INCOMPLETE',	'2024-02-23 13:22:01.329',	'2024-02-23 13:22:01.329'),
-(62,	414,	1,	0.01,	'2024-02-23 19:42:39.319',	'COMPLETED',	'2024-02-23 19:42:39.322',	'2024-02-23 19:42:39.322'),
-(63,	414,	1,	0.01,	'2024-02-23 19:42:57.961',	'COMPLETED',	'2024-02-23 19:42:57.963',	'2024-02-23 19:42:57.963'),
-(64,	1,	414,	0.01,	'2024-02-23 19:43:18.368',	'INCOMPLETE',	'2024-02-23 19:43:18.371',	'2024-02-23 19:43:18.371'),
-(65,	414,	3900,	0.01,	'2024-02-23 19:45:38.955',	'COMPLETED',	'2024-02-23 19:45:38.957',	'2024-02-23 19:45:38.957'),
-(66,	3900,	414,	0.01,	'2024-02-23 19:45:45.356',	'COMPLETED',	'2024-02-23 19:45:45.359',	'2024-02-23 19:45:45.359'),
-(67,	414,	3900,	0.01,	'2024-02-23 19:52:34.028',	'COMPLETED',	'2024-02-23 19:52:34.031',	'2024-02-23 19:52:34.031'),
-(68,	414,	3900,	0.01,	'2024-02-23 19:53:38.242',	'COMPLETED',	'2024-02-23 19:53:38.245',	'2024-02-23 19:53:38.245'),
-(69,	3900,	414,	0.02,	'2024-02-23 19:53:53.282',	'COMPLETED',	'2024-02-23 19:53:53.284',	'2024-02-23 19:53:53.284'),
-(70,	414,	3900,	0.01,	'2024-02-23 20:14:28.159',	'COMPLETED',	'2024-02-23 20:14:28.161',	'2024-02-23 20:14:28.161'),
-(71,	414,	3900,	0.01,	'2024-02-26 19:16:22.658',	'COMPLETED',	'2024-02-26 19:16:22.662',	'2024-02-26 19:16:22.662'),
-(72,	414,	3900,	0.01,	'2024-02-26 19:19:09.334',	'COMPLETED',	'2024-02-26 19:19:09.337',	'2024-02-26 19:19:09.337'),
-(73,	3900,	414,	0.03,	'2024-02-26 19:19:30.713',	'COMPLETED',	'2024-02-26 19:19:30.716',	'2024-02-26 19:19:30.716'),
-(74,	414,	3900,	0.01,	'2024-02-27 14:14:23.654',	'COMPLETED',	'2024-02-27 14:14:23.657',	'2024-02-27 14:14:23.657'),
-(75,	414,	3900,	0.01,	'2024-02-27 14:33:00.569',	'COMPLETED',	'2024-02-27 14:33:00.572',	'2024-02-27 14:33:00.572'),
-(76,	414,	3900,	0.01,	'2024-02-27 14:33:21.304',	'COMPLETED',	'2024-02-27 14:33:21.307',	'2024-02-27 14:33:21.307'),
-(77,	414,	3900,	0.01,	'2024-02-27 14:34:02.971',	'COMPLETED',	'2024-02-27 14:34:02.973',	'2024-02-27 14:34:02.973'),
-(78,	3900,	414,	0.04,	'2024-02-27 14:38:50.882',	'COMPLETED',	'2024-02-27 14:38:50.885',	'2024-02-27 14:38:50.885'),
-(79,	3900,	414,	0.04,	'2024-02-27 14:40:19.966',	'INCOMPLETE',	'2024-02-27 14:40:19.969',	'2024-02-27 14:40:19.969'),
-(80,	414,	3900,	0.01,	'2024-02-29 18:48:02.283',	'COMPLETED',	'2024-02-29 18:48:02.287',	'2024-02-29 18:48:02.287'),
-(81,	3900,	414,	0.01,	'2024-02-29 18:51:14.740',	'COMPLETED',	'2024-02-29 18:51:14.743',	'2024-02-29 18:51:14.743'),
-(82,	414,	3900,	0.01,	'2024-03-05 14:15:12.403',	'COMPLETED',	'2024-03-05 14:15:12.406',	'2024-03-05 14:15:12.406'),
-(83,	414,	3900,	9.21,	'2024-03-05 14:16:15.250',	'INCOMPLETE',	'2024-03-05 14:16:15.252',	'2024-03-05 14:16:15.252'),
-(84,	414,	3900,	9.21,	'2024-03-05 14:19:03.168',	'INCOMPLETE',	'2024-03-05 14:19:03.171',	'2024-03-05 14:19:03.171'),
-(85,	414,	3900,	9.21,	'2024-03-05 14:24:49.581',	'INCOMPLETE',	'2024-03-05 14:24:49.583',	'2024-03-05 14:24:49.583'),
-(86,	414,	3900,	9.21,	'2024-03-05 20:08:18.961',	'INCOMPLETE',	'2024-03-05 20:08:18.964',	'2024-03-05 20:08:18.964'),
-(87,	414,	3900,	9.21,	'2024-03-05 20:12:04.961',	'INCOMPLETE',	'2024-03-05 20:12:04.964',	'2024-03-05 20:12:04.964'),
-(88,	414,	3900,	1,	'2024-03-05 20:12:34.542',	'COMPLETED',	'2024-03-05 20:12:34.545',	'2024-03-05 20:12:34.545'),
-(89,	414,	3900,	1,	'2024-03-05 20:23:18.132',	'COMPLETED',	'2024-03-05 20:23:18.134',	'2024-03-05 20:23:18.134'),
-(90,	414,	3900,	1,	'2024-03-05 20:25:57.768',	'COMPLETED',	'2024-03-05 20:25:57.770',	'2024-03-05 20:25:57.770'),
-(91,	414,	3900,	1,	'2024-03-05 20:33:08.618',	'COMPLETED',	'2024-03-05 20:33:08.620',	'2024-03-05 20:33:08.620'),
-(92,	414,	3900,	1,	'2024-03-05 20:34:09.325',	'COMPLETED',	'2024-03-05 20:34:09.328',	'2024-03-05 20:34:09.328'),
-(93,	414,	3900,	0.01,	'2024-03-05 20:40:40.154',	'COMPLETED',	'2024-03-05 20:40:40.158',	'2024-03-05 20:40:40.158'),
-(94,	414,	3900,	1,	'2024-03-05 20:40:41.170',	'COMPLETED',	'2024-03-05 20:40:41.173',	'2024-03-05 20:40:41.173'),
-(95,	414,	3900,	0.01,	'2024-03-05 20:41:33.015',	'COMPLETED',	'2024-03-05 20:41:33.017',	'2024-03-05 20:41:33.017'),
-(96,	414,	3900,	0.01,	'2024-03-05 20:43:33.968',	'COMPLETED',	'2024-03-05 20:43:33.970',	'2024-03-05 20:43:33.970'),
-(97,	414,	3900,	0.01,	'2024-03-05 20:44:30.455',	'COMPLETED',	'2024-03-05 20:44:30.457',	'2024-03-05 20:44:30.457'),
-(98,	414,	3900,	0.01,	'2024-03-05 20:46:42.415',	'COMPLETED',	'2024-03-05 20:46:42.417',	'2024-03-05 20:46:42.417'),
-(99,	414,	3900,	0.01,	'2024-03-05 20:50:45.249',	'COMPLETED',	'2024-03-05 20:50:45.251',	'2024-03-05 20:50:45.251'),
-(100,	414,	3900,	0.01,	'2024-03-05 20:53:30.983',	'COMPLETED',	'2024-03-05 20:53:30.986',	'2024-03-05 20:53:30.986'),
-(101,	414,	3900,	0.01,	'2024-03-05 20:54:38.134',	'COMPLETED',	'2024-03-05 20:54:38.136',	'2024-03-05 20:54:38.136'),
-(102,	3900,	414,	6.13,	'2024-03-05 20:55:27.589',	'COMPLETED',	'2024-03-05 20:55:27.592',	'2024-03-05 20:55:27.592'),
-(103,	414,	3900,	10,	'2024-03-05 21:19:52.766',	'INCOMPLETE',	'2024-03-05 21:19:52.769',	'2024-03-05 21:19:52.769'),
-(104,	414,	3900,	10,	'2024-03-05 21:37:17.190',	'INCOMPLETE',	'2024-03-05 21:37:17.192',	'2024-03-05 21:37:17.192'),
-(105,	414,	3900,	10,	'2024-03-05 21:43:52.953',	'INCOMPLETE',	'2024-03-05 21:43:52.956',	'2024-03-05 21:43:52.956'),
-(106,	414,	3900,	10,	'2024-03-05 21:48:36.145',	'INCOMPLETE',	'2024-03-05 21:48:36.148',	'2024-03-05 21:48:36.148'),
-(107,	414,	3900,	10,	'2024-03-05 21:52:13.588',	'INCOMPLETE',	'2024-03-05 21:52:13.591',	'2024-03-05 21:52:13.591'),
-(108,	414,	3900,	10,	'2024-03-05 23:54:50.812',	'INCOMPLETE',	'2024-03-05 23:54:50.814',	'2024-03-05 23:54:50.814'),
-(109,	414,	3900,	10,	'2024-03-05 23:55:39.377',	'INCOMPLETE',	'2024-03-05 23:55:39.379',	'2024-03-05 23:55:39.379'),
-(110,	414,	3900,	10,	'2024-03-05 23:58:57.898',	'INCOMPLETE',	'2024-03-05 23:58:57.901',	'2024-03-05 23:58:57.901'),
-(111,	414,	3900,	10,	'2024-03-06 00:00:23.162',	'INCOMPLETE',	'2024-03-06 00:00:23.164',	'2024-03-06 00:00:23.164'),
-(112,	414,	3900,	10,	'2024-03-06 00:06:00.703',	'INCOMPLETE',	'2024-03-06 00:06:00.705',	'2024-03-06 00:06:00.705'),
-(113,	414,	3900,	10,	'2024-03-06 00:12:10.358',	'INCOMPLETE',	'2024-03-06 00:12:10.361',	'2024-03-06 00:12:10.361'),
-(114,	414,	3900,	10,	'2024-03-06 00:28:58.503',	'INCOMPLETE',	'2024-03-06 00:28:58.507',	'2024-03-06 00:28:58.507'),
-(115,	414,	3900,	10,	'2024-03-06 11:23:27.283',	'INCOMPLETE',	'2024-03-06 11:23:27.287',	'2024-03-06 11:23:27.287'),
-(116,	414,	3900,	10,	'2024-03-06 11:23:59.929',	'INCOMPLETE',	'2024-03-06 11:23:59.932',	'2024-03-06 11:23:59.932');
+(162,	414,	3900,	10,	'2024-03-23 14:29:28.762',	'INCOMPLETE',	'2024-03-23 14:29:28.765',	'2024-03-23 14:29:28.765'),
+(163,	414,	3900,	10,	'2024-03-23 15:07:02.835',	'INCOMPLETE',	'2024-03-23 15:07:02.838',	'2024-03-23 15:07:02.838'),
+(164,	3900,	414,	0.01,	'2024-03-23 23:18:16.506',	'COMPLETED',	'2024-03-23 23:18:16.510',	'2024-03-23 23:18:16.510'),
+(165,	3900,	414,	0.01,	'2024-03-25 13:33:29.931',	'COMPLETED',	'2024-03-25 13:33:29.934',	'2024-03-25 13:33:29.934'),
+(166,	3900,	414,	0.01,	'2024-03-25 14:36:08.878',	'COMPLETED',	'2024-03-25 14:36:08.881',	'2024-03-25 14:36:08.881'),
+(167,	3900,	414,	0.01,	'2024-03-25 15:02:31.094',	'COMPLETED',	'2024-03-25 15:02:31.097',	'2024-03-25 15:02:31.097'),
+(168,	3900,	414,	0.01,	'2024-03-25 15:12:22.769',	'COMPLETED',	'2024-03-25 15:12:22.773',	'2024-03-25 15:12:22.773'),
+(169,	414,	3900,	10,	'2024-03-25 15:19:29.379',	'INCOMPLETE',	'2024-03-25 15:19:29.382',	'2024-03-25 15:19:29.382'),
+(170,	3900,	414,	0.01,	'2024-03-25 15:19:39.816',	'COMPLETED',	'2024-03-25 15:19:39.819',	'2024-03-25 15:19:39.819'),
+(171,	414,	3900,	10,	'2024-03-25 15:19:42.101',	'INCOMPLETE',	'2024-03-25 15:19:42.104',	'2024-03-25 15:19:42.104'),
+(172,	414,	3900,	0.01,	'2024-03-25 15:19:42.493',	'COMPLETED',	'2024-03-25 15:19:42.496',	'2024-03-25 15:19:42.496');
+
+INSERT INTO `USERS_ROOT` (`id`, `username`, `password`, `panel_id`, `access`, `refresh`, `json_response`, `dirty`, `created_at`, `updated_at`, `bankAccount`, `alq_api_manager`, `alq_token`) VALUES
+(5,	'luquin',	'{\"ivArray\":[\"223\",\"113\",\"127\",\"161\",\"137\",\"159\",\"125\",\"9\",\"54\",\"212\",\"223\",\"84\",\"216\",\"60\",\"32\",\"145\"],\"ciphertext\":\"cf8e6500b5a41d9587e9951de3fa3eb5\"}',	414,	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzExMzgwNTg1LCJqdGkiOiIzMWVlYTdhNjAwMzM0NGM4OThjMjc3NjVkMTJkZjA4OSIsInVzZXJfaWQiOjQxNCwicmVmcmVzaF9zaGlmdCI6MTIwLCJ1dWlkIjoiNzgzZDQ0M2Q1NmE5NDBlZmI0ZWRlYzE2NTEyYjRlNGUifQ.hNWBLOt6gx-K9X-ZEXqXgOt04M9j4Lp3oCfb7WnbO_A',	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxMTM4MzU4NSwianRpIjoiN2M0NGQxMzgxMWZmNDE3YTg5N2ZiOTVhMDBhNDY2ZDAiLCJ1c2VyX2lkIjo0MTQsInJlZnJlc2hfc2hpZnQiOjEyMCwidXVpZCI6Ijc4M2Q0NDNkNTZhOTQwZWZiNGVkZWMxNjUxMmI0ZTRlIn0.USkLPeUxHmbNYOdBOlykUAkHHe1rooiFZixqfEnkZgI',	'{\"id\":414,\"jackpots_won\":[],\"is_email_verified\":true,\"info\":{\"first_name\":\"lucas\",\"last_name\":\"lucas\",\"date_of_birth\":null,\"mobile_number\":\"\",\"country\":\"\",\"city\":\"\",\"street_address\":\"\",\"postal_code\":\"\",\"state\":null,\"screen_name\":\"lucas\"},\"bonus_balance\":\"0.00\",\"balance\":\"9.02\",\"role\":\"PA\",\"email\":\"luquin@gmail.com\",\"is_withdraw_allowed\":true,\"is_banned\":false,\"is_frozen\":false,\"access\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzExMzgwNTg1LCJqdGkiOiIzMWVlYTdhNjAwMzM0NGM4OThjMjc3NjVkMTJkZjA4OSIsInVzZXJfaWQiOjQxNCwicmVmcmVzaF9zaGlmdCI6MTIwLCJ1dWlkIjoiNzgzZDQ0M2Q1NmE5NDBlZmI0ZWRlYzE2NTEyYjRlNGUifQ.hNWBLOt6gx-K9X-ZEXqXgOt04M9j4Lp3oCfb7WnbO_A\",\"refresh\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxMTM4MzU4NSwianRpIjoiN2M0NGQxMzgxMWZmNDE3YTg5N2ZiOTVhMDBhNDY2ZDAiLCJ1c2VyX2lkIjo0MTQsInJlZnJlc2hfc2hpZnQiOjEyMCwidXVpZCI6Ijc4M2Q0NDNkNTZhOTQwZWZiNGVkZWMxNjUxMmI0ZTRlIn0.USkLPeUxHmbNYOdBOlykUAkHHe1rooiFZixqfEnkZgI\",\"last_login\":\"2024-03-25T15:19:45.708562Z\",\"username\":\"luquin\",\"first_name\":\"\",\"last_name\":\"\",\"date_joined\":\"2023-11-15T16:52:59.768862Z\",\"balance_currency\":\"MXN\",\"bonus_balance_currency\":\"MXN\",\"is_self_registered\":false,\"language\":\"en-US\",\"needs_document_approve\":true,\"affise_data\":null,\"pap_data\":null,\"cpf_document\":null,\"parent\":3}',	0,	'2024-03-11 16:41:03.213',	'2024-03-25 15:19:51.439',	'{\"dni\": \"12345678\", \"name\": \"Test name\", \"alias\": \"Test alias\", \"clabe\": \"12345678901234567890\", \"bankName\": \"Test bank name\", \"accountNumber\": \"1234567890\"}',	'eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XSTBaV05tTkRjeE5HWXdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyWkdWbE5nX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJhZG1pbmlzdHJhY2lvbi5kZW1vbWF0aWMuY29tQGNhcmJvbi5zdXBlciIsImF1dCI6IkFQUExJQ0FUSU9OIiwiYXVkIjoiV3pONHFMc053Z1dScmN5cDJLVnRXUUtmb21ZYSIsIm5iZiI6MTcxMTM3OTk5MCwiYXpwIjoiV3pONHFMc053Z1dScmN5cDJLVnRXUUtmb21ZYSIsInNjb3BlIjoiYW1fYXBwbGljYXRpb25fc2NvcGUgZGVmYXVsdCIsImlzcyI6Imh0dHBzOlwvXC9lYzItMjMtMjMtMjMyLTIxMC5jb21wdXRlLTEuYW1hem9uYXdzLmNvbTo5NDQzXC9vYXV0aDJcL3Rva2VuIiwiZXhwIjoxNzExMzgwNTkwLCJpYXQiOjE3MTEzNzk5OTAsImp0aSI6ImE3YzUyMzVmLWQ2MWYtNDJmYi1hYTcyLTllYTVhNzA0ZmEwOCJ9.nj-psSG0d4MOUy-AhTDCeAR2d0kc7f98FoDTy219BpiddteFs0JhJQti6LcLwV6EPflHF9psWRSiPfW8AwQ9G8WaRytw1BwlWKzTsk0uIuDtJ5y6dKlqBIie4f0H-SI4AxxMfuBzihF54jUjWuG6f57KiT4yfj8zyZPT2vuf8s_thALG-Yx5jTWHSMYEo1GT075eUR3PvRXmcg3uq5XEWWYZo8UwSmQH6HVEdGUplXXFfGpyDUru15HbFSMTz6Dc5nDqUWWSpfDJDsorpXwnfTlRVGfnAw1ok2WcdhwmgJxad08ZSO-KV8XISXH19ItjZtS9oW4mP4vfg0IjlBcW_Q',	'{\"token\":\"bcc38f7e9006d143fb39c80836f3d11898f406fe\",\"expires_at\":1711466391.431}');
 
 INSERT INTO `WEB_PUSH_SUBSCRIPTIONS` (`id`, `endpoint`, `keys`, `expirationTime`, `created_at`, `updated_at`) VALUES
-('0db24e46-e88e-4dcf-aa46-0f4864d9bce6',	'https://updates.push.services.mozilla.com/wpush/v2/gAAAAABl6G1_7dC4XZt8tyakWb4tkgkUPa5OdZdcppzodaq7V-ppV-8W-2VdI0wNTagd8Stza8cWtnod6mCIXuKN2fB7oTWW-Npblv0b8DduIVQ4sh9_HkOKrPejPf2aiWo41NgBOF4EjTXvI34VuHrsrGJXINkFKEuGwqIArd44biQUpvryiBY',	'\"{\\\"auth\\\":\\\"BajUs3_hjWvV-YelV8wvoA\\\",\\\"p256dh\\\":\\\"BCgLxINCe2RsHj7dy2g0ZHebIEB5PHbL7R-kE7AbHfZEmtJ0p9j55zsLV3u2mH0YExz_FuYX8YTbzSsxGbMkPgo\\\"}\"',	NULL,	'2024-03-06 13:19:59.587',	'2024-03-06 13:19:59.587'),
-('cac07b28-1e41-48bd-b47c-6896cdbf98bd',	'https://updates.push.services.mozilla.com/wpush/v2/gAAAAABl57HpCWQY48l7rJCq4hdyDvEZn9M08eeqznLAaS07i-vtt-gOm9fvkTy3GMFAPv0sM0AmauufRETopV8fwAApGDFSwpRKPu3QaXkvh2kgPXNwZ-12-poW08R5n_MqwSxwuAa9BvaByes2vqtxyUdzsIpxXtHiYm8e8Gy2fKysvsPWnYE',	'\"{\\\"auth\\\":\\\"t1613F43pz5cG15yiFpFPg\\\",\\\"p256dh\\\":\\\"BGOwYrogG0_mjsKULF7X5Fv8hJCitTIEISvGMmvmYmNeP8Tyw04yq5bidXvQ_tyuj12TIc0UCLoVBKobNLUtVh0\\\"}\"',	NULL,	'2024-03-05 23:59:38.013',	'2024-03-05 23:59:38.013');
+('0db24e46-e88e-4dcf-aa46-0f4864d9bce6',	'https://updates.push.services.mozilla.com/wpush/v2/gAAAAABl6G1_7dC4XZt8tyakWb4tkgkUPa5OdZdcppzodaq7V-ppV-8W-2VdI0wNTagd8Stza8cWtnod6mCIXuKN2fB7oTWW-Npblv0b8DduIVQ4sh9_HkOKrPejPf2aiWo41NgBOF4EjTXvI34VuHrsrGJXINkFKEuGwqIArd44biQUpvryiBY',	'\"{\\\"auth\\\":\\\"BajUs3_hjWvV-YelV8wvoA\\\",\\\"p256dh\\\":\\\"BCgLxINCe2RsHj7dy2g0ZHebIEB5PHbL7R-kE7AbHfZEmtJ0p9j55zsLV3u2mH0YExz_FuYX8YTbzSsxGbMkPgo\\\"}\"',	NULL,	'2024-03-06 13:19:59.587',	'2024-03-06 13:19:59.587');
 
 INSERT INTO `_PlayerToRole` (`A`, `B`) VALUES
 (28,	1),
@@ -131,6 +107,8 @@ INSERT INTO `_PlayerToRole` (`A`, `B`) VALUES
 (17,	2),
 (18,	2),
 (19,	2),
-(29,	2);
+(29,	2),
+(164,	2),
+(172,	2);
 
--- 2024-03-11 17:50:32
+-- 2024-03-25 18:39:58

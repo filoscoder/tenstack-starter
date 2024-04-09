@@ -3,10 +3,11 @@ import { Token } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JwtService } from "../../services/jwt.service";
 import CONFIG from "@/config";
-import { CustomError, ERR } from "@/middlewares/errorHandler";
+import { CustomError } from "@/middlewares/errorHandler";
 import { TokenDAO } from "@/db/token";
 import { JWTPayload, TokenPair, TokenResult } from "@/types/response/jwt";
 import { PlayersDAO } from "@/db/players";
+import { ERR } from "@/config/errors";
 
 export class AuthServices extends JwtService {
   private get cypherPass(): string {
@@ -26,7 +27,7 @@ export class AuthServices extends JwtService {
    * @param sub User ID
    * @param role User role
    */
-  async tokens(sub: number, user_agent?: string): Promise<TokenResult> {
+  async tokens(sub: string, user_agent?: string): Promise<TokenResult> {
     const dbToken = await TokenDAO.create({ player_id: sub, user_agent });
     return {
       tokens: this.generateTokenPair(sub, dbToken.id, this.cypherPass),
@@ -41,8 +42,11 @@ export class AuthServices extends JwtService {
     if (!this.verifyTokenExpiration(refresh))
       throw new CustomError(ERR.TOKEN_EXPIRED);
 
-    const payload = this.decodePayload(refresh);
-    if (payload.type !== "refresh") throw new CustomError(ERR.TOKEN_INVALID);
+    const payload = await this.verifyToken(refresh, this.cypherPass);
+    if (!payload || typeof payload === "string")
+      throw new CustomError(ERR.TOKEN_INVALID);
+
+    if (payload.type !== "refresh") throw new CustomError(ERR.WRONG_TOKEN_TYPE);
 
     let token = await TokenDAO.getById(payload.jti);
     if (!token) throw new CustomError(ERR.TOKEN_INVALID);
@@ -52,8 +56,6 @@ export class AuthServices extends JwtService {
 
     if (token.invalid) {
       await this.invalidateChildren(token);
-      // TODO
-      // notify("Uso duplicado de refresh token");
       throw new CustomError(ERR.TOKEN_INVALID);
     }
 
@@ -99,7 +101,7 @@ export class AuthServices extends JwtService {
     return TokenDAO.updateById(token_id, { invalid: true });
   }
 
-  invalidateTokensByUserAgent(player_id: number, user_agent?: string) {
+  invalidateTokensByUserAgent(player_id: string, user_agent?: string) {
     return TokenDAO.update({ player_id, user_agent }, { invalid: true });
   }
 
@@ -107,12 +109,13 @@ export class AuthServices extends JwtService {
    * Invalidate given token and all its children
    */
   private async invalidateChildren(token: Token) {
-    do {
-      token = await this.invalidateTokenById(token.id);
-    } while (token!.next);
+    await this.invalidateTokenById(token.id);
+    while (token!.next) {
+      token = await this.invalidateTokenById(token.next);
+    }
   }
 
-  async logout(user_id: number, encoded: string) {
+  async logout(user_id: string, encoded: string) {
     try {
       const payload = jwt.verify(encoded, this.cypherPass) as JwtPayload;
       if (payload === undefined) return;

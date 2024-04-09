@@ -8,10 +8,8 @@ import {
 } from "@/components/players/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
 import { requireUserRole } from "@/middlewares/auth";
-
 const playersRouter = Router();
 
-// Post para crear usuarios
 playersRouter.post(
   "/",
   validatePlayerRequest(),
@@ -19,7 +17,6 @@ playersRouter.post(
   throwIfBadRequest,
   PlayersController.create,
 );
-// Post LogIn
 playersRouter.post(
   "/login",
   validateCredentials(),
@@ -32,4 +29,5 @@ playersRouter.use(
 );
 playersRouter.use(requireUserRole);
 playersRouter.get("/", PlayersController.getPlayerById);
+
 export default playersRouter;

@@ -7,9 +7,12 @@ import HttpStatus, {
 } from "http-status/lib";
 import { Prisma } from "@prisma/client";
 import { TimeOutError } from "@/helpers/error";
+import { ErrorData } from "@/types/response/error";
+import CONFIG from "@/config";
+import { logtailLogger } from "@/helpers/loggers";
 
 /**
- * @description Error response middleware for 404 not found. This middleware function should be at the very bottom of the stack.
+ * @description Error response middleware for not found urls. This middleware function should be at the very bottom of the stack.
  * @param req Express.Request
  * @param res Express.Response
  * @param _next Express.NextFunction
@@ -55,7 +58,6 @@ export const genericErrorHandler = (
     resCode = REQUEST_TIMEOUT;
     resBody = new TimeOutError(req.originalUrl);
   }
-  // console.log("[genericErrorHandler]", resBody);
 
   res.status(resCode).json(resBody);
 };
@@ -71,73 +73,35 @@ export const customErrorHandler = (
       code: err.code,
       description: err.description,
     });
+    if (
+      // @ts-ignore
+      CONFIG.LOG.CODES.includes(err.code) &&
+      CONFIG.APP.ENV === "production"
+    ) {
+      logtailLogger.error({ err, tag: err.code });
+    }
   } else {
     return next(err);
   }
 };
 
 export class CustomError extends Error {
-  status: number;
-  code: string;
-  description: string;
+  public status: number;
+  public code: string;
+  public description: string;
+  /**
+   * Extra info for logging
+   */
+  public detail?: object;
 
   constructor(err: ErrorData) {
-    super(err.description);
-
-    this.description = err.description;
-    this.code = err.code;
+    super();
     this.status = err.status;
+    this.code = err.code;
+    this.description = err.description;
+    this.detail = err.detail;
   }
 }
-
-export interface ErrorData {
-  status: number;
-  code: string;
-  description: string;
-}
-
-export const ERR: { [key: string]: ErrorData } = {
-  USER_ALREADY_EXISTS: {
-    status: 400,
-    code: "ya_existe",
-    description: "Un usuario con ese nombre ya existe",
-  },
-  INVALID_CREDENTIALS: {
-    status: 404,
-    code: "credenciales_invalidas",
-    description: "Usuario o contraseña incorrectos",
-  },
-  AGENT_LOGIN: {
-    status: 500,
-    code: "agent_login",
-    description: "Error al loguear el agente en el panel",
-  },
-  TOKEN_EXPIRED: {
-    status: 401,
-    code: "token_expirado",
-    description: "Token expirado",
-  },
-  TOKEN_INVALID: {
-    status: 401,
-    code: "token_invalido",
-    description: "Token invalido",
-  },
-  KEY_NOT_FOUND: {
-    status: 500,
-    code: "env",
-    description: "No se encontro la llave en .env",
-  },
-  AGENT_PASS_NOT_SET: {
-    status: 500,
-    code: "env",
-    description: "No se encontro la clave de agente en .env",
-  },
-  AGENT_UNSET: {
-    status: 500,
-    code: "agent_unset",
-    description: "No se encontro el agente en la BD. ¿Corriste npm run seed?",
-  },
-};
 
 function prismaErrorHandler(
   err:
@@ -201,11 +165,15 @@ function prismaErrorHandler(
           description: `Error en la base de datos: ${err.message}`,
         });
     }
-    res.send({ status, code, description });
+    res.status(status || 400).send({ status, code, description });
   } else if (err instanceof Prisma.PrismaClientValidationError) {
     let description = "Error de validacion de datos ";
-    description += err.message.split("Unknown")[1];
-    res.send({
+    if (CONFIG.APP.ENV?.includes("test") || CONFIG.APP.ENV?.includes("dev")) {
+      description += err.message;
+    } else {
+      description += err.message.split("Unknown")[1];
+    }
+    res.status(400).send({
       status: 400,
       code: "error_validacion",
       description,

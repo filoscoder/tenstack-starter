@@ -5,19 +5,19 @@ import morgan from "morgan";
 import timeout from "connect-timeout";
 import passport from "passport";
 import CONFIG from "./config";
-import { expressPinoLogger } from "./helpers";
 import { AuthServices } from "./components/auth/services";
+import { expressPinoConsoleLogger } from "./helpers/loggers";
 import * as errorHandler from "@/middlewares/errorHandler";
 import mainRouter from "@/routes";
 
 export const createApp = (): express.Application => {
   const app = express();
 
-  const origin = CONFIG.APP.ENV?.includes("dev")
+  const allowedOrigin = CONFIG.APP.ENV?.includes("dev")
     ? "http://localhost:3000"
-    : "http://localhost:8080";
+    : CONFIG.APP.ALLOWED_ORIGIN;
 
-  app.use(cors({ origin }));
+  allowedOrigin !== "" && app.use(cors({ origin: allowedOrigin }));
   app.use(helmet());
   app.use(express.json());
   app.use(
@@ -28,7 +28,7 @@ export const createApp = (): express.Application => {
 
   if (CONFIG.APP.ENV !== "test") {
     app.use(morgan("dev"));
-    app.use(expressPinoLogger());
+    app.use(expressPinoConsoleLogger());
   }
 
   app.use(timeout(CONFIG.SERVER.TIMEOUT));

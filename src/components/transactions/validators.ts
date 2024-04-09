@@ -1,37 +1,32 @@
-import { CustomValidator, checkSchema } from "express-validator";
+import { checkSchema } from "express-validator";
 
-const emptyBody: CustomValidator = (_value, { req }) => !req.body;
-const noId: CustomValidator = (_value, { req }) => !req.params?.id;
-
-export const validateTransferRequest = () =>
+export const validateCashoutRequest = () =>
   checkSchema({
-    id: {
-      in: ["params"],
-      exists: {
-        if: emptyBody,
-      },
-    },
     amount: {
-      exists: { if: noId },
       in: ["body"],
       isFloat: true,
       isEmpty: false,
       errorMessage: "amount is required",
     },
-    currency: {
-      exists: { if: noId },
+    bank_account: {
       in: ["body"],
       isEmpty: false,
       isString: true,
-      isLength: { options: { min: 3, max: 3 } },
-      errorMessage: "currency is required",
+      errorMessage: "bank_account (account id) is required",
     },
-    bank_account: {
-      exists: { if: noId },
+  });
+
+export const validateDepositRequest = () =>
+  checkSchema({
+    id: {
+      in: ["params"],
+      optional: true,
+    },
+    tracking_number: {
       in: ["body"],
       isEmpty: false,
-      isInt: true,
-      errorMessage: "bank_account (account id) is required",
+      isString: true,
+      errorMessage: "tracking_number is required",
     },
   });
 
@@ -39,7 +34,8 @@ export const validateDepositId = () =>
   checkSchema({
     id: {
       in: ["params"],
-      isInt: true,
+      isString: true,
+      isNumeric: false,
       isEmpty: false,
     },
   });

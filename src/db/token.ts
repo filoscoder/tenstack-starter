@@ -51,7 +51,7 @@ export class TokenDAO {
     }
   }
 
-  static async authorizeRevocation(user_id: number, jti: string) {
+  static async authorizeRevocation(user_id: string, jti: string) {
     try {
       const token = await this.getById(jti);
       if (!token) throw new NotFoundException();

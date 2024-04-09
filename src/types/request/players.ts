@@ -1,4 +1,4 @@
-export type getPlayerId = number;
+export type getPlayerId = string;
 
 export interface getPlayerIdRequest extends Res {
   params: {

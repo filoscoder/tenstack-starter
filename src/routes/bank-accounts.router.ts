@@ -30,15 +30,15 @@ bankAccountsRouter.post(
   throwIfBadRequest,
   BankAccountsController.create,
 );
-bankAccountsRouter.put(
+bankAccountsRouter.post(
   "/:id",
   validateAccountUpdate(),
   checkExact(),
   throwIfBadRequest,
   BankAccountsController.update,
 );
-bankAccountsRouter.delete(
-  "/:id",
+bankAccountsRouter.post(
+  "/:id/delete",
   validateBankAccountIndex(),
   checkExact(),
   throwIfBadRequest,

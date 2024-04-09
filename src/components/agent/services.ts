@@ -1,7 +1,7 @@
 import { Deposit, Payment } from "@prisma/client";
 import { FinanceServices } from "../transactions/services";
 import { AuthServices } from "../auth/services";
-import { CustomError, ERR } from "@/middlewares/errorHandler";
+import { CustomError } from "@/middlewares/errorHandler";
 import { Credentials } from "@/types/request/players";
 import { compare } from "@/utils/crypt";
 import { PaymentsDAO } from "@/db/payments";
@@ -10,10 +10,11 @@ import { AgentBankAccount, BalanceResponse } from "@/types/response/agent";
 import { UserRootDAO } from "@/db/user-root";
 import { TokenPair } from "@/types/response/jwt";
 import { HttpService } from "@/services/http.service";
-import { hidePassword } from "@/utils/auth";
 import { NotFoundException, UnauthorizedError } from "@/helpers/error";
 import { PlayersDAO } from "@/db/players";
 import CONFIG from "@/config";
+import { ERR } from "@/config/errors";
+import { BotFlowsDAO } from "@/db/bot-flows";
 
 export class AgentServices {
   static async login(
@@ -45,14 +46,19 @@ export class AgentServices {
   /**
    * Mark a pending payment as paid
    */
-  static async markAsPaid(payment_id: number): Promise<Payment> {
+  static async markAsPaid(payment_id: string): Promise<Payment> {
     const payment = PaymentsDAO.update(payment_id, {
       paid: new Date().toISOString(),
     });
     return payment;
   }
 
-  static async showDeposits(): Promise<Deposit[] | null> {
+  static async showDeposits(depositId?: string): Promise<Deposit[] | null> {
+    if (depositId) {
+      const deposit = await DepositsDAO.getById(depositId);
+      if (!deposit) return null;
+      return [deposit];
+    }
     const deposits = DepositsDAO.index();
     return deposits;
   }
@@ -77,9 +83,10 @@ export class AgentServices {
     const response = await httpService.authedAgentApi.get(url);
     if (response.status !== 200)
       throw new CustomError({
-        code: "error_balance",
+        code: "agent_api_error",
         status: response.status,
         description: "Error en el panel al obtener el balance",
+        detail: response.data,
       });
     return {
       balance: Number(response.data.balance),
@@ -87,20 +94,30 @@ export class AgentServices {
     };
   }
 
-  static async completePendingDeposits(): Promise<Deposit[]> {
+  static async freePendingCoinTransfers(): Promise<Deposit[]> {
     const deposits = await DepositsDAO.getPendingCoinTransfers();
+    const response: Deposit[] = [];
+    const financeServices = new FinanceServices();
     for (const deposit of deposits) {
-      const financeServices = new FinanceServices(
-        "deposit",
-        deposit.amount,
-        deposit.currency,
-        deposit.Player.panel_id,
+      if (deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED) continue;
+      const result = await financeServices.confirmDeposit(
+        deposit.Player,
+        deposit.id,
+        { tracking_number: deposit.tracking_number },
       );
-      const result = await financeServices.transfer(deposit.id);
-      if (result.status === "COMPLETED") deposit.coins_transfered = new Date();
-      deposit.Player = hidePassword(deposit.Player);
+      response.push(result.deposit);
     }
 
-    return deposits;
+    return response;
+  }
+
+  static async setOnCallBotFlow(active: boolean): Promise<void> {
+    await BotFlowsDAO.setOnCall(active);
+  }
+
+  static async getOnCallStatus(): Promise<boolean> {
+    const botFlow = await BotFlowsDAO.findOnCallFlow();
+
+    return !!botFlow;
   }
 }

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `DEPOSITS` ADD COLUMN `amount` DOUBLE NULL;

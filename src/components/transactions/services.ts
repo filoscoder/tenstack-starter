@@ -1,55 +1,55 @@
-import { Deposit, Payment } from "@prisma/client";
-import { TransactionsDAO } from "@/db/transactions";
-import { CustomError } from "@/middlewares/errorHandler";
+import { AlquimiaDeposit, Deposit, Payment, Player } from "@prisma/client";
+import { AxiosResponse } from "axios";
 import { DepositsDAO } from "@/db/deposits";
 import { HttpService } from "@/services/http.service";
-import { UserRootDAO } from "@/db/user-root";
-import { PlainPlayerResponse } from "@/types/response/players";
+import { PlainPlayerResponse, RoledPlayer } from "@/types/response/players";
 import { PaymentsDAO } from "@/db/payments";
-import { TokenService } from "@/services/token.service";
-import { TransferRequest, TransferDetails } from "@/types/request/transfers";
-import { Transaction } from "@/types/response/transactions";
-import { TransferResult } from "@/types/response/transfers";
-import { parseTransferResult } from "@/utils/parser";
-import { Notify } from "@/helpers/notification";
+import { CashoutRequest, DepositRequest } from "@/types/request/transfers";
+import { parseAlqMovement } from "@/utils/parser";
 import CONFIG from "@/config";
+import { CoinTransferResult, DepositResult } from "@/types/response/transfers";
+import { AlquimiaDepositDAO } from "@/db/alq-deposits";
+import { AlqMovementResponse } from "@/types/response/alquimia";
+import { CasinoCoinsService } from "@/services/casino-coins.service";
+import { CustomError } from "@/middlewares/errorHandler";
+import { ERR } from "@/config/errors";
+import { hidePassword } from "@/utils/auth";
 
 /**
  * Services to be consumed by Player endpoints
  */
 export class FinanceServices {
-  constructor(
-    private _type: "deposit" | "withdrawal",
-    private _amount: number,
-    private _currency: string,
-    private _playerPanelId: number,
-  ) {}
   /**
    * Create deposit, verify it, and transfer coins from agent to player.
    */
   async deposit(
     player: PlainPlayerResponse,
-    request: TransferRequest,
-  ): Promise<TransferResult> {
-    await TransactionsDAO.authorizeTransaction(request.bank_account, player.id);
+    request: DepositRequest,
+  ): Promise<DepositResult> {
+    await DepositsDAO.authorizeCreation(request);
 
     const deposit = await this.createDeposit(player.id, request);
 
-    return await this.finalizeTransfer(deposit, false);
+    return await this.finalizeDeposit(deposit);
   }
 
   /**
    * Player announces they have completed a pending deposit
    */
   async confirmDeposit(
-    player: PlainPlayerResponse,
-    deposit_id: number,
-  ): Promise<TransferResult & { deposit: Deposit }> {
-    await DepositsDAO.authorizeConfirmation(deposit_id, player.id);
+    player: RoledPlayer,
+    deposit_id: string,
+    request: DepositRequest,
+  ): Promise<DepositResult> {
+    await DepositsDAO.authorizeConfirmation(
+      deposit_id,
+      request.tracking_number,
+      player,
+    );
 
-    const deposit = (await DepositsDAO.getById(deposit_id))!;
+    const deposit = (await DepositsDAO.update(deposit_id, request))!;
 
-    return await this.finalizeTransfer(deposit, true);
+    return await this.finalizeDeposit(deposit);
   }
 
   /**
@@ -58,196 +58,216 @@ export class FinanceServices {
    */
   async cashOut(
     player: PlainPlayerResponse,
-    request: TransferRequest,
-  ): Promise<TransferResult> {
-    await TransactionsDAO.authorizeTransaction(request.bank_account, player.id);
+    request: CashoutRequest,
+  ): Promise<CoinTransferResult> {
+    await PaymentsDAO.authorizeCreation(request.bank_account, player.id);
 
-    const transferResult = await this.transfer();
+    const casinoCoinsService = new CasinoCoinsService();
 
-    if (transferResult.status === "COMPLETED")
-      this.createPayment(player.id, request);
+    const transferResult = await casinoCoinsService.playerToAgent(
+      request,
+      player,
+    );
+
+    if (transferResult.ok) this.createPayment(player, request);
 
     return transferResult;
   }
 
-  private async finalizeTransfer(
-    deposit: Deposit,
-    verify: boolean,
-  ): Promise<TransferResult & { deposit: Deposit }> {
-    const verifiedDeposit = await this.verifyPayment(deposit, verify);
-
-    if (!verifiedDeposit.confirmed) {
-      const result: TransferResult = {
-        status: "INCOMPLETE",
-        error: "Deposito no confirmado",
-      };
-      return {
-        ...result,
-        deposit: verifiedDeposit,
-      };
-    }
-
-    const transferResult = await this.transfer(deposit.id);
-
-    return {
-      ...transferResult,
-      deposit: verifiedDeposit,
-    };
-  }
-
-  async transfer(deposit_id?: number): Promise<TransferResult> {
-    const transferDetails = await this.generateTransferDetails();
-    const result = await this.panelTransfer(transferDetails);
-
-    if (result.status === 201 && transferDetails.type === "deposit")
-      await DepositsDAO.update(deposit_id!, {
-        coins_transfered: new Date().toISOString(),
-      });
-
-    if (transferDetails.type === "deposit" && result.status !== 201) {
-      const difference =
-        transferDetails.amount - result.data.variables.balance_amount;
-      await Notify.agent({
-        title: "Fichas insuficientes",
-        body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
-        tag: CONFIG.SD.INSUFICIENT_CREDITS,
-      });
-    }
-
-    await this.logTransaction(result, transferDetails);
-    return parseTransferResult(result, transferDetails.type);
-  }
-
-  private async panelTransfer(transferDetails: TransferDetails): Promise<any> {
-    const { authedAgentApi } = new HttpService();
-    const url = "/backoffice/transactions/";
-    const result = await authedAgentApi.post(url, transferDetails);
-
-    if (result.status !== 201 && result.status !== 400)
-      throw new CustomError({
-        code: "error_transferencia",
-        status: result.status,
-        description: "Error al transferir fichas", //transfer.data
-      });
-
-    return result;
-  }
-
   /**
-   * Log into Transaction History table
+   * Verify a deposit and send coins to player if deposit confirmed
    */
-  private async logTransaction(
-    transfer: any,
-    transferDetails: TransferDetails,
-  ) {
-    const transaction: Transaction = {
-      sender_id: transferDetails.sender_id,
-      recipient_id: transferDetails.recipient_id,
-      amount: transferDetails.amount,
-      date: new Date().toISOString(),
-      status: "INCOMPLETE",
-    };
-    if (transfer.status === 201) {
-      transaction.status = "COMPLETED";
-    } else if (
-      transfer.status === 400 &&
-      transfer.data.code === "transaction_insufficient_balance"
+  private async finalizeDeposit(
+    deposit: Deposit & { Player: Player },
+  ): Promise<DepositResult> {
+    if (
+      deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED &&
+      deposit.status !== CONFIG.SD.DEPOSIT_STATUS.CONFIRMED
     ) {
-      transaction.status = "INCOMPLETE";
+      const amount = await this.verifyPayment(deposit);
+      if (!amount) {
+        return {
+          error: "Deposito no confirmado",
+          deposit: await this.markDepositAsPending(deposit),
+        };
+      }
+      deposit = await this.markDepositAsVerified(deposit, amount);
     }
-    await TransactionsDAO.logTransaction(transaction);
-  }
-
-  private async generateTransferDetails(): Promise<TransferDetails> {
-    let agent = await UserRootDAO.getAgent();
-
-    if (!agent) {
-      const tokenService = new TokenService();
-      await tokenService.login();
-      agent = await UserRootDAO.getAgent();
-    }
-
-    let recipient_id, sender_id;
-
-    switch (this._type) {
-      case "deposit":
-        recipient_id = this._playerPanelId;
-        sender_id = agent!.panel_id;
-        break;
-      case "withdrawal":
-        recipient_id = agent!.panel_id;
-        sender_id = this._playerPanelId;
-        break;
+    let coinTransferResult: CoinTransferResult = { ok: false };
+    try {
+      const casinoCoinsService = new CasinoCoinsService();
+      coinTransferResult = await casinoCoinsService.agentToPlayer(deposit);
+      if (coinTransferResult.ok)
+        deposit = await this.markDepositAsCompleted(deposit);
+    } catch (e) {
+      if (CONFIG.LOG.LEVEL === "debug") console.error(e);
+      if (e instanceof CustomError && e.code === ERR.TRANSACTION_LOG.code)
+        deposit = await this.markDepositAsConfirmed(deposit);
+      else deposit = await this.markDepositAsCompleted(deposit);
+      // TODO
+      // Notify, something went wrong
     }
 
+    deposit.Player = hidePassword(deposit.Player);
     return {
-      recipient_id,
-      sender_id,
-      amount: this._amount,
-      currency: this._currency,
-      type: this._type,
+      player_balance: coinTransferResult?.player_balance,
+      error: coinTransferResult?.error,
+      deposit,
     };
-  }
-
-  private async createDeposit(
-    player_id: number,
-    request: TransferRequest,
-  ): Promise<Deposit> {
-    return await DepositsDAO.create({
-      player_id,
-      amount: request.amount,
-      bank_account: request.bank_account,
-      currency: request.currency,
-    });
-  }
-
-  private async createPayment(
-    player_id: number,
-    request: TransferRequest,
-  ): Promise<Payment> {
-    return await PaymentsDAO.create({
-      player_id,
-      amount: request.amount,
-      bank_account: request.bank_account,
-      currency: request.currency,
-    });
   }
 
   /**
    * Verify receipt of Player's payment.
-   * @throws CustomError if payment is not verified
    */
-  private async verifyPayment(
-    deposit: Deposit,
-    // TODO delete
-    verify = false,
-  ): Promise<Deposit> {
-    const delay = 3000;
-    const paymentOk = await new Promise((resolve, _reject) => {
-      setTimeout(() => {
-        resolve(verify);
-      }, delay);
-    });
+  public async verifyPayment(deposit: Deposit): Promise<number | undefined> {
+    if (
+      deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED ||
+      deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED
+    )
+      return deposit.amount!;
 
-    if (paymentOk) {
-      return await DepositsDAO.update(deposit.id, {
-        confirmed: new Date().toISOString(),
-        dirty: false,
-      });
+    try {
+      const localDeposit = await AlquimiaDepositDAO.findByTrackingNumber(
+        deposit.tracking_number,
+      );
+
+      if (localDeposit) return localDeposit.valor_real;
+
+      const alqDeposit = await this.alquimiaDepositLookup(
+        deposit.tracking_number,
+      );
+
+      if (alqDeposit) return alqDeposit.valor_real;
+
+      return;
+    } catch (e) {
+      if (CONFIG.LOG.LEVEL === "debug") console.error(e);
+      return;
+    }
+  }
+
+  private async createDeposit(
+    player_id: string,
+    request: DepositRequest,
+  ): Promise<Deposit & { Player: Player }> {
+    return await DepositsDAO.create({
+      ...request,
+      player_id,
+    });
+  }
+
+  private async createPayment(
+    player: Player,
+    request: CashoutRequest,
+  ): Promise<Payment> {
+    return await PaymentsDAO.create({
+      player_id: player.id,
+      amount: request.amount,
+      bank_account: request.bank_account,
+      currency: player.balance_currency,
+    });
+  }
+
+  private markDepositAsPending(
+    deposit: Deposit,
+  ): Promise<Deposit & { Player: Player }> {
+    return DepositsDAO.update(deposit.id, {
+      dirty: false,
+      status: CONFIG.SD.DEPOSIT_STATUS.PENDING,
+    });
+  }
+
+  private markDepositAsVerified(
+    deposit: Deposit,
+    amount: number,
+  ): Promise<Deposit & { Player: Player }> {
+    return DepositsDAO.update(deposit.id, {
+      dirty: false,
+      status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED,
+      amount,
+    });
+  }
+
+  private markDepositAsConfirmed(
+    deposit: Deposit,
+  ): Promise<Deposit & { Player: Player }> {
+    return DepositsDAO.update(deposit.id, {
+      dirty: false,
+      status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED,
+    });
+  }
+
+  private markDepositAsCompleted(
+    deposit: Deposit,
+  ): Promise<Deposit & { Player: Player }> {
+    return DepositsDAO.update(deposit.id, {
+      dirty: false,
+      status: CONFIG.SD.DEPOSIT_STATUS.COMPLETED,
+    });
+  }
+
+  /**
+   * Find a deposit in Alquimia's database by tracking number
+   */
+  private async alquimiaDepositLookup(
+    tracking_number: string,
+    from?: Date,
+    page = 1,
+  ): Promise<AlqMovementResponse | undefined> {
+    const accountId = CONFIG.EXTERNAL.ALQ_SAVINGS_ACCOUNT_ID;
+    const endpoint = `cuenta-ahorro-cliente/${accountId}/transaccion`;
+    const PAGE_SIZE = 20;
+
+    if (page === 1) {
+      const lastMovement = await AlquimiaDepositDAO.findLatest();
+      if (lastMovement) from = new Date(lastMovement.fecha_operacion);
     }
 
-    await DepositsDAO.update(deposit.id, { dirty: false });
+    const searchParams = new URLSearchParams();
+    const startDate = from ? from.toISOString().split("T")[0] : "";
+    startDate && searchParams.set("fecha_inicio", startDate);
+    searchParams.set("registros", `${PAGE_SIZE}`);
+    searchParams.set("page", page.toString());
 
-    return deposit;
+    const httpService = new HttpService();
+    const movements: AxiosResponse = await httpService.authedAlqApi.get(
+      endpoint + "?" + searchParams.toString(),
+    );
+
+    if (movements.data.length === 0) return;
+
+    await this.syncMovements(movements.data);
+
+    const found = (movements.data as AlqMovementResponse[]).find(
+      (movement) => movement.clave_rastreo === tracking_number,
+    );
+
+    if (!found && movements.data.length === PAGE_SIZE)
+      return await this.alquimiaDepositLookup(tracking_number, from, page + 1);
+
+    return found;
   }
 
-  static async showPendingDeposits(player_id: number): Promise<Deposit[]> {
+  /**
+   * Sync Alquimia data into local DB
+   */
+  private syncMovements(movements: AlqMovementResponse[]) {
+    // TODO
+    // Chequear que tipo_operacion = 1 sean depósitos
+    const deposits: AlquimiaDeposit[] = movements
+      .filter((movement) => movement.tipo_operacion === 1)
+      .map(parseAlqMovement);
+
+    if (!deposits) return;
+
+    return AlquimiaDepositDAO.createMany(deposits);
+  }
+
+  /**
+   * Show deposits which have pending actions
+   */
+  static async showPendingDeposits(player_id: string): Promise<Deposit[]> {
     const deposits = await DepositsDAO.getPending(player_id);
     return deposits;
-  }
-
-  static async deleteDeposit(deposit_id: number, player_id: number) {
-    await DepositsDAO.authorizeDeletion(deposit_id, player_id);
-    await DepositsDAO.delete(deposit_id);
   }
 }

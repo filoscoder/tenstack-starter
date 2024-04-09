@@ -44,14 +44,18 @@ export const validatePlayerRequest = () => {
       isString: true,
       isEmpty: false,
       trim: true,
+      errorMessage: "username is required",
     },
     password: {
       in: ["body"],
       isString: true,
       isEmpty: false,
       trim: true,
-      custom: { options: checkByteLength },
-      errorMessage: "Contraseña demasiado larga",
+      custom: {
+        options: checkByteLength,
+        errorMessage: "password must be under 73 characters",
+      },
+      errorMessage: "password is required",
     },
     email: {
       in: ["body"],
@@ -59,6 +63,7 @@ export const validatePlayerRequest = () => {
       isEmpty: false,
       trim: true,
       custom: { options: checkEmailNotInUse },
+      errorMessage: "email is required",
     },
     first_name: optionalString,
     last_name: optionalString,

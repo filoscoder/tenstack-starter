@@ -1,4 +1,4 @@
-import { OK } from "http-status";
+import { CREATED, OK } from "http-status";
 import { BankAccountServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
 import { BankAccountRequest } from "@/types/request/bank-account";
@@ -7,7 +7,7 @@ export class BankAccountsController {
   static index = async (req: AuthedReq, res: Res, next: NextFn) => {
     try {
       const player_id = req.user!.id;
-      const account_id = Number(req.params.id);
+      const account_id = req.params.id;
       const bankAccountServices = new BankAccountServices();
 
       let result = [];
@@ -32,7 +32,7 @@ export class BankAccountsController {
 
       const account = await bankAccountServices.create(player_id, request);
 
-      res.status(OK).json(apiResponse(account));
+      res.status(CREATED).json(apiResponse(account));
     } catch (error) {
       next(error);
     }
@@ -41,7 +41,7 @@ export class BankAccountsController {
   static update = async (req: AuthedReq, res: Res, next: NextFn) => {
     try {
       const request: BankAccountRequest = req.body;
-      const account_id = Number(req.params.id);
+      const account_id = req.params.id;
 
       const bankAccountServices = new BankAccountServices();
 
@@ -59,7 +59,7 @@ export class BankAccountsController {
 
   static delete = async (req: AuthedReq, res: Res, next: NextFn) => {
     try {
-      const account_id = Number(req.params.id);
+      const account_id = req.params.id;
 
       const bankAccountServices = new BankAccountServices();
 

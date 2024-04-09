@@ -1,12 +1,23 @@
-// @ts-nocheck
 import httpStatus from "http-status/lib";
 import expressPino from "express-pino-logger";
+import pino from "pino";
 import { hidePassword } from "@/utils/auth";
+import CONFIG from "@/config";
 
 const { OK, BAD_REQUEST, INTERNAL_SERVER_ERROR } = httpStatus;
 
+const token = CONFIG.AUTH.LOGTAIL_TOKEN;
+const transport = pino.transport({
+  target: "@logtail/pino",
+  options: { sourceToken: token },
+});
+/**
+ * Log errors into logtail
+ */
+export const logtailLogger = pino(transport);
+
 // More info: https://github.com/pinojs/express-pino-logger
-export const expressPinoLogger = () =>
+export const expressPinoConsoleLogger = () =>
   expressPino({
     transport: {
       target: "pino-pretty",
@@ -31,11 +42,13 @@ export const expressPinoLogger = () =>
 
       if (status >= 400 && status < 500) {
         return `${status || BAD_REQUEST} : ${
+          // @ts-ignore
           httpStatus[status] || httpStatus[BAD_REQUEST]
         }`;
       }
       if (status >= 500) {
         return `${status || INTERNAL_SERVER_ERROR} : ${
+          // @ts-ignore
           httpStatus[status || 500]
         }`;
       }
@@ -69,6 +82,7 @@ export const expressPinoLogger = () =>
 export const exitLog = (err: any, evt: string) => {
   if (err) {
     process.stdout.write(`\n\n[!ERROR][${evt}] => ${err}\n\n`);
+    console.error(err);
   } else {
     process.stdout.write(`\n\n![${evt}] EVENT CAUSE EXIT\n\n`);
   }

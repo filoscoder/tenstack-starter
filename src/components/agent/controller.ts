@@ -34,7 +34,7 @@ export class AgentController {
     try {
       const { id } = req.params;
 
-      const payment = await AgentServices.markAsPaid(Number(id));
+      const payment = await AgentServices.markAsPaid(id);
 
       res.status(OK).json(apiResponse(payment));
     } catch (error) {
@@ -42,9 +42,10 @@ export class AgentController {
     }
   }
 
-  static async showDeposits(_req: Req, res: Res, next: NextFn) {
+  static async showDeposits(req: Req, res: Res, next: NextFn) {
     try {
-      const deposits = await AgentServices.showDeposits();
+      const depositId = req.params.id;
+      const deposits = await AgentServices.showDeposits(depositId);
 
       res.status(OK).json(apiResponse(deposits));
     } catch (error) {
@@ -98,9 +99,31 @@ export class AgentController {
 
   static async completePendingDeposits(_req: Req, res: Res, next: NextFn) {
     try {
-      const deposits = await AgentServices.completePendingDeposits();
+      const deposits = await AgentServices.freePendingCoinTransfers();
 
       res.status(OK).json(apiResponse(deposits));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async setOnCallBotFlow(req: Req, res: Res, next: NextFn) {
+    try {
+      const { active } = req.body;
+
+      await AgentServices.setOnCallBotFlow(active);
+
+      res.status(OK).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getOnCallStatus(_req: Req, res: Res, next: NextFn) {
+    try {
+      const onCall: boolean = await AgentServices.getOnCallStatus();
+
+      res.status(OK).json(apiResponse(onCall));
     } catch (error) {
       next(error);
     }

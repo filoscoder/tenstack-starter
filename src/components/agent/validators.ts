@@ -20,7 +20,7 @@ export const validatePaymentIndex = () =>
   checkSchema({
     id: {
       in: ["params"],
-      isInt: true,
+      isString: true,
       isEmpty: false,
     },
   });
@@ -48,3 +48,37 @@ export const validateBankAccountUpdate = () => {
     alias: optionalString,
   });
 };
+
+export const validateDepositIndex = () =>
+  checkSchema({
+    id: {
+      in: ["params"],
+      isString: true,
+      optional: true,
+    },
+  });
+
+export const validateDepositUpdate = () =>
+  checkSchema({
+    id: {
+      in: ["params"],
+      isString: true,
+      isEmpty: false,
+      optional: false,
+    },
+    tracking_number: {
+      in: ["body"],
+      isString: true,
+      isEmpty: false,
+      optional: false,
+    },
+  });
+
+export const validateOnCallRequest = () =>
+  checkSchema({
+    active: {
+      in: ["body"],
+      isBoolean: true,
+      optional: false,
+    },
+  });

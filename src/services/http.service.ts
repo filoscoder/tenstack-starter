@@ -1,34 +1,16 @@
 import axios from "axios";
-import { TokenService } from "./token.service";
+import { CasinoTokenService } from "./casino-token.service";
+import { ExternalApiService } from "./external-api.service";
+import { AlquimiaTokenService } from "./alquimia-token.service";
 import CONFIG from "@/config";
-import { CustomError, ERR } from "@/middlewares/errorHandler";
 
-export class HttpService {
-  private _tokenService: TokenService;
-  private _token: string | null = null;
-
-  /**
-   * Configure axios for agent requests with base URL and authorization header.
-   */
-  private get agentAxiosInstance() {
-    return axios.create({
-      baseURL: CONFIG.EXTERNAL.AGENT_BASE_URL,
-      headers: {
-        Authorization: `Bearer ${this._token}`,
-      },
-      validateStatus: () => true,
-    });
-  }
-
+export class HttpService extends ExternalApiService {
   /**
    * Expose methods for authenticated agent to call external API.
    */
   public get authedAgentApi() {
-    return {
-      get: (url: string) => this.agentGet(url),
-      post: (url: string, data: any) => this.agentPost(url, data),
-      patch: (url: string, data: any) => this.agentPatch(url, data),
-    };
+    this.tokenService = new CasinoTokenService();
+    return this.authedApi;
   }
 
   /**
@@ -52,63 +34,31 @@ export class HttpService {
     });
   }
 
-  constructor() {
-    this._tokenService = new TokenService();
-  }
-
-  private async agentGet(url: string) {
-    return await this.send("get", url, null);
-  }
-
-  private async agentPost(url: string, data: any) {
-    return await this.send("post", url, data);
-  }
-
-  private async agentPatch(url: string, data: any) {
-    return await this.send("patch", url, data);
-  }
-
-  private async send(method: string, url: string, data: any): Promise<any> {
-    try {
-      this._token = await this._tokenService.token();
-      if (!this._token) {
-        this._token = await this.handleTokenExpiration();
-      }
-
-      const response = await this.agentAxiosInstance({ url, method, data });
-      if (response.status === 401) {
-        this._token = await this.handleTokenExpiration();
-        if (!this._token) {
-          throw new CustomError(ERR.AGENT_LOGIN);
-        }
-
-        return await this.agentAxiosInstance({ url, method, data });
-      }
-
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  private async handleTokenExpiration(retry = 3): Promise<string | null> {
-    if (retry <= 0) {
-      return null;
-    }
-    return this.delay(async () => {
-      this._token = await this._tokenService.login();
-
-      if (!this._token) {
-        return this.handleTokenExpiration(retry - 1);
-      }
-
-      return this._token;
+  /**
+   * API for fetching Alquimia's API manager token
+   */
+  public get plainAlquimiaApi() {
+    return axios.create({
+      baseURL: CONFIG.EXTERNAL.ALQ_BASE_URL,
+      validateStatus: () => true,
     });
   }
 
-  private async delay(cb: CallableFunction): Promise<any> {
-    return new Promise((resolve) => {
-      setTimeout(async () => resolve(cb ? await cb() : undefined), 500);
+  /**
+   * API for fetching Alquimia's Alquimia token
+   */
+  public get alqTokenApi() {
+    return axios.create({
+      baseURL: CONFIG.EXTERNAL.ALQ_TOKEN_URL,
+      validateStatus: () => true,
     });
+  }
+
+  /**
+   * API for making authenticated calls to Alquimia
+   */
+  public get authedAlqApi() {
+    this.tokenService = new AlquimiaTokenService();
+    return this.authedApi;
   }
 }

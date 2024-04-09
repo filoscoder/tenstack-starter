@@ -1,5 +1,5 @@
 export interface JWTPayload {
-  sub: number;
+  sub: string;
   jti: string;
   type: "access" | "refresh";
   exp: number;
