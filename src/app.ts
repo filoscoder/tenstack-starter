@@ -1,4 +1,4 @@
-// import cors from "cors";
+import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -17,6 +17,7 @@ export const createApp = (): express.Application => {
   //   ? "http://localhost:3000"
   //   : CONFIG.APP.ALLOWED_ORIGIN;
 
+  app.use(cors());
   // allowedOrigin !== "" && app.use(cors({ origin: allowedOrigin }));
   app.use(helmet());
   app.use(express.json());
