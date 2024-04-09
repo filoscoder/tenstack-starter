@@ -41,7 +41,7 @@ export const validateBankAccount = () =>
     bankNumber: {
       in: ["body"],
       notEmpty: true,
-      isNumeric: true,
+      isString: true,
       trim: true,
       errorMessage: "Bank number is required",
     },
