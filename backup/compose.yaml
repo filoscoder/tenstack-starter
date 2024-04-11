@@ -1,0 +1,14 @@
+services:
+  backup:
+    image: timba-backup
+    restart: unless-stopped
+    environment:
+      DB_USER: timbadb
+      DB_PASS: timba2024
+      DB_HOST: host.docker.internal
+      DB_PORT: 3307
+      REMOTE_USER: root
+      REMOTE_HOST: 45.33.94.13
+      REMOTE_LOCATION: /root/Backups
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

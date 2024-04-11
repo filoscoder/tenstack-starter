@@ -110,6 +110,7 @@ dist
 
 # My-SQL  Data
 mysql-data
+mariadb-data
 
 test.txt
 
@@ -121,3 +122,5 @@ history.txt
 test_setup.sh
 
 .vscode/settings.json
+
+backup/*.sql
