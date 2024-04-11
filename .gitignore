@@ -123,4 +123,4 @@ test_setup.sh
 
 .vscode/settings.json
 
-backup/
+backup/*.sql
