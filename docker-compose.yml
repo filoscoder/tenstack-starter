@@ -1,27 +1,21 @@
+version: '3.1'
+
 # AlphaDev casinomex database
 services:
-  db:
-    image: mariadb
+  casinomex_db:
+    image: mysql
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: timba2024root
-      MARIADB_PASSWORD: timba2024
-      MARIADB_USER: timbadb
-      MARIADB_DATABASE: timba-data-base
+      MYSQL_ROOT_PASSWORD: timba2024
+      MYSQL_DATABASE: timba-data-base
     volumes:
-      - ./mariadb-data:/var/lib/mysql
-      - type: bind
-        source: ./backup/timba-backup-2024-04-09.sql
-        target: /docker-entrypoint-initdb.d/backup.sql
+      - ./mysql-data:/var/lib/mysql
     ports:
       - 3307:3306
 
-  adminer:
+  casinomex_adminer:
     image: adminer
     restart: unless-stopped
     ports:
       - 8081:8080
-
-volumes:
-  myapp:
 
