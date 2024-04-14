@@ -4,6 +4,7 @@ import { hidePassword } from "@/utils/auth";
 import { PaymentUpdatableProps } from "@/types/request/transfers";
 import { NotFoundException, ForbiddenError } from "@/helpers/error";
 import { CustomError } from "@/middlewares/errorHandler";
+import CONFIG from "@/config";
 
 const prisma = new PrismaClient();
 
@@ -87,7 +88,8 @@ export class PaymentsDAO {
         take: 1,
       });
 
-      if (!latestCashout) return;
+      if (!latestCashout || CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.DEV)
+        return;
 
       const latestCashoutTime = latestCashout?.updated_at.getTime();
       const retryAfterMins = Math.ceil(

@@ -56,7 +56,8 @@ agentRouter.post(
   throwIfBadRequest,
   AgentController.updateBankAccount,
 );
-agentRouter.get("/balance", AgentController.getBalance);
+agentRouter.get("/balance/casino", AgentController.getCasinoBalance);
+agentRouter.get("/balance/alquimia", AgentController.getAlqBalance);
 agentRouter.get("/pending/deposits", AgentController.completePendingDeposits);
 agentRouter.post(
   "/on-call",

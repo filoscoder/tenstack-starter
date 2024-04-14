@@ -1,4 +1,5 @@
 import { Deposit, Payment } from "@prisma/client";
+import { AxiosResponse } from "axios";
 import { FinanceServices } from "../transactions/services";
 import { AuthServices } from "../auth/services";
 import { CustomError } from "@/middlewares/errorHandler";
@@ -15,6 +16,7 @@ import { PlayersDAO } from "@/db/players";
 import CONFIG from "@/config";
 import { ERR } from "@/config/errors";
 import { BotFlowsDAO } from "@/db/bot-flows";
+import { AlqCuentaAhorroResponse } from "@/types/response/alquimia";
 
 export class AgentServices {
   static async login(
@@ -77,10 +79,10 @@ export class AgentServices {
     return agent.bankAccount as AgentBankAccount;
   }
 
-  static async getBalance(): Promise<BalanceResponse> {
+  static async getCasinoBalance(): Promise<BalanceResponse> {
     const url = "accounts/user";
     const httpService = new HttpService();
-    const response = await httpService.authedAgentApi.get(url);
+    const response: AxiosResponse = await httpService.authedAgentApi.get(url);
     if (response.status !== 200)
       throw new CustomError({
         code: "agent_api_error",
@@ -90,7 +92,27 @@ export class AgentServices {
       });
     return {
       balance: Number(response.data.balance),
-      currency: response.data.balance_currency,
+    };
+  }
+
+  static async getAlqBalance(): Promise<BalanceResponse> {
+    const url = "cuenta-ahorro-cliente";
+    const httpService = new HttpService();
+    const response: AxiosResponse = await httpService.authedAlqApi.get(url);
+    if (response.status !== 200)
+      throw new CustomError({
+        code: "alquimia",
+        status: response.status,
+        description: "Error en alquimia al obtener el balance",
+        detail: response.data,
+      });
+    const account = (response.data as AlqCuentaAhorroResponse).find(
+      (account) =>
+        account.id_cuenta_ahorro === CONFIG.EXTERNAL.ALQ_SAVINGS_ACCOUNT_ID,
+    );
+    if (!account) throw new CustomError(ERR.ALQ_ACCOUNT_NOT_FOUND);
+    return {
+      balance: Number(account.saldo_ahorro),
     };
   }
 

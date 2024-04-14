@@ -72,6 +72,11 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "alquimia",
     description: "Error en Alquimia al obtener token.",
   },
+  ALQ_ACCOUNT_NOT_FOUND: {
+    status: 404,
+    code: "alquimia",
+    description: "Alquimia account not found",
+  },
   TRANSACTION_LOG: {
     status: 500,
     code: "transaction_log",
@@ -91,5 +96,10 @@ export const ERR: { [key: string]: ErrorData } = {
     status: 500,
     code: "agent_api_error",
     description: "Error en el panel al crear el usuario",
+  },
+  QR_NOT_FOUND: {
+    status: 404,
+    code: "qr_not_found",
+    description: "bot.qr.png not found",
   },
 };

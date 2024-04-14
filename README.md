@@ -47,7 +47,8 @@ Comes with:
 + [Ver QR](#ver-qr-🔒)
 + [Ver Cuenta Bancaria](#ver-cuenta-bancaria-🔒)
 + [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-🔒)
-+ [Ver Balance](#ver-balance-🔒)
++ [Ver Balance Casino](#ver-balance-casino-🔒)
++ [Ver Balance Alquimia](#ver-balance-alquimia-🔒)
 + [Liberar Fichas Pendientes](#liberar-fichas-pendientes-🔒)
 + [Indicar Que El Agente Esta De Guardia](#setear-guardia-🔒)
 + [Ver Estado De Guardia]
@@ -258,9 +259,17 @@ Requiere rol| agent
 
 **Nota** Todos los parámetros son opcionales, incluir solo los que se quiera actualizar.
 
-### Ver Balance 🔒
+### Ver Balance Casino 🔒
 
-|Endpoint| `/agent/balance`|
+|Endpoint| `/agent/balance/casino`|
+---|---|
+Método      |`GET`
+Devuelve    |[`Balance`](#balance)
+Requiere rol| agent
+
+### Ver Balance Alquimia 🔒
+
+|Endpoint| `/agent/balance/alquimia`|
 ---|---|
 Método      |`GET`
 Devuelve    |[`Balance`](#balance)
@@ -467,7 +476,6 @@ Estado de transferencia de fichas
 ```typescript
 {
   balance: number
-  currency: string
 }
 ```
 
@@ -519,6 +527,8 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Balance Alquimia en panel agente
 - Tener en cuenta que pasa si el casino devuelve 200 a una transfer de fichas pero la transferencia no pasa
 - Limpiar tabla TOKENS periodicamente
+- Asegurarse que los status code de las respuestas de api externa esten presente en logs
+- Usar instancia global de prisma.
 
 ### Error logging
 
@@ -551,7 +561,7 @@ Listar cuentas de ahorro
 curl -X GET \
 -H "Authorization: Bearer $API_TOKEN" \
 -H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
-${BASE_URL}1.0.0/v2/cuenta-ahorro-cliente \
+${ALQ_TEST_BASE_URL}1.0.0/v2/cuenta-ahorro-cliente \
 -H 'Content-Type: x-www-form-urlencoded' \
 -d 'id_cliente=2733226' 
 ```
@@ -561,7 +571,7 @@ Listar TX pendientes
 curl -X GET \
 -H "Authorization: Bearer $API_TOKEN" \
 -H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
-"${BASE_URL}1.0.0/v2/ordenes-importador?id_cuenta=120902"
+"${ALQ_BASE_URL}1.0.0/v2/ordenes-importador?id_cuenta=120902"
 ```
 
 Consultar status TX
@@ -569,7 +579,7 @@ Consultar status TX
 curl -X GET\
 -H "Authorization: Bearer $API_TOKEN" \
 -H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
-"${BASE_URL}1.0.0/v2/consulta-status-tx" \
+"${ALQ_BASE_URL}1.0.0/v2/consulta-status-tx" \
 -d 'id_cuenta=120902&id_transaccion=18489885' \
 -H 'Content-Type: x-www-form-urlencoded'
 ```

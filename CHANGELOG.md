@@ -1,3 +1,12 @@
+## [1.0.0] - 2024-04-12
+
+### Added
+- GET `/agent/balance/alquimia` endpoint to retrieve alquimia balance
+
+### Changed
+- `/agent/balance` => `agent/balance/casino`
+- Check for file existence on AgentController.qr before attempting to open `bot.qr.png`
+
 ## [1.0.0] - 2024-04-09
 
 ### Added

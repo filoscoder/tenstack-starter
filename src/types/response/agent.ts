@@ -17,7 +17,6 @@ export type AgentBankAccount = {
   alias: string;
 };
 
-export interface BalanceResponse {
+export type BalanceResponse = {
   balance: number;
-  currency: string;
-}
+};
