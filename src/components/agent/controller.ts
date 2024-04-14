@@ -1,10 +1,12 @@
 import { join } from "path";
-import { createReadStream } from "fs";
+import { ReadStream, createReadStream, existsSync } from "fs";
 import { OK } from "http-status";
 import { AgentServices } from "./services";
 import { Credentials } from "@/types/request/players";
 import { apiResponse } from "@/helpers/apiResponse";
 import { AgentBankAccount } from "@/types/response/agent";
+import { CustomError } from "@/middlewares/errorHandler";
+import { ERR } from "@/config/errors";
 
 export class AgentController {
   static async login(req: Req, res: Res, next: NextFn) {
@@ -54,9 +56,14 @@ export class AgentController {
   }
 
   static async qr(_req: Req, res: Res, next: NextFn) {
+    let fileStream: ReadStream | undefined = undefined;
     try {
       const PATH_QR = join(process.cwd(), `bot.qr.png`);
-      const fileStream = createReadStream(PATH_QR);
+      if (!existsSync(PATH_QR)) {
+        throw new CustomError(ERR.QR_NOT_FOUND);
+      }
+
+      fileStream = createReadStream(PATH_QR);
 
       res.writeHead(200, { "Content-Type": "image/png" });
       fileStream.pipe(res);
@@ -87,9 +94,19 @@ export class AgentController {
     }
   }
 
-  static async getBalance(_req: Req, res: Res, next: NextFn) {
+  static async getCasinoBalance(_req: Req, res: Res, next: NextFn) {
     try {
-      const balance = await AgentServices.getBalance();
+      const balance = await AgentServices.getCasinoBalance();
+
+      res.status(OK).json(apiResponse(balance));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getAlqBalance(_req: Req, res: Res, next: NextFn) {
+    try {
+      const balance = await AgentServices.getAlqBalance();
 
       res.status(OK).json(apiResponse(balance));
     } catch (error) {

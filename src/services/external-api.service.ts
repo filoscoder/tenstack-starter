@@ -41,7 +41,7 @@ export class ExternalApiService {
       return axios.create({
         baseURL: CONFIG.EXTERNAL.AGENT_BASE_URL,
         headers: {
-          Authorization: `Bearer ${this._auth![0]}`,
+          Authorization: `Bearer ${this._auth ? this._auth[0] : ""}`,
         },
         validateStatus: () => true,
       });
@@ -49,8 +49,8 @@ export class ExternalApiService {
       return axios.create({
         baseURL: this._alquimiaBaseUrl,
         headers: {
-          Authorization: `Bearer ${this._auth![0]}`,
-          AuthorizationAlquimia: `Bearer ${this._auth![1]}`,
+          Authorization: `Bearer ${this._auth ? this._auth[0] : ""}`,
+          AuthorizationAlquimia: `Bearer ${this._auth ? this._auth[1] : ""}`,
         },
         validateStatus: () => true,
       });

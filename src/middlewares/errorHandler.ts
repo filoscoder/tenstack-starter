@@ -80,6 +80,9 @@ export const customErrorHandler = (
     ) {
       logtailLogger.error({ err, tag: err.code });
     }
+    if (CONFIG.APP.ENV === "dev") {
+      console.error(err);
+    }
   } else {
     return next(err);
   }

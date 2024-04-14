@@ -20,11 +20,6 @@ describe("[UNIT] => HOME", () => {
         "VER",
         "DESCRIPTION",
         "AUTHORS",
-        "HOST",
-        "PORT",
-        "ENV",
-        "CYPHER_PASS",
-        "ALLOWED_ORIGIN",
       ]);
     });
 

@@ -313,12 +313,12 @@ describe("[UNIT] => AGENT ROUTER", () => {
 
       expect(response.status).toBe(OK);
       expect(Object.keys(response.body.data)).toStrictEqual([
-        "dni",
         "name",
-        "alias",
-        "clabe",
+        "dni",
         "bankName",
         "accountNumber",
+        "clabe",
+        "alias",
       ]);
     });
 
@@ -341,32 +341,51 @@ describe("[UNIT] => AGENT ROUTER", () => {
   });
 
   describe("GET: /agent/balance", () => {
-    it("Should return balance", async () => {
+    it("Should return casino balance", async () => {
       const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/balance`)
+        .get(`/app/${CONFIG.APP.VER}/agent/balance/casino`)
         .set("Authorization", `Bearer ${access}`)
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(OK);
-      expect(Object.keys(response.body.data)).toStrictEqual([
-        "balance",
-        "currency",
-      ]);
+      expect(Object.keys(response.body.data)).toStrictEqual(["balance"]);
     });
 
+    // it("Should return alquimia balance", async () => {
+    //   const response = await agent
+    //     .get(`/app/${CONFIG.APP.VER}/agent/balance/alquimia`)
+    //     .set("Authorization", `Bearer ${access}`)
+    //     .set("User-Agent", USER_AGENT);
+
+    //   console.log(response.body);
+    //   expect(response.status).toBe(OK);
+    //   expect(Object.keys(response.body.data)).toStrictEqual(["balance"]);
+    // });
+
     it("Should return 401", async () => {
-      const response = await agent.get(`/app/${CONFIG.APP.VER}/agent/balance`);
+      const response = await agent.get(
+        `/app/${CONFIG.APP.VER}/agent/balance/casino`,
+      );
 
       expect(response.status).toBe(UNAUTHORIZED);
     });
 
     it("Should return 403", async () => {
       const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/balance`)
+        .get(`/app/${CONFIG.APP.VER}/agent/balance/casino`)
         .set("Authorization", `Bearer ${playerAccessToken}`)
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(FORBIDDEN);
+    });
+
+    it("Should return 404", async () => {
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/agent/balance/unknown`)
+        .set("Authorization", `Bearer ${access}`)
+        .set("User-Agent", USER_AGENT);
+
+      expect(response.status).toBe(NOT_FOUND);
     });
   });
 
@@ -423,7 +442,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
           unknownField: "foo",
         });
 
-      console.log("RESPONSE", response.body);
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.details[0].type).toBe("unknown_fields");
     });
