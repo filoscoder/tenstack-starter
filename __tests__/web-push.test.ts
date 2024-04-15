@@ -62,8 +62,8 @@ describe("[UNIT] => WEB PUSH", () => {
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].msg).toBe("endpoint is required");
-      expect(response.body.details[0].path).toBe("endpoint");
+      expect(response.body.data[0].msg).toBe("endpoint is required");
+      expect(response.body.data[0].path).toBe("endpoint");
     });
 
     it("Should return 400 missing p256", async () => {
@@ -77,8 +77,8 @@ describe("[UNIT] => WEB PUSH", () => {
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].msg).toBe("p256dh is required");
-      expect(response.body.details[0].path).toBe("keys.p256dh");
+      expect(response.body.data[0].msg).toBe("p256dh is required");
+      expect(response.body.data[0].path).toBe("keys.p256dh");
     });
 
     it("Should return 400 missing auth", async () => {
@@ -92,8 +92,8 @@ describe("[UNIT] => WEB PUSH", () => {
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].msg).toBe("auth is required");
-      expect(response.body.details[0].path).toBe("keys.auth");
+      expect(response.body.data[0].msg).toBe("auth is required");
+      expect(response.body.data[0].path).toBe("keys.auth");
     });
 
     it("Should return 401", async () => {
@@ -123,8 +123,8 @@ describe("[UNIT] => WEB PUSH", () => {
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].msg).toBe("endpoint is required");
-      expect(response.body.details[0].path).toBe("endpoint");
+      expect(response.body.data[0].msg).toBe("endpoint is required");
+      expect(response.body.data[0].path).toBe("endpoint");
     });
 
     it("Should return 400 unknown fields", async () => {
@@ -135,7 +135,7 @@ describe("[UNIT] => WEB PUSH", () => {
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].type).toBe("unknown_fields");
+      expect(response.body.data[0].type).toBe("unknown_fields");
     });
 
     it("Should return 401", async () => {

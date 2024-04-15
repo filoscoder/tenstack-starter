@@ -97,9 +97,4 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "agent_api_error",
     description: "Error en el panel al crear el usuario",
   },
-  QR_NOT_FOUND: {
-    status: 404,
-    code: "qr_not_found",
-    description: "bot.qr.png not found",
-  },
 };

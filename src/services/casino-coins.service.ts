@@ -4,13 +4,13 @@ import { HttpService } from "./http.service";
 import CONFIG from "@/config";
 import { TransactionsDAO } from "@/db/transactions";
 import { UserRootDAO } from "@/db/user-root";
-import { CustomError } from "@/middlewares/errorHandler";
 import { CashoutRequest, TransferDetails } from "@/types/request/transfers";
 import { Transaction } from "@/types/response/transactions";
 import { Notify } from "@/helpers/notification";
 import { parseTransferResult } from "@/utils/parser";
 import { CoinTransferResult } from "@/types/response/transfers";
 import { ERR } from "@/config/errors";
+import { CustomError } from "@/helpers/error/CustomError";
 
 /**
  * Interact with the casino's coins transfer endpoints and log results into

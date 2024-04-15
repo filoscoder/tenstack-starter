@@ -3,8 +3,8 @@ import { PaymentRequest } from "@/types/request/transfers";
 import { hidePassword } from "@/utils/auth";
 import { PaymentUpdatableProps } from "@/types/request/transfers";
 import { NotFoundException, ForbiddenError } from "@/helpers/error";
-import { CustomError } from "@/middlewares/errorHandler";
 import CONFIG from "@/config";
+import { CustomError } from "@/helpers/error/CustomError";
 
 const prisma = new PrismaClient();
 

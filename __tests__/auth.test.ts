@@ -57,7 +57,7 @@ describe("[UNIT] => AUTH", () => {
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].type).toBe("unknown_fields");
+      expect(response.body.data[0].type).toBe("unknown_fields");
     });
 
     it("Should return 401 token_invalid [repeat use]", async () => {

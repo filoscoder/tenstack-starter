@@ -6,8 +6,8 @@ import {
 } from "crypto";
 import bcrypt from "bcrypt";
 import CONFIG from "@/config";
-import { CustomError } from "@/middlewares/errorHandler";
 import { ErrorData } from "@/types/response/error";
+import { CustomError } from "@/helpers/error/CustomError";
 
 /**
  * @description Create a bcrypt hash for a string.

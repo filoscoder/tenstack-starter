@@ -1,7 +1,6 @@
 import { JwtService } from "./jwt.service";
 import { HttpService } from "./http.service";
 import CONFIG from "@/config";
-import { CustomError } from "@/middlewares/errorHandler";
 import { ERR } from "@/config/errors";
 import {
   AlqApiManagerTokenResponse,
@@ -10,6 +9,7 @@ import {
 } from "@/types/response/alquimia";
 import { UserRootDAO } from "@/db/user-root";
 import { ITokenRetreiver } from "@/types/services/http";
+import { CustomError } from "@/helpers/error/CustomError";
 
 export class AlquimiaTokenService
   extends JwtService

@@ -4,6 +4,7 @@ import { AuthServices } from "../auth/services";
 import { PlayerServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
 import { Credentials, PlayerRequest } from "@/types/request/players";
+import { NotFoundException } from "@/helpers/error";
 
 export class PlayersController {
   /**
@@ -26,7 +27,9 @@ export class PlayersController {
       if (player) {
         res.status(OK).json(apiResponse(player));
       } else {
-        res.status(NOT_FOUND).json(apiResponse(null, "Player not found"));
+        res
+          .status(NOT_FOUND)
+          .json(apiResponse(null, new NotFoundException("User not found")));
       }
     } catch (error) {
       next(error);

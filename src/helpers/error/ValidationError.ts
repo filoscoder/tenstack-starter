@@ -1,18 +1,15 @@
-import HttpStatus, { BAD_REQUEST } from "http-status/lib";
+import { BAD_REQUEST } from "http-status/lib";
+import { ValidationError as ValidatorError } from "express-validator";
+import { CustomError } from "./CustomError";
 
-class ValidationError extends Error {
-  readonly status: number;
-  readonly message: string;
-  readonly details: Record<string, any>;
-
-  constructor(validationErrors: Record<string, any>) {
-    super();
+class ValidationError extends CustomError {
+  constructor(validationErrors: ValidatorError[]) {
+    super({
+      status: BAD_REQUEST,
+      code: "bad_request",
+      description: validationErrors,
+    });
     Object.setPrototypeOf(this, new.target.prototype);
-
-    this.status = BAD_REQUEST;
-    this.message = HttpStatus[BAD_REQUEST] as string;
-    this.details = validationErrors;
-
     Error.captureStackTrace(this);
   }
 }

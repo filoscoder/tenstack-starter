@@ -1,15 +1,17 @@
 import { NextFunction, Request, Response } from "express";
-
-import HttpStatus, {
+import {
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   REQUEST_TIMEOUT,
+  UNAUTHORIZED,
 } from "http-status/lib";
 import { Prisma } from "@prisma/client";
-import { TimeOutError } from "@/helpers/error";
-import { ErrorData } from "@/types/response/error";
 import CONFIG from "@/config";
 import { logtailLogger } from "@/helpers/loggers";
+import { apiResponse } from "@/helpers/apiResponse";
+import { parsePrismaError } from "@/utils/parser";
+import { UnauthorizedError } from "@/helpers/error";
+import { CustomError } from "@/helpers/error/CustomError";
 
 /**
  * @description Error response middleware for not found urls. This middleware function should be at the very bottom of the stack.
@@ -22,13 +24,16 @@ export const notFoundError = (
   res: Response,
   _next: NextFunction,
 ) => {
-  res.status(NOT_FOUND).json({
-    error: {
-      code: NOT_FOUND,
-      message: HttpStatus[NOT_FOUND],
-      path: req.originalUrl,
-    },
-  });
+  res.status(NOT_FOUND).json(
+    apiResponse(
+      null,
+      new CustomError({
+        status: NOT_FOUND,
+        code: "url_not_found",
+        description: `Path: ${req.originalUrl}`,
+      }),
+    ),
+  );
 };
 
 /**
@@ -40,26 +45,48 @@ export const notFoundError = (
  */
 export const genericErrorHandler = (
   err: any,
-  req: Request,
+  _req: Request,
   res: Response,
   _next: NextFunction,
 ) => {
-  // Handle Prisma errors
-  if (
-    err instanceof Prisma.PrismaClientKnownRequestError ||
-    err instanceof Prisma.PrismaClientValidationError
-  ) {
-    prismaErrorHandler(err, res);
-  }
-  let resCode: number = err.status || INTERNAL_SERVER_ERROR;
-  let resBody = err;
+  const resCode: number = err.status || INTERNAL_SERVER_ERROR;
 
+  res
+    .status(resCode)
+    .json(
+      apiResponse(
+        null,
+        new CustomError({ status: resCode, code: "error", description: err }),
+      ),
+    );
+
+  if (CONFIG.APP.ENV === "production")
+    logtailLogger.error({
+      status: resCode,
+      code: "uncaught_error",
+      description: err ?? "Internal server error",
+    });
+  else if (CONFIG.APP.ENV === "dev") console.error(err);
+};
+
+export const requestTimeoutHandler = (
+  err: any,
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   if (err.code === "ETIMEDOUT") {
-    resCode = REQUEST_TIMEOUT;
-    resBody = new TimeOutError(req.originalUrl);
-  }
-
-  res.status(resCode).json(resBody);
+    res.status(REQUEST_TIMEOUT).json(
+      apiResponse(
+        null,
+        new CustomError({
+          status: REQUEST_TIMEOUT,
+          code: "request_timeout",
+          description: "",
+        }),
+      ),
+    );
+  } else return next(err);
 };
 
 export const customErrorHandler = (
@@ -69,10 +96,7 @@ export const customErrorHandler = (
   next: NextFunction,
 ) => {
   if (err instanceof CustomError) {
-    res.status(err.status).json({
-      code: err.code,
-      description: err.description,
-    });
+    res.status(err.status).json(apiResponse(null, err));
     if (
       // @ts-ignore
       CONFIG.LOG.CODES.includes(err.code) &&
@@ -88,98 +112,30 @@ export const customErrorHandler = (
   }
 };
 
-export class CustomError extends Error {
-  public status: number;
-  public code: string;
-  public description: string;
-  /**
-   * Extra info for logging
-   */
-  public detail?: object;
-
-  constructor(err: ErrorData) {
-    super();
-    this.status = err.status;
-    this.code = err.code;
-    this.description = err.description;
-    this.detail = err.detail;
-  }
-}
-
-function prismaErrorHandler(
+export function prismaErrorHandler(
   err:
     | Prisma.PrismaClientKnownRequestError
     | Prisma.PrismaClientValidationError,
-  res: Res,
+  _req: Request,
+  res: Response,
+  next: NextFunction,
 ) {
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    let status, code, description;
-    switch (err.code) {
-      case "P2025":
-        status = 404;
-        code = "not_found";
-        description = "No se encontro el recurso";
-        break;
-      case "P2002":
-        const key = err.message.split("\n").at(-1)?.split("`")[1];
-        status = 409;
-        code = "unique_constraint";
-        description = `Una entrada con ese ${key} ya existe. Error: `;
-        break;
-      case "P2003":
-        status = 409;
-        code = "dependencias_pendientes";
-        description = "No se puede eliminar, otras entidades dependen de esta";
-        break;
-      case "P2005":
-        status = 400;
-        code = "restringido";
-        description =
-          "Una restricion fallo en la BD: " + err.meta?.["database_error"];
-        break;
-      case "P2006":
-        status = 400;
-        code = "valor_invalido";
-        description = `El valor provisto ${err.meta?.["field_value"]} para el campo ${err.meta?.["field_name"]} del ${err.meta?.["model_name"]} no es válido`;
-        break;
-      case "P2011":
-        status = 400;
-        code = "null_constraint";
-        description = `Violacion de null_constraint en ${err.meta?.constraint}`;
-        break;
-      case "P2014":
-        status = 400;
-        code = "restringido";
-        description = `El cambio que estas intentando hacer violaria la relacion ${err.meta?.["relation_name"]} entre los modelos ${err.meta?.["model_a_name"]} y ${err.meta?.["model_b_name"]}`;
-        break;
-      case "P2019":
-        status = 400;
-        code = "input_error";
-        description = `Input error: ${err.meta?.details}`;
-        break;
-      case "P2020":
-        status = 400;
-        code = "fuera_de_rango";
-        description = `Valor fuera de rango. ${err.meta?.details}`;
-        break;
-      default:
-        res.status(500).json({
-          code: "error_bbdd",
-          description: `Error en la base de datos: ${err.message}`,
-        });
-    }
-    res.status(status || 400).send({ status, code, description });
-  } else if (err instanceof Prisma.PrismaClientValidationError) {
-    let description = "Error de validacion de datos ";
-    if (CONFIG.APP.ENV?.includes("test") || CONFIG.APP.ENV?.includes("dev")) {
-      description += err.message;
-    } else {
-      description += err.message.split("Unknown")[1];
-    }
-    res.status(400).send({
-      status: 400,
-      code: "error_validacion",
-      description,
-    });
-  }
+  if (
+    err instanceof Prisma.PrismaClientKnownRequestError ||
+    err instanceof Prisma.PrismaClientValidationError
+  ) {
+    const parsed = parsePrismaError(err);
+    res.status(parsed.status).send(apiResponse(null, parsed));
+  } else return next(err);
+}
+
+export function authenticationErrorHandler(
+  err: any,
+  _req: Req,
+  res: Res,
+  next: NextFunction,
+) {
+  if (err.name === "AuthenticationError")
+    res.status(UNAUTHORIZED).json(apiResponse(null, new UnauthorizedError("")));
+  else next(err);
 }

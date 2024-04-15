@@ -3,8 +3,8 @@ import { CasinoTokenService } from "./casino-token.service";
 import { AlquimiaTokenService } from "./alquimia-token.service";
 import { ITokenRetreiver } from "@/types/services/http";
 import { ERR } from "@/config/errors";
-import { CustomError } from "@/middlewares/errorHandler";
 import CONFIG from "@/config";
+import { CustomError } from "@/helpers/error/CustomError";
 
 /**
  * Handle communications with different external APIs

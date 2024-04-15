@@ -1,3 +1,11 @@
+## [1.0.0] - 2024-04-15
+
+### Changed
+- Add `detail: response.data` to external API errors to ensure original response is included in error logs.
+- Normalize API responses: 
+    + All API responses and errors now return `{ status: number, code: string, data: any }`
+    + All errors now extend `CustomError`
+
 ## [1.0.0] - 2024-04-12
 
 ### Added

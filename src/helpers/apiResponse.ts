@@ -1,19 +1,21 @@
-import HttpStatus, { NOT_FOUND, OK } from "http-status/lib";
+import HttpStatus, { OK } from "http-status/lib";
+import { CustomError } from "./error/CustomError";
 import { ApiSuccessResponse } from "@/types/response";
 
 export const apiResponse = <T>(
   data?: T,
-  errorMessage?: string,
+  error?: CustomError,
 ): ApiSuccessResponse<T> => {
-  if (!data && errorMessage) {
+  if (!data && error) {
     return {
-      status: NOT_FOUND, // Puedes usar otro código de estado según sea necesario
-      message: errorMessage,
+      status: error.status,
+      code: error.code,
+      data: error.description as T,
     };
   }
   return {
     status: OK,
-    message: HttpStatus[OK] as string,
+    code: HttpStatus[OK] as string,
     data,
   };
 };

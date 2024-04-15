@@ -11,9 +11,9 @@ import { CoinTransferResult, DepositResult } from "@/types/response/transfers";
 import { AlquimiaDepositDAO } from "@/db/alq-deposits";
 import { AlqMovementResponse } from "@/types/response/alquimia";
 import { CasinoCoinsService } from "@/services/casino-coins.service";
-import { CustomError } from "@/middlewares/errorHandler";
 import { ERR } from "@/config/errors";
 import { hidePassword } from "@/utils/auth";
+import { CustomError } from "@/helpers/error/CustomError";
 
 /**
  * Services to be consumed by Player endpoints

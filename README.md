@@ -530,6 +530,7 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Usar instancia global de prisma.
 - Chequear token sesion en dos dispositivos
 - Asegurarse que los status code de las respuestas de api externa esten presente en logs
+- Normalize error output
 
 ### Error logging
 
