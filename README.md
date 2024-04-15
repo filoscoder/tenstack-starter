@@ -527,8 +527,9 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Balance Alquimia en panel agente
 - Tener en cuenta que pasa si el casino devuelve 200 a una transfer de fichas pero la transferencia no pasa
 - Limpiar tabla TOKENS periodicamente
-- Asegurarse que los status code de las respuestas de api externa esten presente en logs
 - Usar instancia global de prisma.
+- Chequear token sesion en dos dispositivos
+- Asegurarse que los status code de las respuestas de api externa esten presente en logs
 
 ### Error logging
 

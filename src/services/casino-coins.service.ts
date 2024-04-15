@@ -86,7 +86,8 @@ export class CasinoCoinsService {
       throw new CustomError({
         code: "error_transferencia",
         status: result.status,
-        description: "Error al transferir fichas", //result.data
+        description: "Error en el panel al transferir fichas", //result.data
+        detail: result.data,
       });
 
     return result;
