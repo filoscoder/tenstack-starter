@@ -9,7 +9,7 @@ import { hidePassword } from "@/utils/auth";
 import CONFIG from "@/config";
 import { RoledPlayer } from "@/types/response/players";
 import { ERR } from "@/config/errors";
-import { CustomError } from "@/middlewares/errorHandler";
+import { CustomError } from "@/helpers/error/CustomError";
 
 const prisma = new PrismaClient();
 

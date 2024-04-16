@@ -5,8 +5,7 @@ import { AgentServices } from "./services";
 import { Credentials } from "@/types/request/players";
 import { apiResponse } from "@/helpers/apiResponse";
 import { AgentBankAccount } from "@/types/response/agent";
-import { CustomError } from "@/middlewares/errorHandler";
-import { ERR } from "@/config/errors";
+import { NotFoundException } from "@/helpers/error";
 
 export class AgentController {
   static async login(req: Req, res: Res, next: NextFn) {
@@ -60,7 +59,7 @@ export class AgentController {
     try {
       const PATH_QR = join(process.cwd(), `bot.qr.png`);
       if (!existsSync(PATH_QR)) {
-        throw new CustomError(ERR.QR_NOT_FOUND);
+        throw new NotFoundException("bot.qr.png not found");
       }
 
       fileStream = createReadStream(PATH_QR);

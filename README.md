@@ -518,29 +518,15 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
   - Body: `{ new_password:	string }`
 - Log errors to file
 - Usar endpoint /auth/logout en frontend
-
 - [Bot Whatsapp](https://bot-whatsapp.netlify.app/) ✅
   + [Diagrama Flujo](https://www.figma.com/file/rtxhrNqQxdEdYzOfPl1mRc/Whatsapp-Bot?type=whiteboard&node-id=0%3A1&t=5ACojRhp99vrh24S-1)
-- Configurar bbdd distintas para dev y prod
 - Chequear si agent existe en la bbdd en `seed.ts`
 - Subir la duracion del refresh token a 24 horas
+- Tomar duracion de los tokens de `.env`
 - Balance Alquimia en panel agente
 - Tener en cuenta que pasa si el casino devuelve 200 a una transfer de fichas pero la transferencia no pasa
 - Limpiar tabla TOKENS periodicamente
-- Asegurarse que los status code de las respuestas de api externa esten presente en logs
-- Usar instancia global de prisma.
-
-### Error logging
-
-- Loguear errores de api externas a un archivo, errores nuestros a otro.
-- Notificar solo luego de X errores por dia.
-- Ver errores en panel agente.
-
-### Error logging
-
-- Loguear errores de api externas a un archivo, errores nuestros a otro.
-- Notificar solo luego de X errores por dia.
-- Ver errores en panel agente.
+- Chequear token sesion en dos dispositivos
 
 ### Fichas insuficientes
 
@@ -550,6 +536,7 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 ## Optimizaciones
 
 - Invalidar tokens en conjunto con una sola petición SQL
+- Usar instancia global de prisma.
 
 
 ## Alquimia 

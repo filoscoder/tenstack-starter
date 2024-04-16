@@ -1,14 +1,10 @@
-import HttpStatus, { NOT_FOUND } from "http-status/lib";
+import { NOT_FOUND } from "http-status/lib";
+import { CustomError } from "./CustomError";
 
-class NotFoundException {
-  readonly status: number;
-  readonly message: string;
-
-  constructor() {
+class NotFoundException extends CustomError {
+  constructor(description = "") {
+    super({ status: NOT_FOUND, code: "not_found", description });
     Object.setPrototypeOf(this, new.target.prototype);
-
-    this.status = NOT_FOUND;
-    this.message = HttpStatus[NOT_FOUND] as string;
   }
 }
 

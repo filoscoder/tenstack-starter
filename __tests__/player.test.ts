@@ -78,7 +78,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
           });
 
         expect(response.status).toBe(BAD_REQUEST);
-        expect(response.body.details[0].msg).toBe(message);
+        expect(response.body.data[0].msg).toBe(message);
       },
     );
 
@@ -90,7 +90,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       });
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].msg).toBe(
+      expect(response.body.data[0].msg).toBe(
         "password must be under 73 characters",
       );
     });
@@ -103,9 +103,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       });
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].msg).toBe(
-        "Usuario con ese email ya existe",
-      );
+      expect(response.body.data[0].msg).toBe("Usuario con ese email ya existe");
     });
 
     it("Should return 400 ya_existe", async () => {
@@ -147,7 +145,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
         });
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.message).toBe("Bad Request");
+      expect(response.body.code).toBe("bad_request");
     });
 
     it("Should return 404 user not found", async () => {

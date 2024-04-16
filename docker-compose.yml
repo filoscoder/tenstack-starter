@@ -9,7 +9,7 @@ services:
       MYSQL_ROOT_PASSWORD: timba2024
       MYSQL_DATABASE: timba-data-base
     volumes:
-      - ./mysql-data:/var/lib/mysql
+      - ./mariadb-data:/var/lib/mysql
     ports:
       - 3307:3306
 

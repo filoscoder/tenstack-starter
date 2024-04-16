@@ -67,7 +67,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         });
 
       expect(response.status).toBe(UNAUTHORIZED);
-      expect(response.body.message).toBe("Solo agentes");
+      expect(response.body.data).toBe("Solo agentes");
     });
 
     it("Should return 404", async () => {
@@ -112,7 +112,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("Authorization", `Bearer ${refresh}`);
 
       expect(response.status).toBe(UNAUTHORIZED);
-      expect(response.body.description).toBe("Token invalido");
+      expect(response.body.code).toBe("token_invalido");
     });
 
     /** No token */
@@ -120,7 +120,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent.get(`/app/${CONFIG.APP.VER}/agent/payments`);
 
       expect(response.status).toBe(UNAUTHORIZED);
-      expect(response.body.message).toBe("Unauthorized");
+      expect(response.body.code).toBe("Unauthorized");
     });
 
     it("Should return 403", async () => {
@@ -282,7 +282,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         });
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].type).toBe("unknown_fields");
+      expect(response.body.data[0].type).toBe("unknown_fields");
     });
 
     it("Should return 401", async () => {
@@ -443,7 +443,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         });
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].type).toBe("unknown_fields");
+      expect(response.body.data[0].type).toBe("unknown_fields");
     });
 
     it("Should return 401", async () => {

@@ -3,11 +3,11 @@ import { Token } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JwtService } from "../../services/jwt.service";
 import CONFIG from "@/config";
-import { CustomError } from "@/middlewares/errorHandler";
 import { TokenDAO } from "@/db/token";
 import { JWTPayload, TokenPair, TokenResult } from "@/types/response/jwt";
 import { PlayersDAO } from "@/db/players";
 import { ERR } from "@/config/errors";
+import { CustomError } from "@/helpers/error/CustomError";
 
 export class AuthServices extends JwtService {
   private get cypherPass(): string {

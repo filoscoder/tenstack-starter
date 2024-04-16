@@ -1,23 +1,10 @@
-import { NOT_FOUND } from "http-status";
 import {
   CustomValidator,
   Location,
   body,
   checkSchema,
 } from "express-validator";
-import { apiResponse } from "@/helpers/apiResponse";
 import { PlayersDAO } from "@/db/players";
-
-export const validatePlayerId = (req: Req, res: Res, next: NextFn) => {
-  const { id } = req.params;
-  const playerId = parseInt(id);
-
-  if (isNaN(playerId)) {
-    return res.status(NOT_FOUND).json(apiResponse(null, "Invalid player ID"));
-  }
-
-  return next();
-};
 
 const isDate: CustomValidator = (value: string, { req }) => {
   if (value.length === 0) return true;

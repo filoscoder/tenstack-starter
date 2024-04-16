@@ -2,7 +2,6 @@ import { Deposit, Payment } from "@prisma/client";
 import { AxiosResponse } from "axios";
 import { FinanceServices } from "../transactions/services";
 import { AuthServices } from "../auth/services";
-import { CustomError } from "@/middlewares/errorHandler";
 import { Credentials } from "@/types/request/players";
 import { compare } from "@/utils/crypt";
 import { PaymentsDAO } from "@/db/payments";
@@ -17,6 +16,7 @@ import CONFIG from "@/config";
 import { ERR } from "@/config/errors";
 import { BotFlowsDAO } from "@/db/bot-flows";
 import { AlqCuentaAhorroResponse } from "@/types/response/alquimia";
+import { CustomError } from "@/helpers/error/CustomError";
 
 export class AgentServices {
   static async login(
