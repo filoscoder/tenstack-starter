@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { JWTPayload, TokenPair } from "@/types/response/jwt";
+import CONFIG from "@/config";
 /**
  * Generates and verifies Json Web Tokens
  */
@@ -62,7 +63,7 @@ export class JwtService {
       // Secret
       pass,
       // Options
-      { expiresIn: "10m" },
+      { expiresIn: CONFIG.AUTH.ACCESS_TOKEN_EXPIRE },
     );
 
     return token;
@@ -78,7 +79,7 @@ export class JwtService {
       // Secret
       pass,
       // Options
-      { expiresIn: "8h" },
+      { expiresIn: CONFIG.AUTH.REFRESH_TOKEN_EXPIRE },
     );
 
     return token;
