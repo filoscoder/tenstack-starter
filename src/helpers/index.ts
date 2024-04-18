@@ -1,1 +1,1 @@
-export { expressPinoConsoleLogger, exitLog } from "./loggers";
+export { exitLog } from "./loggers";

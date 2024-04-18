@@ -61,17 +61,24 @@ export class FinanceServices {
     request: CashoutRequest,
   ): Promise<CoinTransferResult> {
     await PaymentsDAO.authorizeCreation(request.bank_account, player.id);
-
     const casinoCoinsService = new CasinoCoinsService();
+    let transferResult: CoinTransferResult | undefined;
+    try {
+      transferResult = await casinoCoinsService.playerToAgent(request, player);
 
-    const transferResult = await casinoCoinsService.playerToAgent(
-      request,
-      player,
-    );
-
-    if (transferResult.ok) this.createPayment(player, request);
-
-    return transferResult;
+      if (transferResult.ok) this.createPayment(player, request);
+      return transferResult;
+    } catch (e) {
+      if (
+        e instanceof CustomError &&
+        e.code === ERR.TRANSACTION_LOG.code &&
+        transferResult?.ok
+      ) {
+        this.createPayment(player, request);
+        return transferResult;
+      }
+      throw e;
+    }
   }
 
   /**

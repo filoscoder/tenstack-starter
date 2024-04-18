@@ -66,7 +66,8 @@ export const genericErrorHandler = (
       code: "uncaught_error",
       description: err ?? "Internal server error",
     });
-  else if (CONFIG.APP.ENV === "dev") console.error(err);
+
+  if (CONFIG.LOG.LEVEL === "debug") console.error(err);
 };
 
 export const requestTimeoutHandler = (
@@ -104,7 +105,7 @@ export const customErrorHandler = (
     ) {
       logtailLogger.error({ err, tag: err.code });
     }
-    if (CONFIG.APP.ENV === "dev") {
+    if (CONFIG.LOG.LEVEL === "debug") {
       console.error(err);
     }
   } else {

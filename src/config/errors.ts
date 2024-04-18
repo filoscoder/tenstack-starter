@@ -92,9 +92,4 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "already_exists",
     description: "Deposito ya existe",
   },
-  PLAYER_CREATE: {
-    status: 500,
-    code: "agent_api_error",
-    description: "Error en el panel al crear el usuario",
-  },
 };

@@ -517,6 +517,10 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
   - Endpoint https://agent.casinomex.vip/api/users/5941/change-password/
   - Body: `{ new_password:	string }`
 - Log errors to file
+- [Bot Whatsapp](https://bot-whatsapp.netlify.app/) ✅
+  + [Diagrama Flujo](https://www.figma.com/file/rtxhrNqQxdEdYzOfPl1mRc/Whatsapp-Bot?type=whiteboard&node-id=0%3A1&t=5ACojRhp99vrh24S-1)
+- Usar endpoint /auth/logout en frontend
+- Acomodar frontend para nuevos errores
 - Usar endpoint /auth/logout en frontend
 - [Bot Whatsapp](https://bot-whatsapp.netlify.app/) ✅
   + [Diagrama Flujo](https://www.figma.com/file/rtxhrNqQxdEdYzOfPl1mRc/Whatsapp-Bot?type=whiteboard&node-id=0%3A1&t=5ACojRhp99vrh24S-1)
@@ -531,7 +535,6 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 ### Fichas insuficientes
 
 - Revisar respuesta y avisarle al agente si quedaron transferencias sin liberar
-
 
 ## Optimizaciones
 

@@ -14,7 +14,7 @@ beforeAll(async () => {
 describe("HttpService", () => {
   describe("authedAlqApi", () => {
     it("Should return 200", async () => {
-      const response = await service.authedAlqApi.get("/perfil");
+      const response = await service.authedAlqApi.get<any>("/perfil");
 
       expect(response.status).toBe(200);
       expect(Object.keys(response.data)).toEqual([

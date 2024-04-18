@@ -12,6 +12,7 @@ import { hidePassword } from "@/utils/auth";
 import { HttpService } from "@/services/http.service";
 import { ERR } from "@/config/errors";
 import { CustomError } from "@/helpers/error/CustomError";
+import { AgentApiError } from "@/helpers/error/AgentApiError";
 
 export class PlayerServices {
   /**
@@ -36,11 +37,14 @@ export class PlayerServices {
     const { authedAgentApi, playerApi } = new HttpService();
 
     // Crear el usuario en panel
-    let response = await authedAgentApi.post(panelSignUpUrl, player);
+    let response = await authedAgentApi.post<any>(panelSignUpUrl, player);
 
-    if (response.status !== 201 && response.status !== 400) {
-      throw new CustomError(ERR.PLAYER_CREATE);
-    }
+    if (response.status !== 201 && response.status !== 400)
+      throw new AgentApiError(
+        response.status,
+        "Error en el panel al crear el usuario",
+        response.data,
+      );
 
     if (
       response.status === 400 &&

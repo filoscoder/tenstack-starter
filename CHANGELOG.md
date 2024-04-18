@@ -1,3 +1,24 @@
+## [1.0.0] - 2024-04-18
+
+### Added
+- `BOT_QR_PATH` in `.env`. Absolute path to the bot.qr.png.
+
+### Changed
+- Moved bot server out into its own project
+
+## [1.0.0] - 2024-04-16
+
+### Added
+- `AgentApiError` as a wrapper around `CustomError` with code "agent_api_error".
+- Ensure value of `CashoutRequest.amount` is between 0 and 2**32 in request validator.
+
+### Changed
+- Fetch token duration from `.env`.
+- Improve `HttpService` typing.
+- Error code `error_transferencia` is now `agent_api_error`.
+- Remove `expressPinoLogger` (middleware that logged errors to console).
+- Truncate TOKENS table on token creation.
+
 ## [1.0.0] - 2024-04-16
 
 ### Changed

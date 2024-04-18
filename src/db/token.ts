@@ -10,7 +10,11 @@ const prisma = new PrismaClient();
 
 export class TokenDAO {
   static async create(data: CreateTokenDetails) {
+    const dayInMS = 24 * 60 * 60 * 1000;
     try {
+      await prisma.token.deleteMany({
+        where: { created_at: { lt: new Date(Date.now() - dayInMS * 15) } },
+      });
       const token = await prisma.token.create({ data });
       return token;
     } catch (error) {

@@ -293,6 +293,22 @@ describe("[UNIT] => TRANSACTIONS", () => {
       expect(response.body.data[0].type).toBe("unknown_fields");
     });
 
+    it("Should return 400 (amount too large)", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
+        .send({
+          ...cashoutRequest,
+          amount: 4294967297,
+        })
+        .set("Authorization", `Bearer ${tokens[0].access}`)
+        .set("User-Agent", USER_AGENT);
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe(
+        "amount must be a number between 0 and 2**32",
+      );
+    });
+
     it("Should return 401", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)

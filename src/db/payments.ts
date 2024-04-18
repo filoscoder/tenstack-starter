@@ -64,6 +64,9 @@ export class PaymentsDAO {
    * Ensure bank account exists and belongs to authenticated player
    * @param bank_account
    * @param player_id
+   * @throws NotFoundException
+   * @throws ForbiddenError
+   * @throws CustomError (too_many_requests)
    */
   static async authorizeCreation(bank_account: string, player_id: string) {
     try {

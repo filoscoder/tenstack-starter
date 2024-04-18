@@ -11,6 +11,7 @@ import { parseTransferResult } from "@/utils/parser";
 import { CoinTransferResult } from "@/types/response/transfers";
 import { ERR } from "@/config/errors";
 import { CustomError } from "@/helpers/error/CustomError";
+import { AgentApiError } from "@/helpers/error/AgentApiError";
 
 /**
  * Interact with the casino's coins transfer endpoints and log results into
@@ -20,6 +21,8 @@ import { CustomError } from "@/helpers/error/CustomError";
 export class CasinoCoinsService {
   /**
    * Transfer coins from player to agent (Cashout)
+   * @throws AgentApiError
+   * @throws CustomError (transaction_log)
    */
   async playerToAgent(
     cashOutRequest: CashoutRequest,
@@ -41,6 +44,8 @@ export class CasinoCoinsService {
 
   /**
    * Transfer coins from agent to player (Deposit)
+   * @throws AgentApiError
+   * @throws CustomError (transaction_log)
    */
   async agentToPlayer(
     deposit: Deposit & { Player: Player },
@@ -74,22 +79,21 @@ export class CasinoCoinsService {
 
   /**
    * Send coins
+   * @throws AgentApiError
    */
   private async transfer(
     transferDetails: TransferDetails,
   ): Promise<AxiosResponse> {
     const { authedAgentApi } = new HttpService();
     const url = "/backoffice/transactions/";
-    const result = await authedAgentApi.post(url, transferDetails);
+    const result = await authedAgentApi.post<any>(url, transferDetails);
 
     if (result.status !== 201 && result.status !== 400)
-      throw new CustomError({
-        code: "error_transferencia",
-        status: result.status,
-        description: "Error en el panel al transferir fichas", //result.data
-        detail: result.data,
-      });
-
+      throw new AgentApiError(
+        result.status,
+        "Error en el panel al transferir fichas",
+        result.data,
+      );
     return result;
   }
 
@@ -125,6 +129,7 @@ export class CasinoCoinsService {
 
   /**
    * Log into Transaction History table
+   * @throws CustomError (transaction_log)
    */
   private async logTransaction(ok: boolean, transferDetails: TransferDetails) {
     try {

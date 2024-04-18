@@ -1,4 +1,3 @@
-import { join } from "path";
 import { ReadStream, createReadStream, existsSync } from "fs";
 import { OK } from "http-status";
 import { AgentServices } from "./services";
@@ -6,6 +5,7 @@ import { Credentials } from "@/types/request/players";
 import { apiResponse } from "@/helpers/apiResponse";
 import { AgentBankAccount } from "@/types/response/agent";
 import { NotFoundException } from "@/helpers/error";
+import CONFIG from "@/config";
 
 export class AgentController {
   static async login(req: Req, res: Res, next: NextFn) {
@@ -57,7 +57,7 @@ export class AgentController {
   static async qr(_req: Req, res: Res, next: NextFn) {
     let fileStream: ReadStream | undefined = undefined;
     try {
-      const PATH_QR = join(process.cwd(), `bot.qr.png`);
+      const PATH_QR = CONFIG.BOT.QR_PATH;
       if (!existsSync(PATH_QR)) {
         throw new NotFoundException("bot.qr.png not found");
       }

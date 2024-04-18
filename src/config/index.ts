@@ -27,7 +27,7 @@ const CONFIG = {
     MAX_FILES: process.env.LOGGING_MAX_FILES || 5,
     CODES: [
       "agent_api_error",
-      "error_transferencia",
+      "external_login",
       "alquimia",
       "token_invalid",
       "wrong_token_type",
@@ -100,6 +100,9 @@ const CONFIG = {
     VER: `v${pkg.version[0][0]}`,
     DESCRIPTION: pkg.description,
     AUTHORS: pkg.authors,
+  },
+  BOT: {
+    QR_PATH: process.env.BOT_QR_PATH ?? "",
   },
 } as const;
 
