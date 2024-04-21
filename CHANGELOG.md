@@ -1,3 +1,9 @@
+## [1.0.0] - 2024-04-20
+
+### Changed
+- Remove `owner_id` from BANK_ACCOUNT
+- Remove unique index from BANK_ACCOUNT.bankName and BANK_ACCOUNT.bankAlias
+
 ## [1.0.0] - 2024-04-18
 
 ### Added

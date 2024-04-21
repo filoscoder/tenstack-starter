@@ -13,7 +13,7 @@
     "clean": "rimraf dist",
     "build": "NODE_ENV=production run-s prettify clean transpile",
     "watch": "tsc --watch",
-    "test": "NODE_ENV=test jest --coverage --runInBand --detectOpenHandles",
+    "test": "NODE_ENV=test LOGGING_LEVEL=none jest --coverage --runInBand --detectOpenHandles",
     "test:watchAll": "NODE_ENV=test jest --watchAll --runInBand --detectOpenHandles",
     "start": "NODE_ENV=development run-s prettify lint & nodemon",
     "start-prod": "NODE_ENV=production node dist/src/index.js",

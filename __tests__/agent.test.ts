@@ -508,7 +508,6 @@ async function initialize() {
             bankNumber: `${Date.now()}`,
             owner: "Test owner",
             bankAlias: "Test alias",
-            owner_id: 123123123,
           },
         ],
       },

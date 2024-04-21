@@ -1,0 +1,5 @@
+-- DropIndex
+DROP INDEX `BANK_ACCOUNTS_bankAlias_key` ON `BANK_ACCOUNTS`;
+
+-- DropIndex
+DROP INDEX `BANK_ACCOUNTS_bankNumber_key` ON `BANK_ACCOUNTS`;

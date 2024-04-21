@@ -351,7 +351,6 @@ Requiere rol| agent
 ```typescript
 {
   owner: string                       // Nombre del beneficiario
-  owner_id: number                    // DNI
   bankName: string                    // Nombre del banco
   bankNumber: string                  // CBU
   bankAlias: string?   
@@ -363,7 +362,6 @@ Requiere rol| agent
 {
   id: string        
   owner: string                       // Nombre del beneficiario
-  owner_id: number                    // DNI
   player_id: string                   // ID de Player
   bankName: string                    // Nombre del banco
   bankNumber: string                  // CBU
