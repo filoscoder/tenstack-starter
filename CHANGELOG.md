@@ -1,3 +1,8 @@
+## [1.0.0] - 2024-04-23
+
+### Changed
+- Improve `seed.ts` to allow updating credentials
+
 ## [1.0.0] - 2024-04-20
 
 ### Changed

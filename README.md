@@ -531,6 +531,11 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Asegurarse que los status code de las respuestas de api externa esten presente en logs
 - Usar instancia global de prisma.
 
+- Agregar a panel agente posibilidad de setear dos telefonos:
+  + bot
+  + soporte humano
+- Agregar telefono de soporte a endpoint cuenta bancaria alquimia
+
 ### Error logging
 
 - Loguear errores de api externas a un archivo, errores nuestros a otro.
