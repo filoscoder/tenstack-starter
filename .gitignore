@@ -121,6 +121,6 @@ bot_sessions
 history.txt
 test_setup.sh
 
-.vscode/settings.json
+.vscode
 
 backup

@@ -6,7 +6,11 @@ import { Credentials } from "@/types/request/players";
 import { compare } from "@/utils/crypt";
 import { PaymentsDAO } from "@/db/payments";
 import { DepositsDAO } from "@/db/deposits";
-import { AgentBankAccount, BalanceResponse } from "@/types/response/agent";
+import {
+  AgentBankAccount,
+  BalanceResponse,
+  SupportResponse,
+} from "@/types/response/agent";
 import { UserRootDAO } from "@/db/user-root";
 import { TokenPair } from "@/types/response/jwt";
 import { HttpService } from "@/services/http.service";
@@ -17,6 +21,7 @@ import { ERR } from "@/config/errors";
 import { BotFlowsDAO } from "@/db/bot-flows";
 import { AlqCuentaAhorroResponse } from "@/types/response/alquimia";
 import { CustomError } from "@/helpers/error/CustomError";
+import { UserRootUpdatableProps } from "@/types/request/agent";
 
 export class AgentServices {
   static async login(
@@ -141,5 +146,27 @@ export class AgentServices {
     const botFlow = await BotFlowsDAO.findOnCallFlow();
 
     return !!botFlow;
+  }
+
+  static async getSupportNumbers(): Promise<SupportResponse> {
+    const agent = await UserRootDAO.getAgent();
+
+    if (!agent) throw new CustomError(ERR.AGENT_UNSET);
+
+    return {
+      bot_phone: agent.bot_phone,
+      human_phone: agent.human_phone,
+    };
+  }
+
+  static async updateSupportNumbers(
+    data: UserRootUpdatableProps,
+  ): Promise<SupportResponse> {
+    const agent = await UserRootDAO.update(data);
+
+    return {
+      bot_phone: agent.bot_phone,
+      human_phone: agent.human_phone,
+    };
   }
 }

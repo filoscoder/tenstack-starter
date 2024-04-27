@@ -220,32 +220,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
     });
   });
 
-  describe("GET: /agent/qr", () => {
-    it("Should return 200", async () => {
-      const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/qr`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
-
-      expect(response.status).toBe(OK);
-    });
-
-    it("Should return 401", async () => {
-      const response = await agent.get(`/app/${CONFIG.APP.VER}/agent/qr`);
-
-      expect(response.status).toBe(UNAUTHORIZED);
-    });
-
-    it("Should return 403", async () => {
-      const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/qr`)
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
-
-      expect(response.status).toBe(FORBIDDEN);
-    });
-  });
-
   describe("POST: /agent/bank-account", () => {
     it("Should update bank account", async () => {
       const response = await agent
@@ -485,6 +459,108 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return 403", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/on-call`)
+        .set("Authorization", `Bearer ${playerAccessToken}`)
+        .set("User-Agent", USER_AGENT);
+
+      expect(response.status).toBe(FORBIDDEN);
+    });
+  });
+
+  describe("GET: /agent/support", () => {
+    it("Should return support numbers", async () => {
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/agent/support`)
+        .set("Authorization", `Bearer ${access}`)
+        .set("User-Agent", USER_AGENT);
+
+      expect(response.status).toBe(OK);
+      expect(Object.keys(response.body.data)).toEqual([
+        "bot_phone",
+        "human_phone",
+      ]);
+    });
+
+    it("Should return 401", async () => {
+      const response = await agent.get(`/app/${CONFIG.APP.VER}/agent/support`);
+
+      expect(response.status).toBe(UNAUTHORIZED);
+    });
+
+    it("Should return 403", async () => {
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/agent/support`)
+        .set("Authorization", `Bearer ${playerAccessToken}`)
+        .set("User-Agent", USER_AGENT);
+
+      expect(response.status).toBe(FORBIDDEN);
+    });
+  });
+
+  describe("POST: /agent/support", () => {
+    it("Should update support numbers", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/agent/support`)
+        .set("Authorization", `Bearer ${access}`)
+        .set("User-Agent", USER_AGENT)
+        .send({
+          bot_phone: "555555555555",
+          human_phone: "44444444444",
+        });
+
+      console.log("RESPONSE", response);
+      expect(response.status).toBe(OK);
+      expect(response.body.data).toEqual({
+        bot_phone: "555555555555",
+        human_phone: "44444444444",
+      });
+    });
+
+    it("Should return 400 unknown_fields", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/agent/support`)
+        .set("Authorization", `Bearer ${access}`)
+        .set("User-Agent", USER_AGENT)
+        .send({
+          unknownField: "foo",
+        });
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].type).toBe("unknown_fields");
+    });
+
+    it.each`
+      field            | value                      | message
+      ${"bot_phone"}   | ${"555555555555555555555"} | ${"bot_phone must be a numeric string between 10 and 20 characters long"}
+      ${"bot_phone"}   | ${"5555"}                  | ${"bot_phone must be a numeric string between 10 and 20 characters long"}
+      ${"bot_phone"}   | ${"5555555555ABC"}         | ${"bot_phone must be a numeric string between 10 and 20 characters long"}
+      ${"human_phone"} | ${"555555555555555555555"} | ${"human_phone must be a numeric string between 10 and 20 characters long"}
+      ${"human_phone"} | ${"5555"}                  | ${"human_phone must be a numeric string between 10 and 20 characters long"}
+      ${"human_phone"} | ${"5555555555ABC"}         | ${"human_phone must be a numeric string between 10 and 20 characters long"}
+    `("Should return 400", async ({ field, message }) => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/agent/support`)
+        .set("Authorization", `Bearer ${access}`)
+        .set("User-Agent", USER_AGENT)
+        .send({
+          [field]: "555555555555555555555",
+        });
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe(message);
+    });
+
+    it("Should return 401", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/agent/support`)
+        .send({ bot_phone: "5555555", human_phone: "4444444" });
+
+      expect(response.status).toBe(UNAUTHORIZED);
+    });
+
+    it("Should return 403", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/agent/support`)
+        .send({ bot_phone: "5555555", human_phone: "4444444" })
         .set("Authorization", `Bearer ${playerAccessToken}`)
         .set("User-Agent", USER_AGENT);
 

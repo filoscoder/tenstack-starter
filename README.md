@@ -51,7 +51,11 @@ Comes with:
 + [Ver Balance Alquimia](#ver-balance-alquimia-🔒)
 + [Liberar Fichas Pendientes](#liberar-fichas-pendientes-🔒)
 + [Indicar Que El Agente Esta De Guardia](#setear-guardia-🔒)
-+ [Ver Estado De Guardia]
++ [Ver Estado De Guardia](#ver-guardia-🔒)
++ [Ver Números de Soporte](#ver-números-de-soporte-🔒)
++ [Actualizar Números de Soporte](#actualizar-números-de-soporte-🔒)
+
+### Bot
 
 ### Auth
 + [Refrescar Token](#refrescar-token)
@@ -232,14 +236,6 @@ Método      |`GET`
 Devuelve    |[`Deposit[]`](#deposit)
 Requiere rol| agent
 
-### Ver QR 🔒
-
-|Endpoint| `/agent/qr`|
----|---|
-Método      |`GET`
-Devuelve    |`Blob`
-Requiere rol| agent
-
 ### Ver Cuenta Bancaria 🔒
 
 |Endpoint| `/agent/bank-account`|
@@ -302,6 +298,36 @@ Indicar que alguien está al teléfono para que el bot muestre el menú "contact
 Método      |`GET`
 Devuelve    |boolean
 Requiere rol| agent
+
+### Ver Números de soporte 🔒
+
+|Endpoint| `/agent/support`|
+---|---|
+Método      |`GET`
+Devuelve    |[`SupportResponse`](#supportresponse)
+Requiere rol| agent
+
+### Actualizar Números de soporte 🔒
+
+|Endpoint| `/agent/support`|
+---|---|
+Método      |`POST`
+Devuelve    |[`SupportRequest`](#supportrequest)
+Requiere rol| agent
+
+Bot
+---
+
+### Ver QR 🔒
+
+|Endpoint| `/bot/:name?`|
+---|---|
+Método      |`GET`
+Devuelve    |`Blob | string[]`
+Requiere rol| agent
+
+> Omitir el parametro `:name` para que devuelva un array con los nombres de los bots.
+> Cualquier caracter que no esté en el rango [a-b] es eliminado del parametro `:name`. Ademas `:name` debe tener entre 1 y 10 caracteres.
 
 ## Interfaces
 
@@ -483,6 +509,23 @@ Estado de transferencia de fichas
   active: boolean
 }
 ```
+
+### SupportResponse
+```typescript
+{
+  bot_phone: string | null;
+  human_phone: string | null;
+}
+```
+
+### SupportRequest
+```typescript
+{
+  bot_phone?: string;
+  human_phone?: string;
+}
+```
+
 ## Load Testing
 
 ### Ddosify
@@ -514,39 +557,14 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Cambiar contraseña (no funciona en el casino, vamos por este lado)
   - Endpoint https://agent.casinomex.vip/api/users/5941/change-password/
   - Body: `{ new_password:	string }`
-- Log errors to file
 - [Bot Whatsapp](https://bot-whatsapp.netlify.app/) ✅
   + [Diagrama Flujo](https://www.figma.com/file/rtxhrNqQxdEdYzOfPl1mRc/Whatsapp-Bot?type=whiteboard&node-id=0%3A1&t=5ACojRhp99vrh24S-1)
 - Usar endpoint /auth/logout en frontend
-- Acomodar frontend para nuevos errores
-- Usar endpoint /auth/logout en frontend
-- [Bot Whatsapp](https://bot-whatsapp.netlify.app/) ✅
-  + [Diagrama Flujo](https://www.figma.com/file/rtxhrNqQxdEdYzOfPl1mRc/Whatsapp-Bot?type=whiteboard&node-id=0%3A1&t=5ACojRhp99vrh24S-1)
-- Chequear si agent existe en la bbdd en `seed.ts`
-- Subir la duracion del refresh token a 24 horas
-- Tomar duracion de los tokens de `.env`
-- Balance Alquimia en panel agente
-- Tener en cuenta que pasa si el casino devuelve 200 a una transfer de fichas pero la transferencia no pasa
-- Limpiar tabla TOKENS periodicamente
-- Asegurarse que los status code de las respuestas de api externa esten presente en logs
-- Usar instancia global de prisma.
+- Buscar deposito en alquimia con clave de rastreo incluyendo `clave_rastreo` en los search params
 
-- Agregar a panel agente posibilidad de setear dos telefonos:
-  + bot
-  + soporte humano
-- Agregar telefono de soporte a endpoint cuenta bancaria alquimia
+- QRs dinámicos
 
-### Error logging
 
-- Loguear errores de api externas a un archivo, errores nuestros a otro.
-- Notificar solo luego de X errores por dia.
-- Ver errores en panel agente.
-
-### Error logging
-
-- Loguear errores de api externas a un archivo, errores nuestros a otro.
-- Notificar solo luego de X errores por dia.
-- Ver errores en panel agente.
 
 ### Fichas insuficientes
 
@@ -589,12 +607,18 @@ curl -X GET\
 -d 'id_cuenta=120902&id_transaccion=18489885' \
 -H 'Content-Type: x-www-form-urlencoded'
 ```
-Devuelve 404 al intentar confirmar el ingreso de $10 con su id_transaccion
 
-Consulta de movimientos
-- Consulta movimientos `/1.0.0/v2/cuenta-ahorro-cliente`
-  + Si el movimiento figura en la lista devuelta por "Consulta de Movimientos", esta confirmado? 
-  + Cuales son los posibles valors del campo `estatus_transaccion` en el resultado de este endpoint?
-- el endpoint "Consulta estatus TX `/1.0.0/v2/consulta-estatus-tx`" nos sirve para confirmar transferencias recibidas? o solo pagos salientes?
+Consultar transferencia por clave de rastreo
+```bash
+curl -X GET\
+-H "Authorization: Bearer $API_TOKEN" \
+-H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
+"${ALQ_BASE_URL}1.0.0/v2/cuenta-ahorro-cliente/:BaccountId/transaccion
+-d 'clave_rastreo=$TRACKING_NUMBER'
+```
 
-
+Transferir platita
+mismo endpoint que arriba
+canal SPEI
+ASP (medio de pago 4)
+cuenta destino

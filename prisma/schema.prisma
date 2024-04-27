@@ -21,7 +21,9 @@ model UserRoot {
   dirty             Boolean       @default(false)     // El agente está siendo logueado
   bankAccount       Json?      
   alq_api_manager   String?       @db.Text
-  alq_token         String?       @db.VarChar(800)    
+  alq_token         String?       @db.VarChar(800)
+  bot_phone         String?       @db.VarChar(20)
+  human_phone       String?       @db.VarChar(20)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 
@@ -148,6 +150,7 @@ model BotFlow {
   messages          Json
   on_call           Boolean
   active            Boolean
+  name              String        @db.VarChar(20)
 
   @@map("BOT_FLOWS")
 }

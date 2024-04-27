@@ -20,3 +20,8 @@ export type AgentBankAccount = {
 export type BalanceResponse = {
   balance: number;
 };
+
+export type SupportResponse = {
+  bot_phone: string | null;
+  human_phone: string | null;
+};

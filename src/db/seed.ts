@@ -3,12 +3,6 @@ import readlineSync from "readline-sync";
 import CONFIG from "@/config";
 import { encrypt, hash } from "@/utils/crypt";
 import { CasinoTokenService } from "@/services/casino-token.service";
-import {
-  botMenus,
-  botMenusOnCall,
-  botMessages,
-  botMessagesOnCall,
-} from "@/chatbot/messages";
 
 const prisma = new PrismaClient();
 
@@ -165,45 +159,12 @@ async function upsertAgent() {
 
   console.log("\nAgente OK 👍\n");
 }
-
-async function createBotFlows() {
-  const onCallFlow = await prisma.botFlow.findFirst({
-    where: { on_call: true },
-  });
-  if (!onCallFlow)
-    await prisma.botFlow.create({
-      data: {
-        messages: botMessagesOnCall,
-        menus: botMenusOnCall,
-        on_call: true,
-        active: false,
-      },
-    });
-
-  const regularFlow = await prisma.botFlow.findFirst({
-    where: { on_call: false },
-  });
-  if (!regularFlow)
-    await prisma.botFlow.create({
-      data: {
-        messages: botMessages,
-        menus: botMenus,
-        on_call: false,
-        active: false,
-      },
-    });
-
-  console.log("Bot flows OK 👍\n");
-}
-
 async function main() {
   await ensureRolesExist();
 
   await upsertUserRoot();
 
   await upsertAgent();
-
-  await createBotFlows();
 }
 
 main();

@@ -82,3 +82,31 @@ export const validateOnCallRequest = () =>
       optional: false,
     },
   });
+
+export const validateSupportRequest = () =>
+  checkSchema({
+    bot_phone: {
+      in: ["body"],
+      isString: true,
+      optional: true,
+      isNumeric: true,
+      trim: true,
+      errorMessage:
+        "bot_phone must be a numeric string between 10 and 20 characters long",
+      isLength: {
+        options: { min: 10, max: 20 },
+      },
+    },
+    human_phone: {
+      in: ["body"],
+      isString: true,
+      optional: true,
+      isNumeric: true,
+      trim: true,
+      errorMessage:
+        "human_phone must be a numeric string between 10 and 20 characters long",
+      isLength: {
+        options: { min: 10, max: 20 },
+      },
+    },
+  });

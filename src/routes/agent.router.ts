@@ -9,6 +9,7 @@ import {
   validateDepositUpdate,
   validateOnCallRequest,
   validatePaymentIndex,
+  validateSupportRequest,
 } from "@/components/agent/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
 import { requireAgentRole } from "@/middlewares/auth";
@@ -47,7 +48,6 @@ agentRouter.post(
   throwIfBadRequest,
   TransactionsController.deposit,
 );
-agentRouter.get("/qr", AgentController.qr);
 agentRouter.get("/bank-account", AgentController.getBankAccount);
 agentRouter.post(
   "/bank-account",
@@ -67,5 +67,13 @@ agentRouter.post(
   AgentController.setOnCallBotFlow,
 );
 agentRouter.get("/on-call", AgentController.getOnCallStatus);
+agentRouter.get("/support", AgentController.getSupportNumbers);
+agentRouter.post(
+  "/support",
+  validateSupportRequest(),
+  checkExact(),
+  throwIfBadRequest,
+  AgentController.updateSupportNumbers,
+);
 
 export default agentRouter;

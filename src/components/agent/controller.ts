@@ -1,11 +1,8 @@
-import { ReadStream, createReadStream, existsSync } from "fs";
 import { OK } from "http-status";
 import { AgentServices } from "./services";
 import { Credentials } from "@/types/request/players";
 import { apiResponse } from "@/helpers/apiResponse";
 import { AgentBankAccount } from "@/types/response/agent";
-import { NotFoundException } from "@/helpers/error";
-import CONFIG from "@/config";
 
 export class AgentController {
   static async login(req: Req, res: Res, next: NextFn) {
@@ -49,23 +46,6 @@ export class AgentController {
       const deposits = await AgentServices.showDeposits(depositId);
 
       res.status(OK).json(apiResponse(deposits));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async qr(_req: Req, res: Res, next: NextFn) {
-    let fileStream: ReadStream | undefined = undefined;
-    try {
-      const PATH_QR = CONFIG.BOT.QR_PATH;
-      if (!existsSync(PATH_QR)) {
-        throw new NotFoundException("bot.qr.png not found");
-      }
-
-      fileStream = createReadStream(PATH_QR);
-
-      res.writeHead(200, { "Content-Type": "image/png" });
-      fileStream.pipe(res);
     } catch (error) {
       next(error);
     }
@@ -140,6 +120,28 @@ export class AgentController {
       const onCall: boolean = await AgentServices.getOnCallStatus();
 
       res.status(OK).json(apiResponse(onCall));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getSupportNumbers(_req: Req, res: Res, next: NextFn) {
+    try {
+      const numbers = await AgentServices.getSupportNumbers();
+
+      res.status(OK).json(apiResponse(numbers));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async updateSupportNumbers(req: Req, res: Res, next: NextFn) {
+    try {
+      const data = req.body;
+
+      const response = await AgentServices.updateSupportNumbers(data);
+
+      res.status(OK).send(apiResponse(response));
     } catch (error) {
       next(error);
     }

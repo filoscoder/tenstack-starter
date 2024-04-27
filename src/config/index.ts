@@ -102,7 +102,7 @@ const CONFIG = {
     AUTHORS: pkg.authors,
   },
   BOT: {
-    QR_PATH: process.env.BOT_QR_PATH ?? "",
+    QR_PATHS: process.env.BOT_QR_PATHS ?? "",
   },
 } as const;
 
