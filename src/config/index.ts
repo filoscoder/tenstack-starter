@@ -104,6 +104,13 @@ const CONFIG = {
   BOT: {
     QR_PATHS: process.env.BOT_QR_PATHS ?? "",
   },
+  EMAIL: {
+    HOST: process.env.EMAIL_HOST,
+    PORT: process.env.EMAIL_PORT,
+    USER: process.env.EMAIL_USER,
+    PASS: process.env.EMAIL_PASS,
+    FROM: process.env.EMAIL_FROM,
+  },
 } as const;
 
 export default CONFIG;

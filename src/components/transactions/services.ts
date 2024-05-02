@@ -1,14 +1,12 @@
-import { AlquimiaDeposit, Deposit, Payment, Player } from "@prisma/client";
+import { Deposit, Payment, Player } from "@prisma/client";
 import { AxiosResponse } from "axios";
 import { DepositsDAO } from "@/db/deposits";
 import { HttpService } from "@/services/http.service";
 import { PlainPlayerResponse, RoledPlayer } from "@/types/response/players";
 import { PaymentsDAO } from "@/db/payments";
 import { CashoutRequest, DepositRequest } from "@/types/request/transfers";
-import { parseAlqMovement } from "@/utils/parser";
 import CONFIG from "@/config";
 import { CoinTransferResult, DepositResult } from "@/types/response/transfers";
-import { AlquimiaDepositDAO } from "@/db/alq-deposits";
 import { AlqMovementResponse } from "@/types/response/alquimia";
 import { CasinoCoinsService } from "@/services/casino-coins.service";
 import { ERR } from "@/config/errors";
@@ -134,12 +132,6 @@ export class FinanceServices {
       return deposit.amount!;
 
     try {
-      const localDeposit = await AlquimiaDepositDAO.findByTrackingNumber(
-        deposit.tracking_number,
-      );
-
-      if (localDeposit) return localDeposit.valor_real;
-
       const alqDeposit = await this.alquimiaDepositLookup(
         deposit.tracking_number,
       );
@@ -218,59 +210,17 @@ export class FinanceServices {
    */
   private async alquimiaDepositLookup(
     tracking_number: string,
-    from?: Date,
-    page = 1,
   ): Promise<AlqMovementResponse | undefined> {
-    // TODO
-    // Look up by clave_rastreo with
-    // searchParams.set("clave_rastreo", tracking_number)
     const accountId = CONFIG.EXTERNAL.ALQ_SAVINGS_ACCOUNT_ID;
     const endpoint = `cuenta-ahorro-cliente/${accountId}/transaccion`;
-    const PAGE_SIZE = 20;
-
-    if (page === 1) {
-      const lastMovement = await AlquimiaDepositDAO.findLatest();
-      if (lastMovement) from = new Date(lastMovement.fecha_operacion);
-    }
-
-    const searchParams = new URLSearchParams();
-    const startDate = from ? from.toISOString().split("T")[0] : "";
-    startDate && searchParams.set("fecha_inicio", startDate);
-    searchParams.set("registros", `${PAGE_SIZE}`);
-    searchParams.set("page", page.toString());
 
     const httpService = new HttpService();
     const movements: AxiosResponse = await httpService.authedAlqApi.get(
-      endpoint + "?" + searchParams.toString(),
+      `${endpoint}?clave_rastreo=${tracking_number}`,
     );
 
     if (movements.data.length === 0) return;
-
-    await this.syncMovements(movements.data);
-
-    const found = (movements.data as AlqMovementResponse[]).find(
-      (movement) => movement.clave_rastreo === tracking_number,
-    );
-
-    if (!found && movements.data.length === PAGE_SIZE)
-      return await this.alquimiaDepositLookup(tracking_number, from, page + 1);
-
-    return found;
-  }
-
-  /**
-   * Sync Alquimia data into local DB
-   */
-  private syncMovements(movements: AlqMovementResponse[]) {
-    // TODO
-    // Chequear que tipo_operacion = 1 sean depósitos
-    const deposits: AlquimiaDeposit[] = movements
-      .filter((movement) => movement.tipo_operacion === 1)
-      .map(parseAlqMovement);
-
-    if (!deposits) return;
-
-    return AlquimiaDepositDAO.createMany(deposits);
+    return movements.data;
   }
 
   /**

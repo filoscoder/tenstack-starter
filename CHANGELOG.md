@@ -1,3 +1,22 @@
+## [1.0.0] - 2024-05-02
+
+### Changed
+- Improve `FinanceServices.alquimiaDepositLookup` by including `clave_rastreo` in query parameters. Reducing the search to a single query.
+- Drop ALQ_DEPOSITS table.
+
+## [1.0.0] - 2024-04-29
+
+### Added
+- Installed nodemailer npm package
+
+### Changed
+- Make PLAYER.email a non null field in Prisma model
+
+## [1.0.0] - 2024-04-26
+
+### Added
+- POST `/auth/reset` to reset password. Requires player role.
+
 ## [1.0.0] - 2024-04-24
 
 ### Changed

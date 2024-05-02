@@ -109,6 +109,7 @@ async function createAgent(userRoot: UserRoot) {
           create: { name: CONFIG.ROLES.AGENT },
         },
       },
+      email: "agent@example.com",
     },
   });
 }

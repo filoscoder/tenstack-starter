@@ -42,6 +42,10 @@ export const validatePlayerRequest = () => {
         options: checkByteLength,
         errorMessage: "password must be under 73 characters",
       },
+      isLength: {
+        options: { min: 4 },
+        errorMessage: "password must be at least 4 characters long",
+      },
       errorMessage: "password is required",
     },
     email: {
@@ -78,7 +82,7 @@ async function checkEmailNotInUse(value: string): Promise<void> {
 /**
  * bcrypt only accepts passwords of up to 72 bytes in length
  */
-function checkByteLength(value: string): boolean {
+export function checkByteLength(value: string): boolean {
   return new TextEncoder().encode(value).length <= 72;
 }
 

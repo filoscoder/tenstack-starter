@@ -1,9 +1,8 @@
-import { AlquimiaDeposit, Prisma, PushSubscription } from "@prisma/client";
+import { Prisma, PushSubscription } from "@prisma/client";
 import { JsonObject } from "@prisma/client/runtime/library";
 import CONFIG from "@/config";
 import { PlayerResponse } from "@/types/response/players";
 import { CoinTransferResult } from "@/types/response/transfers";
-import { AlqMovementResponse } from "@/types/response/alquimia";
 import { CustomError } from "@/helpers/error/CustomError";
 
 export const parsePlayer = (playerDB: any): PlayerResponse | null => {
@@ -61,30 +60,6 @@ export const parseSubscription = (subscription: PushSubscription) => {
     },
   };
 };
-
-export const parseAlqMovement = (
-  movement: AlqMovementResponse,
-): AlquimiaDeposit => ({
-  id_transaccion: movement.id_transaccion,
-  tipo_transaccion: movement.tipo_transaccion,
-  id_cuenta_ahorro: movement.id_cuenta_ahorro,
-  id_medio_pago: movement.id_medio_pago,
-  id_cliente: movement.id_cliente,
-  tipo_movimiento: movement.tipo_movimiento,
-  tipo_cargo: movement.tipo_cargo,
-  tipo_operacion: movement.tipo_operacion,
-  fecha_alta: new Date(movement.fecha_alta.replace(/\s/, "T") + "Z"),
-  fecha_actualizacion: new Date(
-    movement.fecha_actualizacion.replace(/\s/, "T") + "Z",
-  ),
-  concepto: movement.concepto,
-  estatus_transaccion: movement.estatus_transaccion,
-  clave_rastreo: movement.clave_rastreo,
-  id_cuenta_ahorro_medio_pago: movement.id_cuenta_ahorro_medio_pago,
-  fecha_operacion: new Date(movement.fecha_operacion.replace(/\s/, "T") + "Z"),
-  monto: movement.monto,
-  valor_real: movement.valor_real,
-});
 
 export const parsePrismaError = (
   err:

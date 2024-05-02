@@ -507,7 +507,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
           human_phone: "44444444444",
         });
 
-      console.log("RESPONSE", response);
       expect(response.status).toBe(OK);
       expect(response.body.data).toEqual({
         bot_phone: "555555555555",

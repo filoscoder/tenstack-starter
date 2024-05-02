@@ -4,6 +4,9 @@ import { WebPushPayload } from "@/types/request/web-push";
 import { WebPushDAO } from "@/db/web-push";
 import CONFIG from "@/config";
 
+/**
+ * Web push notifications
+ */
 export class Notify {
   static async agent(payload: WebPushPayload) {
     try {

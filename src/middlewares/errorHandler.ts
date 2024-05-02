@@ -103,7 +103,7 @@ export const customErrorHandler = (
       CONFIG.LOG.CODES.includes(err.code) &&
       CONFIG.APP.ENV === "production"
     ) {
-      logtailLogger.error({ err, tag: err.code });
+      logtailLogger.error({ err });
     }
     if (CONFIG.LOG.LEVEL === "debug") {
       console.error(err);

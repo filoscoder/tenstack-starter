@@ -56,10 +56,15 @@ Comes with:
 + [Actualizar Números de Soporte](#actualizar-números-de-soporte-🔒)
 
 ### Bot
++ [Ver QR](#ver-qr-🔒)
++ [Ver bots](#ver-qr-🔒)
 
 ### Auth
 + [Refrescar Token](#refrescar-token)
 + [Logout](#logout-🔒)
++ [Olvidé mi contraseña](#olvide-mi-contraseña)
++ [Reestablecer contraseña](#reestablecer-contraseña)
++ [Cambiar contraseña]()
 
 ### [Interfaces](#interfaces-1)
 
@@ -200,6 +205,36 @@ Error       |403 si el token no le pertenece al usuario, 404 si el token no se e
 Requiere rol| player \| agent
 
 **Nota** el token puede ser un access o refresh token. Al recibir uno, los dos serán invalidados.
+
+### Olvide Mi Contraseña
+Envia un email al usuario con un enlace para reestablecer su contraseña. El token tiene una validez de 10' y sólo puede ser usado una vez.
+
+|Endpoint| `/auth/forgot-password`|
+---|---|
+Método      |`POST`
+Body (json) |[`ForgotPasswordRequest`](#forgot-password-request)
+Devuelve    |OK 200 \| 429 too_many_requests
+Rate limited|1 request cada 10' por username.
+
+> **Nota**: siempre devuelve 200 OK para evitar [user enumeration attack](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/03-Identity_Management_Testing/04-Testing_for_Account_Enumeration_and_Guessable_User_Account.html). Cuando devuelve 429, el tiempo que se debe esperar hasta el próximo request está en el encabezado `Retry-After` (en segundos).
+
+### Reestablecer Contraseña
+Reestablecer contraseña usando el token generado en [`/auth/forgot-password`](#olvide-mi-contraseña).
+
+|Endpoint| `/auth/restore-password`|
+---|---|
+Método      |`POST`
+Body (json) |[`RestorePasswordRequest`](#restore-password-request)
+Devuelve    |OK 200
+
+### Cambiar Contraseña 🔒
+
+|Endpoint| `/auth/reset-password`|
+---|---|
+Método      |`POST`
+Body (json) |[`ResetPasswordRequest`](#reset-password-request)
+Devuelve    |OK 200
+Requiere rol| player
 
 Agente
 ------
@@ -526,6 +561,30 @@ Estado de transferencia de fichas
 }
 ```
 
+### ForgotPasswordRequest
+```typescript
+{
+  username: string
+}
+```
+
+### RestorePasswordRequest
+```typescript
+{
+  token: string
+  new_password: string
+  repeat_password: string
+}
+```
+
+### ResetPasswordRequest
+```typescript
+{
+  new_password: string
+  repeat_password: string
+}
+```
+
 ## Load Testing
 
 ### Ddosify
@@ -554,16 +613,11 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 
 ## TODO
 
-- Cambiar contraseña (no funciona en el casino, vamos por este lado)
-  - Endpoint https://agent.casinomex.vip/api/users/5941/change-password/
-  - Body: `{ new_password:	string }`
 - [Bot Whatsapp](https://bot-whatsapp.netlify.app/) ✅
   + [Diagrama Flujo](https://www.figma.com/file/rtxhrNqQxdEdYzOfPl1mRc/Whatsapp-Bot?type=whiteboard&node-id=0%3A1&t=5ACojRhp99vrh24S-1)
 - Usar endpoint /auth/logout en frontend
 - Buscar deposito en alquimia con clave de rastreo incluyendo `clave_rastreo` en los search params
-
-- QRs dinámicos
-
+- Replace user_agent with [user context](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html#token-sidejacking) to prevent JWT sidejacking 
 
 
 ### Fichas insuficientes
@@ -580,14 +634,54 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 
 - ID Cuenta ahorro: 120902
 
+### Cuentas destino
+- Carolina Maruzza
+  + 646180146003556692
+  + Albo
+- Luis Gonzalo Sosa
+  + 646180402301855904
+  + Banco Stori
+
 Listar cuentas de ahorro 
 ```bash
 curl -X GET \
 -H "Authorization: Bearer $API_TOKEN" \
 -H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
-${ALQ_TEST_BASE_URL}1.0.0/v2/cuenta-ahorro-cliente \
+${ALQ_TEST_BASE_URL}/cuenta-ahorro-cliente \
 -H 'Content-Type: x-www-form-urlencoded' \
 -d 'id_cliente=2733226' 
+```
+
+Crear TX
+```bash
+curl -X POST \
+-H "Authorization: Bearer $API_TOKEN" \
+-H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"cuenta_origen": 120902, "id_cliente": 2733226, "medio_pago": 4, "importe": 1, "cuenta_destino": 646180146003556692,"nombre_beneficiario": "Carolina Maruzza", "rfc_beneficiario": "NA", "email_beneficiario": "contacto@rodrigoalvarez.co.uk", "concepto": "test", "no_referencia": 123456, "api_key": "694cefc59cdd7a30202dcd4ea7fdb790"}' \
+"${ALQ_TEST_BASE_URL}/guardar-transacciones"
+```
+
+Response
+```js
+{
+  "error": false,
+  "id_transaccion": 7281723,
+  "folio_orden": "334251325903025153",
+  "message": "Operación registrada con éxito. Estado: Aplicada.",
+  "pendiente": true,
+  "obj_res": []
+}
+```
+
+Confirmar TX
+```bash
+curl -X POST \
+-H "Authorization: Bearer $API_TOKEN" \
+-H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"id_transaccion": 7279624, "accion": 1, "id_cuenta": 120902, "api_key": "694cefc59cdd7a30202dcd4ea7fdb790"}' \
+"${ALQ_TEST_BASE_URL}/ordenes-importador"
 ```
 
 Listar TX pendientes
@@ -595,27 +689,48 @@ Listar TX pendientes
 curl -X GET \
 -H "Authorization: Bearer $API_TOKEN" \
 -H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
-"${ALQ_BASE_URL}1.0.0/v2/ordenes-importador?id_cuenta=120902"
+"${ALQ_TEST_BASE_URL}/ordenes-importador?id_cuenta=120902"
 ```
 
 Consultar status TX
 ```bash
-curl -X GET\
+curl -X GET \
 -H "Authorization: Bearer $API_TOKEN" \
 -H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
-"${ALQ_BASE_URL}1.0.0/v2/consulta-status-tx" \
--d 'id_cuenta=120902&id_transaccion=18489885' \
--H 'Content-Type: x-www-form-urlencoded'
+"${ALQ_TEST_BASE_URL}/consulta-estatus-tx?id_transaccion=7281723" 
 ```
 
 Consultar transferencia por clave de rastreo
 ```bash
-curl -X GET\
+curl -X GET \
 -H "Authorization: Bearer $API_TOKEN" \
 -H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
-"${ALQ_BASE_URL}1.0.0/v2/cuenta-ahorro-cliente/:BaccountId/transaccion
+"${ALQ_TEST_BASE_URL}/cuenta-ahorro-cliente/120902/transaccion" \
 -d 'clave_rastreo=$TRACKING_NUMBER'
 ```
+
+Datos que necesitamos saber:
+
+- Cuales son los distintos valores posibles, y que significan, del campo `estatus` en la respuesta de `/consulta-estatus-tx`
+- Cuales son los valores posibles, y que significan, del campo `estatus_transaccion` en la respuesta de `/cuenta-ahorro-cliente/$ACCOUNT_ID/transaccion`
+
+## Password restoration checklist
+
+### Forgot password request
+[x] Return consistent message for both existent and non-existent accounts
+[x] Ensure consistent response time
+[x] Rate limit restore request endpoint
+[] Sanitize input on restore request endpoint
+
+### Password reset request
+[x] Send password twice
+[] Enforce secure password policy
+[x] Email user informing password has been reset
+[x] Don't log user straight in, redirect to login page.
+[x] Invalidate previous sessions
+
+### URL token
+[x] Either user a [criptographically secure random number](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation) or JWT
 
 Transferir platita
 mismo endpoint que arriba

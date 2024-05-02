@@ -13,6 +13,8 @@ import { HttpService } from "@/services/http.service";
 import { ERR } from "@/config/errors";
 import { CustomError } from "@/helpers/error/CustomError";
 import { AgentApiError } from "@/helpers/error/AgentApiError";
+import { Mail } from "@/helpers/email/email";
+import { TokenDAO } from "@/db/token";
 
 export class PlayerServices {
   /**
@@ -95,12 +97,17 @@ export class PlayerServices {
       const localPlayer = await this.updatePlayerPassword(
         credentials,
         loginResponse.data.id,
+        loginResponse.data.email,
       );
       return await this.loginResponse(localPlayer, user_agent);
     } else throw new CustomError(ERR.INVALID_CREDENTIALS);
   };
 
-  private async updatePlayerPassword(credentials: Credentials, id: number) {
+  private async updatePlayerPassword(
+    credentials: Credentials,
+    id: number,
+    email: string,
+  ) {
     return PlayersDAO.upsert(
       credentials.username,
       { password: await hash(credentials.password) },
@@ -108,6 +115,7 @@ export class PlayerServices {
         username: credentials.username,
         password: await hash(credentials.password),
         panel_id: id,
+        email,
       },
     );
   }
@@ -120,5 +128,34 @@ export class PlayerServices {
     await authServices.invalidateTokensByUserAgent(player.id, user_agent);
     const { tokens } = await authServices.tokens(player.id, user_agent);
     return { ...tokens, player: hidePassword(player) };
+  }
+
+  async resetPassword(user: Player, new_password: string): Promise<void> {
+    const { authedAgentApi } = new HttpService();
+    const url = `users/${user.panel_id}/change-password/`;
+
+    const response = await authedAgentApi.post<any>(url, { new_password });
+
+    if (response.status !== 200)
+      throw new CustomError({
+        status: response.status,
+        code: "agent_api_error",
+        description: "Reset failed",
+        detail: response.data,
+      });
+
+    await this.emailPasswordResetConfirmation(user);
+    await TokenDAO.update({ player_id: user.id }, { invalid: true });
+  }
+
+  private async emailPasswordResetConfirmation(user: Player) {
+    const subject = "Contraseña reestablecida";
+    const body = "Tu contraseña ha sido reestablecida.";
+    const cta = {
+      name: "Iniciar sesión",
+      href: "https://casino-mex.com",
+    };
+    const mail = new Mail();
+    mail.compose(subject, user.username, body, cta).send(user.email);
   }
 }

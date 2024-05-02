@@ -44,25 +44,26 @@ model Transactions {
 }
 
 model Player {
-  id                String        @id @default(uuid())
-  panel_id          Int           @unique
-  username          String        @db.VarChar(100) @unique
-  password          String        @db.Text
-  email             String?       @db.VarChar(50) @unique
-  first_name        String?       @db.VarChar(50)
-  last_name         String?       @db.VarChar(50)
-  date_of_birth     DateTime?
-  movile_number     String?       @db.VarChar(50)
-  country           String?       @db.VarChar(50)
-  BankAccounts      BankAccount[]
-  balance_currency  String       @db.VarChar(10) @default("MXN")
-  status            String?       @db.VarChar(20) @default("ACTIVO")
-  Payments          Payment[]       
-  Deposits          Deposit[]
-  Tokens            Token[]
-  roles             Role[]
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt     
+  id                  String        @id @default(uuid())
+  panel_id            Int           @unique
+  username            String        @db.VarChar(100) @unique
+  password            String        @db.Text
+  email               String        @db.VarChar(50) @unique
+  first_name          String?       @db.VarChar(50)
+  last_name           String?       @db.VarChar(50)
+  date_of_birth       DateTime?
+  movile_number       String?       @db.VarChar(50)
+  country             String?       @db.VarChar(50)
+  BankAccounts        BankAccount[]
+  balance_currency    String        @db.VarChar(10) @default("MXN")
+  status              String?       @db.VarChar(20) @default("ACTIVO")
+  Payments            Payment[]       
+  Deposits            Deposit[]
+  Tokens              Token[]
+  roles               Role[]
+  PasswordResetTokens PasswordResetToken[]
+  created_at          DateTime      @default(now())
+  updated_at          DateTime      @updatedAt     
 
   @@map("PLAYERS")
 }
@@ -74,7 +75,7 @@ model Payment {
   amount            Float
   paid              DateTime?     
   bank_account      String           
-  BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
+  BankAccount       BankAccount   @relation(fields: [bank_account], references: [id], onDelete: Cascade)
   currency          String        @default("MXN")
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
@@ -155,24 +156,14 @@ model BotFlow {
   @@map("BOT_FLOWS")
 }
 
-model AlquimiaDeposit {
-  id_transaccion              Int       @id
-  tipo_transaccion            Int
-  id_cuenta_ahorro            Int
-  id_medio_pago               Int
-  id_cliente                  Int
-  tipo_movimiento             Int
-  tipo_cargo                  Int
-  tipo_operacion              Int
-  fecha_alta                  DateTime
-  fecha_actualizacion         DateTime
-  concepto                    String
-  estatus_transaccion         Int
-  clave_rastreo               String    @unique
-  id_cuenta_ahorro_medio_pago Int
-  fecha_operacion             DateTime
-  monto                       String
-  valor_real                  Float
+model PasswordResetToken {
+  id                          String    @id @default(uuid())
+  token                       String    @db.VarChar(342)      // 256 bytes in base64url
+  player_id                   String
+  player                      Player    @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  expires_at                  DateTime
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @updatedAt 
 
-  @@map("ALQ_DEPOSITS")
+  @@map("PASSWORD_RESET_TOKENS")
 }
