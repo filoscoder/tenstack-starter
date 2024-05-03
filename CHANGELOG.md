@@ -1,3 +1,8 @@
+## [1.0.0] - 2024-05-03
+
+### Changed 
+- `invalid_credentials` login response is now 400 instead of 404
+
 ## [1.0.0] - 2024-05-02
 
 ### Changed

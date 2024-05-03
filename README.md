@@ -618,6 +618,8 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Usar endpoint /auth/logout en frontend
 - Buscar deposito en alquimia con clave de rastreo incluyendo `clave_rastreo` en los search params
 - Replace user_agent with [user context](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html#token-sidejacking) to prevent JWT sidejacking 
+- Change ERR.INVALID_CREDENTIALS.code to 400
+- Logtail DB errors
 
 
 ### Fichas insuficientes
