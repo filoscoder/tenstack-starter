@@ -1,5 +1,4 @@
 import { Deposit, Payment, Player } from "@prisma/client";
-import { AxiosResponse } from "axios";
 import { DepositsDAO } from "@/db/deposits";
 import { HttpService } from "@/services/http.service";
 import { PlainPlayerResponse, RoledPlayer } from "@/types/response/players";
@@ -215,12 +214,12 @@ export class FinanceServices {
     const endpoint = `cuenta-ahorro-cliente/${accountId}/transaccion`;
 
     const httpService = new HttpService();
-    const movements: AxiosResponse = await httpService.authedAlqApi.get(
+    const movements = await httpService.authedAlqApi.get<AlqMovementResponse[]>(
       `${endpoint}?clave_rastreo=${tracking_number}`,
     );
 
     if (movements.data.length === 0) return;
-    return movements.data;
+    return movements.data.find((movement) => movement.valor_real > 0);
   }
 
   /**
