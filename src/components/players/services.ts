@@ -39,7 +39,10 @@ export class PlayerServices {
     const { authedAgentApi, playerApi } = new HttpService();
 
     // Crear el usuario en panel
-    let response = await authedAgentApi.post<any>(panelSignUpUrl, player);
+    let response = await authedAgentApi.post<any>(panelSignUpUrl, {
+      username: player.username,
+      password: player.password,
+    });
 
     if (response.status !== 201 && response.status !== 400)
       throw new AgentApiError(

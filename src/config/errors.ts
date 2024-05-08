@@ -7,7 +7,7 @@ export const ERR: { [key: string]: ErrorData } = {
     description: "Este nombre de usuario ya está en uso. Elige otro.",
   },
   INVALID_CREDENTIALS: {
-    status: 404,
+    status: 400,
     code: "credenciales_invalidas",
     description: "Usuario o contraseña incorrectos",
   },

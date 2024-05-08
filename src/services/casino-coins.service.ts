@@ -31,8 +31,6 @@ export class CasinoCoinsService {
     const transferDetails = await this.generateTransferDetails(
       "cashout",
       player.panel_id,
-      // TODO
-      // test ways of breaking this with big amounts
       cashOutRequest.amount,
       player.balance_currency,
     );

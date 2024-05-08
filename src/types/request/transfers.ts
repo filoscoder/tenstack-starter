@@ -39,5 +39,7 @@ export interface PaymentUpdatableProps {
   bank_account?: string;
   amount?: number;
   currency?: string;
-  paid?: string;
+  status?: string;
+  dirty?: boolean;
+  alquimia_id?: number;
 }

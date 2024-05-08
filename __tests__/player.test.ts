@@ -1,4 +1,4 @@
-import { BAD_REQUEST, CREATED, NOT_FOUND, OK, UNAUTHORIZED } from "http-status";
+import { BAD_REQUEST, CREATED, OK, UNAUTHORIZED } from "http-status";
 import { SuperAgentTest } from "supertest";
 import { PrismaClient } from "@prisma/client";
 import { initAgent } from "./helpers";
@@ -148,7 +148,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       expect(response.body.code).toBe("bad_request");
     });
 
-    it("Should return 404 user not found", async () => {
+    it("Should return 400 invalid credentials", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/players/login`)
         .send({
@@ -156,7 +156,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
           password,
         });
 
-      expect(response.status).toBe(NOT_FOUND);
+      expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.code).toBe("credenciales_invalidas");
     });
   });

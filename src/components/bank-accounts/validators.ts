@@ -1,5 +1,15 @@
 import { checkSchema } from "express-validator";
 
+const verifyClabe = (clabe: string): boolean => {
+  if (clabe.length !== 18) return false;
+  const weights = [3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7];
+  const truncated = clabe.substring(0, clabe.length - 1);
+  const weighted = weights.map((w, i) => (w * Number(truncated[i])) % 10);
+  const weightedSum = weighted.reduce((a, b) => a + b);
+  const controlDigit = 10 - (weightedSum % 10);
+  return truncated + controlDigit === clabe;
+};
+
 export const validateBankAccountIndex = () =>
   checkSchema({
     id: {
@@ -33,6 +43,7 @@ export const validateBankAccount = () =>
       notEmpty: true,
       isString: true,
       trim: true,
+      custom: { options: verifyClabe, errorMessage: "Invalid bankNumber" },
       errorMessage: "Bank number is required",
     },
     bankAlias: {

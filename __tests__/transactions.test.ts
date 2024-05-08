@@ -175,70 +175,6 @@ describe("[UNIT] => TRANSACTIONS", () => {
     });
   });
 
-  // describe("POST: /transactions/deposit/:id/delete", () => {
-  //   /** Attempt to delete someone else's deposit */
-  //   it("Should return 403", async () => {
-  //     const response = await agent
-  //       .post(
-  //         `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[1].id}/delete`,
-  //       )
-  //       .set("Authorization", `Bearer ${tokens[0].access}`)
-  //       .set("User-Agent", USER_AGENT);
-
-  //     console.log("DELETE RESULT", response.body);
-  //     expect(response.status).toBe(FORBIDDEN);
-  //   });
-
-  //   it("Should delete a deposit", async () => {
-  //     const response = await agent
-  //       .post(
-  //         `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[1].id}/delete`,
-  //       )
-  //       .set("Authorization", `Bearer ${tokens[1].access}`)
-  //       .set("User-Agent", USER_AGENT);
-
-  //     expect(response.status).toBe(OK);
-  //   });
-
-  //   // it("Should return 400 bad_request", async () => {
-  //   //   const response = await agent
-  //   //     .delete(`/app/${CONFIG.APP.VER}/transactions/deposit/9999`)
-  //   //     .set("Authorization", `Bearer ${tokens[0].access}`)
-  //   //     .set("User-Agent", USER_AGENT);
-
-  //   //   expect(response.status).toBe(BAD_REQUEST);
-  //   // });
-
-  //   it("Should return 401", async () => {
-  //     const response = await agent.post(
-  //       `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/delete`,
-  //     );
-
-  //     expect(response.status).toBe(UNAUTHORIZED);
-  //   });
-
-  //   /** Attempt to delete a confirmed deposit */
-  //   it("Should return 403 [deposit confirmed]", async () => {
-  //     const response = await agent
-  //       .post(
-  //         `/app/${CONFIG.APP.VER}/transactions/deposit/${confirmedDeposit.id}/delete`,
-  //       )
-  //       .set("Authorization", `Bearer ${tokens[0].access}`)
-  //       .set("User-Agent", USER_AGENT);
-
-  //     expect(response.status).toBe(FORBIDDEN);
-  //   });
-
-  //   it("Should return 404", async () => {
-  //     const response = await agent
-  //       .post(`/app/${CONFIG.APP.VER}/transactions/deposit/-10/delete`)
-  //       .set("Authorization", `Bearer ${tokens[0].access}`)
-  //       .set("User-Agent", USER_AGENT);
-
-  //     expect(response.status).toBe(404);
-  //   });
-  // });
-
   describe("POST: /transactions/cashout", () => {
     it("Should create a withdrawal", async () => {
       const result = await agent
@@ -250,7 +186,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
       expect(result.status).toBe(OK);
     });
 
-    it("Should should return 429 too_many_requests", async () => {
+    it("Should return 429 too_many_requests", async () => {
       const result = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
         .send(cashoutRequest)

@@ -2,11 +2,11 @@ import { Router } from "express";
 import homeRouter from "./home.router";
 import playersRouter from "./players.router";
 import bankAccountsRouter from "./bank-accounts.router";
-import transactionsRouter from "./transactions.router";
 import agentRouter from "./agent.router";
 import authRouter from "./auth.router";
 import webPushRouter from "./web-push";
 import botRouter from "./bot.router";
+import transactionsRouter from "./transactions";
 
 const mainRouter = Router();
 

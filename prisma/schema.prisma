@@ -73,10 +73,12 @@ model Payment {
   player_id         String           
   Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
   amount            Float
-  paid              DateTime?     
+  status            String        @default("PEDIDO")
   bank_account      String           
   BankAccount       BankAccount   @relation(fields: [bank_account], references: [id], onDelete: Cascade)
   currency          String        @default("MXN")
+  dirty             Boolean       @default(false)
+  alquimia_id       Int?
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 

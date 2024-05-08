@@ -4,10 +4,16 @@ export type CoinTransferResult = {
   error?: string;
 };
 
-import { Deposit } from "@prisma/client";
+import { Deposit, Payment } from "@prisma/client";
 
 export type DepositResult = {
   player_balance?: number;
   error?: string;
   deposit: Deposit;
+};
+
+export type CashoutResult = {
+  player_balance?: number;
+  error?: string;
+  payment: Payment;
 };

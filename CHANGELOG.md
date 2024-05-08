@@ -1,7 +1,30 @@
+## [1.0.0] - 2024-05-07
+
+### Changed
+- Stop sending email to casino on player creation.
+
+## [1.0.0] - 2024-05-06
+
+### Added
+- Rate limiter on POST `/payments/:id/release` (1 every 10 seconds per payment ID).
+- `dirty` column to `PAYMENTS` table.
+
+### Changed
+- Replace `agent/payments/:id/paid` with `agent/payments/:id/release`.
+
+## [1.0.0] - 2024-05-04
+
+### Added
+- Bank account number (CLABE) structure validator.
+
 ## [1.0.0] - 2024-05-03
 
 ### Changed 
-- `invalid_credentials` login response is now 400 instead of 404
+- `invalid_credentials` login response is now 400 instead of 404.
+- Split `transactionsRouter` into `paymentsRouter` and `depositsRouter`.
+- Split `TransactionsController` into `PaymentController` and `DepositController`.
+- Split `FinanceServices` into `PaymentServices` and `DepositServices`.
+
 
 ## [1.0.0] - 2024-05-02
 

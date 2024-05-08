@@ -6,6 +6,7 @@ import timeout from "connect-timeout";
 import passport from "passport";
 import CONFIG from "./config";
 import { AuthServices } from "./components/auth/services";
+import { exposeHeaders } from "./middlewares/exposeHeaders";
 import * as errorHandler from "@/middlewares/errorHandler";
 import mainRouter from "@/routes";
 
@@ -17,6 +18,7 @@ export const createApp = (): express.Application => {
     : CONFIG.APP.ALLOWED_ORIGIN;
 
   allowedOrigin !== "" && app.use(cors({ origin: allowedOrigin }));
+  app.use(exposeHeaders);
   app.use(helmet());
   app.use(express.json());
   app.use(

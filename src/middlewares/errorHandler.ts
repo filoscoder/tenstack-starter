@@ -127,6 +127,8 @@ export function prismaErrorHandler(
   ) {
     const parsed = parsePrismaError(err);
     res.status(parsed.status).send(apiResponse(null, parsed));
+    if (CONFIG.LOG.LEVEL === "debug") console.error(err);
+    if (CONFIG.APP.ENV === "production") logtailLogger.error({ err: parsed });
   } else return next(err);
 }
 

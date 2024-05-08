@@ -156,7 +156,7 @@ async function initialize() {
   bankAccountRequest = {
     owner: "Test " + Date.now(),
     bankName: "Test Bank " + Date.now(),
-    bankNumber: `${Date.now()}`,
+    bankNumber: "646180224404209392",
     bankAlias: `${Date.now()}`,
   };
 

@@ -1,8 +1,8 @@
 import { Deposit, PrismaClient } from "@prisma/client";
-import { FinanceServices } from "@/components/transactions/services";
 import CONFIG from "@/config";
+import { DepositServices } from "@/components/deposits/services";
 
-let service: FinanceServices;
+let service: DepositServices;
 let prisma: PrismaClient;
 let deposit: Deposit | null;
 beforeAll(async () => {
@@ -22,7 +22,7 @@ beforeAll(async () => {
     });
   }
 
-  service = new FinanceServices();
+  service = new DepositServices();
 });
 
 describe("FinanceService", () => {
@@ -30,9 +30,9 @@ describe("FinanceService", () => {
     it("Should verify a payment", async () => {
       if (!deposit) fail("Deposit not found");
 
-      const amount = await service.verifyPayment(deposit);
+      const amount = await service.verify(deposit);
 
-      expect(amount).toBeTruthy();
+      expect(amount).toBeGreaterThan(0);
     });
   });
 });

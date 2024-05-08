@@ -83,3 +83,26 @@ export type AlqCuentaAhorroResponse = {
   rendimiento_mensual: null;
   rendimiento_total_acumulado: null;
 }[];
+
+export type AlqCreateTxResponse = {
+  error: boolean;
+  id_transaccion: number;
+  folio_orden: string;
+  message: string;
+  pendiente: boolean;
+  obj_res: any;
+};
+
+export type AlqStatusTx = {
+  id_transaccion: number;
+  estatus: string; // "PENDIENTE AUTORIZAR" | "EN PROCESO" | "LIQUIDADA"
+  detalle_proveedor: {
+    error: boolean;
+    message: string;
+  };
+};
+
+export type AlqAuthorizeTxResponse = {
+  error: boolean;
+  message: string;
+};

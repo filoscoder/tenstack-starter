@@ -87,7 +87,6 @@ export class DepositsDAO {
     }
   }
 
-  // TODO test
   static getPending(player_id: string) {
     try {
       return prisma.deposit.findMany({

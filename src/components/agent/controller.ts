@@ -28,11 +28,11 @@ export class AgentController {
     }
   }
 
-  static async markAsPaid(req: Req, res: Res, next: NextFn) {
+  static async releasePayment(req: Req, res: Res, next: NextFn) {
     try {
       const { id } = req.params;
 
-      const payment = await AgentServices.markAsPaid(id);
+      const payment = await AgentServices.releasePayment(id);
 
       res.status(OK).json(apiResponse(payment));
     } catch (error) {

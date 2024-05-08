@@ -13,6 +13,7 @@ import {
   Player,
   PrismaClient,
 } from "@prisma/client";
+import { AlquimiaTransferService } from "../src/services/alquimia-transfer.service";
 import { initAgent } from "./helpers";
 import CONFIG from "@/config";
 import { AuthServices } from "@/components/auth/services";
@@ -21,7 +22,7 @@ let agent: SuperAgentTest;
 let prisma: PrismaClient;
 let player: Player & { BankAccounts: BankAccount[] };
 let playerAccessToken: string;
-let payment: Payment;
+let payment: Payment & { BankAccount: BankAccount };
 let deposit: Deposit;
 const USER_AGENT = "jest_test";
 
@@ -95,9 +96,11 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "id",
         "player_id",
         "amount",
-        "paid",
+        "status",
         "bank_account",
         "currency",
+        "dirty",
+        "alquimia_id",
         "created_at",
         "updated_at",
         "Player",
@@ -133,10 +136,22 @@ describe("[UNIT] => AGENT ROUTER", () => {
     });
   });
 
-  describe("POST: /agent/payments/:id/paid", () => {
+  describe("POST: /agent/payments/:id/release", () => {
+    const mockResponse = {
+      id_transaccion: 314420,
+      estatus: "EN PROCESO",
+      detalle_proveedor: {
+        error: false,
+        message: "",
+      },
+    };
+    jest
+      .spyOn(AlquimiaTransferService.prototype, "pay")
+      .mockResolvedValue(mockResponse);
+
     it("Should mark payment as paid", async () => {
       const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/paid`)
+        .post(`/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/release`)
         .set("Authorization", `Bearer ${access}`)
         .set("User-Agent", USER_AGENT);
 
@@ -145,18 +160,21 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "id",
         "player_id",
         "amount",
-        "paid",
+        "status",
         "bank_account",
         "currency",
+        "dirty",
+        "alquimia_id",
         "created_at",
         "updated_at",
       ]);
-      expect(response.body.data.paid).toBeTruthy();
+      expect(response.body.data.alquimia_id).toBe(314420);
+      expect(response.body.data.status).toBe("EN PROCESO");
     });
 
     it("Should return 401", async () => {
       const response = await agent.post(
-        `/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/paid`,
+        `/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/release`,
       );
 
       expect(response.status).toBe(UNAUTHORIZED);
@@ -164,7 +182,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
 
     it("Should return 403", async () => {
       const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/paid`)
+        .post(`/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/release`)
         .set("Authorization", `Bearer ${playerAccessToken}`)
         .set("User-Agent", USER_AGENT);
 
@@ -173,7 +191,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
 
     it("Should return 404", async () => {
       const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/agent/payments/-1/paid`)
+        .post(`/app/${CONFIG.APP.VER}/agent/payments/-1/release`)
         .set("Authorization", `Bearer ${access}`)
         .set("User-Agent", USER_AGENT);
 
@@ -535,15 +553,16 @@ describe("[UNIT] => AGENT ROUTER", () => {
       ${"human_phone"} | ${"555555555555555555555"} | ${"human_phone must be a numeric string between 10 and 20 characters long"}
       ${"human_phone"} | ${"5555"}                  | ${"human_phone must be a numeric string between 10 and 20 characters long"}
       ${"human_phone"} | ${"5555555555ABC"}         | ${"human_phone must be a numeric string between 10 and 20 characters long"}
-    `("Should return 400", async ({ field, message }) => {
+    `("Should return 400", async ({ field, value, message }) => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/support`)
         .set("Authorization", `Bearer ${access}`)
         .set("User-Agent", USER_AGENT)
         .send({
-          [field]: "555555555555555555555",
+          [field]: value,
         });
 
+      console.log(response.body);
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe(message);
     });
@@ -599,6 +618,7 @@ async function initialize() {
       player_id: player?.id,
       currency: "MXN",
     },
+    include: { BankAccount: true },
   });
 
   deposit = await prisma.deposit.create({
@@ -624,4 +644,5 @@ async function cleanUp() {
   // await prisma.token.delete({ where: { }})
   await prisma.player.delete({ where: { id: player.id } });
   prisma.$disconnect();
+  jest.restoreAllMocks();
 }
