@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `ROLES` MODIFY `name` VARCHAR(191) NOT NULL;

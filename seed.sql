@@ -8,6 +8,7 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 SET NAMES utf8mb4;
 
 INSERT INTO `BANK_ACCOUNTS` (`id`, `bankName`, `bankNumber`, `bankAlias`, `created_at`, `updated_at`, `owner`, `player_id`) VALUES
+('931d79c7-d2df-4a6f-8045-4f11fe00dbc9',	'albo',	'646180146003556692',	NULL,	'2024-05-06 20:03:50.213',	'2024-05-06 20:03:50.213',	'Carolina Maruzza',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6'),
 ('a560be45-423d-4ee0-b9d5-cc3ac327a43d',	'The Rock',	'0303030303',	NULL,	'2024-04-11 18:46:25.919',	'2024-04-11 18:46:25.919',	'Tyrion Lannister',	'49324acd-ec2b-4a05-9a1c-08f4957f5e67'),
 ('b6365118-c291-407d-a559-082688a2dc1d',	'hola_vengo_a_flotar',	'032180000118359719',	NULL,	'2024-05-04 15:13:16.898',	'2024-05-04 15:13:16.898',	'Alejo',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6'),
 ('cf2763df-1fdc-4b7e-b490-4be1eb2e2551',	'baocn',	'0202020202',	NULL,	'2024-05-02 18:01:33.136',	'2024-05-02 18:01:33.136',	'foo',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6'),
@@ -21,10 +22,11 @@ INSERT INTO `BOT_FLOWS` (`id`, `menus`, `messages`, `on_call`, `active`, `name`)
 
 INSERT INTO `DEPOSITS` (`id`, `player_id`, `created_at`, `updated_at`, `currency`, `dirty`, `status`, `tracking_number`, `amount`) VALUES
 ('13e4c9af-a022-40db-a8f4-b739f99b2227',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:02:26.814',	'2024-05-02 18:02:26.814',	'MXN',	1,	'pending',	'test_tracking_number21714672945506',	NULL),
+('16b77da3-565a-4423-a681-0e592966ed13',	'1c759b43-8059-436f-80be-5cdcb2d3d40b',	'2024-05-08 17:07:44.017',	'2024-05-08 17:07:44.017',	'MXN',	1,	'pending',	'53771ALBO11032024195558814',	NULL),
 ('401a87e3-92b8-4536-995b-7c99aadbb02f',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 19:08:17.609',	'2024-05-02 19:11:29.942',	'MXN',	0,	'pending',	'test_tracking_number0000',	NULL),
+('60e63706-6d1f-451a-9aca-bf40c887e25d',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-08 13:41:26.546',	'2024-05-08 17:07:32.090',	'MXN',	0,	'completed',	'COMPROPAGO2024032818171338231',	50),
 ('b0b80947-f34c-4eff-84b0-37dc76bd9f0b',	'49324acd-ec2b-4a05-9a1c-08f4957f5e67',	'2024-04-11 18:46:42.074',	'2024-04-11 18:46:44.338',	'MXN',	0,	'pending',	'12345',	NULL),
-('f6b39964-2e99-450c-a37a-c0fc7126f74a',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:17:27.223',	'2024-05-02 18:17:27.223',	'MXN',	1,	'pending',	'test_tracking_number21714673845688',	NULL),
-('ff008ec3-eb6b-446a-b6e1-0a792473100e',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-03 13:16:19.452',	'2024-05-03 13:46:25.992',	'MXN',	0,	'completed',	'COMPROPAGO2024032818171338231',	50);
+('f6b39964-2e99-450c-a37a-c0fc7126f74a',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:17:27.223',	'2024-05-02 18:17:27.223',	'MXN',	1,	'pending',	'test_tracking_number21714673845688',	NULL);
 
 INSERT INTO `PASSWORD_RESET_TOKENS` (`id`, `token`, `player_id`, `expires_at`, `created_at`, `updated_at`) VALUES
 ('36bef5df-2ea4-4337-a95c-88a75f6130d9',	'uM5m-KFOStKi4RrxI8ubvQzo9Areyo5K7RbBU0dpPijzVIPlKKNSDkcpHbfXvZZ0OoC8m75FpUa7746qAGQr1KsoA06q2QE_HCzEiqvQXeTO2yLdx7EnRUkPwW7_lvz5WRW2i9Pee9dFr0f4zyrmPxkKZfUA3ESBCGxyxPGdaP8IImNhxD6p9L2k2Af2-5xy3wus_fYNsyElsJjxO8pSpmdo1lGo3UQHE2jrhK-niPAucelvgaPSnpRTzmcPPLM5SLmfP1dlv-fuWEXL-RAcPNmhVOLkBFMUh9DvA9Y3jXQH564PgGklankqb4UKaQC10w9Y5F8GQqFJFVsIXPkQSA',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-04-29 19:58:13.993',	'2024-04-29 19:48:13.997',	'2024-04-29 19:48:13.997'),
@@ -38,52 +40,78 @@ INSERT INTO `PASSWORD_RESET_TOKENS` (`id`, `token`, `player_id`, `expires_at`, `
 ('d5c248f9-3ba1-4cc4-a320-85ce1b3b52c7',	'2L5p_QYh9lXZtTdgq1vfUQ9nPCFCCzoQXHgA5pUxinTDrWvjYls1JsdZWHScZDZBcPycjKFN8HpU_IZvOwK51MDqY1E0-k9ZsiuqT-mS_WYxcKVxoeR4AOWskNWRTTgbdzalJxkEvabnSXsYAIv1t1-qPvvuDLAWkh9AT_nnX1k6Sy0dEyj5rpHtseIIxQE0CEqdLaihgnm-knF_tUYjhtnGG6AXE5ASodrZiHlb6iAdO4EXW9FALOoDAnK5NlS5H68m9A2CBGtLkRkq76wJ4EyecrGZbrpeESe2doXgE9I7s8hS5GZbF4nBaXgsyilRRofwCgExUPsmJKGiroN3Ag',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-04-29 19:55:57.916',	'2024-04-29 19:45:57.919',	'2024-04-29 19:45:57.919'),
 ('dff06fdb-0c5e-4f19-958c-2678b9c54321',	'Hx6eaRUvGDxPVUz6ieWB4R4R-AxXKoTe3BLI8XW6WnAcKzeShneqh7tfKadPyiZCTToiglnJFY9TZo8gj4npJq8Oov_JMUbfrfmsDJboWOIeSL-3bK3Pjq21Ei2MWRUtjvlvXbKz1OBXd4LihHqlMTBvr58k1ZJFIVRG5MQMso--yTJbFVhLFwEO4gvxAHRt6rVlDL7ADt_0G6dQnEgvQqw4J3RQL-wrBgciQ2biR1-bBVMRlNpjq7eUcXEFU_FresMv1e8PO6agg0mvvCSkCnoMXpyuXPKbLJehZmH3gM3m3LxZNDBBPB8e1B33HIcOlaOUyGa9fgGaJkcq3oj_8A',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-04-29 20:03:48.487',	'2024-04-29 19:53:48.490',	'2024-04-29 19:53:48.490');
 
+INSERT INTO `PAYMENTS` (`id`, `player_id`, `amount`, `created_at`, `updated_at`, `bank_account`, `currency`, `status`, `dirty`, `alquimia_id`) VALUES
+('1f475591-2ff2-49c2-9de7-f1cb26dffc80',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	60,	'2024-05-08 13:47:02.899',	'2024-05-08 13:55:21.604',	'931d79c7-d2df-4a6f-8045-4f11fe00dbc9',	'MXN',	'PEDIDO',	0,	NULL),
+('94907c09-084c-11ef-ba2b-0242ac180002',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	10,	'2024-05-07 15:02:56.000',	'2024-05-08 12:49:37.180',	'931d79c7-d2df-4a6f-8045-4f11fe00dbc9',	'MXN',	'PENDIENTE RESPUESTA PROVEEDOR',	0,	7388722),
+('ee534e4f-4ade-46d1-9265-4ece41114300',	'49324acd-ec2b-4a05-9a1c-08f4957f5e67',	0.01,	'2024-05-08 17:07:37.228',	'2024-05-08 17:07:37.228',	'a560be45-423d-4ee0-b9d5-cc3ac327a43d',	'MXN',	'PEDIDO',	0,	NULL),
+('f2f1eef9-ff42-480e-bdf8-efbc4f93845f',	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	10,	'2024-05-07 13:10:18.707',	'2024-05-08 12:27:23.831',	'931d79c7-d2df-4a6f-8045-4f11fe00dbc9',	'MXN',	'LIQUIDADA',	0,	7388577);
 
 INSERT INTO `PLAYERS` (`id`, `panel_id`, `username`, `password`, `email`, `first_name`, `last_name`, `date_of_birth`, `movile_number`, `country`, `balance_currency`, `status`, `created_at`, `updated_at`) VALUES
 ('1c759b43-8059-436f-80be-5cdcb2d3d40b',	8649,	'jest_test1714759205941',	'$2b$10$/Lte5QNNwDITAF47btn8P.iZPDolrgf3ks3iS3s9LOaRYXgJx5NeS',	'jest_test1714759205941@test.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-05-03 18:00:08.757',	'2024-05-03 18:00:08.757'),
 ('49324acd-ec2b-4a05-9a1c-08f4957f5e67',	3859,	'test17',	'$2b$10$UXa9XEaKmPgBJnKR39o0kuV1.I8Zmv9GaPl.ClNvEsZjF150bskES',	'test17@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-04-11 14:50:31.175',	'2024-04-11 14:50:31.175'),
 ('5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	3900,	'test19',	'$2b$10$LVQt8coAE19btuBOEQRLHurfJU4/ifQv9sRM/np3gm4tEwhf/5xay',	'alvarezrrj@gmail.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-04-29 19:24:16.670',	'2024-04-29 19:24:16.670'),
-('a83db24d-13c5-46cc-aa3f-4041e68fea70',	414,	'cmex-admin',	'$2b$10$DrIRVD61/0YnRMHkPL9TeOTb9uUvAcNYZvAJg9GaKgcOTqdwOM7si',	'hello@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-04-09 17:26:18.627',	'2024-04-23 14:56:36.347');
+('7b650640-d90b-46cb-b65d-8af64790a50c',	8662,	'jest_test1715110883775',	'$2b$10$tS5I8LbVQcRFry3i/e6XVOliLVdXKyIawhhwLXJ3wIbbPQ4A6JE1u',	'jest_test1715110883775@test.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-05-07 19:41:26.739',	'2024-05-07 19:41:26.739'),
+('a83db24d-13c5-46cc-aa3f-4041e68fea70',	414,	'cmex-admin',	'$2b$10$DrIRVD61/0YnRMHkPL9TeOTb9uUvAcNYZvAJg9GaKgcOTqdwOM7si',	'hello@example.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-04-09 17:26:18.627',	'2024-04-23 14:56:36.347'),
+('e95f711a-b650-4fe2-a260-8fb7f59931ea',	8663,	'jest_test1715188045647',	'$2b$10$l5BnD/p48L0aqlHbnEtWNOM368l3dsnnRJdh8Tgk0ophWwyF5oy7C',	'jest_test1715188045647@test.com',	NULL,	NULL,	NULL,	NULL,	NULL,	'MXN',	'ACTIVO',	'2024-05-08 17:07:28.540',	'2024-05-08 17:07:28.540');
 
 INSERT INTO `ROLES` (`id`, `name`) VALUES
 ('292a6d46-3967-442a-a62c-977f95fb48e8',	'agent'),
 ('a10bbcab-e8b3-41e2-b1b2-d88469fd1195',	'player');
 
 INSERT INTO `TOKENS` (`id`, `invalid`, `next`, `player_id`, `created_at`, `updated_at`, `user_agent`) VALUES
-('01c7813b-5cd2-4293-be5d-785aaf77f510',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 17:57:28.445',	'2024-05-03 18:00:18.894',	NULL),
-('1d3e7200-f1b1-4e69-b444-cf6675e4d0a6',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-04-29 19:24:16.689',	'2024-05-04 15:09:45.703',	'curl/7.81.0'),
-('39755098-7f21-4520-96dc-e74d2bfad243',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:00:32.901',	'2024-05-04 15:09:45.703',	'curl/7.81.0'),
-('60dd2068-f8a6-4a87-b9f9-2f40a413b495',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 20:48:05.858',	'2024-05-03 18:00:18.894',	NULL),
-('69bdeaf3-726e-4fb2-84a7-8c104145dfe7',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 19:40:25.504',	'2024-05-03 18:00:18.894',	NULL),
-('7300f271-381f-4113-a9bc-5069827a7735',	0,	NULL,	'a83db24d-13c5-46cc-aa3f-4041e68fea70',	'2024-05-03 18:04:40.815',	'2024-05-03 18:04:40.815',	'jest_test'),
-('73afcf1a-e752-4aa1-bf1e-7c2858d7aef2',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-03 13:15:56.867',	'2024-05-04 15:09:45.703',	'curl/7.81.0'),
-('89d2ae6f-2efe-4ee5-9570-2faa95f3cfde',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 19:32:37.220',	'2024-05-03 18:00:18.894',	NULL),
-('8c442515-e1ca-4039-b10b-254b67338f65',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:17:49.449',	'2024-05-03 18:00:18.894',	NULL),
-('aaf1869a-b130-4f90-9950-c6dd92657f87',	0,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-04 15:09:45.717',	'2024-05-04 15:09:45.717',	'curl/7.81.0'),
-('b05d88fc-6092-44a7-bfad-e58eff2ae38f',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:29:16.305',	'2024-05-04 15:09:45.703',	'curl/7.81.0'),
-('bcdc6098-faae-4d7f-8c7f-3d59187d612d',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:55:44.684',	'2024-05-04 15:09:45.703',	'curl/7.81.0'),
-('cb2f9121-301e-4050-a85b-5edde0fcf907',	0,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-03 18:00:18.907',	'2024-05-03 18:00:18.907',	NULL),
-('cb41f10e-c35b-45c2-bd2a-171aff7ce25d',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 19:08:06.437',	'2024-05-04 15:09:45.703',	'curl/7.81.0'),
+('00a5c3ae-bf3a-4c17-9c27-bced12742a25',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-07 12:51:06.086',	'2024-05-08 17:07:42.307',	'curl/7.81.0'),
+('01c7813b-5cd2-4293-be5d-785aaf77f510',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 17:57:28.445',	'2024-05-08 17:07:42.307',	NULL),
+('08d01437-bfed-4330-b2d6-eb9e54409f9c',	1,	NULL,	'e95f711a-b650-4fe2-a260-8fb7f59931ea',	'2024-05-08 17:07:28.549',	'2024-05-08 17:07:29.088',	NULL),
+('1d3e7200-f1b1-4e69-b444-cf6675e4d0a6',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-04-29 19:24:16.689',	'2024-05-08 17:07:42.307',	'curl/7.81.0'),
+('30b22351-a7c7-4c64-8f74-8bc5e5334cc3',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-07 19:50:54.882',	'2024-05-08 17:07:42.307',	NULL),
+('39755098-7f21-4520-96dc-e74d2bfad243',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:00:32.901',	'2024-05-08 17:07:42.307',	'curl/7.81.0'),
+('426a293a-c7c4-43c6-ae92-534e38002c87',	0,	NULL,	'a83db24d-13c5-46cc-aa3f-4041e68fea70',	'2024-05-08 17:15:10.210',	'2024-05-08 17:15:10.210',	'jest_test'),
+('60dd2068-f8a6-4a87-b9f9-2f40a413b495',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 20:48:05.858',	'2024-05-08 17:07:42.307',	NULL),
+('69bdeaf3-726e-4fb2-84a7-8c104145dfe7',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 19:40:25.504',	'2024-05-08 17:07:42.307',	NULL),
+('6d14d0a2-3344-4d5d-b8c5-8fc0a73d7bf9',	1,	NULL,	'7b650640-d90b-46cb-b65d-8af64790a50c',	'2024-05-07 19:41:26.748',	'2024-05-07 19:41:27.241',	NULL),
+('73afcf1a-e752-4aa1-bf1e-7c2858d7aef2',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-03 13:15:56.867',	'2024-05-08 17:07:42.307',	'curl/7.81.0'),
+('7d400b2d-a156-40cb-ab9b-d8aba06658cb',	0,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-08 17:07:42.319',	'2024-05-08 17:07:42.319',	NULL),
+('89d2ae6f-2efe-4ee5-9570-2faa95f3cfde',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 19:32:37.220',	'2024-05-08 17:07:42.307',	NULL),
+('8c442515-e1ca-4039-b10b-254b67338f65',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:17:49.449',	'2024-05-08 17:07:42.307',	NULL),
+('9216d4f7-6796-4af3-9912-28e8fa979060',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-07 13:08:21.865',	'2024-05-08 17:07:42.307',	'curl/7.81.0'),
+('92e8712e-5e5a-459b-ae68-1ea1f80e8a67',	0,	NULL,	'e95f711a-b650-4fe2-a260-8fb7f59931ea',	'2024-05-08 17:07:29.101',	'2024-05-08 17:07:29.101',	NULL),
+('a4fc2360-f37d-4b99-b15f-2ea7ca1788ba',	1,	NULL,	'a83db24d-13c5-46cc-aa3f-4041e68fea70',	'2024-05-08 17:10:39.675',	'2024-05-08 17:15:10.208',	'jest_test'),
+('aaf1869a-b130-4f90-9950-c6dd92657f87',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-04 15:09:45.717',	'2024-05-08 17:07:42.307',	'curl/7.81.0'),
+('afbcf6dc-a5ef-4aaf-8af0-31baaa4fa9f8',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-07 19:41:28.458',	'2024-05-08 17:07:42.307',	NULL),
+('b05d88fc-6092-44a7-bfad-e58eff2ae38f',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:29:16.305',	'2024-05-08 17:07:42.307',	'curl/7.81.0'),
+('b083ead6-c3ca-4683-8f61-c01733fc2804',	0,	NULL,	'7b650640-d90b-46cb-b65d-8af64790a50c',	'2024-05-07 19:41:27.255',	'2024-05-07 19:41:27.255',	NULL),
+('b21dd286-667a-4b14-bca8-576652ee1038',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-06 20:00:03.935',	'2024-05-08 17:07:42.307',	'curl/7.81.0'),
+('bcdc6098-faae-4d7f-8c7f-3d59187d612d',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:55:44.684',	'2024-05-08 17:07:42.307',	'curl/7.81.0'),
+('cb2f9121-301e-4050-a85b-5edde0fcf907',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-03 18:00:18.907',	'2024-05-08 17:07:42.307',	NULL),
+('cb41f10e-c35b-45c2-bd2a-171aff7ce25d',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 19:08:06.437',	'2024-05-08 17:07:42.307',	'curl/7.81.0'),
 ('cd44abff-97c9-47af-9d6f-631003d5403f',	0,	NULL,	'1c759b43-8059-436f-80be-5cdcb2d3d40b',	'2024-05-03 18:00:09.276',	'2024-05-03 18:00:09.276',	NULL),
 ('d076a3c9-1c14-4bdd-a51a-d9068f7ce051',	1,	NULL,	'1c759b43-8059-436f-80be-5cdcb2d3d40b',	'2024-05-03 18:00:08.767',	'2024-05-03 18:00:09.266',	NULL),
-('da1dad0d-1379-462a-9a85-12a29d475456',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:02:45.480',	'2024-05-03 18:00:18.894',	NULL),
-('e99993e2-68ce-43b7-b110-c01910104591',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-03 13:46:20.779',	'2024-05-04 15:09:45.703',	'curl/7.81.0');
+('d592ace2-71b5-4e7e-a0c8-edfd7782cd1c',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-08 13:39:59.549',	'2024-05-08 17:07:42.307',	'curl/7.81.0'),
+('da1dad0d-1379-462a-9a85-12a29d475456',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-02 18:02:45.480',	'2024-05-08 17:07:42.307',	NULL),
+('e99993e2-68ce-43b7-b110-c01910104591',	1,	NULL,	'5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'2024-05-03 13:46:20.779',	'2024-05-08 17:07:42.307',	'curl/7.81.0');
 
 INSERT INTO `TRANSACTIONS` (`id`, `sender_id`, `recipient_id`, `amount`, `date`, `created_at`, `updated_at`, `ok`) VALUES
 ('0335e8e6-9e6d-4a2f-a321-1ab059fb7055',	414,	3859,	10,	'2024-05-02 18:02:26.698',	'2024-05-02 18:02:26.701',	'2024-05-02 18:02:26.701',	1),
+('03f828df-eb09-4ea3-88ce-27e05deba87e',	414,	3859,	10,	'2024-05-07 19:41:19.033',	'2024-05-07 19:41:19.037',	'2024-05-07 19:41:19.037',	1),
 ('0542cc5b-baf2-471b-8709-8d30ae198150',	414,	3859,	10,	'2024-05-03 17:58:26.256',	'2024-05-03 17:58:26.258',	'2024-05-03 17:58:26.258',	1),
 ('0dd86dc5-587b-4d8a-ad05-6766e9ba5b4b',	3859,	414,	0.01,	'2024-04-20 16:39:11.684',	'2024-04-20 16:39:11.687',	'2024-04-20 16:39:11.687',	1),
 ('0f21c90a-9d25-4315-8560-68c28bfc648e',	3900,	414,	40,	'2024-05-03 13:47:22.089',	'2024-05-03 13:47:22.092',	'2024-05-03 13:47:22.092',	1),
 ('113d6137-666d-4675-b3b7-d87eb0e37d12',	3859,	414,	0.01,	'2024-05-02 18:02:32.851',	'2024-05-02 18:02:32.854',	'2024-05-02 18:02:32.854',	1),
 ('155aec39-fe9f-44a4-80d6-03dec23b1da7',	3900,	414,	0.1,	'2024-04-11 15:04:53.706',	'2024-04-11 15:04:53.709',	'2024-04-11 15:04:53.709',	1),
 ('20e0b3a3-c965-44d4-a49b-0c2ce8dd4626',	3859,	414,	0.01,	'2024-05-03 17:58:27.547',	'2024-05-03 17:58:27.550',	'2024-05-03 17:58:27.550',	1),
+('26ede5a6-e8be-40c6-b1e7-2c451be9abab',	3900,	414,	10,	'2024-05-07 13:10:18.697',	'2024-05-07 13:10:18.700',	'2024-05-07 13:10:18.700',	1),
+('2757205e-b08c-4b3b-a48c-add19b3b1988',	414,	3900,	50,	'2024-05-08 13:41:13.174',	'2024-05-08 13:41:13.177',	'2024-05-08 13:41:13.177',	1),
+('3756a271-4cb7-4d91-8b6b-ff85a5a02576',	3859,	414,	0.01,	'2024-05-07 19:41:20.727',	'2024-05-07 19:41:20.731',	'2024-05-07 19:41:20.731',	1),
 ('37c3c03e-2be6-49b0-9751-c21fae09f2f8',	3900,	414,	0.1,	'2024-04-11 15:07:11.633',	'2024-04-11 15:07:11.636',	'2024-04-11 15:07:11.636',	1),
+('3c41a956-f67a-4e4d-b010-4b14b95c3daa',	414,	3900,	50,	'2024-05-08 17:07:32.079',	'2024-05-08 17:07:32.082',	'2024-05-08 17:07:32.082',	1),
 ('453b6f22-f34b-46f7-aec5-7f9e767a40d8',	3900,	414,	0.1,	'2024-04-11 15:12:07.059',	'2024-04-11 15:12:07.062',	'2024-04-11 15:12:07.062',	1),
 ('4db3f2ae-c779-445b-b44a-cacaa8e5d432',	3859,	414,	0.01,	'2024-04-11 18:47:33.308',	'2024-04-11 18:47:33.311',	'2024-04-11 18:47:33.311',	1),
 ('53785453-a900-454e-abf7-eec6402f5b23',	3900,	414,	0.01,	'2024-04-11 14:54:14.805',	'2024-04-11 14:54:14.808',	'2024-04-11 14:54:14.808',	1),
 ('54bf05ef-35ce-4470-a63c-05075c2c24dc',	3900,	414,	0.1,	'2024-04-11 15:12:05.869',	'2024-04-11 15:12:05.872',	'2024-04-11 15:12:05.872',	1),
 ('60b907ad-8d58-435c-a802-9c5cd606381d',	414,	3859,	10,	'2024-05-03 18:00:03.833',	'2024-05-03 18:00:03.836',	'2024-05-03 18:00:03.836',	1),
+('62686960-23f8-4802-872e-64bd1444a835',	414,	3900,	50,	'2024-05-08 13:41:28.591',	'2024-05-08 13:41:28.594',	'2024-05-08 13:41:28.594',	0),
 ('63165ae8-53ae-4a8b-8c6a-e1ffd32034b6',	3859,	414,	0.01,	'2024-05-02 19:32:17.995',	'2024-05-02 19:32:17.997',	'2024-05-02 19:32:17.997',	1),
+('6a91845d-4587-4d5b-a63c-c5369c98bd6d',	414,	3900,	10,	'2024-05-07 13:08:38.225',	'2024-05-07 13:08:38.227',	'2024-05-07 13:08:38.227',	1),
 ('6b2ca5c2-5d5a-4138-a773-56b8816d8207',	414,	3859,	10,	'2024-04-12 15:09:30.681',	'2024-04-12 15:09:30.684',	'2024-04-12 15:09:30.684',	1),
 ('6bcb59df-23aa-4486-bcba-2220cd12c43e',	3900,	414,	10,	'2024-05-03 13:47:14.771',	'2024-05-03 13:47:14.774',	'2024-05-03 13:47:14.774',	1),
 ('6d937b54-841d-4b20-9ae6-9f10c5f0592f',	3900,	414,	10,	'2024-05-02 19:11:01.699',	'2024-05-02 19:11:01.702',	'2024-05-02 19:11:01.702',	1),
@@ -91,8 +119,11 @@ INSERT INTO `TRANSACTIONS` (`id`, `sender_id`, `recipient_id`, `amount`, `date`,
 ('77e7dbef-1129-4998-a411-2c4848a1fd71',	414,	3859,	10,	'2024-04-20 16:39:10.219',	'2024-04-20 16:39:10.222',	'2024-04-20 16:39:10.222',	1),
 ('7a389e25-2f32-497f-94ce-543a14ec7210',	414,	3900,	10,	'2024-04-12 14:38:36.103',	'2024-04-12 14:38:36.106',	'2024-04-12 14:38:36.106',	1),
 ('7b745704-0b1e-4d6a-b53c-92899ffe6c30',	3859,	414,	0.01,	'2024-04-12 16:44:59.668',	'2024-04-12 16:44:59.671',	'2024-04-12 16:44:59.671',	1),
+('7d707296-79d6-42ac-81f5-842045b110f4',	414,	3900,	10,	'2024-05-08 13:42:09.169',	'2024-05-08 13:42:09.171',	'2024-05-08 13:42:09.171',	1),
 ('804f3b27-e42e-4873-8880-b359a898a823',	3900,	414,	0.1,	'2024-04-11 16:49:44.231',	'2024-04-11 16:49:44.234',	'2024-04-11 16:49:44.234',	1),
+('884c3cf3-48f6-45e3-8c98-07a0b723bbf3',	414,	3900,	10,	'2024-05-06 20:01:13.989',	'2024-05-06 20:01:13.992',	'2024-05-06 20:01:13.992',	1),
 ('8a093476-f3be-44ab-8e95-9d4d4da896fa',	3900,	414,	0.1,	'2024-04-11 15:07:54.346',	'2024-04-11 15:07:54.349',	'2024-04-11 15:07:54.349',	1),
+('8ce2c0fe-6661-44e2-9563-610bdb04286d',	3900,	414,	60,	'2024-05-08 13:47:02.884',	'2024-05-08 13:47:02.887',	'2024-05-08 13:47:02.887',	1),
 ('91821527-6542-4a91-820f-efb76fa22472',	3859,	414,	0.01,	'2024-05-02 19:40:13.834',	'2024-05-02 19:40:13.837',	'2024-05-02 19:40:13.837',	1),
 ('9a956513-7b4c-40d8-9edd-d6b877ae779b',	3859,	414,	0.01,	'2024-04-12 16:20:07.705',	'2024-04-12 16:20:07.708',	'2024-04-12 16:20:07.708',	1),
 ('9e270636-d0de-4a0a-9362-42de6a885833',	3859,	414,	0.1,	'2024-04-11 18:47:23.312',	'2024-04-11 18:47:23.314',	'2024-04-11 18:47:23.314',	0),
@@ -101,21 +132,26 @@ INSERT INTO `TRANSACTIONS` (`id`, `sender_id`, `recipient_id`, `amount`, `date`,
 ('b45ebd23-1876-4366-8c1c-b92888d64ff4',	3859,	414,	0.01,	'2024-05-02 20:48:02.264',	'2024-05-02 20:48:02.267',	'2024-05-02 20:48:02.267',	1),
 ('bc964a5b-8f5b-45b7-8ca5-64c166aecd92',	414,	3900,	10,	'2024-05-02 19:09:06.171',	'2024-05-02 19:09:06.174',	'2024-05-02 19:09:06.174',	1),
 ('ccf44995-4add-4d40-96c4-5d8c962cffb4',	3900,	414,	0.1,	'2024-04-11 15:07:35.430',	'2024-04-11 15:07:35.433',	'2024-04-11 15:07:35.433',	1),
+('d90d2749-8963-4a43-87fe-82ca353178f5',	3859,	414,	0.01,	'2024-05-08 17:07:37.212',	'2024-05-08 17:07:37.215',	'2024-05-08 17:07:37.215',	1),
 ('dc38e0cf-a7fd-40e9-984b-b5c9fd6fd741',	414,	3859,	10,	'2024-04-12 16:20:02.574',	'2024-04-12 16:20:02.577',	'2024-04-12 16:20:02.577',	1),
 ('e01b11ed-e6a8-48b1-8554-62754f4842ba',	3859,	414,	0.01,	'2024-05-02 18:17:35.855',	'2024-05-02 18:17:35.858',	'2024-05-02 18:17:35.858',	1),
 ('e4cfe372-08cd-44c7-baea-0cb1dded647e',	414,	3859,	10,	'2024-04-12 16:44:57.925',	'2024-04-12 16:44:57.929',	'2024-04-12 16:44:57.929',	1),
 ('ea34a2a9-e0f9-44ca-89c9-03cddec2852a',	414,	3900,	50,	'2024-05-03 13:46:25.979',	'2024-05-03 13:46:25.982',	'2024-05-03 13:46:25.982',	1),
+('f38f930e-7d50-4837-aba4-d4781451d383',	414,	3859,	10,	'2024-05-08 17:07:35.626',	'2024-05-08 17:07:35.629',	'2024-05-08 17:07:35.629',	1),
 ('f54708ab-ed34-4730-9c37-93c77811c5ec',	3859,	414,	0.01,	'2024-04-12 15:09:31.999',	'2024-04-12 15:09:32.001',	'2024-04-12 15:09:32.001',	1),
+('f58f2a97-156e-497a-a335-3dcbe7ccaec4',	3900,	414,	10,	'2024-05-06 20:04:25.320',	'2024-05-06 20:04:25.323',	'2024-05-06 20:04:25.323',	1),
 ('f8b0266f-0b89-437d-b0fc-c7e12e2cfb32',	3900,	414,	20,	'2024-05-02 19:10:52.514',	'2024-05-02 19:10:52.517',	'2024-05-02 19:10:52.517',	0);
 
 INSERT INTO `USERS_ROOT` (`id`, `username`, `password`, `panel_id`, `access`, `refresh`, `json_response`, `dirty`, `created_at`, `updated_at`, `bankAccount`, `alq_api_manager`, `alq_token`, `bot_phone`, `human_phone`) VALUES
-('2fd2469c-8190-413c-bb80-c500fed75c58',	'luquin',	'{\"ivArray\":[\"5\",\"244\",\"173\",\"7\",\"29\",\"101\",\"157\",\"203\",\"191\",\"209\",\"206\",\"141\",\"185\",\"248\",\"104\",\"231\"],\"ciphertext\":\"42196e6dace12b3555c2da1d7bcee958\"}',	414,	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0NzU5ODEzLCJqdGkiOiJlN2YwYTJlMmQ2YjU0MjlmYjUzMGUwNGRkYjVjNWFjNyIsInVzZXJfaWQiOjQxNCwicmVmcmVzaF9zaGlmdCI6MTIwLCJ1dWlkIjoiMGFiZmIzYWM0MGRiNGVjNmI3NjU5Y2UzYTllN2I0MmQiLCJyb2xlIjoiUEEifQ.a9OhBW9q0XB04p4CKL4PyRbqK4kLLvrq6AR12abk_Xs',	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxNDgwMjQxMywianRpIjoiYjFkN2Q3MzE1ZmI4NDMxYmFhMDgxODdiMjRlN2Y4OGMiLCJ1c2VyX2lkIjo0MTQsInJlZnJlc2hfc2hpZnQiOjEyMCwidXVpZCI6IjBhYmZiM2FjNDBkYjRlYzZiNzY1OWNlM2E5ZTdiNDJkIiwicm9sZSI6IlBBIn0.ejzsRCHjPswFb6BwVV8J-muDS61w0smeGF5MfvLCAoc',	'{\"id\":414,\"is_email_verified\":true,\"info\":{\"first_name\":\"lucas\",\"last_name\":\"lucas\",\"date_of_birth\":null,\"mobile_number\":\"\",\"country\":\"\",\"city\":\"\",\"street_address\":\"\",\"postal_code\":\"\",\"state\":null,\"screen_name\":\"lucas\"},\"bonus_balance\":\"0.00\",\"balance\":\"59.36\",\"role\":\"PA\",\"email\":\"luquin@gmail.com\",\"is_withdraw_allowed\":true,\"is_banned\":false,\"is_frozen\":false,\"access\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0NzU5ODEzLCJqdGkiOiJlN2YwYTJlMmQ2YjU0MjlmYjUzMGUwNGRkYjVjNWFjNyIsInVzZXJfaWQiOjQxNCwicmVmcmVzaF9zaGlmdCI6MTIwLCJ1dWlkIjoiMGFiZmIzYWM0MGRiNGVjNmI3NjU5Y2UzYTllN2I0MmQiLCJyb2xlIjoiUEEifQ.a9OhBW9q0XB04p4CKL4PyRbqK4kLLvrq6AR12abk_Xs\",\"refresh\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxNDgwMjQxMywianRpIjoiYjFkN2Q3MzE1ZmI4NDMxYmFhMDgxODdiMjRlN2Y4OGMiLCJ1c2VyX2lkIjo0MTQsInJlZnJlc2hfc2hpZnQiOjEyMCwidXVpZCI6IjBhYmZiM2FjNDBkYjRlYzZiNzY1OWNlM2E5ZTdiNDJkIiwicm9sZSI6IlBBIn0.ejzsRCHjPswFb6BwVV8J-muDS61w0smeGF5MfvLCAoc\",\"last_login\":\"2024-05-03T18:00:13.439629Z\",\"username\":\"luquin\",\"first_name\":\"\",\"last_name\":\"\",\"date_joined\":\"2023-11-15T16:52:59.768862Z\",\"balance_currency\":\"MXN\",\"bonus_balance_currency\":\"MXN\",\"is_self_registered\":false,\"language\":\"en-US\",\"needs_document_approve\":true,\"affise_data\":null,\"pap_data\":null,\"cpf_document\":null,\"parent\":3}',	0,	'2024-04-09 17:26:09.995',	'2024-05-03 18:04:42.164',	'{\"name\":\"Test name\",\"dni\":\"12345678\",\"bankName\":\"Test bank name\",\"accountNumber\":\"1234567890\",\"clabe\":\"12345678901234567890\",\"alias\":\"Test alias\"}',	'eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XSTBaV05tTkRjeE5HWXdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyWkdWbE5nX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJhZG1pbmlzdHJhY2lvbi5kZW1vbWF0aWMuY29tQGNhcmJvbi5zdXBlciIsImF1dCI6IkFQUExJQ0FUSU9OIiwiYXVkIjoiV3pONHFMc053Z1dScmN5cDJLVnRXUUtmb21ZYSIsIm5iZiI6MTcxNDc1OTIxNSwiYXpwIjoiV3pONHFMc053Z1dScmN5cDJLVnRXUUtmb21ZYSIsInNjb3BlIjoiYW1fYXBwbGljYXRpb25fc2NvcGUgZGVmYXVsdCIsImlzcyI6Imh0dHBzOlwvXC9lYzItMjMtMjMtMjMyLTIxMC5jb21wdXRlLTEuYW1hem9uYXdzLmNvbTo5NDQzXC9vYXV0aDJcL3Rva2VuIiwiZXhwIjoxNzE0NzU5ODE1LCJpYXQiOjE3MTQ3NTkyMTUsImp0aSI6IjY2ZjhhYWM2LTdlODMtNDMzNi04MTc0LTMzZTNkNmU4OTdiMyJ9.WlDWnW4Mzq8KQBCEtbRzSoT030CVKoClqlePNPZ6tsT3SnoIHuCNxcG6647b9D4q6gCCysd7AhI36Y8a3I-uRBo1Wwjf9s6KKKKGbi71Egj0yXSUI6E-eIFzMHRpvZsckzJkyUTZ7UeSTAAEAciEjZQQvnY_QN9gDFqpxb_tNK0oJN0lPeJ3Dm1_rG0h3f1G_8bqkUFawrdxba6-luaReOrB3WCk9Ql1VleQ6njYBaGH1BL1q2eZP9mFkXTyaHzEOr_20wgrawRWEUHzDrnZ2w1tZsHJf4TVeWcuX8-w0DZM6qh8usVm_EuFWtGFcc6njZtqqJF4g22PG0TySRMXwA',	'{\"token\":\"dc9fd532c26e7cc55ef2c048c1e4a817910f087f\",\"expires_at\":1714845616.411}',	'555555555555',	'44444444444');
+('2fd2469c-8190-413c-bb80-c500fed75c58',	'luquin',	'{\"ivArray\":[\"5\",\"244\",\"173\",\"7\",\"29\",\"101\",\"157\",\"203\",\"191\",\"209\",\"206\",\"141\",\"185\",\"248\",\"104\",\"231\"],\"ciphertext\":\"42196e6dace12b3555c2da1d7bcee958\"}',	414,	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1MTg4NjYxLCJqdGkiOiI1MTFkZmY4ODBmMDE0ODQ4OWZjOTUyNmY0ODJkNDA4NCIsInVzZXJfaWQiOjQxNCwicmVmcmVzaF9zaGlmdCI6MTIwLCJ1dWlkIjoiOWRmOWE2ODA5MDU3NGM5ZTgxYjhlOTI0YWNmN2ZkMzUiLCJyb2xlIjoiUEEifQ.2UcIBp8Jy4ub_egvrVpyoXBiBcRm3mOpB3P-rlJo588',	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxNTIzMTI2MSwianRpIjoiY2YxYjdjZTllZTg5NDM5MGI3YTQ2NWZhM2Y3YjIxY2UiLCJ1c2VyX2lkIjo0MTQsInJlZnJlc2hfc2hpZnQiOjEyMCwidXVpZCI6IjlkZjlhNjgwOTA1NzRjOWU4MWI4ZTkyNGFjZjdmZDM1Iiwicm9sZSI6IlBBIn0.vb7XHYpnXHvrhCvycys3-iKsq9xa6kwnS5qRWY50u-c',	'{\"id\":414,\"is_email_verified\":true,\"info\":{\"first_name\":\"lucas\",\"last_name\":\"lucas\",\"date_of_birth\":null,\"mobile_number\":\"\",\"country\":\"\",\"city\":\"\",\"street_address\":\"\",\"postal_code\":\"\",\"state\":null,\"screen_name\":\"lucas\"},\"bonus_balance\":\"0.00\",\"balance\":\"39.30\",\"role\":\"PA\",\"email\":\"luquin@gmail.com\",\"is_withdraw_allowed\":true,\"is_banned\":false,\"is_frozen\":false,\"access\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1MTg4NjYxLCJqdGkiOiI1MTFkZmY4ODBmMDE0ODQ4OWZjOTUyNmY0ODJkNDA4NCIsInVzZXJfaWQiOjQxNCwicmVmcmVzaF9zaGlmdCI6MTIwLCJ1dWlkIjoiOWRmOWE2ODA5MDU3NGM5ZTgxYjhlOTI0YWNmN2ZkMzUiLCJyb2xlIjoiUEEifQ.2UcIBp8Jy4ub_egvrVpyoXBiBcRm3mOpB3P-rlJo588\",\"refresh\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxNTIzMTI2MSwianRpIjoiY2YxYjdjZTllZTg5NDM5MGI3YTQ2NWZhM2Y3YjIxY2UiLCJ1c2VyX2lkIjo0MTQsInJlZnJlc2hfc2hpZnQiOjEyMCwidXVpZCI6IjlkZjlhNjgwOTA1NzRjOWU4MWI4ZTkyNGFjZjdmZDM1Iiwicm9sZSI6IlBBIn0.vb7XHYpnXHvrhCvycys3-iKsq9xa6kwnS5qRWY50u-c\",\"last_login\":\"2024-05-08T17:07:41.212882Z\",\"username\":\"luquin\",\"first_name\":\"\",\"last_name\":\"\",\"date_joined\":\"2023-11-15T16:52:59.768862Z\",\"balance_currency\":\"MXN\",\"bonus_balance_currency\":\"MXN\",\"is_self_registered\":false,\"language\":\"en-US\",\"needs_document_approve\":true,\"affise_data\":null,\"pap_data\":null,\"cpf_document\":null,\"parent\":3}',	0,	'2024-04-09 17:26:09.995',	'2024-05-08 17:15:11.549',	'{\"name\":\"Test name\",\"dni\":\"12345678\",\"bankName\":\"Test bank name\",\"accountNumber\":\"1234567890\",\"clabe\":\"12345678901234567890\",\"alias\":\"Test alias\"}',	'eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XSTBaV05tTkRjeE5HWXdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyWkdWbE5nX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJhZG1pbmlzdHJhY2lvbi5kZW1vbWF0aWMuY29tQGNhcmJvbi5zdXBlciIsImF1dCI6IkFQUExJQ0FUSU9OIiwiYXVkIjoiV3pONHFMc053Z1dScmN5cDJLVnRXUUtmb21ZYSIsIm5iZiI6MTcxNTE4ODA2MiwiYXpwIjoiV3pONHFMc053Z1dScmN5cDJLVnRXUUtmb21ZYSIsInNjb3BlIjoiYW1fYXBwbGljYXRpb25fc2NvcGUgZGVmYXVsdCIsImlzcyI6Imh0dHBzOlwvXC9lYzItMjMtMjMtMjMyLTIxMC5jb21wdXRlLTEuYW1hem9uYXdzLmNvbTo5NDQzXC9vYXV0aDJcL3Rva2VuIiwiZXhwIjoxNzE1MTg4NjYyLCJpYXQiOjE3MTUxODgwNjIsImp0aSI6IjBiOGY2MmEyLWQxNGEtNDQ5Yi1hNzk0LTg1NzllNjJkODg5YyJ9.esL5ixlBCIfhhjRbDAiMMzYGBc74j0jIg7-gozsAYm7r5L7Q2AzB2M3auErH24IxY0mUpGcHmheHmAF91soE0RD6acyFaTUlx9ar18B82ClHEz931lvzOkT0wxFUK0-rSc-MWMJIu-1ICIxedoKKbi5RBDWJ3ooGWGMnl1NR-ybdzsWWKWomdDmz24CO3KAc8srKF82RmUuixZXDfMwkzzHJrvbaWziw874X-XgPXu8pTcdZ8-FAGPjaRWKlb-E8KwwZENb2BJy_o3dSRSPhB7b6cWh7Uo_mleTGywtrTVuc8qlMC-4pkr_Y_5yOcpyc2KazWZvKDdOuJc4a2fS2tw',	'{\"token\":\"65e339f435437651a02cb72c829bdf2ace0a1008\",\"expires_at\":1715274463.879}',	'555555555555',	'44444444444');
 
 
 INSERT INTO `_PlayerToRole` (`A`, `B`) VALUES
 ('a83db24d-13c5-46cc-aa3f-4041e68fea70',	'292a6d46-3967-442a-a62c-977f95fb48e8'),
 ('1c759b43-8059-436f-80be-5cdcb2d3d40b',	'a10bbcab-e8b3-41e2-b1b2-d88469fd1195'),
 ('49324acd-ec2b-4a05-9a1c-08f4957f5e67',	'a10bbcab-e8b3-41e2-b1b2-d88469fd1195'),
-('5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'a10bbcab-e8b3-41e2-b1b2-d88469fd1195');
+('5a6df5b8-6ba7-49ac-8ea5-673c418231f6',	'a10bbcab-e8b3-41e2-b1b2-d88469fd1195'),
+('7b650640-d90b-46cb-b65d-8af64790a50c',	'a10bbcab-e8b3-41e2-b1b2-d88469fd1195'),
+('e95f711a-b650-4fe2-a260-8fb7f59931ea',	'a10bbcab-e8b3-41e2-b1b2-d88469fd1195');
 
--- 2024-05-06 18:45:09
+-- 2024-05-08 18:17:53

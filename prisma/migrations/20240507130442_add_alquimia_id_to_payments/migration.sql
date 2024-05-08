@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `PAYMENTS` ADD COLUMN `alq_id` INTEGER NULL;

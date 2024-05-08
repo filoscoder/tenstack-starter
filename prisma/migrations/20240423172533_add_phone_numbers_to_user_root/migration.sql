@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE `USERS_ROOT` ADD COLUMN `bot_phone` VARCHAR(20) NULL,
-    ADD COLUMN `human_phone` VARCHAR(20) NULL;

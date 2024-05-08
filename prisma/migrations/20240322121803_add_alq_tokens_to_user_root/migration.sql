@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE `USERS_ROOT` ADD COLUMN `alq_api_manager` VARCHAR(800) NULL,
-    ADD COLUMN `alq_token` VARCHAR(800) NULL;
