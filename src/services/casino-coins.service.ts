@@ -6,12 +6,12 @@ import { TransactionsDAO } from "@/db/transactions";
 import { UserRootDAO } from "@/db/user-root";
 import { CashoutRequest, TransferDetails } from "@/types/request/transfers";
 import { Transaction } from "@/types/response/transactions";
-import { Notify } from "@/helpers/notification";
 import { parseTransferResult } from "@/utils/parser";
 import { CoinTransferResult } from "@/types/response/transfers";
 import { ERR } from "@/config/errors";
 import { CustomError } from "@/helpers/error/CustomError";
 import { AgentApiError } from "@/helpers/error/AgentApiError";
+import { WebPush } from "@/notification/web-push";
 
 /**
  * Interact with the casino's coins transfer endpoints and log results into
@@ -64,7 +64,7 @@ export class CasinoCoinsService {
     if (result.data.code == "insuficient_balance") {
       const difference =
         transferDetails.amount - result.data.variables.balance_amount;
-      await Notify.agent({
+      await WebPush.agent({
         title: "Fichas insuficientes",
         body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
         tag: CONFIG.SD.INSUFICIENT_CREDITS,

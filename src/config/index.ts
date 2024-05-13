@@ -70,6 +70,10 @@ const CONFIG = {
     ALQ_SAVINGS_ACCOUNT_ID: Number(process.env.ALQ_SAVINGS_ACCOUNT_ID),
     ALQ_API_KEY: process.env.ALQ_API_KEY,
   },
+  INTERNAL: {
+    BOT_API_PORT: process.env.BOT_API_PORT,
+    BOT_API_BASE_URL: process.env.BOT_API_BASE_URL,
+  },
   ROLES: {
     AGENT: "agent",
     PLAYER: "player",
@@ -109,6 +113,7 @@ const CONFIG = {
       DEV: "dev",
       PRODUCTION: "production",
     },
+    PLAYER_WELCOME_MESSAGE: process.env.PLAYER_WELCOME_MESSAGE || "",
   },
   INFO: {
     NAME: pkg.name,

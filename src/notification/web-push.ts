@@ -7,7 +7,7 @@ import CONFIG from "@/config";
 /**
  * Web push notifications
  */
-export class Notify {
+export class WebPush {
   static async agent(payload: WebPushPayload) {
     try {
       const webPushServices = new WebPushServices();

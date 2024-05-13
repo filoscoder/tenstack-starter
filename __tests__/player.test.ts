@@ -3,6 +3,7 @@ import { SuperAgentTest } from "supertest";
 import { PrismaClient } from "@prisma/client";
 import { initAgent } from "./helpers";
 import CONFIG from "@/config";
+import { Whatsapp } from "@/notification/whatsapp";
 
 let agent: SuperAgentTest;
 let prisma: PrismaClient;
@@ -18,17 +19,23 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
   const username = "jest_test" + Date.now();
   const email = username + "@test.com";
   const password = "1234";
+  const movile_number = "5490000000000";
 
   describe("POST: /players", () => {
-    it("Should create a player", async () => {
+    it.only("Should create a player", async () => {
+      const mockSend = jest.fn();
+      jest.spyOn(Whatsapp, "send").mockImplementation(mockSend);
+
       const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
         username,
         password,
         email,
+        movile_number,
       });
 
       const result = response.body.data;
 
+      expect(mockSend).toHaveBeenCalledTimes(1);
       expect(response.status).toBe(CREATED);
       expect(Object.keys(result)).toEqual(["access", "refresh", "player"]);
 

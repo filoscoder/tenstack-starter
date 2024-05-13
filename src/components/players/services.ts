@@ -15,6 +15,8 @@ import { CustomError } from "@/helpers/error/CustomError";
 import { AgentApiError } from "@/helpers/error/AgentApiError";
 import { Mail } from "@/helpers/email/email";
 import { TokenDAO } from "@/db/token";
+import { Whatsapp } from "@/notification/whatsapp";
+import CONFIG from "@/config";
 
 export class PlayerServices {
   /**
@@ -34,14 +36,34 @@ export class PlayerServices {
    * @throws if user exists or something goes wrong
    */
   create = async (player: PlayerRequest): Promise<PlainPlayerResponse> => {
-    const panelSignUpUrl = "/pyramid/create/player/";
+    const panel_id = await this.createCasinoPlayer(
+      player.username,
+      player.password,
+    );
+
+    const localPlayer = await this.createLocalPlayer(panel_id, player);
+
+    if (player.movile_number) {
+      await Whatsapp.send(
+        player.movile_number,
+        CONFIG.SD.PLAYER_WELCOME_MESSAGE,
+      );
+    }
+
+    return hidePassword(localPlayer);
+  };
+
+  private async createCasinoPlayer(
+    username: string,
+    password: string,
+  ): Promise<number> {
     const playerLoginUrl = "/accounts/login/";
+    const panelSignUpUrl = "/pyramid/create/player/";
     const { authedAgentApi, playerApi } = new HttpService();
 
-    // Crear el usuario en panel
     let response = await authedAgentApi.post<any>(panelSignUpUrl, {
-      username: player.username,
-      password: player.password,
+      username,
+      password,
     });
 
     if (response.status !== 201 && response.status !== 400)
@@ -50,32 +72,35 @@ export class PlayerServices {
         "Error en el panel al crear el usuario",
         response.data,
       );
-
     if (
       response.status === 400 &&
       (response.data.code === "already_exists" ||
         response.data.code === "user_already_exists")
     ) {
       // Usuario existe en el panel, verificar que esté en local
-      const localPlayer = await PlayersDAO.getByUsername(player.username);
+      const localPlayer = await PlayersDAO.getByUsername(username);
 
       // Usuario existe en panel y en local. Devolver "Ya existe"
       if (localPlayer) throw new CustomError(ERR.USER_ALREADY_EXISTS);
 
       // Usuario existe en panel pero no en local, loguearlo para obtener
       // su panel_id
-      response = await playerApi.post(playerLoginUrl, player);
+      response = await playerApi.post(playerLoginUrl, { username, password });
       // Credenciales inválidas
       if (response.status !== 200)
         throw new CustomError(ERR.USER_ALREADY_EXISTS);
     }
+    return response.data.id;
+  }
 
-    // Crear usuario en local
-    player.panel_id = response.data.id;
+  private async createLocalPlayer(
+    panel_id: number,
+    player: PlayerRequest,
+  ): Promise<PlainPlayerResponse> {
+    player.panel_id = panel_id;
     player.password = await hash(player.password);
-    const localPlayer = await PlayersDAO.create(player);
-    return hidePassword(localPlayer);
-  };
+    return await PlayersDAO.create(player);
+  }
 
   /**
    * Log in player
