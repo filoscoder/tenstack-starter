@@ -1,5 +1,4 @@
 import pkg from "../../package.json";
-
 // https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("dotenv").config();
