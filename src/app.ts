@@ -12,9 +12,8 @@ import mainRouter from "@/routes";
 
 export const createApp = (): express.Application => {
   const app = express();
-
-  const allowedOrigin = CONFIG.APP.ENV?.includes("dev")
-    ? "http://localhost:3000"
+  const allowedOrigin = CONFIG.APP.ENV?.includes("staging")
+    ? `http://localhost:${CONFIG.APP.PORT}`
     : CONFIG.APP.ALLOWED_ORIGIN;
 
   allowedOrigin !== "" && app.use(cors({ origin: allowedOrigin }));

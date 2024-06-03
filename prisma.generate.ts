@@ -1,16 +1,15 @@
-const fs = require('fs');
-const path = require('path');
 const { execSync } = require('child_process');
-const dotenv = require('dotenv');
+const files = require("fs");
+const paths = require("path");
 
-const env = process.env.NODE_ENV || "development";
-const envFilePath = path.resolve(__dirname, `.env.${env}`);
+const envTarget = process.env.NODE_ENV || "development";
+const envTargetFile = paths.resolve(__dirname, `./.env.${envTarget}`);
+const rootEnvFile = paths.resolve(__dirname, "./env");
 
-if (fs.existsSync(envFilePath)) {
-  dotenv.config({ path: envFilePath });
-  console.log(`Archivo de configuración ${envFilePath} cargado para el entorno ${env}`);
+if (files.existsSync(envTargetFile)) {
+  files.copyFileSync(envTargetFile, rootEnvFile);
 } else {
-  console.error(`Archivo de configuración .env para el entorno '${env}' no encontrado en la ruta ${envFilePath}`);
+  console.error(`Archivo de configuración .env para el entorno '${envTarget}' no encontrado en la ruta ${envTargetFile}`);
   process.exit(1);
 }
 

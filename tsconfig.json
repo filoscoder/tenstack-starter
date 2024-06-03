@@ -36,6 +36,11 @@
         "@/*": ["./*"]
     },
   },
-  "include": ["src/**/*", "**/__tests__/**/*", "prisma.generate.ts"],
+  "include": [
+    "src/**/*",
+    "**/__tests__/**/*",
+    "prisma.generate.ts",
+    "envLoader.ts"
+  ],
   "exclude": ["node_modules"]
 }

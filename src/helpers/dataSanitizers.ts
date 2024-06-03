@@ -1,5 +1,5 @@
 import { Result, ValidationChain, validationResult } from "express-validator";
-import { Middleware as ValidatorMiddleware } from "express-validator/src/base";
+import { Middleware as ValidatorMiddleware } from "express-validator/lib/base";
 import ValidationError from "./error/ValidationError";
 
 type MultiValidatorChain = ValidatorMiddleware & {
