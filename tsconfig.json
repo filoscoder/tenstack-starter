@@ -36,6 +36,6 @@
         "@/*": ["./*"]
     },
   },
-  "include": ["src/**/*", "**/__tests__/**/*"],
+  "include": ["src/**/*", "**/__tests__/**/*", "prisma.generate.ts"],
   "exclude": ["node_modules"]
 }
