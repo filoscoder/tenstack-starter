@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: timba2024
-      MYSQL_DATABASE: timba-data-base
+      MYSQL_DATABASE: timba_local_db
     volumes:
       - ./mysql-data:/var/lib/mysql
     ports:
@@ -17,5 +17,5 @@ services:
     image: adminer
     restart: unless-stopped
     ports:
-      - 8081:8080
+      - 9090:8080
 

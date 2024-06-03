@@ -31,14 +31,15 @@ async function main() {
   let userRoot = await prisma.userRoot.findFirst();
   if (!userRoot) {
     const casinoUsername = readlineSync.question(
-      "Nombre de usuario del agente en el casino [luquin]: ",
+      `Nombre de usuario del agente en el casino [${CONFIG.AUTH.CASINO_PANEL_USER}]: `,
       {
-        defaultInput: "luquin",
+        defaultInput: CONFIG.AUTH.CASINO_PANEL_USER,
       },
     );
     const casinoPassword = readlineSync.question(
-      "Contraseña del agente en el casino: ",
+      "Contraseña del agente en el casino (enter para default): ",
       {
+        defaultInput: CONFIG.AUTH.CASINO_PANEL_PASS,
         hideEchoBack: true,
       },
     );

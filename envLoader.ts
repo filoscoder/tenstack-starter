@@ -10,7 +10,9 @@ const rootEnvFilePath = path.resolve(__dirname, `${envRootPath}`);
 
 
 if (fs.existsSync(envFilePath)) {
-  fs.copyFileSync(envFilePath, rootEnvFilePath);
+  const fs = require('fs');
+
+  fs.copyFileSync(envFilePath, rootEnvFilePath, fs.constants.COPYFILE_FICLONE, { mode: 0o644 });
   dotenv.config({ path: envFilePath });
 } else {
   console.error(
