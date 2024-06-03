@@ -12,6 +12,7 @@
     "prettify": "prettier --write \"src/**/*.{ts,js,json}\" \"__tests__/**/*.{ts,js,json}\"",
     "lint": "eslint 'src/**/*.{ts,js}' '__tests__/**/*.{ts,js}'",
     "lint:fix": "eslint --fix 'src/**/*.{ts,js}' '__tests__/**/*.{ts,js}' --quiet",
+    "build": "cross-env NODE_ENV=production run-s prettify clean transpile",
     "build:staging": "cross-env NODE_ENV=staging run-s prettify clean transpile",
     "build:prod": "cross-env NODE_ENV=production run-s prettify clean transpile",
     "start": "cross-env NODE_ENV=development run-s prettify lint & nodemon",

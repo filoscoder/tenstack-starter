@@ -4,7 +4,7 @@ const paths = require("path");
 
 const envTarget = process.env.NODE_ENV || "development";
 const envTargetFile = paths.resolve(__dirname, `./.env.${envTarget}`);
-const rootEnvFile = paths.resolve(__dirname, "./env");
+const rootEnvFile = paths.resolve(__dirname, "./.env");
 
 if (files.existsSync(envTargetFile)) {
   files.copyFileSync(envTargetFile, rootEnvFile);
