@@ -169,3 +169,14 @@ model PasswordResetToken {
 
   @@map("PASSWORD_RESET_TOKENS")
 }
+
+model Analytics {
+  id                          String    @id @default(uuid())
+  source                      String
+  event                       String
+  data                        Json?
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @updatedAt 
+
+  @@map("ANALYTICS")
+}

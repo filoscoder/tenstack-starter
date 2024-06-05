@@ -7,6 +7,7 @@ import authRouter from "./auth.router";
 import webPushRouter from "./web-push";
 import botRouter from "./bot.router";
 import transactionsRouter from "./transactions";
+import analyticsRouter from "./analytics.router";
 
 const mainRouter = Router();
 
@@ -18,5 +19,6 @@ mainRouter.use("/agent", agentRouter);
 mainRouter.use("/auth", authRouter);
 mainRouter.use("/web-push", webPushRouter);
 mainRouter.use("/bot", botRouter);
+mainRouter.use("/analytics", analyticsRouter);
 
 export default mainRouter;
