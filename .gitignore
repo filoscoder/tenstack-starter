@@ -117,7 +117,7 @@ test.txt
 
 # Bot stuff
 *.qr.png
-bot_sessions
+*_sessions
 
 history.txt
 test_setup.sh

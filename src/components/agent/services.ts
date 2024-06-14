@@ -49,10 +49,10 @@ export class AgentServices {
     return tokens;
   }
 
-  static async showPayments(): Promise<Payment[] | null> {
-    const payments = PaymentsDAO.index();
-    return payments;
-  }
+  // static async showPayments(): Promise<Payment[] | null> {
+  //   const payments = PaymentsDAO.index();
+  //   return payments;
+  // }
 
   /**
    * Release requested payment into player's bank account
@@ -74,16 +74,6 @@ export class AgentServices {
       await PaymentsDAO.update(payment_id, { dirty: false });
       throw e;
     }
-  }
-
-  static async showDeposits(depositId?: string): Promise<Deposit[] | null> {
-    if (depositId) {
-      const deposit = await DepositsDAO.getById(depositId);
-      if (!deposit) return null;
-      return [deposit];
-    }
-    const deposits = DepositsDAO.index();
-    return deposits;
   }
 
   static async getBankAccount(): Promise<AgentBankAccount> {

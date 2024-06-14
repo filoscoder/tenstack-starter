@@ -11,8 +11,13 @@ import { hidePassword } from "@/utils/auth";
 import { HttpService } from "@/services/http.service";
 import { AlqMovementResponse } from "@/types/response/alquimia";
 import { logtailLogger } from "@/helpers/loggers";
+import { ResourceService } from "@/services/resource.service";
 
-export class DepositServices {
+export class DepositServices extends ResourceService {
+  constructor() {
+    super(DepositsDAO);
+  }
+
   /**
    * Create deposit, verify it, and transfer coins from agent to player.
    */
@@ -129,6 +134,7 @@ export class DepositServices {
     if (movements.data.length === 0) return;
     return movements.data.find((movement) => movement.valor_real > 0);
   }
+
   private markAsPending(
     deposit: Deposit,
   ): Promise<Deposit & { Player: Player }> {
@@ -173,5 +179,15 @@ export class DepositServices {
   static async showPending(player_id: string): Promise<Deposit[]> {
     const deposits = await DepositsDAO.getPending(player_id);
     return deposits;
+  }
+
+  static async pendingCoinTransfers(): Promise<number> {
+    const deposits = await DepositsDAO.getPendingCoinTransfers();
+    let total = 0;
+    deposits.forEach((deposit) => {
+      total += deposit.amount!;
+    });
+
+    return total;
   }
 }

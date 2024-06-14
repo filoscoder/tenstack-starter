@@ -1,4 +1,48 @@
+import { BankAccount, Payment, Player } from "@prisma/client";
 import { checkSchema } from "express-validator";
+import { isKeyOfNestedObject } from "../players/validators";
+
+export const isKeyOfPayment = (key: string): key is keyof Payment => {
+  const mockPayment: Payment & { Player: Player; BankAccount: BankAccount } = {
+    id: "",
+    amount: 0,
+    bank_account: "",
+    currency: "",
+    dirty: false,
+    player_id: "",
+    status: "",
+    alquimia_id: 0,
+    Player: {
+      id: "",
+      panel_id: 0,
+      username: "",
+      password: "",
+      email: "",
+      first_name: "",
+      last_name: "",
+      date_of_birth: new Date(),
+      movile_number: "",
+      country: "",
+      balance_currency: "",
+      status: "",
+      created_at: new Date(),
+      updated_at: new Date(),
+    },
+    BankAccount: {
+      id: "",
+      player_id: "",
+      owner: "",
+      bankAlias: "",
+      bankName: "",
+      bankNumber: "",
+      created_at: new Date(),
+      updated_at: new Date(),
+    },
+    created_at: new Date(),
+    updated_at: new Date(),
+  };
+  return isKeyOfNestedObject(mockPayment, key);
+};
 
 export const validateCashoutRequest = () =>
   checkSchema({

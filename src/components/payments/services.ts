@@ -6,8 +6,12 @@ import { CasinoCoinsService } from "@/services/casino-coins.service";
 import { CashoutRequest } from "@/types/request/transfers";
 import { PlainPlayerResponse } from "@/types/response/players";
 import { CoinTransferResult } from "@/types/response/transfers";
+import { ResourceService } from "@/services/resource.service";
 
-export class PaymentServices {
+export class PaymentServices extends ResourceService {
+  constructor() {
+    super(PaymentsDAO);
+  }
   /**
    * Send payment to player, transfer coins from player to agent and create a
    * pending payment.

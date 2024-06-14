@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -168,6 +169,16 @@ model PasswordResetToken {
   updated_at                  DateTime  @updatedAt 
 
   @@map("PASSWORD_RESET_TOKENS")
+}
+
+model ChatData {
+  id                          String    @id @default(uuid())
+  number                      String    @unique
+  name                        String    
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @updatedAt 
+
+  @@map("CHAT_DATA")
 }
 
 model Analytics {

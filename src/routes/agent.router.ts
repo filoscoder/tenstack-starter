@@ -5,15 +5,13 @@ import { AgentController } from "@/components/agent/controller";
 import { validateCredentials } from "@/components/players/validators";
 import {
   validateBankAccountUpdate,
-  validateDepositIndex,
-  validateDepositUpdate,
   validateOnCallRequest,
   validatePaymentIndex,
+  validateResetPasswordRequest,
   validateSupportRequest,
 } from "@/components/agent/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
 import { requireAgentRole } from "@/middlewares/auth";
-import { DepositController } from "@/components/deposits/controller";
 import { paymentRateLimiter } from "@/middlewares/rate-limiters/payment";
 
 const agentRouter = Router();
@@ -29,7 +27,6 @@ agentRouter.use(
   passport.authenticate("jwt", { session: false, failWithError: true }),
 );
 agentRouter.use(requireAgentRole);
-agentRouter.get("/payments", AgentController.showPayments);
 agentRouter.post(
   "/payments/:id/release",
   validatePaymentIndex(),
@@ -37,18 +34,6 @@ agentRouter.post(
   throwIfBadRequest,
   paymentRateLimiter,
   AgentController.releasePayment,
-);
-agentRouter.get(
-  "/deposits/:id?",
-  validateDepositIndex(),
-  throwIfBadRequest,
-  AgentController.showDeposits,
-);
-agentRouter.post(
-  "/deposits/:id",
-  validateDepositUpdate(),
-  throwIfBadRequest,
-  DepositController.create,
 );
 agentRouter.get("/bank-account", AgentController.getBankAccount);
 agentRouter.post(
@@ -77,5 +62,11 @@ agentRouter.post(
   throwIfBadRequest,
   AgentController.updateSupportNumbers,
 );
-
+agentRouter.post(
+  "/reset-player-password",
+  validateResetPasswordRequest(),
+  checkExact(),
+  throwIfBadRequest,
+  AgentController.resetPlayerPassword,
+);
 export default agentRouter;

@@ -1,3 +1,5 @@
+import { PLAYER_STATUS } from "@/config";
+
 export type getPlayerId = string;
 
 export type PlayerRequest = {
@@ -18,5 +20,22 @@ export type Credentials = {
 };
 
 export type PlayerUpdatableProps = {
-  password: string;
+  password?: string;
+  email?: string;
+  movile_number?: string;
+  first_name?: string;
+  last_name?: string;
+  status?: PLAYER_STATUS;
+};
+
+export type PlayerUpdateRequest = {
+  email?: string;
+  movile_number?: string;
+  first_name?: string;
+  last_name?: string;
+  status?: PLAYER_STATUS;
+};
+
+export type OrderBy<T> = {
+  [key in keyof T]?: "asc" | "desc";
 };

@@ -12,11 +12,13 @@ import {
   Payment,
   Player,
   PrismaClient,
+  Role,
 } from "@prisma/client";
 import { AlquimiaTransferService } from "../src/services/alquimia-transfer.service";
 import { initAgent } from "./helpers";
 import CONFIG from "@/config";
 import { AuthServices } from "@/components/auth/services";
+import { PlayerServices } from "@/components/players/services";
 
 let agent: SuperAgentTest;
 let prisma: PrismaClient;
@@ -24,6 +26,7 @@ let player: Player & { BankAccounts: BankAccount[] };
 let playerAccessToken: string;
 let payment: Payment & { BankAccount: BankAccount };
 let deposit: Deposit;
+let userWithAgentRole: Player & { roles: Role[] };
 const USER_AGENT = "jest_test";
 
 const credentials = {
@@ -83,16 +86,17 @@ describe("[UNIT] => AGENT ROUTER", () => {
     });
   });
 
-  describe("GET: /agent/payments", () => {
+  describe("GET: /transactions/payment", () => {
     it("Should return payments", async () => {
       const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/payments`)
+        .get(`/app/${CONFIG.APP.VER}/transactions/payment`)
         .set("Authorization", `Bearer ${access}`)
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(OK);
-      expect(response.body.data.length).toBeGreaterThanOrEqual(1);
-      expect(Object.keys(response.body.data[0])).toStrictEqual([
+      expect(response.body.data.payments.length).toBeGreaterThanOrEqual(0);
+      expect(response.body.data.totalPayments).toBeGreaterThanOrEqual(0);
+      expect(Object.keys(response.body.data.payments[0])).toStrictEqual([
         "id",
         "player_id",
         "amount",
@@ -106,12 +110,28 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "Player",
         "BankAccount",
       ]);
+      expect(response.body.data.payments[0].Player.password).toBe("********");
+    });
+
+    it.each`
+      field               | value    | message
+      ${"page"}           | ${"-1"}  | ${"page must be greater than 0"}
+      ${"sort_column"}    | ${"foo"} | ${"Invalid sort_column"}
+      ${"sort_direction"} | ${"baz"} | ${"sort_direction must be 'asc' or 'desc'"}
+    `("Shloud return 400", async ({ field, value, message }) => {
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/transactions/payment?${field}=${value}`)
+        .set("Authorization", `Bearer ${access}`)
+        .set("User-Agent", USER_AGENT);
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe(message);
     });
 
     /** Wrong token */
     it("Should return 401", async () => {
       const response = await await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/payments`)
+        .get(`/app/${CONFIG.APP.VER}/transactions/payment`)
         .set("Authorization", `Bearer ${refresh}`);
 
       expect(response.status).toBe(UNAUTHORIZED);
@@ -120,7 +140,9 @@ describe("[UNIT] => AGENT ROUTER", () => {
 
     /** No token */
     it("Should return 401", async () => {
-      const response = await agent.get(`/app/${CONFIG.APP.VER}/agent/payments`);
+      const response = await agent.get(
+        `/app/${CONFIG.APP.VER}/transactions/payment`,
+      );
 
       expect(response.status).toBe(UNAUTHORIZED);
       expect(response.body.code).toBe("Unauthorized");
@@ -128,7 +150,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
 
     it("Should return 403", async () => {
       const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/payments`)
+        .get(`/app/${CONFIG.APP.VER}/transactions/payment`)
         .set("Authorization", `Bearer ${playerAccessToken}`)
         .set("User-Agent", USER_AGENT);
 
@@ -199,16 +221,17 @@ describe("[UNIT] => AGENT ROUTER", () => {
     });
   });
 
-  describe("GET: /agent/deposits", () => {
+  describe("GET: /transactions/deposit", () => {
     it("Should return deposits", async () => {
       const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/deposits`)
+        .get(`/app/${CONFIG.APP.VER}/transactions/deposit`)
         .set("Authorization", `Bearer ${access}`)
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(OK);
-      expect(response.body.data.length).toBeGreaterThanOrEqual(1);
-      expect(Object.keys(response.body.data[0])).toStrictEqual([
+      expect(response.body.data.deposits.length).toBeGreaterThanOrEqual(0);
+      expect(response.body.data.totalDeposits).toBeGreaterThanOrEqual(0);
+      expect(Object.keys(response.body.data.deposits[0])).toStrictEqual([
         "id",
         "player_id",
         "currency",
@@ -220,21 +243,61 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "updated_at",
         "Player",
       ]);
+      expect(response.body.data.deposits[0].Player.password).toBe("********");
+    });
+
+    it.each`
+      field               | value    | message
+      ${"page"}           | ${"-1"}  | ${"page must be greater than 0"}
+      ${"sort_column"}    | ${"foo"} | ${"Invalid sort_column"}
+      ${"sort_direction"} | ${"baz"} | ${"sort_direction must be 'asc' or 'desc'"}
+    `("Shloud return 400", async ({ field, value, message }) => {
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/transactions/deposit?${field}=${value}`)
+        .set("Authorization", `Bearer ${access}`)
+        .set("User-Agent", USER_AGENT);
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe(message);
     });
 
     it("Should return 401", async () => {
-      const response = await agent.get(`/app/${CONFIG.APP.VER}/agent/deposits`);
+      const response = await agent.get(
+        `/app/${CONFIG.APP.VER}/transactions/deposit`,
+      );
 
       expect(response.status).toBe(UNAUTHORIZED);
     });
 
     it("Should return 403", async () => {
       const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/deposits`)
+        .get(`/app/${CONFIG.APP.VER}/transactions/deposit`)
         .set("Authorization", `Bearer ${playerAccessToken}`)
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(FORBIDDEN);
+    });
+  });
+
+  describe("GET: /transactions/deposit/pending-coin-transfers", () => {
+    it("Should return pending coin transfers", async () => {
+      const response = await agent
+        .get(
+          `/app/${CONFIG.APP.VER}/transactions/deposit/pending-coin-transfers`,
+        )
+        .set("Authorization", `Bearer ${access}`)
+        .set("User-Agent", USER_AGENT);
+
+      expect(response.status).toBe(OK);
+      expect(response.body.data).toBeGreaterThanOrEqual(0);
+    });
+
+    it("Should return 401", async () => {
+      const response = await agent.get(
+        `/app/${CONFIG.APP.VER}/transactions/deposit/pending-coin-transfers`,
+      );
+
+      expect(response.status).toBe(UNAUTHORIZED);
     });
   });
 
@@ -349,7 +412,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
     //     .set("Authorization", `Bearer ${access}`)
     //     .set("User-Agent", USER_AGENT);
 
-    //   console.log(response.body);
     //   expect(response.status).toBe(OK);
     //   expect(Object.keys(response.body.data)).toStrictEqual(["balance"]);
     // });
@@ -562,7 +624,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
           [field]: value,
         });
 
-      console.log(response.body);
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe(message);
     });
@@ -583,6 +644,55 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("User-Agent", USER_AGENT);
 
       expect(response.status).toBe(FORBIDDEN);
+    });
+  });
+
+  describe("POST: /agent/reset-player-password", () => {
+    jest.spyOn(PlayerServices.prototype, "resetPassword").mockResolvedValue();
+
+    it("Should reset player password", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/agent/reset-player-password`)
+        .set("Authorization", `Bearer ${access}`)
+        .set("User-Agent", USER_AGENT)
+        .send({
+          new_password: "1234",
+          user_id: player.id,
+        });
+
+      expect(response.status).toBe(OK);
+      expect(response.body.data).toBeUndefined();
+    });
+
+    it("Should return 400 unknown_fields", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/agent/reset-player-password`)
+        .set("Authorization", `Bearer ${access}`)
+        .set("User-Agent", USER_AGENT)
+        .send({
+          new_password: "1234",
+          user_id: player.id,
+          unknownField: "foo",
+        });
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].type).toBe("unknown_fields");
+    });
+
+    it("Should return 400 can only reset player passwords", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/agent/reset-player-password`)
+        .set("Authorization", `Bearer ${access}`)
+        .set("User-Agent", USER_AGENT)
+        .send({
+          new_password: "1234",
+          user_id: userWithAgentRole.id,
+        });
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe(
+        "only player passwords can be updated",
+      );
     });
   });
 });
@@ -608,6 +718,23 @@ async function initialize() {
     },
     include: {
       BankAccounts: true,
+    },
+  });
+
+  userWithAgentRole = await prisma.player.create({
+    data: {
+      email: "userWithAgentRole@example.com",
+      password: "1234",
+      panel_id: -11,
+      username: "userWithAgentRole",
+      roles: {
+        connect: {
+          name: "agent",
+        },
+      },
+    },
+    include: {
+      roles: true,
     },
   });
 
@@ -641,8 +768,8 @@ async function cleanUp() {
   await prisma.deposit.delete({ where: { id: deposit.id } });
   await prisma.bankAccount.delete({ where: { id: player.BankAccounts[0].id } });
   await prisma.token.deleteMany({ where: { player_id: player.id } });
-  // await prisma.token.delete({ where: { }})
   await prisma.player.delete({ where: { id: player.id } });
+  await prisma.player.delete({ where: { id: userWithAgentRole.id } });
   prisma.$disconnect();
   jest.restoreAllMocks();
 }

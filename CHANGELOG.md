@@ -1,3 +1,35 @@
+## [1.0.0] - 2024-05-29
+
+### Added
+- GET `/transactions/deposit/pending-coin-transfers`
+
+## [1.0.0] - 2024-05-28
+
+### Added
+- `/agent/reset-player-password` for the agent to reset players' passwords.
+
+### Changed
+- Split GET `/agent/deposits/:id?` into GET `/transactions/deposit/:id` and GET `/transactions/deposit`.
+- Move POST `/agent/deposits/:id` into `/transactions/deposit/:id`.
+- Return `{ deposits, totalDeposits }` from GET `/transactions/deposit`.
+- Move GET `/agent/payments` to GET `/transactions/payment`
+- Return `{ payments, totalPayments }` from GET `/transactions/payment`.
+
+## [1.0.0] - 2024-05-27
+
+### Changed
+- Improve `movile_number` validator: must be a numerical string of up to 20 characters
+
+## [1.0.0] - 2024-05-15
+
+### Changed
+- GET `/players?page=1&items_per_page=20&search=<string>&sort_column=<string>&sort_direction=<asc|desc>` now returns a list of players. Requires agent role.
+- Mock call to `PlayerServices.createCasinoPlayer` to avoid creating players on casino on every test run.
+
+### Added
+- GET `/players/:id` returns player details.
+- POST `/players/:id` to update a player. Requires agent role.
+
 ## [1.0.0] - 2024-05-07
 
 ### Changed

@@ -1,10 +1,10 @@
 import { BankAccount, Payment, PrismaClient } from "@prisma/client";
 import { PaymentRequest } from "@/types/request/transfers";
-import { hidePassword } from "@/utils/auth";
 import { PaymentUpdatableProps } from "@/types/request/transfers";
 import { NotFoundException, ForbiddenError } from "@/helpers/error";
 import CONFIG from "@/config";
 import { CustomError } from "@/helpers/error/CustomError";
+import { OrderBy } from "@/types/request/players";
 
 const prisma = new PrismaClient();
 
@@ -27,24 +27,31 @@ export class PaymentsDAO {
   /**
    * Show Payments
    */
-  static async index(all = true) {
+  static async _getAll(
+    page: number,
+    itemsPerPage: number,
+    search?: string,
+    orderBy?: OrderBy<Payment>,
+  ) {
     try {
       const payments = await prisma.payment.findMany({
-        where: all
-          ? {}
-          : {
-              OR: [
-                { status: CONFIG.SD.PAYMENT_STATUS.PENDING },
-                { status: CONFIG.SD.PAYMENT_STATUS.PROCESSING },
-              ],
-            },
+        skip: page * itemsPerPage,
+        take: itemsPerPage,
+        where: {
+          OR: [
+            { BankAccount: { bankAlias: { contains: search } } },
+            { BankAccount: { bankName: { contains: search } } },
+            { BankAccount: { bankNumber: { contains: search } } },
+            { BankAccount: { owner: { contains: search } } },
+            { Player: { username: { contains: search } } },
+            { Player: { first_name: { contains: search } } },
+            { Player: { last_name: { contains: search } } },
+          ],
+        },
+        orderBy,
         include: { Player: true, BankAccount: true },
       });
 
-      // Excluir contraseñas
-      payments.forEach(
-        (payment) => (payment.Player = hidePassword(payment.Player)),
-      );
       return payments;
     } catch (error) {
       throw error;
@@ -53,7 +60,7 @@ export class PaymentsDAO {
     }
   }
 
-  static async findById(id: string) {
+  static async _getById(id: string) {
     try {
       return await prisma.payment.findFirst({
         where: { id },
@@ -155,5 +162,9 @@ export class PaymentsDAO {
       });
     });
     return authorized;
+  }
+
+  static count(): Promise<number> {
+    return prisma.payment.count();
   }
 }

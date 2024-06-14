@@ -4,7 +4,7 @@ import paymentsRouter from "./payments.router";
 
 const transactionsRouter = Router();
 
-transactionsRouter.use(depositsRouter);
 transactionsRouter.use(paymentsRouter);
+transactionsRouter.use(depositsRouter);
 
 export default transactionsRouter;

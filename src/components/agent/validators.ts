@@ -1,4 +1,12 @@
 import { Location, checkSchema } from "express-validator";
+import CONFIG from "@/config";
+import { PlayersDAO } from "@/db/players";
+
+const ensurePlayerRole = async (id: string) => {
+  const user = await PlayersDAO._getById(id);
+  if (user?.roles.some((r) => r.name !== CONFIG.ROLES.PLAYER))
+    throw new Error();
+};
 
 export const validateCredentials = () =>
   checkSchema({
@@ -49,31 +57,6 @@ export const validateBankAccountUpdate = () => {
   });
 };
 
-export const validateDepositIndex = () =>
-  checkSchema({
-    id: {
-      in: ["params"],
-      isString: true,
-      optional: true,
-    },
-  });
-
-export const validateDepositUpdate = () =>
-  checkSchema({
-    id: {
-      in: ["params"],
-      isString: true,
-      isEmpty: false,
-      optional: false,
-    },
-    tracking_number: {
-      in: ["body"],
-      isString: true,
-      isEmpty: false,
-      optional: false,
-    },
-  });
-
 export const validateOnCallRequest = () =>
   checkSchema({
     active: {
@@ -114,5 +97,35 @@ export const validateSupportRequest = () =>
       isLength: {
         options: { max: 20 },
       },
+    },
+  });
+
+export const validateResetPasswordRequest = () =>
+  checkSchema({
+    new_password: {
+      in: ["body"],
+      isString: true,
+      notEmpty: true,
+      trim: true,
+      isByteLength: {
+        options: { max: 72 },
+        errorMessage: "password must be under 73 characters",
+      },
+      isLength: {
+        options: { min: 4 },
+        errorMessage: "password must be at least 4 characters long",
+      },
+      errorMessage: "new_password is required",
+    },
+    user_id: {
+      in: ["body"],
+      isString: true,
+      notEmpty: true,
+      trim: true,
+      custom: {
+        options: ensurePlayerRole,
+        errorMessage: "only player passwords can be updated",
+      },
+      errorMessage: "user_id is required",
     },
   });

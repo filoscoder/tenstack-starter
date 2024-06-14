@@ -134,4 +134,8 @@ const CONFIG = {
   },
 } as const;
 
+export enum PLAYER_STATUS {
+  ACTIVE = "ACTIVO",
+  BANNED = "BLOQUEADO",
+}
 export default CONFIG;
