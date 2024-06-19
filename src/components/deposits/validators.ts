@@ -66,18 +66,3 @@ export const validateDepositIndex = () =>
     },
   });
 
-export const validateDepositUpdate = () =>
-  checkSchema({
-    id: {
-      in: ["params"],
-      isString: true,
-      isEmpty: false,
-      optional: false,
-    },
-    tracking_number: {
-      in: ["body"],
-      isString: true,
-      isEmpty: false,
-      optional: false,
-    },
-  });

@@ -1,4 +1,8 @@
+import { Analytics } from "@prisma/client";
 import { checkSchema } from "express-validator";
+import { isKeyOfNestedObject } from "../players/validators";
+
+const isDashedAlphaNumeric = (value: string) => !/[^a-zA-Z0-9\-_]/.test(value);
 
 const isDashedAlphaNumeric = (value: string) => !/[^a-zA-Z0-9\-_]/.test(value);
 
@@ -42,3 +46,15 @@ export const validateAnalyticsRequest = () =>
       optional: true,
     },
   });
+
+export const isKeyOfAnalytics = (key: string): key is keyof Analytics => {
+  const mockAnalytics: Analytics = {
+    id: "",
+    source: "",
+    event: "",
+    data: {},
+    created_at: new Date(),
+    updated_at: new Date(),
+  };
+  return isKeyOfNestedObject(mockAnalytics, key);
+};

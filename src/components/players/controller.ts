@@ -27,10 +27,10 @@ export class PlayersController {
         search,
         orderBy,
       );
-      const safePlayers = players.map((p) => hidePassword(p));
-      const totalPlayers = await PlayersDAO.count;
+      const result = players.map((p) => hidePassword(p));
+      const total = await PlayersDAO.count;
 
-      res.status(OK).json(apiResponse({ players: safePlayers, totalPlayers }));
+      res.status(OK).json(apiResponse({ result, total }));
     } catch (error) {
       next(error);
     }
@@ -105,21 +105,6 @@ export class PlayersController {
         .setHeader("Set-Cookie", fingerprintCookie)
         .status(OK)
         .json(apiResponse(loginResponse));
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  static update = async (req: Req, res: Res, next: NextFn) => {
-    try {
-      const playersServices = new PlayerServices();
-
-      const playerId = req.params.id;
-      const request: PlayerRequest = req.body;
-
-      const player = await playersServices.update(playerId, request);
-
-      res.status(OK).json(apiResponse(player));
     } catch (error) {
       next(error);
     }

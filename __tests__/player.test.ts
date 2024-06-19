@@ -232,9 +232,9 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
         .set("Authorization", `Bearer ${agentAccessToken}`);
 
       expect(response.status).toBe(OK);
-      expect(response.body.data.players).toBeInstanceOf(Array);
-      expect(response.body.data.totalPlayers).toBeGreaterThanOrEqual(0);
-      expect(Object.keys(response.body.data.players[0])).toEqual([
+      expect(response.body.data.result).toBeInstanceOf(Array);
+      expect(response.body.data.total).toBeGreaterThanOrEqual(0);
+      expect(Object.keys(response.body.data.result[0])).toEqual([
         "id",
         "panel_id",
         "username",

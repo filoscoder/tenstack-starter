@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { checkExact } from "express-validator";
 import passport from "passport";
-import { requireAgentRole, requireUserRole } from "@/middlewares/auth";
+import {
+  requireAgentRole,
+  requireUserOrAgentRole,
+  requireUserRole,
+} from "@/middlewares/auth";
 import { depositRateLimiter } from "@/middlewares/rate-limiters/deposit";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
 import { AgentController } from "@/components/agent/controller";
@@ -9,7 +13,6 @@ import {
   isKeyOfDeposit,
   validateDepositIndex,
   validateDepositRequest,
-  validateDepositUpdate,
 } from "@/components/deposits/validators";
 import { DepositController } from "@/components/deposits/controller";
 import { validateResourceSearchRequest } from "@/components/players/validators";
@@ -26,7 +29,7 @@ depositsRouter.get(
 );
 depositsRouter.post(
   "/deposit/:id?",
-  requireUserRole,
+  requireUserOrAgentRole,
   validateDepositRequest(),
   checkExact(),
   throwIfBadRequest,
@@ -48,6 +51,7 @@ depositsRouter.get(
 depositsRouter.get(
   "/deposit/:id",
   validateDepositIndex(),
+  checkExact(),
   throwIfBadRequest,
   DepositController.show,
 );
@@ -57,12 +61,6 @@ depositsRouter.get(
   checkExact(),
   throwIfBadRequest,
   DepositController.index,
-);
-depositsRouter.post(
-  "/deposit/:id",
-  validateDepositUpdate(),
-  throwIfBadRequest,
-  DepositController.create,
 );
 
 export default depositsRouter;

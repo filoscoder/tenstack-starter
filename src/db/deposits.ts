@@ -46,7 +46,10 @@ export class DepositsDAO {
 
   static async _getById(id: string) {
     try {
-      return await prisma.deposit.findUnique({ where: { id } });
+      return await prisma.deposit.findUnique({
+        where: { id },
+        include: { Player: true },
+      });
     } catch (error) {
       throw error;
     } finally {
@@ -267,8 +270,6 @@ export class DepositsDAO {
       prisma.$disconnect();
     }
   }
-
-  // static authorizeDeletion = this.authorizeConfirmation;
 
   static async authorizeCreation(request: DepositRequest) {
     try {

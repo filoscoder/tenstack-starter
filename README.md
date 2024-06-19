@@ -78,6 +78,7 @@ Comes with:
 + [Listar](#listar-analytics)
 + [Ver](#ver-analytics)
 + [Crear](#crear-analytics)
++ [Resumen](#resumen-de-analytics)
 
 ### [Interfaces](#interfaces-1)
 
@@ -300,6 +301,7 @@ Requiere rol| agent
 |Endpoint| `/transactions/deposit/:id`|
 ---|---|
 Método      |`GET`
+Query string| [`ResourceListQueryString`](#ResourceListQueryString)
 Devuelve    |[`Deposit[]`](#deposit)
 Requiere rol| agent
 
@@ -462,6 +464,14 @@ Body (json) | [`AnalyticsRequest`](#analyticsrequest)
 Devuelve    |`Analytics`
 Requiere rol| agent
 
+### Resumen de Analytics
+
+|Endpoint| `/analytics/summary`|
+---|---|
+Método      |`GET`
+Devuelve | [`AnalyticsSummary[]`]()
+
+
 ## Interfaces
 
 ### Player
@@ -494,8 +504,8 @@ Requiere rol| agent
 ### PlayerListResponse
 ```typescript
 {
-  players: Player[]
-  totalPlayers: number
+  result: Player[]
+  total: number
 }
 ```
 
@@ -743,6 +753,15 @@ Estado de transferencia de fichas
   source: string
   event: string
   data?: object
+}
+```
+
+### AnalyticsSummary
+```typescript
+{
+  _count: { event: number };
+  source: string;
+  event: string;
 }
 ```
 

@@ -17,15 +17,13 @@ export class PaymentController {
       const payments = await paymentServices.getAll<
         Payment & { Player: Player; BankAccount: BankAccount }
       >(page, itemsPerPage, search, orderBy);
-      const safePayments = payments.map((payment) => ({
+      const result = payments.map((payment) => ({
         ...payment,
         Player: hidePassword(payment.Player),
       }));
-      const totalPayments = await PaymentsDAO.count();
+      const total = await PaymentsDAO.count();
 
-      res
-        .status(OK)
-        .json(apiResponse({ payments: safePayments, totalPayments }));
+      res.status(OK).json(apiResponse({ result, total }));
     } catch (err) {
       next(err);
     }

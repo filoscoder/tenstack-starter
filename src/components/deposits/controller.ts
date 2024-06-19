@@ -18,15 +18,13 @@ export class DepositController {
       const deposits = await depositServices.getAll<
         Deposit & { Player: Player }
       >(page, itemsPerPage, search, orderBy);
-      const safeDeposits = deposits.map((deposit) => ({
+      const result = deposits.map((deposit) => ({
         ...deposit,
         Player: hidePassword(deposit.Player),
       }));
-      const totalDeposits = await DepositsDAO.count();
+      const total = await DepositsDAO.count();
 
-      res
-        .status(OK)
-        .json(apiResponse({ deposits: safeDeposits, totalDeposits }));
+      res.status(OK).json(apiResponse({ result, total }));
     } catch (err) {
       next(err);
     }
@@ -36,7 +34,10 @@ export class DepositController {
     const depositId = req.params.id;
     try {
       const depositServices = new DepositServices();
-      const deposit = await depositServices.show(depositId);
+      const deposit = await depositServices.show<Deposit & { Player: Player }>(
+        depositId,
+      );
+      if (deposit) deposit[0].Player = hidePassword(deposit[0].Player);
 
       res.status(OK).json(apiResponse(deposit));
     } catch (err) {

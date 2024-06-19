@@ -91,9 +91,9 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(OK);
-      expect(response.body.data.payments.length).toBeGreaterThanOrEqual(0);
-      expect(response.body.data.totalPayments).toBeGreaterThanOrEqual(0);
-      expect(Object.keys(response.body.data.payments[0])).toStrictEqual([
+      expect(response.body.data.result.length).toBeGreaterThanOrEqual(0);
+      expect(response.body.data.total).toBeGreaterThanOrEqual(0);
+      expect(Object.keys(response.body.data.result[0])).toStrictEqual([
         "id",
         "player_id",
         "amount",
@@ -107,7 +107,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "Player",
         "BankAccount",
       ]);
-      expect(response.body.data.payments[0].Player.password).toBe("********");
+      expect(response.body.data.result[0].Player.password).toBe("********");
     });
 
     it.each`
@@ -220,9 +220,9 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(OK);
-      expect(response.body.data.deposits.length).toBeGreaterThanOrEqual(0);
-      expect(response.body.data.totalDeposits).toBeGreaterThanOrEqual(0);
-      expect(Object.keys(response.body.data.deposits[0])).toStrictEqual([
+      expect(response.body.data.result.length).toBeGreaterThanOrEqual(0);
+      expect(response.body.data.total).toBeGreaterThanOrEqual(0);
+      expect(Object.keys(response.body.data.result[0])).toStrictEqual([
         "id",
         "player_id",
         "currency",
@@ -234,7 +234,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "updated_at",
         "Player",
       ]);
-      expect(response.body.data.deposits[0].Player.password).toBe("********");
+      expect(response.body.data.result[0].Player.password).toBe("********");
     });
 
     it.each`
