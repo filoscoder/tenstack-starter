@@ -77,10 +77,9 @@ export class PlayersController {
       const authServices = new AuthServices();
 
       const request: PlayerRequest = req.body;
-      const user_agent = req.headers["user-agent"];
 
       const player = await playersServices.create(request);
-      const { tokens } = await authServices.tokens(player.id, user_agent);
+      const { tokens } = await authServices.tokens(player.id);
       const response = { ...tokens, player };
 
       res.status(CREATED).json(apiResponse(response));
@@ -97,14 +96,30 @@ export class PlayersController {
       const playersServices = new PlayerServices();
 
       const credentials: Credentials = req.body;
-      const user_agent = req.headers["user-agent"];
 
-      const loginResponse = await playersServices.login(
+      const { loginResponse, fingerprintCookie } = await playersServices.login(
         credentials,
-        user_agent,
       );
 
-      res.status(OK).json(apiResponse(loginResponse));
+      res
+        .setHeader("Set-Cookie", fingerprintCookie)
+        .status(OK)
+        .json(apiResponse(loginResponse));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  static update = async (req: Req, res: Res, next: NextFn) => {
+    try {
+      const playersServices = new PlayerServices();
+
+      const playerId = req.params.id;
+      const request: PlayerRequest = req.body;
+
+      const player = await playersServices.update(playerId, request);
+
+      res.status(OK).json(apiResponse(player));
     } catch (error) {
       next(error);
     }

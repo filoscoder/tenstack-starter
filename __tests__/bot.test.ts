@@ -12,7 +12,6 @@ let playerAccessToken: string;
 let agentId: string;
 let agentAccessToken: string;
 let botNames: string[];
-const USER_AGENT = "jest_test";
 
 const credentials = {
   username: "jest_test" + Date.now(),
@@ -28,8 +27,7 @@ describe("[UNIT] => BOT ROUTER", () => {
     it("Should return bot names", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/bot`)
-        .set("Authorization", `Bearer ${agentAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${agentAccessToken}`);
 
       expect(response.status).toBe(OK);
       expect(response.body.data.length).toBeGreaterThanOrEqual(1);
@@ -39,8 +37,7 @@ describe("[UNIT] => BOT ROUTER", () => {
     it("Should return 200", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/bot/${botNames[0]}`)
-        .set("Authorization", `Bearer ${agentAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${agentAccessToken}`);
 
       expect(response.status).toBe(OK);
     });
@@ -54,8 +51,7 @@ describe("[UNIT] => BOT ROUTER", () => {
     it("Should return 403", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/bot`)
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -83,15 +79,9 @@ async function initialize() {
   }))!.id;
 
   const authServices = new AuthServices();
-  const { tokens: playerTokens } = await authServices.tokens(
-    player.id,
-    USER_AGENT,
-  );
+  const { tokens: playerTokens } = await authServices.tokens(player.id);
   playerAccessToken = playerTokens.access;
-  const { tokens: agentTokens } = await authServices.tokens(
-    agentId,
-    USER_AGENT,
-  );
+  const { tokens: agentTokens } = await authServices.tokens(agentId);
   agentAccessToken = agentTokens.access;
 }
 

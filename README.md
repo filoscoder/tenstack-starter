@@ -777,11 +777,11 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - [Bot Whatsapp](https://bot-whatsapp.netlify.app/) ✅
   + [Diagrama Flujo](https://www.figma.com/file/rtxhrNqQxdEdYzOfPl1mRc/Whatsapp-Bot?type=whiteboard&node-id=0%3A1&t=5ACojRhp99vrh24S-1)
 - Usar endpoint /auth/logout en frontend
-- Buscar deposito en alquimia con clave de rastreo incluyendo `clave_rastreo` en los search params
-- Replace user_agent with [user context](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html#token-sidejacking) to prevent JWT sidejacking 
-- Arreglar UI agente telefonos de soporte
 - Refactor calls to \*DAO.authorize\* to use same format as `PaymentsDAO.authorizeRelease()`
 
+- Ambientes staging y prod en, bot-timba y alquimia
+- Cambiar start-staging por start:production en timba-api scripts
+- Boletear todo lo relacionado al bot de este repo
 
 ### Fichas insuficientes
 

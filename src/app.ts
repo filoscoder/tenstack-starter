@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import timeout from "connect-timeout";
 import passport from "passport";
+import cookieParser from "cookie-parser";
 import CONFIG from "./config";
 import { AuthServices } from "./components/auth/services";
 import { exposeHeaders } from "./middlewares/exposeHeaders";
@@ -34,7 +35,7 @@ export const createApp = (): express.Application => {
   app.use(timeout(CONFIG.SERVER.TIMEOUT));
 
   // API Routes (/app/v1/....)
-
+  app.use(cookieParser());
   app.use(`/app/${CONFIG.APP.VER}`, mainRouter);
 
   // Error Middleware

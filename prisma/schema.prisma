@@ -122,7 +122,6 @@ model Token {
   next              String?       
   player_id         String           
   player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
-  user_agent        String?       @db.VarChar(256)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt 
 

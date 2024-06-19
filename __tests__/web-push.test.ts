@@ -11,7 +11,6 @@ let agent: SuperAgentTest;
 let prisma: PrismaClient;
 let casinoAgent: Player;
 let auth: TokenPair;
-const USER_AGENT = "jest_test";
 const pushSubscription: WebPushSubscription = {
   endpoint: "test_endpoint" + Date.now(),
   keys: {
@@ -27,8 +26,7 @@ describe("[UNIT] => WEB PUSH", () => {
     it("Should return web push public key", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/web-push/pubkey`)
-        .set("Authorization", `Bearer ${auth.access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${auth.access}`);
 
       expect(response.status).toBe(OK);
       expect(response.body.data).toBeDefined();
@@ -48,8 +46,7 @@ describe("[UNIT] => WEB PUSH", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/web-push/subscription`)
         .send(pushSubscription)
-        .set("Authorization", `Bearer ${auth.access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${auth.access}`);
 
       expect(response.status).toBe(CREATED);
     });
@@ -58,8 +55,7 @@ describe("[UNIT] => WEB PUSH", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/web-push/subscription`)
         .send({ keys: pushSubscription.keys })
-        .set("Authorization", `Bearer ${auth.access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${auth.access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe("endpoint is required");
@@ -73,8 +69,7 @@ describe("[UNIT] => WEB PUSH", () => {
           endpoint: pushSubscription.endpoint,
           keys: { auth: pushSubscription.keys.auth },
         })
-        .set("Authorization", `Bearer ${auth.access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${auth.access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe("p256dh is required");
@@ -88,8 +83,7 @@ describe("[UNIT] => WEB PUSH", () => {
           endpoint: pushSubscription.endpoint,
           keys: { p256dh: pushSubscription.keys.p256dh },
         })
-        .set("Authorization", `Bearer ${auth.access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${auth.access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe("auth is required");
@@ -110,8 +104,7 @@ describe("[UNIT] => WEB PUSH", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/web-push/delete`)
         .send({ endpoint: pushSubscription.endpoint })
-        .set("Authorization", `Bearer ${auth.access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${auth.access}`);
 
       expect(response.status).toBe(OK);
     });
@@ -119,8 +112,7 @@ describe("[UNIT] => WEB PUSH", () => {
     it("Shloud return 400 missing endpoint", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/web-push/delete`)
-        .set("Authorization", `Bearer ${auth.access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${auth.access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe("endpoint is required");
@@ -131,8 +123,7 @@ describe("[UNIT] => WEB PUSH", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/web-push/delete`)
         .send({ endpoint: pushSubscription.endpoint, unknown_field: "unknown" })
-        .set("Authorization", `Bearer ${auth.access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${auth.access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].type).toBe("unknown_fields");
@@ -150,8 +141,7 @@ describe("[UNIT] => WEB PUSH", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/web-push/delete`)
         .send({ endpoint: "unknown_endpoint" })
-        .set("Authorization", `Bearer ${auth.access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${auth.access}`);
 
       expect(response.status).toBe(NOT_FOUND);
     });
@@ -169,13 +159,13 @@ async function initialize() {
   if (!casinoAgent) throw new Error("Agent not found");
 
   const authServices = new AuthServices();
-  const { tokens } = await authServices.tokens(casinoAgent.id, USER_AGENT);
+  const { tokens } = await authServices.tokens(casinoAgent.id);
   auth = tokens;
 }
 
 async function cleanUp() {
   await prisma.token.deleteMany({
-    where: { player_id: casinoAgent.id, user_agent: USER_AGENT },
+    where: { player_id: casinoAgent.id },
   });
   prisma.$disconnect();
 }

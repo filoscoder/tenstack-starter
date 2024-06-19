@@ -46,6 +46,7 @@ const CONFIG = {
     ALQUIMIA_USERNAME: process.env.ALQUIMIA_USERNAME,
     ALQUIMIA_PASSWORD: process.env.ALQUIMIA_PASSWORD,
     LOGTAIL_TOKEN: process.env.LOGTAIL_TOKEN,
+    FINGERPRINT_COOKIE: "__Secure-Fgp",
   },
   AWS: {
     ACCESS_KEY: process.env.AWS_ACCESS_KEY,

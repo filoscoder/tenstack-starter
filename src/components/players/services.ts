@@ -6,7 +6,7 @@ import {
   PlayerRequest,
   PlayerUpdateRequest,
 } from "@/types/request/players";
-import { LoginResponse, PlainPlayerResponse } from "@/types/response/players";
+import { PlainPlayerResponse } from "@/types/response/players";
 import { compare, hash } from "@/utils/crypt";
 import { hidePassword } from "@/utils/auth";
 import { HttpService } from "@/services/http.service";
@@ -20,6 +20,7 @@ import CONFIG, { PLAYER_STATUS } from "@/config";
 import { ForbiddenError } from "@/helpers/error";
 import { ResourceService } from "@/services/resource.service";
 import { logtailLogger } from "@/helpers/loggers";
+import { AuthResult } from "@/types/response/auth";
 
 export class PlayerServices extends ResourceService {
   constructor() {
@@ -99,10 +100,7 @@ export class PlayerServices extends ResourceService {
   /**
    * Log in player
    */
-  login = async (
-    credentials: Credentials,
-    user_agent?: string,
-  ): Promise<LoginResponse> => {
+  login = async (credentials: Credentials): Promise<AuthResult> => {
     // Verificar user y pass en nuestra DB
     const player = await PlayersDAO.getByUsername(credentials.username);
 
@@ -110,7 +108,7 @@ export class PlayerServices extends ResourceService {
       throw new ForbiddenError("Usuario bloqueado");
 
     if (player && (await compare(credentials.password, player.password))) {
-      return await this.loginResponse(player, user_agent);
+      return await this.loginResponse(player);
     }
 
     // Usuario no está en local o contraseña es incorrecta
@@ -124,7 +122,7 @@ export class PlayerServices extends ResourceService {
         loginResponse.data.id,
         loginResponse.data.email,
       );
-      return await this.loginResponse(localPlayer, user_agent);
+      return await this.loginResponse(localPlayer);
     } else throw new CustomError(ERR.INVALID_CREDENTIALS);
   };
 
@@ -145,14 +143,13 @@ export class PlayerServices extends ResourceService {
     );
   }
 
-  private async loginResponse(
-    player: Player,
-    user_agent?: string,
-  ): Promise<LoginResponse> {
+  private async loginResponse(player: Player): Promise<AuthResult> {
     const authServices = new AuthServices();
-    await authServices.invalidateTokensByUserAgent(player.id, user_agent);
-    const { tokens } = await authServices.tokens(player.id, user_agent);
-    return { ...tokens, player: hidePassword(player) };
+    const { tokens, fingerprintCookie } = await authServices.tokens(player.id);
+    return {
+      loginResponse: { ...tokens, player: hidePassword(player) },
+      fingerprintCookie,
+    };
   }
 
   async resetPassword(user: Player, new_password: string): Promise<void> {

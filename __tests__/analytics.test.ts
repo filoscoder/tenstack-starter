@@ -43,7 +43,9 @@ describe("[UNIT] => ANALYTICS ROUTER", () => {
     it.each`
       field       | value  | message
       ${"source"} | ${""}  | ${"source is required"}
+      ${"source"} | ${"%"} | ${"invalid source"}
       ${"event"}  | ${""}  | ${"event is required"}
+      ${"event"}  | ${"%"} | ${"invalid event"}
       ${"data"}   | ${1}   | ${"Invalid value"}
       ${"data"}   | ${"1"} | ${"Invalid value"}
     `("Should return 400 bad_request", async ({ field, value, message }) => {

@@ -27,7 +27,6 @@ let playerAccessToken: string;
 let payment: Payment & { BankAccount: BankAccount };
 let deposit: Deposit;
 let userWithAgentRole: Player & { roles: Role[] };
-const USER_AGENT = "jest_test";
 
 const credentials = {
   username: "jest_test" + Date.now(),
@@ -50,8 +49,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .send({
           username: process.env.AGENT_PANEL_USERNAME,
           password: process.env.AGENT_PANEL_PASSWORD,
-        })
-        .set("User-Agent", USER_AGENT);
+        });
 
       const tokens = response.body.data.access;
 
@@ -90,8 +88,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return payments", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/transactions/payment`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(OK);
       expect(response.body.data.payments.length).toBeGreaterThanOrEqual(0);
@@ -121,8 +118,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     `("Shloud return 400", async ({ field, value, message }) => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/transactions/payment?${field}=${value}`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe(message);
@@ -151,8 +147,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return 403", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/transactions/payment`)
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -174,8 +169,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should mark payment as paid", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/release`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(OK);
       expect(Object.keys(response.body.data)).toStrictEqual([
@@ -205,8 +199,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return 403", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/release`)
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -214,8 +207,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return 404", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/payments/-1/release`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(NOT_FOUND);
     });
@@ -225,8 +217,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return deposits", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/transactions/deposit`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(OK);
       expect(response.body.data.deposits.length).toBeGreaterThanOrEqual(0);
@@ -254,8 +245,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     `("Shloud return 400", async ({ field, value, message }) => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/transactions/deposit?${field}=${value}`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe(message);
@@ -272,8 +262,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return 403", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/transactions/deposit`)
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -285,8 +274,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .get(
           `/app/${CONFIG.APP.VER}/transactions/deposit/pending-coin-transfers`,
         )
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(OK);
       expect(response.body.data).toBeGreaterThanOrEqual(0);
@@ -306,7 +294,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/bank-account`)
         .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT)
         .send({
           name: "Test name",
           dni: "12345678",
@@ -331,7 +318,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/bank-account`)
         .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT)
         .send({
           unknownField: "foo",
         });
@@ -352,8 +338,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/bank-account`)
         .send({ name: "Juancito" })
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -363,8 +348,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return bank account", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/bank-account`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(OK);
       expect(Object.keys(response.body.data)).toStrictEqual([
@@ -388,8 +372,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return 403", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/bank-account`)
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -399,8 +382,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return casino balance", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/balance/casino`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(OK);
       expect(Object.keys(response.body.data)).toStrictEqual(["balance"]);
@@ -410,7 +392,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     //   const response = await agent
     //     .get(`/app/${CONFIG.APP.VER}/agent/balance/alquimia`)
     //     .set("Authorization", `Bearer ${access}`)
-    //     .set("User-Agent", USER_AGENT);
+    //
 
     //   expect(response.status).toBe(OK);
     //   expect(Object.keys(response.body.data)).toStrictEqual(["balance"]);
@@ -427,8 +409,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return 403", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/balance/casino`)
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -436,8 +417,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return 404", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/balance/unknown`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(NOT_FOUND);
     });
@@ -447,8 +427,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return completed deposits", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/pending/deposits`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(OK);
       expect(response.body.data.length).toBeGreaterThanOrEqual(0);
@@ -465,8 +444,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return 403", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/pending/deposits`)
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -477,7 +455,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/on-call`)
         .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT)
+
         .send({
           active: true,
         });
@@ -490,7 +468,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/on-call`)
         .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT)
+
         .send({
           active: true,
           unknownField: "foo",
@@ -512,8 +490,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/on-call`)
         .send({ active: true })
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -523,8 +500,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return on call status", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(OK);
       expect(response.body.data).toBeTruthy();
@@ -539,8 +515,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return 403", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -550,8 +525,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return support numbers", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/support`)
-        .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(OK);
       expect(Object.keys(response.body.data)).toEqual([
@@ -569,8 +543,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
     it("Should return 403", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/agent/support`)
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -581,7 +554,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/support`)
         .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT)
+
         .send({
           bot_phone: "555555555555",
           human_phone: "44444444444",
@@ -598,7 +571,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/support`)
         .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT)
+
         .send({
           unknownField: "foo",
         });
@@ -619,7 +592,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/support`)
         .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT)
+
         .send({
           [field]: value,
         });
@@ -640,8 +613,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/support`)
         .send({ bot_phone: "5555555", human_phone: "4444444" })
-        .set("Authorization", `Bearer ${playerAccessToken}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -654,7 +626,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/reset-player-password`)
         .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT)
         .send({
           new_password: "1234",
           user_id: player.id,
@@ -668,7 +639,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/reset-player-password`)
         .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT)
         .send({
           new_password: "1234",
           user_id: player.id,
@@ -683,7 +653,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/reset-player-password`)
         .set("Authorization", `Bearer ${access}`)
-        .set("User-Agent", USER_AGENT)
         .send({
           new_password: "1234",
           user_id: userWithAgentRole.id,
@@ -759,7 +728,7 @@ async function initialize() {
   });
 
   const authServices = new AuthServices();
-  const { tokens } = await authServices.tokens(player.id, USER_AGENT);
+  const { tokens } = await authServices.tokens(player.id);
   playerAccessToken = tokens.access;
 }
 

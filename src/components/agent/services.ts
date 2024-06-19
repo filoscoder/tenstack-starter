@@ -30,8 +30,7 @@ import { AlquimiaTransferService } from "@/services/alquimia-transfer.service";
 export class AgentServices {
   static async login(
     credentials: Credentials,
-    user_agent?: string,
-  ): Promise<TokenPair> {
+  ): Promise<{ tokens: TokenPair; fingerprintCookie: string }> {
     const { username, password } = credentials;
     const agent = await PlayersDAO.getByUsername(username);
     if (!agent) throw new NotFoundException();
@@ -44,15 +43,9 @@ export class AgentServices {
       throw new CustomError(ERR.INVALID_CREDENTIALS);
 
     const authServices = new AuthServices();
-    authServices.invalidateTokensByUserAgent(agent.id, user_agent);
-    const { tokens } = await authServices.tokens(agent.id, user_agent);
-    return tokens;
+    const { tokens, fingerprintCookie } = await authServices.tokens(agent.id);
+    return { tokens, fingerprintCookie };
   }
-
-  // static async showPayments(): Promise<Payment[] | null> {
-  //   const payments = PaymentsDAO.index();
-  //   return payments;
-  // }
 
   /**
    * Release requested payment into player's bank account

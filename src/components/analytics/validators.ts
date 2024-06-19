@@ -1,5 +1,7 @@
 import { checkSchema } from "express-validator";
 
+const isDashedAlphaNumeric = (value: string) => !/[^a-zA-Z0-9\-_]/.test(value);
+
 export const validateId = () =>
   checkSchema({
     id: {
@@ -15,7 +17,10 @@ export const validateAnalyticsRequest = () =>
     source: {
       in: ["body"],
       isString: true,
-      isAlphanumeric: true,
+      custom: {
+        options: isDashedAlphaNumeric,
+        errorMessage: "invalid source",
+      },
       notEmpty: true,
       trim: true,
       errorMessage: "source is required",
@@ -23,7 +28,10 @@ export const validateAnalyticsRequest = () =>
     event: {
       in: ["body"],
       isString: true,
-      isAlphanumeric: true,
+      custom: {
+        options: isDashedAlphaNumeric,
+        errorMessage: "invalid event",
+      },
       notEmpty: true,
       trim: true,
       errorMessage: "event is required",
