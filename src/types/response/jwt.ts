@@ -4,7 +4,6 @@ export interface JWTPayload {
   type: "access" | "refresh";
   exp: number;
   iat: number;
-  userFingerprint: string;
 }
 
 export interface TokenResult {

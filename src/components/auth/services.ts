@@ -86,7 +86,7 @@ export class AuthServices extends JwtService {
     done: jwtStrategy.VerifiedCallback,
   ) => {
     try {
-      await this.validateUserAgent(request, payload.userFingerprint);
+      await this.validateUserAgent(request, payload.jti);
     } catch (error) {
       return done(error, false);
     }
