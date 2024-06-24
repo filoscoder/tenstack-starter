@@ -113,13 +113,9 @@ dist
 mysql-data
 mariadb-data
 
-test.txt
-
 # Bot stuff
 *.qr.png
-*_sessions
 
-history.txt
 test_setup.sh
 
 .vscode

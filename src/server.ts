@@ -1,11 +1,7 @@
 import { Server, createServer } from "http";
 import e from "express";
-import BotWhatsapp from "@bot-whatsapp/bot";
-import MockAdapter from "@bot-whatsapp/database/mock";
-import ProviderWS from "@bot-whatsapp/provider/baileys";
 import CONFIG from "./config";
 import { exitLog } from "./helpers";
-import { createFlow } from "./chatbot/flows";
 
 export const startServer = (app: e.Application): Server => {
   const httpServer = createServer(app);
@@ -24,17 +20,5 @@ export const startServer = (app: e.Application): Server => {
     process.stdout.write(
       `Timba Api Server ready at http://${CONFIG.APP.HOST}:${CONFIG.APP.PORT}\n`,
     );
-  });
-};
-
-export const startWhatsappBot = async () => {
-  const database = new MockAdapter();
-  const provider = BotWhatsapp.createProvider(ProviderWS);
-  const flow = await createFlow();
-
-  await BotWhatsapp.createBot({
-    database,
-    provider,
-    flow,
   });
 };
