@@ -79,9 +79,15 @@ async function initialize() {
   }))!.id;
 
   const authServices = new AuthServices();
-  const { tokens: playerTokens } = await authServices.tokens(player.id);
+  const { tokens: playerTokens } = await authServices.tokens(
+    player.id,
+    "jest_test",
+  );
   playerAccessToken = playerTokens.access;
-  const { tokens: agentTokens } = await authServices.tokens(agentId);
+  const { tokens: agentTokens } = await authServices.tokens(
+    agentId,
+    "jest_test",
+  );
   agentAccessToken = agentTokens.access;
 }
 

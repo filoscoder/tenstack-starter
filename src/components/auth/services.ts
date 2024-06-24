@@ -32,7 +32,6 @@ export class AuthServices extends JwtService {
     const dbToken = await TokenDAO.create({ player_id: sub, user_agent });
     return {
       tokens: this.generateTokenPair(sub, dbToken.id, this.cypherPass),
-      fingerprintCookie: this.fingerprintCookie,
       jti: dbToken.id,
     };
   }
@@ -40,7 +39,7 @@ export class AuthServices extends JwtService {
   /**
    * Generate new pair from refresh token
    */
-  async refresh(refresh: string, user_agent: string): Promise<TokenPair> {
+  async refresh(refresh: string, req: Req): Promise<TokenPair> {
     if (!this.verifyTokenExpiration(refresh))
       throw new CustomError(ERR.TOKEN_EXPIRED);
 
@@ -53,13 +52,14 @@ export class AuthServices extends JwtService {
     const token = await TokenDAO.getById(payload.jti);
     if (!token) throw new CustomError(ERR.TOKEN_INVALID);
 
-    // this.validateFingerprint(req, payload.userFingerprint);
+    await this.validateUserAgent(req, payload.jti);
 
     if (token.invalid) {
       await this.invalidateChildren(token);
       throw new CustomError(ERR.TOKEN_INVALID);
     }
 
+    const user_agent = req.headers["user-agent"] ?? "";
     const { tokens, jti } = await this.tokens(payload.sub, user_agent);
     // Invalidate received token and link it to newly created one.
     await TokenDAO.updateById(token.id, { invalid: true, next: jti });

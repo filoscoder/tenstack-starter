@@ -99,15 +99,12 @@ export class PlayersController {
       const credentials: Credentials = req.body;
       const user_agent = req.headers["user-agent"] ?? "";
 
-      const { loginResponse, fingerprintCookie } = await playersServices.login(
+      const { loginResponse } = await playersServices.login(
         credentials,
         user_agent,
       );
 
-      res
-        .setHeader("Set-Cookie", fingerprintCookie)
-        .status(OK)
-        .json(apiResponse(loginResponse));
+      res.status(OK).json(apiResponse(loginResponse));
     } catch (error) {
       next(error);
     }

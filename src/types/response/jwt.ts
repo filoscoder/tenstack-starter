@@ -9,7 +9,6 @@ export interface JWTPayload {
 
 export interface TokenResult {
   tokens: TokenPair;
-  fingerprintCookie: string;
   jti: string;
 }
 

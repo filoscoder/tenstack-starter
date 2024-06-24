@@ -151,13 +151,9 @@ export class PlayerServices extends ResourceService {
     user_agent: string,
   ): Promise<AuthResult> {
     const authServices = new AuthServices();
-    const { tokens, fingerprintCookie } = await authServices.tokens(
-      player.id,
-      user_agent,
-    );
+    const { tokens } = await authServices.tokens(player.id, user_agent);
     return {
       loginResponse: { ...tokens, player: hidePassword(player) },
-      fingerprintCookie,
     };
   }
 

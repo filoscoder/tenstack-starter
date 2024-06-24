@@ -13,15 +13,9 @@ export class AgentController {
       const credentials: Credentials = req.body;
       const user_agent = req.headers["user-agent"] ?? "";
 
-      const { tokens, fingerprintCookie } = await AgentServices.login(
-        credentials,
-        user_agent,
-      );
+      const { tokens } = await AgentServices.login(credentials, user_agent);
 
-      res
-        .setHeader("Set-Cookie", fingerprintCookie)
-        .status(OK)
-        .json(apiResponse({ access: tokens }));
+      res.status(OK).json(apiResponse({ access: tokens }));
     } catch (error) {
       next(error);
     }
