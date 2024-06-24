@@ -1,4 +1,3 @@
-import { createHash } from "crypto";
 import jwtStrategy, { StrategyOptions } from "passport-jwt";
 import { Token } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
@@ -9,6 +8,7 @@ import { JWTPayload, TokenPair, TokenResult } from "@/types/response/jwt";
 import { PlayersDAO } from "@/db/players";
 import { ERR } from "@/config/errors";
 import { CustomError } from "@/helpers/error/CustomError";
+import { UnauthorizedError } from "@/helpers/error";
 
 export class AuthServices extends JwtService {
   private get cypherPass(): string {
@@ -28,8 +28,8 @@ export class AuthServices extends JwtService {
    * @param sub User ID
    * @param role User role
    */
-  async tokens(sub: string): Promise<TokenResult> {
-    const dbToken = await TokenDAO.create({ player_id: sub });
+  async tokens(sub: string, user_agent: string): Promise<TokenResult> {
+    const dbToken = await TokenDAO.create({ player_id: sub, user_agent });
     return {
       tokens: this.generateTokenPair(sub, dbToken.id, this.cypherPass),
       fingerprintCookie: this.fingerprintCookie,
@@ -40,7 +40,7 @@ export class AuthServices extends JwtService {
   /**
    * Generate new pair from refresh token
    */
-  async refresh(refresh: string, req: Req): Promise<TokenPair> {
+  async refresh(refresh: string, user_agent: string): Promise<TokenPair> {
     if (!this.verifyTokenExpiration(refresh))
       throw new CustomError(ERR.TOKEN_EXPIRED);
 
@@ -53,14 +53,14 @@ export class AuthServices extends JwtService {
     const token = await TokenDAO.getById(payload.jti);
     if (!token) throw new CustomError(ERR.TOKEN_INVALID);
 
-    this.validateFingerprint(req, payload.userFingerprint);
+    // this.validateFingerprint(req, payload.userFingerprint);
 
     if (token.invalid) {
       await this.invalidateChildren(token);
       throw new CustomError(ERR.TOKEN_INVALID);
     }
 
-    const { tokens, jti } = await this.tokens(payload.sub);
+    const { tokens, jti } = await this.tokens(payload.sub, user_agent);
     // Invalidate received token and link it to newly created one.
     await TokenDAO.updateById(token.id, { invalid: true, next: jti });
     return tokens;
@@ -86,7 +86,7 @@ export class AuthServices extends JwtService {
     done: jwtStrategy.VerifiedCallback,
   ) => {
     try {
-      this.validateFingerprint(request, payload.userFingerprint);
+      await this.validateUserAgent(request, payload.userFingerprint);
     } catch (error) {
       return done(error, false);
     }
@@ -100,28 +100,20 @@ export class AuthServices extends JwtService {
     return done(null, user);
   };
 
-  private validateFingerprint(request: Req, userFingerprint: string): void {
-    if (
-      CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.TEST ||
-      CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.DEV
-    )
-      return;
-    if (
-      !request.cookies ||
-      request.cookies.length === 0 ||
-      !(CONFIG.AUTH.FINGERPRINT_COOKIE in request.cookies)
-    )
-      // TODO
-      // use UnauthorizedError
-      throw new CustomError(ERR.FINGERPRINT_COOKIE_NOT_FOUND);
+  private async validateUserAgent(req: Req, jti: string) {
+    if (CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.TEST) return;
 
-    const cookie = request.cookies[CONFIG.AUTH.FINGERPRINT_COOKIE];
-    const hash = createHash("sha256").update(cookie).digest("hex");
+    const token = await TokenDAO.getById(jti);
+    const user_agent = req.headers["user-agent"] ?? "";
 
-    if (hash !== userFingerprint)
-      // TODO
-      // use UnauthorizedError
-      throw new CustomError(ERR.INVALID_FINGERPRINT);
+    if (!token || token.user_agent !== user_agent) {
+      await this.invalidateTokenByUserAgent(user_agent);
+      throw new UnauthorizedError("Token invalido");
+    }
+  }
+
+  private async invalidateTokenByUserAgent(user_agent: string) {
+    await TokenDAO.update({ user_agent }, { invalid: true });
   }
 
   private invalidateTokenById(token_id: string) {

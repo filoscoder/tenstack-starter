@@ -11,9 +11,11 @@ export class AgentController {
   static async login(req: Req, res: Res, next: NextFn) {
     try {
       const credentials: Credentials = req.body;
+      const user_agent = req.headers["user-agent"] ?? "";
 
       const { tokens, fingerprintCookie } = await AgentServices.login(
         credentials,
+        user_agent,
       );
 
       res
