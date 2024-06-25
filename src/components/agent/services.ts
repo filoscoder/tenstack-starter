@@ -30,7 +30,8 @@ import { AlquimiaTransferService } from "@/services/alquimia-transfer.service";
 export class AgentServices {
   static async login(
     credentials: Credentials,
-  ): Promise<{ tokens: TokenPair; fingerprintCookie: string }> {
+    user_agent: string,
+  ): Promise<{ tokens: TokenPair }> {
     const { username, password } = credentials;
     const agent = await PlayersDAO.getByUsername(username);
     if (!agent) throw new NotFoundException();
@@ -43,8 +44,8 @@ export class AgentServices {
       throw new CustomError(ERR.INVALID_CREDENTIALS);
 
     const authServices = new AuthServices();
-    const { tokens, fingerprintCookie } = await authServices.tokens(agent.id);
-    return { tokens, fingerprintCookie };
+    const { tokens } = await authServices.tokens(agent.id, user_agent);
+    return { tokens };
   }
 
   /**

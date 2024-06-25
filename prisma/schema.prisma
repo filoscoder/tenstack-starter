@@ -120,6 +120,7 @@ model Token {
   id                String        @id @default(uuid())
   invalid           Boolean       @default(false)
   next              String?       
+  user_agent        String?
   player_id         String           
   player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
   created_at        DateTime      @default(now())

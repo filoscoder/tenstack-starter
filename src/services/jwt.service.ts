@@ -1,4 +1,3 @@
-import { createHash } from "crypto";
 import jwt from "jsonwebtoken";
 import { JWTPayload, TokenPair } from "@/types/response/jwt";
 import CONFIG from "@/config";
@@ -51,7 +50,6 @@ export class JwtService {
    * @param sub User ID
    */
   generateTokenPair(sub: string, jti: string, pass: string): TokenPair {
-    this.generateFingerprintCookie();
     return {
       access: this.generateAccessToken(pass, sub, jti),
       refresh: this.generateRefreshToken(pass, sub, jti),
@@ -98,25 +96,5 @@ export class JwtService {
     );
 
     return token;
-  }
-
-  private generateFingerprintCookie() {
-    let arr = new Uint8Array(50);
-    arr = crypto.getRandomValues(arr);
-    const binaryString = Array.from(arr, (byte) =>
-      String.fromCodePoint(byte),
-    ).join("");
-
-    const userFingerprint = btoa(binaryString);
-    const fingerprintCookie =
-      CONFIG.AUTH.FINGERPRINT_COOKIE +
-      "=" +
-      userFingerprint +
-      "; SameSite=Strict; HttpOnly; Secure; " +
-      `Path=/app/${CONFIG.APP.VER}`;
-    this.fingerprintCookie = fingerprintCookie;
-    this.userFingerprintSha256 = createHash("sha256")
-      .update(userFingerprint)
-      .digest("hex");
   }
 }

@@ -728,7 +728,7 @@ async function initialize() {
   });
 
   const authServices = new AuthServices();
-  const { tokens } = await authServices.tokens(player.id);
+  const { tokens } = await authServices.tokens(player.id, "jest_test");
   playerAccessToken = tokens.access;
 }
 

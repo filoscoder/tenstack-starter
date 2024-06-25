@@ -269,9 +269,9 @@ async function cleanUp() {
 
 async function generateTokens() {
   const authServices = new AuthServices();
-  const result = await authServices.tokens(player.id);
+  const result = await authServices.tokens(player.id, "jest_test");
   tokenPair = result.tokens;
-  const result2 = await authServices.tokens(player2.id);
+  const result2 = await authServices.tokens(player2.id, "jest_test");
   tokenPair2 = result2.tokens;
 
   const payload = jwt.verify(tokenPair.access, CONFIG.APP.CYPHER_PASS!);

@@ -100,7 +100,10 @@ export class PlayerServices extends ResourceService {
   /**
    * Log in player
    */
-  login = async (credentials: Credentials): Promise<AuthResult> => {
+  login = async (
+    credentials: Credentials,
+    user_agent: string,
+  ): Promise<AuthResult> => {
     // Verificar user y pass en nuestra DB
     const player = await PlayersDAO.getByUsername(credentials.username);
 
@@ -108,7 +111,7 @@ export class PlayerServices extends ResourceService {
       throw new ForbiddenError("Usuario bloqueado");
 
     if (player && (await compare(credentials.password, player.password))) {
-      return await this.loginResponse(player);
+      return await this.loginResponse(player, user_agent);
     }
 
     // Usuario no está en local o contraseña es incorrecta
@@ -122,7 +125,7 @@ export class PlayerServices extends ResourceService {
         loginResponse.data.id,
         loginResponse.data.email,
       );
-      return await this.loginResponse(localPlayer);
+      return await this.loginResponse(localPlayer, user_agent);
     } else throw new CustomError(ERR.INVALID_CREDENTIALS);
   };
 
@@ -143,12 +146,14 @@ export class PlayerServices extends ResourceService {
     );
   }
 
-  private async loginResponse(player: Player): Promise<AuthResult> {
+  private async loginResponse(
+    player: Player,
+    user_agent: string,
+  ): Promise<AuthResult> {
     const authServices = new AuthServices();
-    const { tokens, fingerprintCookie } = await authServices.tokens(player.id);
+    const { tokens } = await authServices.tokens(player.id, user_agent);
     return {
       loginResponse: { ...tokens, player: hidePassword(player) },
-      fingerprintCookie,
     };
   }
 

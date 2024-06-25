@@ -374,7 +374,7 @@ async function setUp() {
   if (!agentUser) throw new Error("No agent found");
   agentEmail = agentUser.email;
   const authServices = new AuthServices();
-  const { tokens } = await authServices.tokens(agentUser.id);
+  const { tokens } = await authServices.tokens(agentUser.id, "jest_test");
   agentAccessToken = tokens.access;
 }
 

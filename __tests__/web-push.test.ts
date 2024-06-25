@@ -159,7 +159,7 @@ async function initialize() {
   if (!casinoAgent) throw new Error("Agent not found");
 
   const authServices = new AuthServices();
-  const { tokens } = await authServices.tokens(casinoAgent.id);
+  const { tokens } = await authServices.tokens(casinoAgent.id, "jest_test");
   auth = tokens;
 }
 

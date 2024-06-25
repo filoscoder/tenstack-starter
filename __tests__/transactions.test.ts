@@ -285,8 +285,8 @@ async function initialize() {
   });
 
   const authServices = new AuthServices();
-  const auth1 = await authServices.tokens(players[0].id);
-  const auth2 = await authServices.tokens(players[1].id);
+  const auth1 = await authServices.tokens(players[0].id, "jest_test");
+  const auth2 = await authServices.tokens(players[1].id, "jest_test");
   tokens[0] = auth1.tokens;
   tokens[1] = auth2.tokens;
 

@@ -77,9 +77,10 @@ export class PlayersController {
       const authServices = new AuthServices();
 
       const request: PlayerRequest = req.body;
+      const user_agent = req.headers["user-agent"] ?? "";
 
       const player = await playersServices.create(request);
-      const { tokens } = await authServices.tokens(player.id);
+      const { tokens } = await authServices.tokens(player.id, user_agent);
       const response = { ...tokens, player };
 
       res.status(CREATED).json(apiResponse(response));
@@ -96,15 +97,14 @@ export class PlayersController {
       const playersServices = new PlayerServices();
 
       const credentials: Credentials = req.body;
+      const user_agent = req.headers["user-agent"] ?? "";
 
-      const { loginResponse, fingerprintCookie } = await playersServices.login(
+      const { loginResponse } = await playersServices.login(
         credentials,
+        user_agent,
       );
 
-      res
-        .setHeader("Set-Cookie", fingerprintCookie)
-        .status(OK)
-        .json(apiResponse(loginResponse));
+      res.status(OK).json(apiResponse(loginResponse));
     } catch (error) {
       next(error);
     }

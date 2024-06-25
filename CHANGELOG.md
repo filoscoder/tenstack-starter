@@ -1,3 +1,8 @@
+## [1.0.0] - 2024-06-24
+
+### Changed
+- Reverted back to user_agent method to avoid JWT sidejacking
+
 ## [1.0.0] - 2024-06-13
 
 ### Added
