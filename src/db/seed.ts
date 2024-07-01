@@ -17,14 +17,15 @@ async function ensureRolesExist() {
 
 async function createUserRoot() {
   const casinoUsername = readlineSync.question(
-    "Nombre de usuario del agente en el casino [Lucas2]: ",
+    `Nombre de usuario del agente en el casino [${CONFIG.AUTH.CASINO_PANEL_USER}]:`,
     {
-      defaultInput: "Lucas2",
+      defaultInput: `${CONFIG.AUTH.CASINO_PANEL_USER}`,
     },
   );
   const casinoPassword = readlineSync.question(
-    "Contraseña del agente en el casino: ",
+    `Contraseña del agente en el casino: [${CONFIG.AUTH.CASINO_PANEL_PASS}]:`,
     {
+      defaultInput: `${CONFIG.AUTH.CASINO_PANEL_PASS}`,
       hideEchoBack: true,
     },
   );
@@ -43,14 +44,15 @@ async function createUserRoot() {
 
 async function updateUserRoot(userRoot: UserRoot) {
   const casinoUsername = readlineSync.question(
-    "Nombre de usuario del agente en el casino [luquin]: ",
+    `Nombre de usuario del agente en el casino [${CONFIG.AUTH.CASINO_PANEL_USER}]:`,
     {
-      defaultInput: "luquin",
+      defaultInput: `${CONFIG.AUTH.CASINO_PANEL_USER}`,
     },
   );
   const casinoPassword = readlineSync.question(
-    "Contraseña del agente en el casino: ",
+    `Contraseña del agente en el casino: [${CONFIG.AUTH.CASINO_PANEL_PASS}]:`,
     {
+      defaultInput: `${CONFIG.AUTH.CASINO_PANEL_PASS}`,
       hideEchoBack: true,
     },
   );

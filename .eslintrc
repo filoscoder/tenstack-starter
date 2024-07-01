@@ -7,7 +7,14 @@
     "project": "./tsconfig.json"
   },
   "plugins": ["import", "prettier"],
-  "ignorePatterns": ["node_modules/*", "dist/*", ".*", "jest*", "ecosystem*" ],
+  "ignorePatterns": [
+    "node_modules/*", 
+    "dist/*", ".*", 
+    "jest*", 
+    "ecosystem*", 
+    "prisma.generate.ts",
+    "envLoader.ts"
+   ],
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "prettier"
