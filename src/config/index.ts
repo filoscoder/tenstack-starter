@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 // https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 import pkg from "../../package.json";
-import "../../envLoader";
+// import "../../envLoader";
 require("dotenv").config();
 
 const CONFIG = {
