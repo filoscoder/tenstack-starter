@@ -1,5 +1,15 @@
 import { checkSchema } from "express-validator";
 
+const verifyClabe = (clabe: string): boolean => {
+  if (clabe.length !== 18) return false;
+  const weights = [3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7];
+  const truncated = clabe.substring(0, clabe.length - 1);
+  const weighted = weights.map((w, i) => (w * Number(truncated[i])) % 10);
+  const weightedSum = weighted.reduce((a, b) => a + b);
+  const controlDigit = 10 - (weightedSum % 10);
+  return truncated + controlDigit === clabe;
+};
+
 export const validateBankAccountIndex = () =>
   checkSchema({
     id: {
@@ -21,16 +31,6 @@ export const validateBankAccount = () =>
       trim: true,
       errorMessage: "Owner name is required",
     },
-    owner_id: {
-      in: ["body"],
-      notEmpty: true,
-      custom: {
-        // 4294967295: max value of UNSIGNED INT in mariadb
-        options: (value) => typeof value === "number" && value < 4294967295,
-      },
-      customSanitizer: { options: (value) => Number(value) },
-      errorMessage: "owner_id must be an integer lower than 2**32",
-    },
     bankName: {
       in: ["body"],
       notEmpty: true,
@@ -43,6 +43,7 @@ export const validateBankAccount = () =>
       notEmpty: true,
       isString: true,
       trim: true,
+      custom: { options: verifyClabe, errorMessage: "Invalid bankNumber" },
       errorMessage: "Bank number is required",
     },
     bankAlias: {
@@ -60,11 +61,6 @@ export const validateAccountUpdate = () =>
       optional: true,
       isString: true,
       trim: true,
-    },
-    owner_id: {
-      in: ["body"],
-      optional: true,
-      isNumeric: true,
     },
     bankName: {
       in: ["body"],

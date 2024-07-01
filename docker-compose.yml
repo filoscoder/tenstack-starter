@@ -1,19 +1,19 @@
-version: '3.1'
-
 # AlphaDev casinomex database
 services:
-  casinomex_db:
-    image: mysql
+  db:
+    image: mariadb
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: timba2024
-      MYSQL_DATABASE: timba_local_db
+      MARIADB_ROOT_PASSWORD: timba2024root
+      MARIADB_USER: timba
+      MARIADB_PASSWORD: timba2024
+      MARIADB_DATABASE: timba-dev
     volumes:
-      - ./mysql-data:/var/lib/mysql
+      - ./mariadb-data:/var/lib/mysql
     ports:
       - 3307:3306
 
-  casinomex_adminer:
+  adminer:
     image: adminer
     restart: unless-stopped
     ports:

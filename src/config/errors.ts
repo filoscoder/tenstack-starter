@@ -7,7 +7,7 @@ export const ERR: { [key: string]: ErrorData } = {
     description: "Este nombre de usuario ya está en uso. Elige otro.",
   },
   INVALID_CREDENTIALS: {
-    status: 404,
+    status: 400,
     code: "credenciales_invalidas",
     description: "Usuario o contraseña incorrectos",
   },
@@ -91,15 +91,5 @@ export const ERR: { [key: string]: ErrorData } = {
     status: 400,
     code: "already_exists",
     description: "Deposito ya existe",
-  },
-  PLAYER_CREATE: {
-    status: 500,
-    code: "agent_api_error",
-    description: "Error en el panel al crear el usuario",
-  },
-  QR_NOT_FOUND: {
-    status: 404,
-    code: "qr_not_found",
-    description: "bot.qr.png not found",
   },
 };

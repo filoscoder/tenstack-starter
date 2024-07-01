@@ -1,10 +1,10 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { CasinoTokenService } from "./casino-token.service";
 import { AlquimiaTokenService } from "./alquimia-token.service";
 import { ITokenRetreiver } from "@/types/services/http";
 import { ERR } from "@/config/errors";
-import { CustomError } from "@/middlewares/errorHandler";
 import CONFIG from "@/config";
+import { CustomError } from "@/helpers/error/CustomError";
 
 /**
  * Handle communications with different external APIs
@@ -30,9 +30,9 @@ export class ExternalApiService {
 
   protected get authedApi() {
     return {
-      get: (url: string) => this.authedGet(url),
-      post: (url: string, data: any) => this.authedPost(url, data),
-      patch: (url: string, data: any) => this.authedPatch(url, data),
+      get: <T>(url: string) => this.authedGet<T>(url),
+      post: <T>(url: string, data: any) => this.authedPost<T>(url, data),
+      patch: <T>(url: string, data: any) => this.authedPatch<T>(url, data),
     };
   }
 
@@ -57,36 +57,49 @@ export class ExternalApiService {
     else throw new TypeError("Invalid token service");
   }
 
-  protected async authedGet(url: string) {
-    return await this.send("get", url, null);
+  protected async authedGet<T>(url: string) {
+    return await this.send<T>("get", url, null);
   }
 
-  protected async authedPost(url: string, data: any) {
-    return await this.send("post", url, data);
+  protected async authedPost<T>(url: string, data: any) {
+    return await this.send<T>("post", url, data);
   }
 
-  protected async authedPatch(url: string, data: any) {
-    return await this.send("patch", url, data);
+  protected async authedPatch<T>(url: string, data: any) {
+    return await this.send<T>("patch", url, data);
   }
 
-  private async send(method: string, url: string, data: any): Promise<any> {
+  private async send<T>(
+    method: string,
+    url: string,
+    data: any,
+  ): Promise<AxiosResponse<T>> {
     try {
       this._auth = await this._tokenService.getAuth();
       if (!this._auth) {
         this._auth = await this.handleTokenExpiration();
       }
 
-      const response = await this._authedAxiosInstance({ url, method, data });
+      const response = await this._authedAxiosInstance({
+        url,
+        method,
+        data,
+      });
       if (response.status === 401) {
         this._auth = await this.handleTokenExpiration();
         if (!this._auth) {
-          throw new CustomError(ERR.EXTERNAL_LOGIN);
+          throw new CustomError({
+            status: response.status,
+            code: "external_login",
+            description: "Error en login externo",
+            detail: response.data,
+          });
         }
 
         return await this._authedAxiosInstance({ url, method, data });
       }
 
-      return response;
+      return response as AxiosResponse<T>;
     } catch (error) {
       throw error;
     }

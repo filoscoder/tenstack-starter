@@ -38,13 +38,12 @@ describe("[UNIT] => BANK ACCOUNTS ROUTER", () => {
       .set("Authorization", `Bearer ${playerAccess} `);
 
     expect(response.status).toBe(BAD_REQUEST);
-    expect(response.body.details[0].type).toBe("unknown_fields");
+    expect(response.body.data[0].type).toBe("unknown_fields");
   });
 
   it.each`
     field           | message
     ${"owner"}      | ${"Owner name is required"}
-    ${"owner_id"}   | ${"owner_id must be an integer lower than 2**32"}
     ${"bankName"}   | ${"Bank name is required"}
     ${"bankNumber"} | ${"Bank number is required"}
   `(
@@ -54,7 +53,6 @@ describe("[UNIT] => BANK ACCOUNTS ROUTER", () => {
         .post(`/app/${CONFIG.APP.VER}/bank-account`)
         .send({
           owner: "Test " + Date.now(),
-          owner_id: 33333333,
           bankName: "Test Bank " + Date.now(),
           bankNumber: `${Date.now()}`,
           [field]: undefined,
@@ -62,8 +60,8 @@ describe("[UNIT] => BANK ACCOUNTS ROUTER", () => {
         .set("Authorization", `Bearer ${playerAccess} `);
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].msg).toBe(message);
-      expect(response.body.details[0].path).toBe(field);
+      expect(response.body.data[0].msg).toBe(message);
+      expect(response.body.data[0].path).toBe(field);
     },
   );
 
@@ -105,7 +103,6 @@ describe("[UNIT] => BANK ACCOUNTS ROUTER", () => {
     expect(Object.keys(response.body.data[0])).toStrictEqual([
       "id",
       "owner",
-      "owner_id",
       "player_id",
       "bankName",
       "bankNumber",
@@ -158,9 +155,8 @@ async function initialize() {
 
   bankAccountRequest = {
     owner: "Test " + Date.now(),
-    owner_id: 33333333,
     bankName: "Test Bank " + Date.now(),
-    bankNumber: `${Date.now()}`,
+    bankNumber: "646180224404209392",
     bankAlias: `${Date.now()}`,
   };
 

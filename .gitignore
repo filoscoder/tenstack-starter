@@ -73,6 +73,7 @@ typings/
 .env.development
 .env.staging
 .env.production
+.env.staging
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -110,14 +111,13 @@ dist
 
 # My-SQL  Data
 mysql-data
-
-test.txt
+mariadb-data
 
 # Bot stuff
-bot.qr.png
-bot_sessions
+*.qr.png
 
-history.txt
 test_setup.sh
 
-.vscode/settings.json
+.vscode
+
+backup

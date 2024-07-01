@@ -21,41 +21,64 @@ Comes with:
 ## Contenidos
 
 ### Jugadores
-+ [Ver Jugador](#ver-jugador)
++ [Listar Jugadores](#listar-jugadores-)
++ [Ver Jugador](#ver-jugador-)
 + [Crear Jugador](#crear-jugador)
++ [Editar Jugador](#editar-jugador-)
 + [Login de Jugador](#login-jugador)
 
-#### Cuentas Bancarias
-+ [Ver Cuentas Bancarias](#ver-cuentas-bancarias-🔒)
-+ [Crear Cuenta Bancaria](#crear-cuenta-bancaria-🔒)
-+ [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-🔒)
-+ [Eliminar Cuenta Bancaria](#eliminar-cuenta-bancaria-🔒)
 
-### Transferencias
-+ [Cargar Fichas](#cargar-fichas-🔒)
-+ [Retirar Premios](#retirar-premios-🔒)
-+ [Ver Depósitos Pendientes](#ver-depósitos-pendientes-🔒)
-+ [Confirmar Depósito Pendiente](#confirmar-depósito-pendiente-🔒)
-+ [Eliminar Depósito Pendiente](#eliminar-depósito-pendiente-🔒)
-+ [Ver Cuenta Bancaria de Alquimia](#ver-cuenta-alquimia-🔒)
+### Cuentas Bancarias
++ [Ver Cuentas Bancarias](#ver-cuentas-bancarias-)
++ [Crear Cuenta Bancaria](#crear-cuenta-bancaria-)
++ [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-)
++ [Eliminar Cuenta Bancaria](#eliminar-cuenta-bancaria-)
+
+### Depositos (jugador ➡ plataforma)
++ [Cargar Fichas](#cargar-fichas-) (instanciar depósito)
++ [Ver Depósitos Pendientes](#ver-depósitos-pendientes-)
++ [Ver Depósito](#ver-depósito-)
++ [Listar Depósitos](#listar-depósitos-)
++ [Editar Depósito]()
++ [Ver Cuenta Bancaria de Alquimia](#ver-cuenta-alquimia-)
+
+### Pagos (plataforma ➡ jugador)
++ [Retirar Premios](#retirar-premios-) (instanciar pago)
++ [Listar Pagos](#listar-pagos-)
 
 ### Agente
 + [Login de Agente](#login-agente)
-+ [Ver Pagos](#ver-pagos-🔒)
-+ [Marcar Pago Como Completado](#marcar-pago-como-completado-🔒)
-+ [Ver Depósitos](#ver-depósitos-🔒)
-+ [Ver QR](#ver-qr-🔒)
-+ [Ver Cuenta Bancaria](#ver-cuenta-bancaria-🔒)
-+ [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-🔒)
-+ [Ver Balance Casino](#ver-balance-casino-🔒)
-+ [Ver Balance Alquimia](#ver-balance-alquimia-🔒)
-+ [Liberar Fichas Pendientes](#liberar-fichas-pendientes-🔒)
-+ [Indicar Que El Agente Esta De Guardia](#setear-guardia-🔒)
-+ [Ver Estado De Guardia]
++ [Marcar Pago Como Completado](#marcar-pago-como-completado-)
+
++ [Ver QR](#ver-qr-)
++ [Ver Cuenta Bancaria](#ver-cuenta-bancaria-)
++ [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-)
++ [Ver Balance Casino](#ver-balance-casino-)
++ [Ver Balance Alquimia](#ver-balance-alquimia-)
++ [Ver Transferencias de Fichas Pendientes](#ver-transferencias-de-fichas-pendientes-)
++ [Liberar Fichas Pendientes](#liberar-fichas-pendientes-)
++ [Indicar Que El Agente Esta De Guardia](#setear-guardia-)
++ [Ver Estado De Guardia](#ver-guardia-)
++ [Ver Números de Soporte](#ver-números-de-soporte-)
++ [Actualizar Números de Soporte](#actualizar-números-de-soporte-)
++ [Cambiar Contraseña de Jugador](#cambiar-contraseña-de-jugador-)
+
+### Bot
++ [Ver QR](#ver-qr-)
++ [Ver bots](#ver-qr-)
 
 ### Auth
 + [Refrescar Token](#refrescar-token)
-+ [Logout](#logout-🔒)
++ [Logout](#logout-)
++ [Olvidé mi contraseña](#olvide-mi-contraseña)
++ [Reestablecer contraseña](#reestablecer-contraseña)
++ [Cambiar contraseña](#cambiar-contraseña-)
+
+### Analytics
++ [Listar](#listar-analytics)
++ [Ver](#ver-analytics)
++ [Crear](#crear-analytics)
++ [Resumen](#resumen-de-analytics)
 
 ### [Interfaces](#interfaces-1)
 
@@ -64,9 +87,18 @@ Comes with:
 Jugadores
 ---------
 
+### Listar Jugadores 🔒
+
+|Endpoint:| `/players`|
+---|---|
+Método      | `GET`
+Query string| [`ResourceListQueryString`](#ResourceListQueryString)
+Devuelve    | [`PlayerListResponse`](#playerlistresponse)
+Requiere rol| agent
+
 ### Ver Jugador 🔒
 
-|Endpoint:| `/players/`|
+|Endpoint:| `/players/:id`|
 ---|---|
 Método      | `GET`
 Devuelve    | [`Player & { bank_accounts: BankAccount[] }`](#player)
@@ -79,6 +111,15 @@ Requiere rol| player
 Método      | `POST`
 Body (json) | [`PlayerRequest`](#playerrequest)
 Devuelve    | [`LoginResponse`](#loginresponse)
+
+### Editar Jugador 🔒
+
+|Endpoint:| `/players/:id`|
+---|---|
+Método      | `POST`
+Body (json) | [`PlayerUpdateRequest`](#playerupdaterequest)
+Devuelve    | [`Player`](#player)
+Requiere rol| agent
 
 ### Login Jugador
 
@@ -148,6 +189,15 @@ Body (json) |[`CashoutRequest`](#cashoutrequest)
 Devuelve    |[`CoinTransferResult`](#cointransferresult)
 Requiere rol| player
 
+### Listar Pagos 🔒
+
+|Endpoint| `/transactions/payment`|
+---|---|
+Método      |`GET`
+Query string| [`ResourceListQueryString`](#ResourceListQueryString)
+Devuelve    |[`Payment[]`](#payment)
+Requiere rol| agent
+
 ### Ver Depósitos Pendientes 🔒
 
 |Endpoint| `/transactions/deposit/pending`|
@@ -197,6 +247,36 @@ Requiere rol| player \| agent
 
 **Nota** el token puede ser un access o refresh token. Al recibir uno, los dos serán invalidados.
 
+### Olvide Mi Contraseña
+Envia un email al usuario con un enlace para reestablecer su contraseña. El token tiene una validez de 10' y sólo puede ser usado una vez.
+
+|Endpoint| `/auth/forgot-password`|
+---|---|
+Método      |`POST`
+Body (json) |[`ForgotPasswordRequest`](#forgot-password-request)
+Devuelve    |OK 200 \| 429 too_many_requests
+Rate limited|1 request cada 10' por username.
+
+> **Nota**: siempre devuelve 200 OK para evitar [user enumeration attack](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/03-Identity_Management_Testing/04-Testing_for_Account_Enumeration_and_Guessable_User_Account.html). Cuando devuelve 429, el tiempo que se debe esperar hasta el próximo request está en el encabezado `Retry-After` (en segundos).
+
+### Reestablecer Contraseña
+Reestablecer contraseña usando el token generado en [`/auth/forgot-password`](#olvide-mi-contraseña).
+
+|Endpoint| `/auth/restore-password`|
+---|---|
+Método      |`POST`
+Body (json) |[`RestorePasswordRequest`](#restorepasswordrequest)
+Devuelve    |OK 200
+
+### Cambiar Contraseña 🔒
+
+|Endpoint| `/auth/reset-password`|
+---|---|
+Método      |`POST`
+Body (json) |[`ResetPasswordRequest`](#resetpasswordrequest)
+Devuelve    |OK 200
+Requiere rol| player
+
 Agente
 ------
 
@@ -208,14 +288,6 @@ Método      |`POST`
 Body (json) |[`Credenciales`](#credenciales)
 Devuelve    |[`Tokens`](#tokens)
 
-### Ver Pagos 🔒
-
-|Endpoint| `/agent/payments`|
----|---|
-Método      |`GET`
-Devuelve    |[`Payment[]`](#payment)
-Requiere rol| agent
-
 ### Marcar Pago Como Completado 🔒
 
 |Endpoint| `/agent/payments/:id/paid`|
@@ -224,20 +296,32 @@ Método      |`POST`
 Devuelve    |[`Payment`](#payment)
 Requiere rol| agent
 
-### Ver Depósitos 🔒
+### Ver Depósito 🔒
 
-|Endpoint| `/agent/deposits/:id?`|
+|Endpoint| `/transactions/deposit/:id`|
 ---|---|
 Método      |`GET`
+Query string| [`ResourceListQueryString`](#ResourceListQueryString)
 Devuelve    |[`Deposit[]`](#deposit)
 Requiere rol| agent
 
-### Ver QR 🔒
+### Listar Depósitos 🔒
 
-|Endpoint| `/agent/qr`|
+|Endpoint| `/transactions/deposit/`|
 ---|---|
 Método      |`GET`
-Devuelve    |`Blob`
+Query string| [`ResourceListQueryString`](#ResourceListQueryString)
+Devuelve    |[`Deposit[]`](#deposit)
+Requiere rol| agent
+
+### Editar Depósito 🔒
+Endpoint para que el agente modifique el `trackin_number` de un depósito y dispare el flujo de verificación.
+
+|Endpoint| `/transactions/deposit/:id`|
+---|---|
+Método      |`POST`
+Body (json) | [`EditDepositRequest`](#editdepositrequest)
+Devuelve    |[`Deposit`](#deposit)
 Requiere rol| agent
 
 ### Ver Cuenta Bancaria 🔒
@@ -275,10 +359,19 @@ Método      |`GET`
 Devuelve    |[`Balance`](#balance)
 Requiere rol| agent
 
+### Ver Transferencias de Fichas Pendientes 🔒
+Devuelve el total de fichas que debe cargar el agente para liberar transferencias pendientes
+
+|Endpoint| `/agent/pending/pending-coin-transfers`|
+---|---|
+Método      |`GET`
+Devuelve    |`number`
+Requiere rol| agent
+
 ### Liberar Fichas Pendientes 🔒
 Liberar transferencias que hayan quedado pendientes en el caso que un jugador quiera comprar mas fichas de las que tiene dispoibles el agente
 
-|Endpoint| `/agent/deposits/complete`|
+|Endpoint| `/agent/pending/deposits`|
 ---|---|
 Método      |`GET`
 Devuelve    |[`Deposit[]`](#deposit) - los depositos afectados
@@ -303,6 +396,82 @@ Método      |`GET`
 Devuelve    |boolean
 Requiere rol| agent
 
+### Ver Números de soporte 🔒
+
+|Endpoint| `/agent/support`|
+---|---|
+Método      |`GET`
+Devuelve    |[`SupportResponse`](#supportresponse)
+Requiere rol| agent
+
+### Actualizar Números de soporte 🔒
+
+|Endpoint| `/agent/support`|
+---|---|
+Método      |`POST`
+Body (json) |[`SupportRequest`](#supportrequest)
+Devuelve    |200 OK
+Requiere rol| agent
+
+### Cambiar Contraseña de Jugador 🔒
+
+|Endpoint| `/agent/reset-player-password`|
+---|---|
+Método      |`POST`
+Body (json) |[`PlayerPasswordResetRequest`](#playerpasswordresetrequest)
+Devuelve    |200 OK
+Requiere rol| agent
+
+Bot
+---
+
+### Ver QR 🔒
+
+|Endpoint| `/bot/:name?`|
+---|---|
+Método      |`GET`
+Devuelve    |`Blob | string[]`
+Requiere rol| agent
+
+> Omitir el parametro `:name` para que devuelva un array con los nombres de los bots.
+> Cualquier caracter que no esté en el rango [a-b] es eliminado del parametro `:name`. Ademas `:name` debe tener entre 1 y 10 caracteres.
+
+Analytics
+---------
+
+### Listar Analytics
+
+|Endpoint| `/analytics/`|
+---|---|
+Método      |`GET`
+Devuelve    |[`Analytics[]`](#analytics-2)
+Requiere rol| agent
+
+### Ver Analytics
+
+|Endpoint| `/analytics/:id`|
+---|---|
+Método      |`GET`
+Devuelve    |[`Analytics`](#analytics-2)
+Requiere rol| agent
+
+### Crear Analytics
+
+|Endpoint| `/analytics/`|
+---|---|
+Método      |`POST`
+Body (json) | [`AnalyticsRequest`](#analyticsrequest)
+Devuelve    |`Analytics`
+Requiere rol| agent
+
+### Resumen de Analytics
+
+|Endpoint| `/analytics/summary`|
+---|---|
+Método      |`GET`
+Devuelve | [`AnalyticsSummary[]`]()
+
+
 ## Interfaces
 
 ### Player
@@ -320,6 +489,23 @@ Requiere rol| agent
   balance_currency: string
   status: string
   created_at: string                  // 2024-01-29T18:14:41.534Z
+}
+```
+
+### ResourceListQueryString
+```typescript
+  page=1
+  items_per_page=20
+  search=<string>
+  sort_column=<string>
+  sort_direction='asc' | 'desc'
+```
+
+### PlayerListResponse
+```typescript
+{
+  result: Player[]
+  total: number
 }
 ```
 
@@ -347,11 +533,20 @@ Requiere rol| agent
 }
 ``` 
 
+### PlayerUpdateRequest
+```typescript
+{
+  email?: string
+  movile_number?: string
+  first_name?: string
+  last_name?: string
+}
+```
+
 ### BankAccountRequest
 ```typescript
 {
   owner: string                       // Nombre del beneficiario
-  owner_id: number                    // DNI
   bankName: string                    // Nombre del banco
   bankNumber: string                  // CBU
   bankAlias: string?   
@@ -363,7 +558,6 @@ Requiere rol| agent
 {
   id: string        
   owner: string                       // Nombre del beneficiario
-  owner_id: number                    // DNI
   player_id: string                   // ID de Player
   bankName: string                    // Nombre del banco
   bankNumber: string                  // CBU
@@ -431,6 +625,13 @@ Estado de transferencia de fichas
 }
 ```
 
+### EditDepositRequest
+```typescript
+{
+  trackin_number: string
+}
+```
+
 ### Payment
 ```typescript
 {
@@ -485,6 +686,85 @@ Estado de transferencia de fichas
   active: boolean
 }
 ```
+
+### SupportResponse
+```typescript
+{
+  bot_phone: string | null;
+  human_phone: string | null;
+}
+```
+
+### SupportRequest
+```typescript
+{
+  bot_phone?: string;
+  human_phone?: string;
+}
+```
+
+### ForgotPasswordRequest
+```typescript
+{
+  username: string
+}
+```
+
+### RestorePasswordRequest
+```typescript
+{
+  token: string
+  new_password: string
+  repeat_password: string
+}
+```
+
+### ResetPasswordRequest
+```typescript
+{
+  new_password: string
+  repeat_password: string
+}
+```
+
+### PlayerPasswordResetRequest
+```typescript
+{
+  new_password: string
+  user_id: string
+}
+```
+
+### Analytics
+```typescript
+{
+  id: string
+  source: string
+  event: string
+  data?: object
+  created_at: datetime    // 2024-01-29T18:14:41.534Z
+  updated_at: datetime    // 2024-01-29T18:14:41.534Z
+}
+```
+
+### AnalyticsRequest
+```typescript
+{
+  source: string
+  event: string
+  data?: object
+}
+```
+
+### AnalyticsSummary
+```typescript
+{
+  _count: { event: number };
+  source: string;
+  event: string;
+}
+```
+
 ## Load Testing
 
 ### Ddosify
@@ -513,57 +793,77 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 
 ## TODO
 
-- Cambiar contraseña (no funciona en el casino, vamos por este lado)
-  - Endpoint https://agent.casinomex.vip/api/users/5941/change-password/
-  - Body: `{ new_password:	string }`
-- Log errors to file
-- Usar endpoint /auth/logout en frontend
-
 - [Bot Whatsapp](https://bot-whatsapp.netlify.app/) ✅
   + [Diagrama Flujo](https://www.figma.com/file/rtxhrNqQxdEdYzOfPl1mRc/Whatsapp-Bot?type=whiteboard&node-id=0%3A1&t=5ACojRhp99vrh24S-1)
-- Configurar bbdd distintas para dev y prod
-- Chequear si agent existe en la bbdd en `seed.ts`
-- Subir la duracion del refresh token a 24 horas
-- Balance Alquimia en panel agente
-- Tener en cuenta que pasa si el casino devuelve 200 a una transfer de fichas pero la transferencia no pasa
-- Limpiar tabla TOKENS periodicamente
-- Asegurarse que los status code de las respuestas de api externa esten presente en logs
-- Usar instancia global de prisma.
+- Usar endpoint /auth/logout en frontend
+- Refactor calls to \*DAO.authorize\* to use same format as `PaymentsDAO.authorizeRelease()`
 
-### Error logging
-
-- Loguear errores de api externas a un archivo, errores nuestros a otro.
-- Notificar solo luego de X errores por dia.
-- Ver errores en panel agente.
-
-### Error logging
-
-- Loguear errores de api externas a un archivo, errores nuestros a otro.
-- Notificar solo luego de X errores por dia.
-- Ver errores en panel agente.
+- Ambientes staging y prod en, bot-timba y alquimia
+- Cambiar start-staging por start:production en timba-api scripts
+- Boletear todo lo relacionado al bot de este repo
 
 ### Fichas insuficientes
 
 - Revisar respuesta y avisarle al agente si quedaron transferencias sin liberar
 
-
 ## Optimizaciones
 
 - Invalidar tokens en conjunto con una sola petición SQL
+- Usar instancia global de prisma.
 
 
 ## Alquimia 
 
 - ID Cuenta ahorro: 120902
 
+### Cuentas destino
+- Carolina Maruzza
+  + 646180146003556692
+  + Albo
+- Luis Gonzalo Sosa
+  + 646180402301855904
+  + Banco Stori
+
 Listar cuentas de ahorro 
 ```bash
 curl -X GET \
 -H "Authorization: Bearer $API_TOKEN" \
 -H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
-${ALQ_TEST_BASE_URL}1.0.0/v2/cuenta-ahorro-cliente \
+${ALQ_TEST_BASE_URL}/cuenta-ahorro-cliente \
 -H 'Content-Type: x-www-form-urlencoded' \
 -d 'id_cliente=2733226' 
+```
+
+Crear TX
+```bash
+curl -X POST \
+-H "Authorization: Bearer $API_TOKEN" \
+-H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"cuenta_origen": 120902, "id_cliente": 2733226, "medio_pago": 4, "importe": 1, "cuenta_destino": 646180146003556692,"nombre_beneficiario": "Carolina Maruzza", "rfc_beneficiario": "NA", "email_beneficiario": "contacto@rodrigoalvarez.co.uk", "concepto": "test", "no_referencia": 123456, "api_key": "694cefc59cdd7a30202dcd4ea7fdb790"}' \
+"${ALQ_TEST_BASE_URL}/guardar-transacciones"
+```
+
+Response
+```js
+{
+  "error": false,
+  "id_transaccion": 7281723,
+  "folio_orden": "334251325903025153",
+  "message": "Operación registrada con éxito. Estado: Aplicada.",
+  "pendiente": true,
+  "obj_res": []
+}
+```
+
+Confirmar TX
+```bash
+curl -X POST \
+-H "Authorization: Bearer $API_TOKEN" \
+-H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"id_transaccion": 7279624, "accion": 1, "id_cuenta": 120902, "api_key": "694cefc59cdd7a30202dcd4ea7fdb790"}' \
+"${ALQ_TEST_BASE_URL}/ordenes-importador"
 ```
 
 Listar TX pendientes
@@ -571,24 +871,56 @@ Listar TX pendientes
 curl -X GET \
 -H "Authorization: Bearer $API_TOKEN" \
 -H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
-"${ALQ_BASE_URL}1.0.0/v2/ordenes-importador?id_cuenta=120902"
+"${ALQ_TEST_BASE_URL}/ordenes-importador?id_cuenta=120902"
 ```
-
+7388577, 7388722 
 Consultar status TX
 ```bash
-curl -X GET\
+curl -X GET \
 -H "Authorization: Bearer $API_TOKEN" \
 -H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
-"${ALQ_BASE_URL}1.0.0/v2/consulta-status-tx" \
--d 'id_cuenta=120902&id_transaccion=18489885' \
--H 'Content-Type: x-www-form-urlencoded'
+"${ALQ_TEST_BASE_URL}/consulta-estatus-tx?id_transaccion=7281723" 
 ```
-Devuelve 404 al intentar confirmar el ingreso de $10 con su id_transaccion
+Respuesta
+```js
+{
+  id_transaccion: "7281723",
+  estatus: "LIQUIDADA",
+  detalle_proveedor: {
+    "error":true,
+    "message":"Respuesta proveedor desconocida"
+  }
+}
+```
 
-Consulta de movimientos
-- Consulta movimientos `/1.0.0/v2/cuenta-ahorro-cliente`
-  + Si el movimiento figura en la lista devuelta por "Consulta de Movimientos", esta confirmado? 
-  + Cuales son los posibles valors del campo `estatus_transaccion` en el resultado de este endpoint?
-- el endpoint "Consulta estatus TX `/1.0.0/v2/consulta-estatus-tx`" nos sirve para confirmar transferencias recibidas? o solo pagos salientes?
+Consultar transferencia por clave de rastreo
+```bash
+curl -X GET \
+-H "Authorization: Bearer $API_TOKEN" \
+-H "AuthorizationAlquimia: Bearer $ALQ_TOKEN" \
+"${ALQ_TEST_BASE_URL}/cuenta-ahorro-cliente/120902/transaccion" \
+-d 'clave_rastreo=$TRACKING_NUMBER'
+```
 
+Datos que necesitamos saber:
 
+- Cuales son los distintos valores posibles, y que significan, del campo `estatus` en la respuesta de `/consulta-estatus-tx`
+- Cuales son los valores posibles, y que significan, del campo `estatus_transaccion` en la respuesta de `/cuenta-ahorro-cliente/$ACCOUNT_ID/transaccion`
+
+## Password restoration checklist
+
+### Forgot password request
+[x] Return consistent message for both existent and non-existent accounts
+[x] Ensure consistent response time
+[x] Rate limit restore request endpoint
+[] Sanitize input on restore request endpoint
+
+### Password reset request
+[x] Send password twice
+[] Enforce secure password policy
+[x] Email user informing password has been reset
+[x] Don't log user straight in, redirect to login page.
+[x] Invalidate previous sessions
+
+### URL token
+[x] Either user a [criptographically secure random number](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html#secure-random-number-generation) or JWT

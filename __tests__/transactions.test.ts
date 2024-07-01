@@ -22,8 +22,6 @@ const tokens: TokenPair[] = [];
 const deposits: Deposit[] = [];
 let confirmedDeposit: Deposit;
 
-const USER_AGENT = "jest_test";
-
 beforeAll(initialize);
 afterAll(cleanUp);
 
@@ -33,8 +31,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
         .send(depositRequests[0])
-        .set("Authorization", `Bearer ${tokens[0].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[0].access}`);
 
       expect(response.status).toBe(OK);
       expect(response.body.data.deposit).toBeDefined();
@@ -46,8 +43,8 @@ describe("[UNIT] => TRANSACTIONS", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
         .send(depositRequests[1])
-        .set("Authorization", `Bearer ${tokens[1].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[1].access}`);
+
       expect(response.status).toBe(OK);
       expect(response.body.data.deposit).toBeDefined();
 
@@ -64,12 +61,11 @@ describe("[UNIT] => TRANSACTIONS", () => {
           ...depositRequests[0],
           [field]: undefined,
         })
-        .set("Authorization", `Bearer ${tokens[0].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[0].access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].msg).toBe(message);
-      expect(response.body.details[0].path).toBe(field);
+      expect(response.body.data[0].msg).toBe(message);
+      expect(response.body.data[0].path).toBe(field);
     });
 
     it("Should return 400 unknown_field", async () => {
@@ -79,11 +75,10 @@ describe("[UNIT] => TRANSACTIONS", () => {
           ...depositRequests[0],
           unknown_field: "unknown",
         })
-        .set("Authorization", `Bearer ${tokens[0].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[0].access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].type).toBe("unknown_fields");
+      expect(response.body.data[0].type).toBe("unknown_fields");
     });
 
     it("Should return 401", async () => {
@@ -100,8 +95,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[1].id}`)
         .send(depositRequests[1])
-        .set("Authorization", `Bearer ${tokens[1].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[1].access}`);
 
       expect(response.status).toBe(OK);
       expect(response.body.data.deposit).toBeDefined();
@@ -120,8 +114,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[1].id}`)
         .send(depositRequests[1])
-        .set("Authorization", `Bearer ${tokens[0].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[0].access}`);
 
       expect(response.status).toBe(FORBIDDEN);
     });
@@ -130,8 +123,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit/-10`)
         .send(depositRequests[1])
-        .set("Authorization", `Bearer ${tokens[0].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[0].access}`);
 
       expect(response.status).toBe(404);
     });
@@ -141,8 +133,7 @@ describe("[UNIT] => TRANSACTIONS", () => {
     it("Should return pending deposits", async () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/transactions/deposit/pending`)
-        .set("Authorization", `Bearer ${tokens[1].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[1].access}`);
 
       const deposits = response.body.data as Deposit[];
 
@@ -175,87 +166,21 @@ describe("[UNIT] => TRANSACTIONS", () => {
     });
   });
 
-  // describe("POST: /transactions/deposit/:id/delete", () => {
-  //   /** Attempt to delete someone else's deposit */
-  //   it("Should return 403", async () => {
-  //     const response = await agent
-  //       .post(
-  //         `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[1].id}/delete`,
-  //       )
-  //       .set("Authorization", `Bearer ${tokens[0].access}`)
-  //       .set("User-Agent", USER_AGENT);
-
-  //     console.log("DELETE RESULT", response.body);
-  //     expect(response.status).toBe(FORBIDDEN);
-  //   });
-
-  //   it("Should delete a deposit", async () => {
-  //     const response = await agent
-  //       .post(
-  //         `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[1].id}/delete`,
-  //       )
-  //       .set("Authorization", `Bearer ${tokens[1].access}`)
-  //       .set("User-Agent", USER_AGENT);
-
-  //     expect(response.status).toBe(OK);
-  //   });
-
-  //   // it("Should return 400 bad_request", async () => {
-  //   //   const response = await agent
-  //   //     .delete(`/app/${CONFIG.APP.VER}/transactions/deposit/9999`)
-  //   //     .set("Authorization", `Bearer ${tokens[0].access}`)
-  //   //     .set("User-Agent", USER_AGENT);
-
-  //   //   expect(response.status).toBe(BAD_REQUEST);
-  //   // });
-
-  //   it("Should return 401", async () => {
-  //     const response = await agent.post(
-  //       `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/delete`,
-  //     );
-
-  //     expect(response.status).toBe(UNAUTHORIZED);
-  //   });
-
-  //   /** Attempt to delete a confirmed deposit */
-  //   it("Should return 403 [deposit confirmed]", async () => {
-  //     const response = await agent
-  //       .post(
-  //         `/app/${CONFIG.APP.VER}/transactions/deposit/${confirmedDeposit.id}/delete`,
-  //       )
-  //       .set("Authorization", `Bearer ${tokens[0].access}`)
-  //       .set("User-Agent", USER_AGENT);
-
-  //     expect(response.status).toBe(FORBIDDEN);
-  //   });
-
-  //   it("Should return 404", async () => {
-  //     const response = await agent
-  //       .post(`/app/${CONFIG.APP.VER}/transactions/deposit/-10/delete`)
-  //       .set("Authorization", `Bearer ${tokens[0].access}`)
-  //       .set("User-Agent", USER_AGENT);
-
-  //     expect(response.status).toBe(404);
-  //   });
-  // });
-
   describe("POST: /transactions/cashout", () => {
     it("Should create a withdrawal", async () => {
       const result = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
         .send(cashoutRequest)
-        .set("Authorization", `Bearer ${tokens[0].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[0].access}`);
 
       expect(result.status).toBe(OK);
     });
 
-    it("Should should return 429 too_many_requests", async () => {
+    it("Should return 429 too_many_requests", async () => {
       const result = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
         .send(cashoutRequest)
-        .set("Authorization", `Bearer ${tokens[0].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[0].access}`);
 
       expect(result.status).toBe(TOO_MANY_REQUESTS);
     });
@@ -271,12 +196,11 @@ describe("[UNIT] => TRANSACTIONS", () => {
           ...cashoutRequest,
           [field]: undefined,
         })
-        .set("Authorization", `Bearer ${tokens[0].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[0].access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].msg).toBe(message);
-      expect(response.body.details[0].path).toBe(field);
+      expect(response.body.data[0].msg).toBe(message);
+      expect(response.body.data[0].path).toBe(field);
     });
 
     it("Should return 400 unknown_field", async () => {
@@ -286,11 +210,25 @@ describe("[UNIT] => TRANSACTIONS", () => {
           ...cashoutRequest,
           unknown_field: "unknown",
         })
-        .set("Authorization", `Bearer ${tokens[0].access}`)
-        .set("User-Agent", USER_AGENT);
+        .set("Authorization", `Bearer ${tokens[0].access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.details[0].type).toBe("unknown_fields");
+      expect(response.body.data[0].type).toBe("unknown_fields");
+    });
+
+    it("Should return 400 (amount too large)", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
+        .send({
+          ...cashoutRequest,
+          amount: 4294967297,
+        })
+        .set("Authorization", `Bearer ${tokens[0].access}`);
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe(
+        "amount must be a number between 0 and 2**32",
+      );
     });
 
     it("Should return 401", async () => {
@@ -347,8 +285,8 @@ async function initialize() {
   });
 
   const authServices = new AuthServices();
-  const auth1 = await authServices.tokens(players[0].id, USER_AGENT);
-  const auth2 = await authServices.tokens(players[1].id, USER_AGENT);
+  const auth1 = await authServices.tokens(players[0].id, "jest_test");
+  const auth2 = await authServices.tokens(players[1].id, "jest_test");
   tokens[0] = auth1.tokens;
   tokens[1] = auth2.tokens;
 
@@ -367,10 +305,10 @@ async function initialize() {
 async function cleanUp() {
   try {
     await prisma.token.deleteMany({
-      where: { player_id: players[0].id, user_agent: USER_AGENT },
+      where: { player_id: players[0].id },
     });
     await prisma.token.deleteMany({
-      where: { player_id: players[1].id, user_agent: USER_AGENT },
+      where: { player_id: players[1].id },
     });
     await prisma.deposit.delete({ where: { id: confirmedDeposit.id } });
     await prisma.deposit.delete({ where: { id: deposits[0].id } });

@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { BankAccount, Payment, PrismaClient } from "@prisma/client";
 import { PaymentRequest } from "@/types/request/transfers";
-import { hidePassword } from "@/utils/auth";
 import { PaymentUpdatableProps } from "@/types/request/transfers";
 import { NotFoundException, ForbiddenError } from "@/helpers/error";
-import { CustomError } from "@/middlewares/errorHandler";
 import CONFIG from "@/config";
+import { CustomError } from "@/helpers/error/CustomError";
+import { OrderBy } from "@/types/request/players";
 
 const prisma = new PrismaClient();
 
@@ -27,18 +27,45 @@ export class PaymentsDAO {
   /**
    * Show Payments
    */
-  static async index(all = true) {
+  static async _getAll(
+    page: number,
+    itemsPerPage: number,
+    search?: string,
+    orderBy?: OrderBy<Payment>,
+  ) {
     try {
       const payments = await prisma.payment.findMany({
-        where: all ? {} : { paid: null },
+        skip: page * itemsPerPage,
+        take: itemsPerPage,
+        where: {
+          OR: [
+            { BankAccount: { bankAlias: { contains: search } } },
+            { BankAccount: { bankName: { contains: search } } },
+            { BankAccount: { bankNumber: { contains: search } } },
+            { BankAccount: { owner: { contains: search } } },
+            { Player: { username: { contains: search } } },
+            { Player: { first_name: { contains: search } } },
+            { Player: { last_name: { contains: search } } },
+          ],
+        },
+        orderBy,
         include: { Player: true, BankAccount: true },
       });
 
-      // Excluir contraseñas
-      payments.forEach(
-        (payment) => (payment.Player = hidePassword(payment.Player)),
-      );
       return payments;
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static async _getById(id: string) {
+    try {
+      return await prisma.payment.findFirst({
+        where: { id },
+        include: { BankAccount: true },
+      });
     } catch (error) {
       throw error;
     } finally {
@@ -64,6 +91,9 @@ export class PaymentsDAO {
    * Ensure bank account exists and belongs to authenticated player
    * @param bank_account
    * @param player_id
+   * @throws NotFoundException
+   * @throws ForbiddenError
+   * @throws CustomError (too_many_requests)
    */
   static async authorizeCreation(bank_account: string, player_id: string) {
     try {
@@ -91,7 +121,7 @@ export class PaymentsDAO {
       if (!latestCashout || CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.DEV)
         return;
 
-      const latestCashoutTime = latestCashout?.updated_at.getTime();
+      const latestCashoutTime = latestCashout?.created_at.getTime();
       const retryAfterMins = Math.ceil(
         (dayInMs - (now - latestCashoutTime)) / 1000 / 60,
       );
@@ -110,5 +140,31 @@ export class PaymentsDAO {
     } finally {
       prisma.$disconnect();
     }
+  }
+
+  static async authorizeRelease(
+    payment_id: string,
+  ): Promise<Payment & { BankAccount: BankAccount }> {
+    const authorized = await prisma.$transaction(async (tx) => {
+      const payment = await tx.payment.findFirst({ where: { id: payment_id } });
+      if (!payment) throw new NotFoundException();
+
+      if (payment.status === CONFIG.SD.PAYMENT_STATUS.COMPLETED)
+        throw new ForbiddenError("El pago ya está completado");
+
+      if (payment.dirty)
+        throw new ForbiddenError("El pago está siendo procesado");
+
+      return await tx.payment.update({
+        where: { id: payment_id },
+        data: { dirty: true },
+        include: { BankAccount: true },
+      });
+    });
+    return authorized;
+  }
+
+  static count(): Promise<number> {
+    return prisma.payment.count();
   }
 }

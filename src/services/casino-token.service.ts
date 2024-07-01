@@ -1,11 +1,11 @@
 import { HttpService } from "./http.service";
 import { JwtService } from "./jwt.service";
 import { decrypt } from "@/utils/crypt";
-import { CustomError } from "@/middlewares/errorHandler";
 import { UserRootDAO } from "@/db/user-root";
 import { LoginResponse } from "@/types/response/agent";
 import { ERR } from "@/config/errors";
 import { ITokenRetreiver } from "@/types/services/http";
+import { CustomError } from "@/helpers/error/CustomError";
 
 /**
  * Generates and refreshes Agent's panel token
@@ -151,6 +151,7 @@ export class CasinoTokenService extends JwtService implements ITokenRetreiver {
         status: response.status,
         code: "agent_api_error",
         description: "Error en el panel al loguear al agente",
+        detail: response.data,
       });
     }
 

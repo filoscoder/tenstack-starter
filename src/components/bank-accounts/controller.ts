@@ -4,7 +4,7 @@ import { apiResponse } from "@/helpers/apiResponse";
 import { BankAccountRequest } from "@/types/request/bank-account";
 
 export class BankAccountsController {
-  static index = async (req: AuthedReq, res: Res, next: NextFn) => {
+  static index = async (req: Req, res: Res, next: NextFn) => {
     try {
       const player_id = req.user!.id;
       const account_id = req.params.id;
@@ -23,7 +23,7 @@ export class BankAccountsController {
     }
   };
 
-  static create = async (req: AuthedReq, res: Res, next: NextFn) => {
+  static create = async (req: Req, res: Res, next: NextFn) => {
     try {
       const player_id = req.user!.id;
       const request: BankAccountRequest = req.body;
@@ -38,7 +38,7 @@ export class BankAccountsController {
     }
   };
 
-  static update = async (req: AuthedReq, res: Res, next: NextFn) => {
+  static update = async (req: Req, res: Res, next: NextFn) => {
     try {
       const request: BankAccountRequest = req.body;
       const account_id = req.params.id;
@@ -57,7 +57,7 @@ export class BankAccountsController {
     }
   };
 
-  static delete = async (req: AuthedReq, res: Res, next: NextFn) => {
+  static delete = async (req: Req, res: Res, next: NextFn) => {
     try {
       const account_id = req.params.id;
 

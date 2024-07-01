@@ -1,14 +1,14 @@
 import HttpStatus, { UNAUTHORIZED } from "http-status/lib";
+import { CustomError } from "./CustomError";
 
-class UnauthorizedError {
-  readonly status: number;
-  readonly message: string;
-
-  constructor(message: string) {
+class UnauthorizedError extends CustomError {
+  constructor(description: string) {
+    super({
+      status: UNAUTHORIZED,
+      code: HttpStatus[UNAUTHORIZED],
+      description,
+    });
     Object.setPrototypeOf(this, new.target.prototype);
-
-    this.status = UNAUTHORIZED;
-    this.message = message || (HttpStatus[UNAUTHORIZED] as string);
   }
 }
 

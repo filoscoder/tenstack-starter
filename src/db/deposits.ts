@@ -9,11 +9,58 @@ import { hidePassword } from "@/utils/auth";
 import CONFIG from "@/config";
 import { RoledPlayer } from "@/types/response/players";
 import { ERR } from "@/config/errors";
-import { CustomError } from "@/middlewares/errorHandler";
+import { CustomError } from "@/helpers/error/CustomError";
+import { OrderBy } from "@/types/request/players";
 
 const prisma = new PrismaClient();
 
 export class DepositsDAO {
+  static _getAll = async (
+    page: number,
+    itemsPerPage: number,
+    search?: string,
+    orderBy?: OrderBy<Deposit>,
+  ): Promise<Deposit[]> => {
+    try {
+      const deposits = await prisma.deposit.findMany({
+        skip: page * itemsPerPage,
+        take: itemsPerPage,
+        where: {
+          OR: [
+            { tracking_number: { contains: search } },
+            { Player: { username: { contains: search } } },
+            { Player: { first_name: { contains: search } } },
+            { Player: { last_name: { contains: search } } },
+          ],
+        },
+        orderBy,
+        include: { Player: true },
+      });
+      return deposits;
+    } catch (error: any) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  };
+
+  static async _getById(id: string) {
+    try {
+      return await prisma.deposit.findUnique({
+        where: { id },
+        include: { Player: true },
+      });
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static async count() {
+    return prisma.deposit.count();
+  }
+
   /**
    * Create a DB entry for a deposit
    */
@@ -87,7 +134,6 @@ export class DepositsDAO {
     }
   }
 
-  // TODO test
   static getPending(player_id: string) {
     try {
       return prisma.deposit.findMany({
@@ -224,8 +270,6 @@ export class DepositsDAO {
       prisma.$disconnect();
     }
   }
-
-  // static authorizeDeletion = this.authorizeConfirmation;
 
   static async authorizeCreation(request: DepositRequest) {
     try {

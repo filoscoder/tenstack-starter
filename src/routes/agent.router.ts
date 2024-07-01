@@ -5,14 +5,14 @@ import { AgentController } from "@/components/agent/controller";
 import { validateCredentials } from "@/components/players/validators";
 import {
   validateBankAccountUpdate,
-  validateDepositIndex,
-  validateDepositUpdate,
   validateOnCallRequest,
   validatePaymentIndex,
+  validateResetPasswordRequest,
+  validateSupportRequest,
 } from "@/components/agent/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
 import { requireAgentRole } from "@/middlewares/auth";
-import { TransactionsController } from "@/components/transactions";
+import { paymentRateLimiter } from "@/middlewares/rate-limiters/payment";
 
 const agentRouter = Router();
 
@@ -27,27 +27,14 @@ agentRouter.use(
   passport.authenticate("jwt", { session: false, failWithError: true }),
 );
 agentRouter.use(requireAgentRole);
-agentRouter.get("/payments", AgentController.showPayments);
 agentRouter.post(
-  "/payments/:id/paid",
+  "/payments/:id/release",
   validatePaymentIndex(),
   checkExact(),
   throwIfBadRequest,
-  AgentController.markAsPaid,
+  paymentRateLimiter,
+  AgentController.releasePayment,
 );
-agentRouter.get(
-  "/deposits/:id?",
-  validateDepositIndex(),
-  throwIfBadRequest,
-  AgentController.showDeposits,
-);
-agentRouter.post(
-  "/deposits/:id",
-  validateDepositUpdate(),
-  throwIfBadRequest,
-  TransactionsController.deposit,
-);
-agentRouter.get("/qr", AgentController.qr);
 agentRouter.get("/bank-account", AgentController.getBankAccount);
 agentRouter.post(
   "/bank-account",
@@ -67,5 +54,19 @@ agentRouter.post(
   AgentController.setOnCallBotFlow,
 );
 agentRouter.get("/on-call", AgentController.getOnCallStatus);
-
+agentRouter.get("/support", AgentController.getSupportNumbers);
+agentRouter.post(
+  "/support",
+  validateSupportRequest(),
+  checkExact(),
+  throwIfBadRequest,
+  AgentController.updateSupportNumbers,
+);
+agentRouter.post(
+  "/reset-player-password",
+  validateResetPasswordRequest(),
+  checkExact(),
+  throwIfBadRequest,
+  AgentController.resetPlayerPassword,
+);
 export default agentRouter;

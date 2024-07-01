@@ -1,32 +1,67 @@
 import { NOT_FOUND, OK, CREATED } from "http-status/lib";
 import { Response } from "express";
+import { Player } from "@prisma/client";
 import { AuthServices } from "../auth/services";
 import { PlayerServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
 import { Credentials, PlayerRequest } from "@/types/request/players";
+import { NotFoundException, UnauthorizedError } from "@/helpers/error";
+import { PlayersDAO } from "@/db/players";
+import { hidePassword } from "@/utils/auth";
+import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 
 export class PlayersController {
   /**
-   * @description Gets the API information.
-   * @param {Req} req
-   * @param {Res} res
+   * List all players, optionally filtering and sorting
    */
-  static getPlayerById = async (
+  static index = async (req: Req, res: Response, next: NextFn) => {
+    try {
+      const { page, itemsPerPage, search, orderBy } =
+        extractResourceSearchQueryParams<Player>(req);
+
+      const playersServices = new PlayerServices();
+
+      const players = await playersServices.getAll<Player>(
+        page,
+        itemsPerPage,
+        search,
+        orderBy,
+      );
+      const result = players.map((p) => hidePassword(p));
+      const total = await PlayersDAO.count;
+
+      res.status(OK).json(apiResponse({ result, total }));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Show single player
+   */
+
+  static show = async (
     req: Req,
     res: Response<any, Record<string, any>>,
     next: NextFn,
   ) => {
     try {
-      const playerId = req.user!.id;
+      if (!req.user) throw new UnauthorizedError("No autorizado");
+      await PlayersDAO.authorizeShow(req.user, req.params.id);
+
+      const playerId = req.params.id;
 
       const playersServices = new PlayerServices();
 
-      const player = await playersServices.getPlayerById(playerId);
+      const player = await playersServices.show<Player>(playerId);
 
       if (player) {
+        player[0] = hidePassword(player[0]);
         res.status(OK).json(apiResponse(player));
       } else {
-        res.status(NOT_FOUND).json(apiResponse(null, "Player not found"));
+        res
+          .status(NOT_FOUND)
+          .json(apiResponse(null, new NotFoundException("User not found")));
       }
     } catch (error) {
       next(error);
@@ -42,7 +77,7 @@ export class PlayersController {
       const authServices = new AuthServices();
 
       const request: PlayerRequest = req.body;
-      const user_agent = req.headers["user-agent"];
+      const user_agent = req.headers["user-agent"] ?? "";
 
       const player = await playersServices.create(request);
       const { tokens } = await authServices.tokens(player.id, user_agent);
@@ -62,14 +97,29 @@ export class PlayersController {
       const playersServices = new PlayerServices();
 
       const credentials: Credentials = req.body;
-      const user_agent = req.headers["user-agent"];
+      const user_agent = req.headers["user-agent"] ?? "";
 
-      const loginResponse = await playersServices.login(
+      const { loginResponse } = await playersServices.login(
         credentials,
         user_agent,
       );
 
       res.status(OK).json(apiResponse(loginResponse));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  static update = async (req: Req, res: Res, next: NextFn) => {
+    try {
+      const playersServices = new PlayerServices();
+
+      const playerId = req.params.id;
+      const request: PlayerRequest = req.body;
+
+      const player = await playersServices.update(playerId, request);
+
+      res.status(OK).json(apiResponse(player));
     } catch (error) {
       next(error);
     }

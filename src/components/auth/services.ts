@@ -3,11 +3,12 @@ import { Token } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JwtService } from "../../services/jwt.service";
 import CONFIG from "@/config";
-import { CustomError } from "@/middlewares/errorHandler";
 import { TokenDAO } from "@/db/token";
 import { JWTPayload, TokenPair, TokenResult } from "@/types/response/jwt";
 import { PlayersDAO } from "@/db/players";
 import { ERR } from "@/config/errors";
+import { CustomError } from "@/helpers/error/CustomError";
+import { UnauthorizedError } from "@/helpers/error";
 
 export class AuthServices extends JwtService {
   private get cypherPass(): string {
@@ -27,7 +28,7 @@ export class AuthServices extends JwtService {
    * @param sub User ID
    * @param role User role
    */
-  async tokens(sub: string, user_agent?: string): Promise<TokenResult> {
+  async tokens(sub: string, user_agent: string): Promise<TokenResult> {
     const dbToken = await TokenDAO.create({ player_id: sub, user_agent });
     return {
       tokens: this.generateTokenPair(sub, dbToken.id, this.cypherPass),
@@ -38,7 +39,7 @@ export class AuthServices extends JwtService {
   /**
    * Generate new pair from refresh token
    */
-  async refresh(refresh: string, user_agent?: string): Promise<TokenPair> {
+  async refresh(refresh: string, req: Req): Promise<TokenPair> {
     if (!this.verifyTokenExpiration(refresh))
       throw new CustomError(ERR.TOKEN_EXPIRED);
 
@@ -48,17 +49,17 @@ export class AuthServices extends JwtService {
 
     if (payload.type !== "refresh") throw new CustomError(ERR.WRONG_TOKEN_TYPE);
 
-    let token = await TokenDAO.getById(payload.jti);
+    const token = await TokenDAO.getById(payload.jti);
     if (!token) throw new CustomError(ERR.TOKEN_INVALID);
 
-    if (token.user_agent != user_agent)
-      token = await this.invalidateTokenById(token.id);
+    await this.validateUserAgent(req, payload.jti);
 
     if (token.invalid) {
       await this.invalidateChildren(token);
       throw new CustomError(ERR.TOKEN_INVALID);
     }
 
+    const user_agent = req.headers["user-agent"] ?? "";
     const { tokens, jti } = await this.tokens(payload.sub, user_agent);
     // Invalidate received token and link it to newly created one.
     await TokenDAO.updateById(token.id, { invalid: true, next: jti });
@@ -76,33 +77,47 @@ export class AuthServices extends JwtService {
       passReqToCallback: true,
     };
 
-    const deserialize: jwtStrategy.VerifyCallbackWithRequest = async (
-      request: Req,
-      payload: JWTPayload,
-      done: jwtStrategy.VerifiedCallback,
-    ) => {
-      const token = await TokenDAO.getById(payload.jti);
-      if (
-        !token ||
-        token.invalid ||
-        payload.type !== "access" ||
-        token.user_agent != request.headers["user-agent"]
-      )
-        return done(new CustomError(ERR.TOKEN_INVALID), false);
+    return new jwtStrategy.Strategy(options, this.deserialize);
+  }
 
-      const user = await PlayersDAO._getById(payload.sub);
-      return done(null, user);
-    };
+  private deserialize: jwtStrategy.VerifyCallbackWithRequest = async (
+    request: Req,
+    payload: JWTPayload,
+    done: jwtStrategy.VerifiedCallback,
+  ) => {
+    try {
+      await this.validateUserAgent(request, payload.jti);
+    } catch (error) {
+      return done(error, false);
+    }
 
-    return new jwtStrategy.Strategy(options, deserialize);
+    const token = await TokenDAO.getById(payload.jti);
+
+    if (!token || token.invalid || payload.type !== "access")
+      return done(new CustomError(ERR.TOKEN_INVALID), false);
+
+    const user = await PlayersDAO._getById(payload.sub);
+    return done(null, user);
+  };
+
+  private async validateUserAgent(req: Req, jti: string) {
+    if (CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.TEST) return;
+
+    const token = await TokenDAO.getById(jti);
+    const user_agent = req.headers["user-agent"] ?? "";
+
+    if (!token || token.user_agent !== user_agent) {
+      await this.invalidateTokenByUserAgent(user_agent);
+      throw new UnauthorizedError("Token invalido");
+    }
+  }
+
+  private async invalidateTokenByUserAgent(user_agent: string) {
+    await TokenDAO.update({ user_agent }, { invalid: true });
   }
 
   private invalidateTokenById(token_id: string) {
     return TokenDAO.updateById(token_id, { invalid: true });
-  }
-
-  invalidateTokensByUserAgent(player_id: string, user_agent?: string) {
-    return TokenDAO.update({ player_id, user_agent }, { invalid: true });
   }
 
   /**

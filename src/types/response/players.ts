@@ -25,3 +25,44 @@ export type LoginResponse = {
   refresh: string;
   player: Player;
 };
+
+/** Casino response to /pyramid/certain-user/:userId */
+export type CertainUserResponse = {
+  id: number;
+  is_email_verified: false;
+  info: {
+    first_name: string;
+    last_name: string;
+    date_of_birth: string | null;
+    mobile_number: string;
+    country: string;
+    city: string;
+    street_address: string;
+    postal_code: string;
+    state: string | null;
+    screen_name: string;
+  };
+  bonus_balance: string;
+  balance: string;
+  role: string;
+  email: string;
+  is_withdraw_allowed: boolean;
+  is_banned: boolean;
+  is_frozen: boolean;
+  social_links: string[];
+  agent_info: null;
+  last_login: null;
+  username: string;
+  first_name: string;
+  last_name: string;
+  date_joined: string;
+  balance_currency: string;
+  bonus_balance_currency: string;
+  is_self_registered: boolean;
+  language: string;
+  needs_document_approve: boolean;
+  affise_data: null;
+  pap_data: null;
+  cpf_document: null;
+  parent: number;
+};

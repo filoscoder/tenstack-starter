@@ -1,9 +1,13 @@
 import jwt from "jsonwebtoken";
 import { JWTPayload, TokenPair } from "@/types/response/jwt";
+import CONFIG from "@/config";
 /**
  * Generates and verifies Json Web Tokens
  */
 export class JwtService {
+  protected fingerprintCookie!: string;
+  protected userFingerprintSha256!: string;
+
   /**
    * Verificar si el token está expirado
    * @param token the token to check
@@ -58,11 +62,16 @@ export class JwtService {
   private generateAccessToken(pass: string, sub: string, jti: string): string {
     const token = jwt.sign(
       // Payload
-      { sub, jti, type: "access" },
+      {
+        sub,
+        jti,
+        type: "access",
+        userFingerprint: this.userFingerprintSha256,
+      },
       // Secret
       pass,
       // Options
-      { expiresIn: "10m" },
+      { expiresIn: CONFIG.AUTH.ACCESS_TOKEN_EXPIRE },
     );
 
     return token;
@@ -74,11 +83,16 @@ export class JwtService {
   private generateRefreshToken(pass: string, sub: string, jti: string) {
     const token = jwt.sign(
       // Payload
-      { sub, jti, type: "refresh" },
+      {
+        sub,
+        jti,
+        type: "refresh",
+        userFingerprint: this.userFingerprintSha256,
+      },
       // Secret
       pass,
       // Options
-      { expiresIn: "8h" },
+      { expiresIn: CONFIG.AUTH.REFRESH_TOKEN_EXPIRE },
     );
 
     return token;

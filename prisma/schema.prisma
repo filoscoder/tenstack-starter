@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -21,7 +22,9 @@ model UserRoot {
   dirty             Boolean       @default(false)     // El agente está siendo logueado
   bankAccount       Json?      
   alq_api_manager   String?       @db.Text
-  alq_token         String?       @db.VarChar(800)    
+  alq_token         String?       @db.VarChar(800)
+  bot_phone         String?       @db.VarChar(20)
+  human_phone       String?       @db.VarChar(20)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 
@@ -42,25 +45,26 @@ model Transactions {
 }
 
 model Player {
-  id                String        @id @default(uuid())
-  panel_id          Int           @unique
-  username          String        @db.VarChar(100) @unique
-  password          String        @db.Text
-  email             String?       @db.VarChar(50) @unique
-  first_name        String?       @db.VarChar(50)
-  last_name         String?       @db.VarChar(50)
-  date_of_birth     DateTime?
-  movile_number     String?       @db.VarChar(50)
-  country           String?       @db.VarChar(50)
-  BankAccounts      BankAccount[]
-  balance_currency  String       @db.VarChar(10) @default("MXN")
-  status            String?       @db.VarChar(20) @default("ACTIVO")
-  Payments          Payment[]       
-  Deposits          Deposit[]
-  Tokens            Token[]
-  roles             Role[]
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt     
+  id                  String        @id @default(uuid())
+  panel_id            Int           @unique
+  username            String        @db.VarChar(100) @unique
+  password            String        @db.Text
+  email               String        @db.VarChar(50) @unique
+  first_name          String?       @db.VarChar(50)
+  last_name           String?       @db.VarChar(50)
+  date_of_birth       DateTime?
+  movile_number       String?       @db.VarChar(50)
+  country             String?       @db.VarChar(50)
+  BankAccounts        BankAccount[]
+  balance_currency    String        @db.VarChar(10) @default("MXN")
+  status              String?       @db.VarChar(20) @default("ACTIVO")
+  Payments            Payment[]       
+  Deposits            Deposit[]
+  Tokens              Token[]
+  roles               Role[]
+  PasswordResetTokens PasswordResetToken[]
+  created_at          DateTime      @default(now())
+  updated_at          DateTime      @updatedAt     
 
   @@map("PLAYERS")
 }
@@ -70,10 +74,12 @@ model Payment {
   player_id         String           
   Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
   amount            Float
-  paid              DateTime?     
+  status            String        @default("PEDIDO")
   bank_account      String           
-  BankAccount       BankAccount   @relation(fields: [bank_account], references: [id])
+  BankAccount       BankAccount   @relation(fields: [bank_account], references: [id], onDelete: Cascade)
   currency          String        @default("MXN")
+  dirty             Boolean       @default(false)
+  alquimia_id       Int?
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
@@ -83,17 +89,16 @@ model Payment {
 model BankAccount {
   id                String        @id @default(uuid())
   owner             String        // Nombre del beneficiario
-  owner_id          Int           @db.UnsignedInt // DNI
   Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
   player_id         String        // ID de Player
   bankName          String        // Nombre del banco
-  bankNumber        String        @unique // CBU
-  bankAlias         String?       @unique
+  bankNumber        String        // CBU
+  bankAlias         String?       
   Payments          Payment[]
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
-  @@map("BANK_ACCOUNTS")   
+  @@map("BANK_ACCOUNTS")
 }
 
 model Deposit {
@@ -115,9 +120,9 @@ model Token {
   id                String        @id @default(uuid())
   invalid           Boolean       @default(false)
   next              String?       
+  user_agent        String?
   player_id         String           
   player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
-  user_agent        String?       @db.VarChar(256)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt 
 
@@ -149,28 +154,40 @@ model BotFlow {
   messages          Json
   on_call           Boolean
   active            Boolean
+  name              String        @db.VarChar(20)
 
   @@map("BOT_FLOWS")
 }
 
-model AlquimiaDeposit {
-  id_transaccion              Int       @id
-  tipo_transaccion            Int
-  id_cuenta_ahorro            Int
-  id_medio_pago               Int
-  id_cliente                  Int
-  tipo_movimiento             Int
-  tipo_cargo                  Int
-  tipo_operacion              Int
-  fecha_alta                  DateTime
-  fecha_actualizacion         DateTime
-  concepto                    String
-  estatus_transaccion         Int
-  clave_rastreo               String    @unique
-  id_cuenta_ahorro_medio_pago Int
-  fecha_operacion             DateTime
-  monto                       String
-  valor_real                  Float
+model PasswordResetToken {
+  id                          String    @id @default(uuid())
+  token                       String    @db.VarChar(342)      // 256 bytes in base64url
+  player_id                   String
+  player                      Player    @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  expires_at                  DateTime
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @updatedAt 
 
-  @@map("ALQ_DEPOSITS")
+  @@map("PASSWORD_RESET_TOKENS")
+}
+
+model ChatData {
+  id                          String    @id @default(uuid())
+  number                      String    @unique
+  name                        String    
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @updatedAt 
+
+  @@map("CHAT_DATA")
+}
+
+model Analytics {
+  id                          String    @id @default(uuid())
+  source                      String
+  event                       String
+  data                        Json?
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @updatedAt 
+
+  @@map("ANALYTICS")
 }

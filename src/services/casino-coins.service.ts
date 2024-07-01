@@ -4,13 +4,14 @@ import { HttpService } from "./http.service";
 import CONFIG from "@/config";
 import { TransactionsDAO } from "@/db/transactions";
 import { UserRootDAO } from "@/db/user-root";
-import { CustomError } from "@/middlewares/errorHandler";
 import { CashoutRequest, TransferDetails } from "@/types/request/transfers";
 import { Transaction } from "@/types/response/transactions";
-import { Notify } from "@/helpers/notification";
 import { parseTransferResult } from "@/utils/parser";
 import { CoinTransferResult } from "@/types/response/transfers";
 import { ERR } from "@/config/errors";
+import { CustomError } from "@/helpers/error/CustomError";
+import { AgentApiError } from "@/helpers/error/AgentApiError";
+import { WebPush } from "@/notification/web-push";
 
 /**
  * Interact with the casino's coins transfer endpoints and log results into
@@ -20,6 +21,8 @@ import { ERR } from "@/config/errors";
 export class CasinoCoinsService {
   /**
    * Transfer coins from player to agent (Cashout)
+   * @throws AgentApiError
+   * @throws CustomError (transaction_log)
    */
   async playerToAgent(
     cashOutRequest: CashoutRequest,
@@ -28,8 +31,6 @@ export class CasinoCoinsService {
     const transferDetails = await this.generateTransferDetails(
       "cashout",
       player.panel_id,
-      // TODO
-      // test ways of breaking this with big amounts
       cashOutRequest.amount,
       player.balance_currency,
     );
@@ -41,6 +42,8 @@ export class CasinoCoinsService {
 
   /**
    * Transfer coins from agent to player (Deposit)
+   * @throws AgentApiError
+   * @throws CustomError (transaction_log)
    */
   async agentToPlayer(
     deposit: Deposit & { Player: Player },
@@ -61,7 +64,7 @@ export class CasinoCoinsService {
     if (result.data.code == "insuficient_balance") {
       const difference =
         transferDetails.amount - result.data.variables.balance_amount;
-      await Notify.agent({
+      await WebPush.agent({
         title: "Fichas insuficientes",
         body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
         tag: CONFIG.SD.INSUFICIENT_CREDITS,
@@ -74,21 +77,21 @@ export class CasinoCoinsService {
 
   /**
    * Send coins
+   * @throws AgentApiError
    */
   private async transfer(
     transferDetails: TransferDetails,
   ): Promise<AxiosResponse> {
     const { authedAgentApi } = new HttpService();
     const url = "/backoffice/transactions/";
-    const result = await authedAgentApi.post(url, transferDetails);
+    const result = await authedAgentApi.post<any>(url, transferDetails);
 
     if (result.status !== 201 && result.status !== 400)
-      throw new CustomError({
-        code: "error_transferencia",
-        status: result.status,
-        description: "Error al transferir fichas", //result.data
-      });
-
+      throw new AgentApiError(
+        result.status,
+        "Error en el panel al transferir fichas",
+        result.data,
+      );
     return result;
   }
 
@@ -124,6 +127,7 @@ export class CasinoCoinsService {
 
   /**
    * Log into Transaction History table
+   * @throws CustomError (transaction_log)
    */
   private async logTransaction(ok: boolean, transferDetails: TransferDetails) {
     try {

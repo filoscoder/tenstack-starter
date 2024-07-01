@@ -12,3 +12,13 @@ export function requireUserRole(req: Req, _res: Res, next: NextFn) {
     throw new ForbiddenError("No autorizado");
   return next();
 }
+
+export function requireUserOrAgentRole(req: Req, _res: Res, next: NextFn) {
+  if (
+    !req.user!.roles.some(
+      (r) => r.name === CONFIG.ROLES.PLAYER || r.name === CONFIG.ROLES.AGENT,
+    )
+  )
+    throw new ForbiddenError("No autorizado");
+  return next();
+}

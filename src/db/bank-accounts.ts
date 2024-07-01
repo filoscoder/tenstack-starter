@@ -12,7 +12,6 @@ export class BankAccountsDAO {
       });
       return accounts;
     } catch (error: any) {
-      // Prisma errors handled by prismaErrorHandler()
       throw error;
     } finally {
       prisma.$disconnect();

@@ -1,3 +1,154 @@
+## [1.0.0] - 2024-06-24
+
+### Changed
+- Reverted back to user_agent method to avoid JWT sidejacking
+
+## [1.0.0] - 2024-06-13
+
+### Added
+- GET `/analytics/summary`
+
+## [1.0.0] - 2024-06-11
+
+### Changed
+- Paginate `/analytics`
+- Add Player to GET `/deposit/:id` response
+- Normalize output of resource listing endpoints to `{ result, total }`
+
+## [1.0.0] - 2024-05-29
+
+### Added
+- GET `/transactions/deposit/pending-coin-transfers`
+
+## [1.0.0] - 2024-05-28
+
+### Added
+- `/agent/reset-player-password` for the agent to reset players' passwords.
+
+### Changed
+- Split GET `/agent/deposits/:id?` into GET `/transactions/deposit/:id` and GET `/transactions/deposit`.
+- Move POST `/agent/deposits/:id` into `/transactions/deposit/:id`.
+- Return `{ deposits, totalDeposits }` from GET `/transactions/deposit`.
+- Move GET `/agent/payments` to GET `/transactions/payment`
+- Return `{ payments, totalPayments }` from GET `/transactions/payment`.
+
+## [1.0.0] - 2024-05-27
+
+### Changed
+- Improve `movile_number` validator: must be a numerical string of up to 20 characters
+
+## [1.0.0] - 2024-05-15
+
+### Changed
+- GET `/players?page=1&items_per_page=20&search=<string>&sort_column=<string>&sort_direction=<asc|desc>` now returns a list of players. Requires agent role.
+- Mock call to `PlayerServices.createCasinoPlayer` to avoid creating players on casino on every test run.
+
+### Added
+- GET `/players/:id` returns player details.
+- POST `/players/:id` to update a player. Requires agent role.
+
+## [1.0.0] - 2024-05-07
+
+### Changed
+- Stop sending email to casino on player creation.
+
+## [1.0.0] - 2024-05-06
+
+### Added
+- Rate limiter on POST `/payments/:id/release` (1 every 10 seconds per payment ID).
+- `dirty` column to `PAYMENTS` table.
+
+### Changed
+- Replace `agent/payments/:id/paid` with `agent/payments/:id/release`.
+
+## [1.0.0] - 2024-05-04
+
+### Added
+- Bank account number (CLABE) structure validator.
+
+## [1.0.0] - 2024-05-03
+
+### Changed 
+- `invalid_credentials` login response is now 400 instead of 404.
+- Split `transactionsRouter` into `paymentsRouter` and `depositsRouter`.
+- Split `TransactionsController` into `PaymentController` and `DepositController`.
+- Split `FinanceServices` into `PaymentServices` and `DepositServices`.
+
+
+## [1.0.0] - 2024-05-02
+
+### Changed
+- Improve `FinanceServices.alquimiaDepositLookup` by including `clave_rastreo` in query parameters. Reducing the search to a single query.
+- Drop ALQ_DEPOSITS table.
+
+## [1.0.0] - 2024-04-29
+
+### Added
+- Installed nodemailer npm package
+
+### Changed
+- Make PLAYER.email a non null field in Prisma model
+
+## [1.0.0] - 2024-04-26
+
+### Added
+- POST `/auth/reset` to reset password. Requires player role.
+
+## [1.0.0] - 2024-04-24
+
+### Changed
+- Moved `/agent/qr/:name` to `/bot/:name?`.
+- Return bot names from `/bot` when `:name` param is omitted.
+
+## [1.0.0] - 2024-04-23
+
+### Added
+- GET and POST `/agent/support` to view and update support telephone numbers. 
+
+### Changed
+- Improve `seed.ts` to allow updating credentials
+- Move bot seeding logic into bot repo
+
+## [1.0.0] - 2024-04-20
+
+### Changed
+- Remove `owner_id` from BANK_ACCOUNT
+- Remove unique index from BANK_ACCOUNT.bankName and BANK_ACCOUNT.bankAlias
+
+## [1.0.0] - 2024-04-18
+
+### Added
+- `BOT_QR_PATH` in `.env`. Absolute path to the bot.qr.png.
+
+### Changed
+- Moved bot server out into its own project
+
+## [1.0.0] - 2024-04-16
+
+### Added
+- `AgentApiError` as a wrapper around `CustomError` with code "agent_api_error".
+- Ensure value of `CashoutRequest.amount` is between 0 and 2**32 in request validator.
+
+### Changed
+- Fetch token duration from `.env`.
+- Improve `HttpService` typing.
+- Error code `error_transferencia` is now `agent_api_error`.
+- Remove `expressPinoLogger` (middleware that logged errors to console).
+- Truncate TOKENS table on token creation.
+
+## [1.0.0] - 2024-04-16
+
+### Changed
+- Fetch token duration from `.env`
+
+## [1.0.0] - 2024-04-15
+
+### Changed
+- Add `detail: response.data` to external API errors to ensure original response is included in error logs.
+- Normalize API responses: 
+    + All API responses and errors now return `{ status: number, code: string, data: any }`
+    + All errors now extend `CustomError`
+
 ## [1.0.0] - 2024-04-12
 
 ### Added

@@ -1,1 +1,0 @@
-export { TransactionsController } from "./controller";
