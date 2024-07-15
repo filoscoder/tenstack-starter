@@ -914,6 +914,56 @@ Datos que necesitamos saber:
 - Cuales son los distintos valores posibles, y que significan, del campo `estatus` en la respuesta de `/consulta-estatus-tx`
 - Cuales son los valores posibles, y que significan, del campo `estatus_transaccion` en la respuesta de `/cuenta-ahorro-cliente/$ACCOUNT_ID/transaccion`
 
+## Banxico
+
+### Verificar transferencia
+
+Enviar el siguiente pedido y guardar la cookie JSESSIONID de la respuesta
+```bash
+curl -X POST \
+-i \
+https://www.banxico.org.mx/cep/valida.do \
+-d 'tipoCriterio=T&fecha=11-03-2024&criterio=53771ALBO11032024195558814&emisor=90646&receptor=90659&cuenta=659437001005389354&receptorParticipante=0&monto=10&captcha=c&tipoConsulta=1' 
+```
+
+Despues
+```bash
+curl https://www.banxico.org.mx/cep/descarga.do?formato=XML \
+-H "Cookie: JSESSIONID=$JSESSIONID"
+```
+
+Respesta
+```xml
+<SPEI_Tercero 
+  FechaOperacion="2024-03-11" 
+  Hora="13:56:07" 
+  ClaveSPEI="90659" 
+  sello="DbcZSGP5NnDGhmfHt+2wBv1+tdOorVXVdM4rktrhjycj1okIAcgQSM7B3glPe6DEB9nsNZ6iM4ckjjwcdn1q0ub9aOi8qHwg1vuBDr+nmv00+VwKNGX/vDcIosPk2NzHW5pAYYeHQy+WINzFtSgJx4o30dK7rtlGFjWNfaLRKQC0Cau4E1KLWZ+AP8iYjC5CLJEHL2VZhcbJaUivupJ40bP1Idh1bOI1me+F2GQ4sQuuqms8vzMPX1wIsweqFCqysco8ycO1RaFCs0OsZ8Ij9delh3jZG8QftYwdLGjM6XOh85MoRs4P7HoMrOw07S9SzB6NNyZa+YgP2lpdUXq/eA==" 
+  numeroCertificado="00001000000505544848" 
+  cadenaCDA="||1|11032024|11032024|135607|90659|STP|CAROLINA MARUZZA|40|646180146003556692|MAXC720729MNERXR07|ASP INTEGRA OPC|TECHNOLOGY AND INTEROPERABILITY SA DE CV|40|659437001005389354|TIN160223BC2|sin concepto|0.00|10.00|NA|NA|0|0|NA|0|0.00|00001000000505544848||DbcZSGP5NnDGhmfHt+2wBv1+tdOorVXVdM4rktrhjycj1okIAcgQSM7B3glPe6DEB9nsNZ6iM4ckjjwcdn1q0ub9aOi8qHwg1vuBDr+nmv00+VwKNGX/vDcIosPk2NzHW5pAYYeHQy+WINzFtSgJx4o30dK7rtlGFjWNfaLRKQC0Cau4E1KLWZ+AP8iYjC5CLJEHL2VZhcbJaUivupJ40bP1Idh1bOI1me+F2GQ4sQuuqms8vzMPX1wIsweqFCqysco8ycO1RaFCs0OsZ8Ij9delh3jZG8QftYwdLGjM6XOh85MoRs4P7HoMrOw07S9SzB6NNyZa+YgP2lpdUXq/eA==" 
+  claveRastreo="53771ALBO11032024195558814">
+    <Beneficiario 
+      BancoReceptor="ASP INTEGRA OPC" 
+      Nombre="TECHNOLOGY AND INTEROPERABILITY SA DE CV" 
+      TipoCuenta="40" 
+      uenta="659437001005389354" 
+      RFC="TIN160223BC2" 
+      Concepto="sin concepto" 
+      IVA="0.00" 
+      MontoPago="10.00"/>
+    <Ordenante 
+      BancoEmisor="STP" 
+      Nombre="CAROLINA MARUZZA" 
+      TipoCuenta="40" 
+      Cuenta="646180146003556692" 
+      RFC="MAXC720729MNERXR07"/>
+</SPEI_Tercero>
+```
+
+Sacar el valor del atributo `MontoPago` del elemento `Beneficiario`
+
+
+
 ## Password restoration checklist
 
 ### Forgot password request
