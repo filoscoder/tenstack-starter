@@ -800,7 +800,14 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 
 - Ambientes staging y prod en, bot-timba y alquimia
 - Cambiar start-staging por start:production en timba-api scripts
-- Boletear todo lo relacionado al bot de este repo
+
+- Pensar en alguien para sumar al equipo
+- Caracter invisible en metricas bot
+- Verificar Transferencias en banco de mexico
+- Revertir pago de transferencia a manual y poner switch en config con doble verificacion
+- Seguimiento de bonus_balance de lucas y tabla de movimientos en panel
+
+
 
 ### Fichas insuficientes
 

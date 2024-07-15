@@ -74,6 +74,7 @@ typings/
 .env.staging
 .env.production
 .env.staging
+.env.bak
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
