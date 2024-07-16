@@ -68,6 +68,7 @@ export const validateDepositRequest = () =>
       custom: {
         options: (val) =>
           val.toString().length >= 4 && val.toString().length <= 5,
+        errorMessage: "sending_bank must be between 4 and 5 digits",
       },
       errorMessage: "sending_bank is required",
     },
