@@ -92,7 +92,7 @@ model BankAccount {
   Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
   player_id         String        // ID de Player
   bankName          String        // Nombre del banco
-  bankNumber        String        // CBU
+  bankNumber        String        @unique   // CBU
   bankAlias         String?       
   Payments          Payment[]
   created_at        DateTime      @default(now())
