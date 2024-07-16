@@ -12,6 +12,7 @@ import { HttpService } from "@/services/http.service";
 import { AlqMovementResponse } from "@/types/response/alquimia";
 import { logtailLogger } from "@/helpers/loggers";
 import { ResourceService } from "@/services/resource.service";
+import { BanxicoService } from "@/services/banxico.service";
 
 export class DepositServices extends ResourceService {
   constructor() {
@@ -63,7 +64,7 @@ export class DepositServices extends ResourceService {
       deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED &&
       deposit.status !== CONFIG.SD.DEPOSIT_STATUS.CONFIRMED
     ) {
-      const amount = await this.verify(deposit);
+      const amount = await this.verifyThroughBanxico(deposit);
       if (!amount) {
         return {
           error: "Deposito no confirmado",
@@ -94,9 +95,11 @@ export class DepositServices extends ResourceService {
   }
 
   /**
-   * Verify receipt of Player's deposit.
+   * Verify receipt of Player's deposit through Alquimia.
    */
-  public async verify(deposit: Deposit): Promise<number | undefined> {
+  public async verifyThroughAlquimia(
+    deposit: Deposit,
+  ): Promise<number | undefined> {
     if (
       deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED ||
       deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED
@@ -133,6 +136,29 @@ export class DepositServices extends ResourceService {
 
     if (movements.data.length === 0) return;
     return movements.data.find((movement) => movement.valor_real > 0);
+  }
+
+  /**
+   * Verify receipt of Player's deposit through Banxico.
+   */
+  public async verifyThroughBanxico(
+    deposit: Deposit,
+  ): Promise<number | undefined> {
+    if (
+      deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED ||
+      deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED
+    )
+      return deposit.amount!;
+
+    const banxicoService = new BanxicoService();
+    try {
+      const amount = await banxicoService.verifyDeposit(deposit);
+
+      return amount;
+    } catch (e) {
+      if (CONFIG.LOG.LEVEL === "debug") console.error(e);
+      return;
+    }
   }
 
   private markAsPending(

@@ -7,6 +7,7 @@ let prisma: PrismaClient;
 let deposit: Deposit | null;
 beforeAll(async () => {
   prisma = new PrismaClient();
+  service = new DepositServices();
   deposit = await prisma.deposit.findFirst({
     where: { tracking_number: "53771ALBO11032024195558814" },
   });
@@ -26,8 +27,6 @@ beforeAll(async () => {
       sending_bank: "90646",
     },
   });
-
-  service = new DepositServices();
 });
 
 describe("FinanceService", () => {
@@ -35,7 +34,7 @@ describe("FinanceService", () => {
     it("Should verify a payment", async () => {
       if (!deposit) fail("Deposit not found");
 
-      const amount = await service.verify(deposit);
+      const amount = await service.verifyThroughBanxico(deposit);
 
       expect(amount).toBeGreaterThan(0);
     });
