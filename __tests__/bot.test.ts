@@ -65,7 +65,7 @@ async function initialize() {
   player = await prisma.player.create({
     data: {
       ...credentials,
-      panel_id: -11,
+      panel_id: -12,
     },
   });
   agentId = (await prisma.player.findFirst({

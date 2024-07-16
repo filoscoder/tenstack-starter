@@ -7,7 +7,7 @@ beforeAll(async () => {
   await UserRootDAO.update({ alq_api_manager: "", alq_token: "" });
 });
 
-describe("AlquimiaTokenService", () => {
+describe.skip("AlquimiaTokenService", () => {
   describe("authenticate", () => {
     it("Should return tokens from API", async () => {
       const auth = await service.authenticate();

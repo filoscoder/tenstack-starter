@@ -230,6 +230,8 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "status",
         "tracking_number",
         "amount",
+        "date",
+        "sending_bank",
         "created_at",
         "updated_at",
         "Player",
@@ -724,6 +726,8 @@ async function initialize() {
       currency: "MXN",
       status: CONFIG.SD.DEPOSIT_STATUS.PENDING,
       tracking_number: "test_tracking_number3" + Date.now(),
+      date: new Date(),
+      sending_bank: "foo",
     },
   });
 
