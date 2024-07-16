@@ -11,16 +11,21 @@ beforeAll(async () => {
     where: { tracking_number: "53771ALBO11032024195558814" },
   });
 
-  if (!deposit) {
-    const player = await prisma.player.findFirst();
-    deposit = await prisma.deposit.create({
-      data: {
-        tracking_number: "53771ALBO11032024195558814",
-        status: CONFIG.SD.DEPOSIT_STATUS.PENDING,
-        player_id: player!.id,
-      },
-    });
-  }
+  if (deposit) return;
+
+  const player = await prisma.player.findFirst();
+  if (!player) throw new Error("Player not found");
+
+  deposit = await prisma.deposit.create({
+    data: {
+      tracking_number: "53771ALBO11032024195558814",
+      status: CONFIG.SD.DEPOSIT_STATUS.PENDING,
+      player_id: player.id,
+      amount: 10,
+      date: "2024-03-11T03:00:00.000Z",
+      sending_bank: "90646",
+    },
+  });
 
   service = new DepositServices();
 });

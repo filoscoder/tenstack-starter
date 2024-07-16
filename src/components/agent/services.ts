@@ -127,9 +127,7 @@ export class AgentServices {
     const depositServices = new DepositServices();
     for (const deposit of deposits) {
       if (deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED) continue;
-      const result = await depositServices.confirm(deposit.Player, deposit.id, {
-        tracking_number: deposit.tracking_number,
-      });
+      const result = await depositServices.finalizeDeposit(deposit);
       response.push(result.deposit);
     }
 

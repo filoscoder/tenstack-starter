@@ -56,7 +56,7 @@ export class DepositServices extends ResourceService {
   /**
    * Verify a deposit and send coins to player if deposit confirmed
    */
-  private async finalizeDeposit(
+  async finalizeDeposit(
     deposit: Deposit & { Player: Player },
   ): Promise<DepositResult> {
     if (

@@ -15,6 +15,9 @@ export type TransferDetails = {
 
 export interface DepositRequest {
   tracking_number: string;
+  date: string; // ISO-8601
+  sending_bank: string;
+  amount: number;
 }
 
 export interface CreateDepositProps extends DepositRequest {
