@@ -47,6 +47,26 @@ export const validateDepositRequest = () =>
       isString: true,
       errorMessage: "tracking_number is required",
     },
+    amount: {
+      in: ["body"],
+      isEmpty: false,
+      isNumeric: true,
+      isString: false,
+      errorMessage: "invalid amount",
+    },
+    date: {
+      in: ["body"],
+      isEmpty: false,
+      isISO8601: true,
+      errorMessage: "invalid date",
+    },
+    sending_bank: {
+      in: ["body"],
+      isEmpty: false,
+      isNumeric: true,
+      trim: true,
+      errorMessage: "sending_bank is required",
+    },
   });
 
 export const validateDepositId = () =>
