@@ -47,6 +47,9 @@ describe("[UNIT] => DEPOSIT", () => {
     it.each`
       field                | message
       ${"tracking_number"} | ${"tracking_number is required"}
+      ${"amount"}          | ${"invalid amount"}
+      ${"date"}            | ${"invalid date"}
+      ${"sending_bank"}    | ${"sending_bank is required"}
     `("Should return 400 missing_fields", async ({ field, message }) => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
@@ -59,6 +62,24 @@ describe("[UNIT] => DEPOSIT", () => {
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe(message);
       expect(response.body.data[0].path).toBe(field);
+    });
+
+    it.each`
+      field             | value           | message
+      ${"amount"}       | ${"a"}          | ${"invalid amount"}
+      ${"date"}         | ${"11-03-2024"} | ${"invalid date"}
+      ${"sending_bank"} | ${123456}       | ${"sending_bank must be between 4 and 5 digits"}
+    `("Should return 400 bad_request", async ({ field, value, message }) => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
+        .send({
+          ...depositRequests[0],
+          [field]: value,
+        })
+        .set("Authorization", `Bearer ${tokens[0].access}`);
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe(message);
     });
 
     it("Should return 400 unknown_field", async () => {
