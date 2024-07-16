@@ -1,6 +1,7 @@
 import { Deposit, Player } from "@prisma/client";
 import { checkSchema } from "express-validator";
 import { isKeyOfNestedObject } from "../players/validators";
+import { bankCodes } from "@/config/bank-codes";
 
 export const isKeyOfDeposit = (key: string): key is keyof Deposit => {
   const mockDeposit: Deposit & { Player: Player } = {
@@ -67,9 +68,8 @@ export const validateDepositRequest = () =>
       isNumeric: true,
       trim: true,
       custom: {
-        options: (val) =>
-          val.toString().length >= 4 && val.toString().length <= 5,
-        errorMessage: "sending_bank must be between 4 and 5 digits",
+        options: (val) => bankCodes.includes(val),
+        errorMessage: "invalid sending_bank",
       },
       errorMessage: "sending_bank is required",
     },

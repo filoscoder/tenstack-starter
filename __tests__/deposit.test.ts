@@ -68,7 +68,8 @@ describe("[UNIT] => DEPOSIT", () => {
       field             | value           | message
       ${"amount"}       | ${"a"}          | ${"invalid amount"}
       ${"date"}         | ${"11-03-2024"} | ${"invalid date"}
-      ${"sending_bank"} | ${123456}       | ${"sending_bank must be between 4 and 5 digits"}
+      ${"sending_bank"} | ${123456}       | ${"invalid sending_bank"}
+      ${"sending_bank"} | ${90420}        | ${"invalid sending_bank"}
     `("Should return 400 bad_request", async ({ field, value, message }) => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
@@ -213,7 +214,7 @@ async function initialize() {
       tracking_number: "test_tracking_number2" + Date.now(),
       amount: 1,
       date: "2024-03-11T03:00:00.000Z",
-      sending_bank: "90420",
+      sending_bank: "40138",
     },
   ];
 
