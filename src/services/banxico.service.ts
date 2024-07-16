@@ -73,7 +73,7 @@ export class BanxicoService {
         attributeNamePrefix: "",
       });
 
-      const parsed = parser.parse(xmlResponse.data);
+      const parsed = parser.parse(xmlResponse.data, true);
       const amountString = parsed.SPEI_Tercero?.Beneficiario?.MontoPago;
       if (!amountString) throw new Error("Banxico XML malformed");
 

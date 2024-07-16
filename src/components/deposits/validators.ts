@@ -65,6 +65,10 @@ export const validateDepositRequest = () =>
       isEmpty: false,
       isNumeric: true,
       trim: true,
+      custom: {
+        options: (val) =>
+          val.toString().length >= 4 && val.toString().length <= 5,
+      },
       errorMessage: "sending_bank is required",
     },
   });
