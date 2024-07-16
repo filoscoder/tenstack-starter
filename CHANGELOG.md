@@ -1,3 +1,8 @@
+## [1.0.0] - 2024-07-16
+
+### Changed
+- Added `amount`, `date` and `sending_bank` to create deposit request.
+
 ## [1.0.0] - 2024-06-24
 
 ### Changed

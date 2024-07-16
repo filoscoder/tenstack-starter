@@ -579,6 +579,9 @@ Devuelve | [`AnalyticsSummary[]`]()
 ```typescript
 {
   tracking_number: string;
+  amount: number;
+  date: datetime;                     // 2024-01-29T18:14:41.534Z 
+  sending_bank: string;               // valid bank ID
 }
 ```
 
