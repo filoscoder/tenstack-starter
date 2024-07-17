@@ -1,6 +1,6 @@
 import { AgentBankAccount } from "../response/agent";
 
-export interface RootUpdatableProps {
+export type RootUpdatableProps = {
   username?: string;
   password?: string;
   panel_id?: number;
@@ -11,9 +11,9 @@ export interface RootUpdatableProps {
   bankAccount?: AgentBankAccount;
   alq_api_manager?: string;
   alq_token?: string;
-}
+};
 
-export interface RootRequest {
+export type RootRequest = {
   username: string;
   password: string;
   panel_id: number;
@@ -21,4 +21,13 @@ export interface RootRequest {
   refresh: string;
   json_response: string;
   dirty: boolean;
-}
+};
+
+export type RootBankAccount = {
+  name: string;
+  dni: string;
+  bankId: string;
+  accountNumber: string;
+  clabe: string;
+  alias: string;
+};

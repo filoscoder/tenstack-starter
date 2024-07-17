@@ -3,6 +3,8 @@ import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
 import CONFIG from "@/config";
 import { logtailLogger } from "@/helpers/loggers";
+import { UserRootDAO } from "@/db/user-root";
+import { RootBankAccount } from "@/types/request/user-root";
 
 export class BanxicoService {
   public async verifyDeposit(deposit: Deposit): Promise<number | undefined> {
@@ -17,6 +19,8 @@ export class BanxicoService {
    * @returns cookie value or undefined if not found
    */
   private async depositLookup(deposit: Deposit): Promise<string | undefined> {
+    const agent = await UserRootDAO.getAgent();
+    const bankAccount = agent!.bankAccount as RootBankAccount;
     const url = "https://www.banxico.org.mx/cep/valida.do",
       day = deposit.date.getDate(),
       month = (deposit.date.getMonth() + 1).toString().padStart(2, "0"),
@@ -28,8 +32,8 @@ export class BanxicoService {
     data.append("fecha", date);
     data.append("criterio", deposit.tracking_number);
     data.append("emisor", deposit.sending_bank);
-    data.append("receptor", `${CONFIG.RECEIVING_BANK.BANK_ID}`);
-    data.append("cuenta", `${CONFIG.RECEIVING_BANK.CLABE}`);
+    data.append("receptor", `${bankAccount.bankId}`);
+    data.append("cuenta", `${bankAccount.clabe}`);
     data.append("receptorParticipante", "0");
     data.append("monto", `${deposit.amount}`);
     data.append("captcha", "c");

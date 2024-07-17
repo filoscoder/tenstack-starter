@@ -663,7 +663,7 @@ Estado de transferencia de fichas
 {
   name: string
   dni: string
-  bankName: string
+  bankId: string
   accountNumber: string
   clabe: string
   alias: string
@@ -813,7 +813,7 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Ambientes staging y prod en, bot-timba y alquimia
 - Cambiar start-staging por start:production en timba-api scripts
 - Caracter invisible en metricas bot
-
+- Arturito check deposit through banxico  
 
 ### Fichas insuficientes
 
