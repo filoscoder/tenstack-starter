@@ -70,6 +70,19 @@ export class AgentServices {
     }
   }
 
+  static async markPaymentAsPaid(payment_id: string): Promise<Payment> {
+    await PaymentsDAO.authorizeRelease(payment_id);
+    try {
+      const updated = await PaymentsDAO.update(payment_id, {
+        status: CONFIG.SD.PAYMENT_STATUS.COMPLETED,
+      });
+      return updated;
+    } catch (e) {
+      await PaymentsDAO.update(payment_id, { dirty: false });
+      throw e;
+    }
+  }
+
   static async getBankAccount(): Promise<AgentBankAccount> {
     const account = UserRootDAO.getBankAccount();
     return account;

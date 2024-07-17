@@ -49,7 +49,7 @@ Comes with:
 ### Agente
 + [Login de Agente](#login-agente)
 + [Marcar Pago Como Completado](#marcar-pago-como-completado-)
-
++ [Liberar Pago](#liberar-pago-)
 + [Ver QR](#ver-qr-)
 + [Ver Cuenta Bancaria](#ver-cuenta-bancaria-)
 + [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-)
@@ -291,6 +291,15 @@ Devuelve    |[`Tokens`](#tokens)
 ### Marcar Pago Como Completado 🔒
 
 |Endpoint| `/agent/payments/:id/paid`|
+---|---|
+Método      |`POST`
+Devuelve    |[`Payment`](#payment)
+Requiere rol| agent
+
+### Liberar Pago 🔒
+Transferir desde alquimia a la cuenta del jugador
+
+|Endpoint| `/agent/payments/:id/release`|
 ---|---|
 Método      |`POST`
 Devuelve    |[`Payment`](#payment)
@@ -803,11 +812,7 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 
 - Ambientes staging y prod en, bot-timba y alquimia
 - Cambiar start-staging por start:production en timba-api scripts
-
 - Caracter invisible en metricas bot
-- Revertir pago de transferencia a manual y poner switch en config con doble verificacion
-- Seguimiento de bonus_balance de lucas y tabla de movimientos en panel
-
 
 
 ### Fichas insuficientes

@@ -19,6 +19,7 @@ import { initAgent } from "./helpers";
 import CONFIG from "@/config";
 import { AuthServices } from "@/components/auth/services";
 import { PlayerServices } from "@/components/players/services";
+import { AgentServices } from "@/components/agent/services";
 
 let agent: SuperAgentTest;
 let prisma: PrismaClient;
@@ -166,7 +167,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       .spyOn(AlquimiaTransferService.prototype, "pay")
       .mockResolvedValue(mockResponse);
 
-    it("Should mark payment as paid", async () => {
+    it("Should release a payment", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/release`)
         .set("Authorization", `Bearer ${access}`);
@@ -210,6 +211,37 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(NOT_FOUND);
+    });
+  });
+
+  describe("POST: /agent/payments/:id/paid", () => {
+    const mockResponse = {
+      id: "bacon",
+      player_id: "spam",
+      amount: 10,
+      status: CONFIG.SD.PAYMENT_STATUS.COMPLETED,
+      bank_account: "baz",
+      currency: "MXN",
+      dirty: false,
+      alquimia_id: null,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
+    jest
+      .spyOn(AgentServices, "markPaymentAsPaid")
+      .mockResolvedValue(mockResponse);
+
+    it("Should mark payment as paid", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/paid`)
+        .set("Authorization", `Bearer ${access}`);
+
+      expect(response.status).toBe(OK);
+      expect(response.body.data.id).toEqual("bacon");
+      expect(response.body.data.status).toEqual(
+        CONFIG.SD.PAYMENT_STATUS.COMPLETED,
+      );
     });
   });
 
