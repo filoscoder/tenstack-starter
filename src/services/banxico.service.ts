@@ -7,6 +7,7 @@ import { UserRootDAO } from "@/db/user-root";
 import { RootBankAccount } from "@/types/request/user-root";
 import { DepositsDAO } from "@/db/deposits";
 import { Telegram } from "@/notification/telegram";
+import { AnalyticsDAO } from "@/db/analytics";
 
 export class BanxicoService {
   private url = "https://www.banxico.org.mx/cep/valida.do";
@@ -16,17 +17,14 @@ export class BanxicoService {
     if (!cookies) return;
 
     const cep = await this.cepDownload(cookies);
-    const cep_amount = await this.analyzeCep(cep);
+    const cepAmount = await this.analyzeCep(cep);
 
     const query = await this.queryDepositStatus(deposit);
     if (!query) return;
-
     const queryAmount = this.analyzeQueryResult(query);
 
-    if (!cep || cep_amount !== queryAmount)
-      await DepositsDAO.update(deposit.id, { cep_ok: false });
+    await this.cepAnalytics(deposit, cep, cepAmount, queryAmount);
 
-    await DepositsDAO.update(deposit.id, { cep_ok: true });
     return queryAmount;
   }
 
@@ -167,6 +165,29 @@ export class BanxicoService {
     data.append("tipoConsulta", queryType);
 
     return data;
+  }
+
+  private async cepAnalytics(
+    deposit: Deposit,
+    cep: string | undefined,
+    cepAmount: number | undefined,
+    queryAmount: number | undefined,
+  ) {
+    if (!cep) {
+      await AnalyticsDAO.create({
+        source: "cep",
+        event: "cep_download_failed",
+      });
+    } else if (cepAmount !== queryAmount) {
+      await AnalyticsDAO.create({
+        source: "cep",
+        event: "deposit_amount_mismatch",
+      });
+    } else {
+      await DepositsDAO.update(deposit.id, { cep_ok: true });
+      return;
+    }
+    await DepositsDAO.update(deposit.id, { cep_ok: false });
   }
 
   private async errorHandler(e: any) {
