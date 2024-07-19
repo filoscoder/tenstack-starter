@@ -44,7 +44,7 @@ describe("[UNIT] => BANK ACCOUNTS ROUTER", () => {
   it.each`
     field           | message
     ${"owner"}      | ${"Owner name is required"}
-    ${"bankName"}   | ${"Bank name is required"}
+    ${"bankId"}     | ${"Bank id is required"}
     ${"bankNumber"} | ${"Bank number is required"}
   `(
     "Should fail with error 'Field is required'",
@@ -53,7 +53,7 @@ describe("[UNIT] => BANK ACCOUNTS ROUTER", () => {
         .post(`/app/${CONFIG.APP.VER}/bank-account`)
         .send({
           owner: "Test " + Date.now(),
-          bankName: "Test Bank " + Date.now(),
+          bankId: "40138",
           bankNumber: `${Date.now()}`,
           [field]: undefined,
         })
@@ -64,6 +64,19 @@ describe("[UNIT] => BANK ACCOUNTS ROUTER", () => {
       expect(response.body.data[0].path).toBe(field);
     },
   );
+
+  it("Should fail with error invalid bank ID", async () => {
+    const response = await agent
+      .post(`/app/${CONFIG.APP.VER}/bank-account`)
+      .send({
+        owner: "Test " + Date.now(),
+        bankId: "Invalid Bank",
+        bankNumber: `${Date.now()}`,
+      })
+      .set("Authorization", `Bearer ${playerAccess} `);
+
+    expect(response.status).toBe(BAD_REQUEST);
+  });
 
   it("Should update bank account", async () => {
     const response = await agent
@@ -104,7 +117,7 @@ describe("[UNIT] => BANK ACCOUNTS ROUTER", () => {
       "id",
       "owner",
       "player_id",
-      "bankName",
+      "bankId",
       "bankNumber",
       "bankAlias",
       "created_at",
@@ -155,7 +168,7 @@ async function initialize() {
 
   bankAccountRequest = {
     owner: "Test " + Date.now(),
-    bankName: "Test Bank " + Date.now(),
+    bankId: "40138",
     bankNumber: "646180224404209392",
     bankAlias: `${Date.now()}`,
   };

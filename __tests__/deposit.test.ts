@@ -163,6 +163,7 @@ describe("[UNIT] => DEPOSIT", () => {
         "amount",
         "date",
         "sending_bank",
+        "cep_ok",
         "created_at",
         "updated_at",
       ]);

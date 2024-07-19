@@ -556,7 +556,7 @@ Devuelve | [`AnalyticsSummary[]`]()
 ```typescript
 {
   owner: string                       // Nombre del beneficiario
-  bankName: string                    // Nombre del banco
+  bankId: string                    // Nombre del banco
   bankNumber: string                  // CBU
   bankAlias: string?   
 }
@@ -568,7 +568,7 @@ Devuelve | [`AnalyticsSummary[]`]()
   id: string        
   owner: string                       // Nombre del beneficiario
   player_id: string                   // ID de Player
-  bankName: string                    // Nombre del banco
+  bankId: string                    // Nombre del banco
   bankNumber: string                  // CBU
   bankAlias: string?       
   created_at: datetime                // 2024-01-29T18:14:41.534Z
@@ -820,7 +820,6 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Chequear todos los bancos cuando `sending_bank` === -1
   + Empezar con STP, luego ASP y luego todos los demas en paralelo
 - Chequear que la lista de bancos no cambie
-- Cambiar bankName por bankId en modelo BankAccount
 
 ### Bono
 - Tabla de bonos con diferentes tipos de bono

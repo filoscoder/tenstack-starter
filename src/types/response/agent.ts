@@ -11,7 +11,7 @@ export type LoginResponse = {
 export type AgentBankAccount = {
   name: string;
   dni: string;
-  bankName: string;
+  bankId: string;
   accountNumber: string;
   clabe: string;
   alias: string;
