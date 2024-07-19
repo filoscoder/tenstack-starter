@@ -112,6 +112,7 @@ model Deposit {
   amount            Float         
   date              DateTime
   sending_bank      String         
+  cep_ok            Boolean       @default(false)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 

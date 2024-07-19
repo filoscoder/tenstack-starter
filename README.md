@@ -813,7 +813,14 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Ambientes staging y prod en, bot-timba y alquimia
 - Cambiar start-staging por start:production en timba-api scripts
 - Caracter invisible en metricas bot
-- Arturito check deposit through banxico  
+- Verificación manual de depósitos: marcar como verificado y enviar fichas (boton en agent) 
+- Agent: mostrar depositos en rojo si `cep_ok` === false
+
+### Bono
+- Tabla de bonos con diferentes tipos de bono
+- Cargar bono en la primer carga de crédito
+- Endpoint para transferir bono a saldo. Chequear si ya hizo un retiro, si ya hizo retiro, no se puede usar el bono.
+
 
 ### Fichas insuficientes
 

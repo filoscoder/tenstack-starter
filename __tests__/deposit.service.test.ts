@@ -29,7 +29,7 @@ beforeAll(async () => {
   });
 });
 
-describe("FinanceService", () => {
+describe("DepositService", () => {
   describe("verifyPayment", () => {
     it("Should verify a payment", async () => {
       if (!deposit) fail("Deposit not found");

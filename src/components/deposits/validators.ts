@@ -14,6 +14,7 @@ export const isKeyOfDeposit = (key: string): key is keyof Deposit => {
     tracking_number: "",
     date: new Date(),
     sending_bank: "",
+    cep_ok: false,
     Player: {
       id: "",
       panel_id: 0,

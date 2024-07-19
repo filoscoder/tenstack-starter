@@ -22,6 +22,7 @@ export interface DepositRequest {
 
 export interface CreateDepositProps extends DepositRequest {
   player_id: string;
+  cep_ok?: boolean;
 }
 
 export interface DepositUpdatableProps {
@@ -29,6 +30,7 @@ export interface DepositUpdatableProps {
   status?: string;
   tracking_number?: string;
   amount?: number;
+  cep_ok?: boolean;
 }
 
 export interface PaymentRequest {
