@@ -6,6 +6,7 @@ import { logtailLogger } from "@/helpers/loggers";
 import { UserRootDAO } from "@/db/user-root";
 import { RootBankAccount } from "@/types/request/user-root";
 import { DepositsDAO } from "@/db/deposits";
+import { Telegram } from "@/notification/telegram";
 
 export class BanxicoService {
   private url = "https://www.banxico.org.mx/cep/valida.do";
@@ -167,9 +168,11 @@ export class BanxicoService {
     return data;
   }
 
-  private errorHandler(e: any) {
+  private async errorHandler(e: any) {
     if (CONFIG.LOG.LEVEL === "debug") console.error(e);
-    if (CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.PRODUCTION)
+    if (CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.PRODUCTION) {
       logtailLogger.error(e);
+      await Telegram.arturito(e);
+    }
   }
 }
