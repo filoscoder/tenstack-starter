@@ -26,6 +26,7 @@ export class BanxicoService {
     if (!cep || cep_amount !== queryAmount)
       await DepositsDAO.update(deposit.id, { cep_ok: false });
 
+    await DepositsDAO.update(deposit.id, { cep_ok: true });
     return queryAmount;
   }
 
