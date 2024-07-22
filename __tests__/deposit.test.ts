@@ -1,17 +1,25 @@
 import { BankAccount, Deposit, Player, PrismaClient } from "@prisma/client";
 import { SuperAgentTest } from "supertest";
-import { BAD_REQUEST, FORBIDDEN, OK, UNAUTHORIZED } from "http-status";
+import {
+  BAD_REQUEST,
+  FORBIDDEN,
+  NOT_FOUND,
+  OK,
+  UNAUTHORIZED,
+} from "http-status";
 import { initAgent } from "./helpers";
 import { TokenPair } from "@/types/response/jwt";
 import { AuthServices } from "@/components/auth/services";
 import CONFIG from "@/config";
 import { DepositRequest } from "@/types/request/transfers";
+import { PlayersDAO } from "@/db/players";
 
 let agent: SuperAgentTest;
 let prisma: PrismaClient;
 let players: (Player & { BankAccounts: BankAccount[] })[];
 let depositRequests: DepositRequest[];
 const tokens: TokenPair[] = [];
+let agentAccessToken: TokenPair;
 const deposits: Deposit[] = [];
 let confirmedDeposit: Deposit;
 
@@ -144,6 +152,62 @@ describe("[UNIT] => DEPOSIT", () => {
     });
   });
 
+  describe("POST: /transactions/deposit/:id/update", () => {
+    it("Should update a deposit", async () => {
+      const response = await agent
+        .post(
+          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+        )
+        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED })
+        .set("Authorization", `Bearer ${agentAccessToken.access}`);
+
+      expect(response.status).toBe(OK);
+      expect(response.body.data.status).toBe(
+        CONFIG.SD.DEPOSIT_STATUS.CONFIRMED,
+      );
+    });
+
+    it("Should return 400 unknown_field", async () => {
+      const response = await agent
+        .post(
+          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+        )
+        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED, unknown_field: 10 })
+        .set("Authorization", `Bearer ${agentAccessToken.access}`);
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].type).toBe("unknown_fields");
+    });
+
+    it("Should return 401", async () => {
+      const response = await agent.post(
+        `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+      );
+
+      expect(response.status).toBe(UNAUTHORIZED);
+    });
+
+    it("Should return 403", async () => {
+      const response = await agent
+        .post(
+          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+        )
+        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED })
+        .set("Authorization", `Bearer ${tokens[0].access}`);
+
+      expect(response.status).toBe(FORBIDDEN);
+    });
+
+    it("Should return 404", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/transactions/deposit/nonexistent/update`)
+        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED })
+        .set("Authorization", `Bearer ${agentAccessToken.access}`);
+
+      expect(response.status).toBe(NOT_FOUND);
+    });
+  });
+
   describe("GET: /transactions/deposit/pending", () => {
     it("Should return pending deposits", async () => {
       const response = await agent
@@ -163,6 +227,7 @@ describe("[UNIT] => DEPOSIT", () => {
         "amount",
         "date",
         "sending_bank",
+        "cep_ok",
         "created_at",
         "updated_at",
       ]);
@@ -230,20 +295,21 @@ async function initialize() {
     },
   });
 
+  const agentUser = await PlayersDAO.getAgent();
+
   const authServices = new AuthServices();
   const auth1 = await authServices.tokens(players[0].id, "jest_test");
   const auth2 = await authServices.tokens(players[1].id, "jest_test");
+  const auth3 = await authServices.tokens(agentUser!.id, "jest_test");
   tokens[0] = auth1.tokens;
   tokens[1] = auth2.tokens;
+  agentAccessToken = auth3.tokens;
 }
 
 async function cleanUp() {
   try {
     await prisma.token.deleteMany({
-      where: { player_id: players[0].id },
-    });
-    await prisma.token.deleteMany({
-      where: { player_id: players[1].id },
+      where: { user_agent: "jest_test" },
     });
     await prisma.deposit.delete({ where: { id: confirmedDeposit.id } });
     await prisma.deposit.delete({ where: { id: deposits[0].id } });

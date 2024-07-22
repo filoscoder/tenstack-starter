@@ -2,6 +2,7 @@ import { Deposit, Player } from "@prisma/client";
 import { checkSchema } from "express-validator";
 import { isKeyOfNestedObject } from "../players/validators";
 import { bankCodes } from "@/config/bank-codes";
+import CONFIG from "@/config";
 
 export const isKeyOfDeposit = (key: string): key is keyof Deposit => {
   const mockDeposit: Deposit & { Player: Player } = {
@@ -92,5 +93,20 @@ export const validateDepositIndex = () =>
       in: ["params"],
       isString: true,
       optional: true,
+    },
+  });
+
+export const validateDepositUpdateRequest = () =>
+  checkSchema({
+    status: {
+      in: ["body"],
+      isEmpty: false,
+      isString: true,
+      trim: true,
+      isIn: {
+        options: [Object.values(CONFIG.SD.DEPOSIT_STATUS)],
+        errorMessage: "invalid status",
+      },
+      errorMessage: "status is required",
     },
   });

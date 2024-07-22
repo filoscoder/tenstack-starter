@@ -13,6 +13,7 @@ import {
   isKeyOfDeposit,
   validateDepositIndex,
   validateDepositRequest,
+  validateDepositUpdateRequest,
 } from "@/components/deposits/validators";
 import { DepositController } from "@/components/deposits/controller";
 import { validateResourceSearchRequest } from "@/components/players/validators";
@@ -54,6 +55,14 @@ depositsRouter.get(
   checkExact(),
   throwIfBadRequest,
   DepositController.show,
+);
+depositsRouter.post(
+  "/deposit/:id/update",
+  validateDepositIndex(),
+  validateDepositUpdateRequest(),
+  checkExact(),
+  throwIfBadRequest,
+  DepositController.update,
 );
 depositsRouter.get(
   "/deposit",

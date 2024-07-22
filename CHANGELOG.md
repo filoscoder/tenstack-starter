@@ -1,4 +1,8 @@
 ## [1.0.0] - 2024-07-17
+### Added
+- `/transactions/deposit/:id/update` for agent to mark a deposit as confirmed.
+
+## [1.0.0] - 2024-07-17
 
 ### Added
 - Re-added ability to mark payments as paid by agent (meaning payment was made manually).
