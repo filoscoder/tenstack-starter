@@ -264,6 +264,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "amount",
         "date",
         "sending_bank",
+        "cep_ok",
         "created_at",
         "updated_at",
         "Player",
@@ -331,7 +332,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .send({
           name: "Test name",
           dni: "12345678",
-          bankName: "Test bank name",
+          bankId: "40138",
           accountNumber: "1234567890",
           clabe: "12345678901234567890",
           alias: "Test alias",
@@ -341,7 +342,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       expect(response.body.data).toStrictEqual({
         name: "Test name",
         dni: "12345678",
-        bankName: "Test bank name",
+        bankId: "40138",
         accountNumber: "1234567890",
         clabe: "12345678901234567890",
         alias: "Test alias",
@@ -388,7 +389,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       expect(Object.keys(response.body.data)).toStrictEqual([
         "name",
         "dni",
-        "bankName",
+        "bankId",
         "accountNumber",
         "clabe",
         "alias",
@@ -711,7 +712,7 @@ async function initialize() {
       BankAccounts: {
         create: [
           {
-            bankName: "Test Bank " + Date.now(),
+            bankId: "40138",
             bankNumber: `${Date.now()}`,
             owner: "Test owner",
             bankAlias: "Test alias",

@@ -127,7 +127,7 @@ export class BanxicoService {
   private analyzeQueryResult(query: string): number | undefined {
     try {
       const match = query.match(/<tbody>[\s\S]*?<\/tbody>/);
-      if (!match || match.length > 1)
+      if (!match || match.length != 1)
         throw new Error("Banxico query result malformed");
       const table = match[0];
 

@@ -91,8 +91,8 @@ model BankAccount {
   owner             String                  // Nombre del beneficiario
   Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
   player_id         String                  // ID de Player
-  bankName          String                  // Nombre del banco
-  bankNumber        String        @unique   // CBU
+  bankId            String                  // Como aparece en banxico
+  bankNumber        String        @unique   // CLABE
   bankAlias         String?       
   Payments          Payment[]
   created_at        DateTime      @default(now())

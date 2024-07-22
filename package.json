@@ -22,7 +22,7 @@
     "prisma:generate:staging": "cross-env NODE_ENV=staging node prisma.generate.ts",
     "prisma:generate:prod": "cross-env NODE_ENV=production node prisma.generate.ts",
     "seed": "tsx src/db/seed.ts",
-    "test": "cross-env NODE_ENV=test jest --coverage --runInBand --detectOpenHandles",
+    "test": "cross-env LOGGING_LEVEL=none NODE_ENV=test jest --coverage --runInBand --detectOpenHandles",
     "watch": "tsc --watch",
     "test:watchAll": "cross-env NODE_ENV=test jest --watchAll --runInBand --detectOpenHandles",
     "service:start": "pm2 start ecosystem.config.js",

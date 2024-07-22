@@ -566,7 +566,7 @@ Devuelve | [`AnalyticsSummary[]`]()
 ```typescript
 {
   owner: string                       // Nombre del beneficiario
-  bankName: string                    // Nombre del banco
+  bankId: string                    // Nombre del banco
   bankNumber: string                  // CBU
   bankAlias: string?   
 }
@@ -578,7 +578,7 @@ Devuelve | [`AnalyticsSummary[]`]()
   id: string        
   owner: string                       // Nombre del beneficiario
   player_id: string                   // ID de Player
-  bankName: string                    // Nombre del banco
+  bankId: string                    // Nombre del banco
   bankNumber: string                  // CBU
   bankAlias: string?       
   created_at: datetime                // 2024-01-29T18:14:41.534Z
