@@ -150,49 +150,34 @@ export class BanxicoService {
   /**
    * @returns bank ID
    */
-  private async findBank(deposit: Deposit): Promise<string | null> {
-    const batchLookUp = async (
-      size: number,
-      round = 0,
-    ): Promise<AxiosResponse<string> | undefined> => {
-      if (round * size > bankCodes.length) return;
-
-      const requestDataArr = [];
-      for (let i = round * size; i < (round + 1) * size; i++) {
-        const reqData = await this.generateRequestData(
-          { ...deposit, sending_bank: bankCodes[i] },
-          "1",
-        );
-        requestDataArr.push(reqData);
-      }
-
-      const requests = requestDataArr.map(
-        (data) =>
-          new Promise<AxiosResponse<string>>((resolve, reject) => {
-            axios
-              .post<string>(this.url, data, { responseType: "text" })
-              .then((r) =>
-                r.data.includes(
-                  "Haga clic sobre el &iacute;cono para descargar el CEP",
-                )
-                  ? resolve(r)
-                  : reject(r.data),
-              );
-          }),
+  public async findBank(deposit: Deposit): Promise<string | null> {
+    const requestDataArr = [];
+    for (let i = 0; i < 2; i++) {
+      const reqData = await this.generateRequestData(
+        { ...deposit, sending_bank: bankCodes[i] },
+        "1",
       );
+      requestDataArr.push(reqData);
+    }
 
-      try {
-        return await Promise.any(requests);
-      } catch (e) {
-        return new Promise((resolve) =>
-          // Delay to avoid reaching banxico's request limit
-          setTimeout(() => resolve(batchLookUp(size, round + 1)), 2000),
-        );
-      }
-    };
+    const requests = requestDataArr.map(
+      (data) =>
+        new Promise<AxiosResponse<string>>((resolve, reject) => {
+          axios
+            .post<string>(this.url, data, { responseType: "text" })
+            .then((r) =>
+              r.data.includes(
+                "Haga clic sobre el &iacute;cono para descargar el CEP",
+              )
+                ? resolve(r)
+                : reject(r.data),
+            );
+        }),
+    );
 
-    const successful = await batchLookUp(3);
+    const successful = await Promise.any(requests);
     if (!successful) return null;
+
     const queryString = new URLSearchParams(successful.config.data);
     return queryString.get("emisor");
   }
