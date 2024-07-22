@@ -31,6 +31,7 @@ export interface DepositUpdatableProps {
   tracking_number?: string;
   amount?: number;
   cep_ok?: boolean;
+  sending_bank?: string;
 }
 
 export interface PaymentRequest {
