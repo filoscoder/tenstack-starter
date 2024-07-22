@@ -817,10 +817,9 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Disparar flujo de verificacion de depósito desde agente cuando cep no OK
 - Verificación manual de depósitos: marcar como verificado y enviar fichas (boton en agent) 
 - Agent: mostrar depositos en rojo si `cep_ok` === false
-- Chequear todos los bancos cuando `sending_bank` === -1
+- Chequear los dos primeros cuando `sending_bank` === -1
   + Empezar con STP, luego ASP y luego todos los demas en paralelo
 - Chequear que la lista de bancos no cambie
-- Cambiar bankName por bankId en modelo BankAccount
 
 ### Bono
 - Tabla de bonos con diferentes tipos de bono

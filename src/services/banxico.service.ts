@@ -1,5 +1,5 @@
-import { Deposit } from "@prisma/client";
-import axios from "axios";
+import { Deposit, UserRoot } from "@prisma/client";
+import axios, { AxiosResponse } from "axios";
 import { XMLParser } from "fast-xml-parser";
 import CONFIG from "@/config";
 import { logtailLogger } from "@/helpers/loggers";
@@ -8,9 +8,11 @@ import { RootBankAccount } from "@/types/request/user-root";
 import { DepositsDAO } from "@/db/deposits";
 import { Telegram } from "@/notification/telegram";
 import { AnalyticsDAO } from "@/db/analytics";
+import { bankCodes } from "@/config/bank-codes";
 
 export class BanxicoService {
   private url = "https://www.banxico.org.mx/cep/valida.do";
+  private agent: UserRoot | null = null;
 
   public async verifyDeposit(deposit: Deposit): Promise<number | undefined> {
     const cookies = await this.prepareCepDownload(deposit);
@@ -34,13 +36,20 @@ export class BanxicoService {
   private async prepareCepDownload(
     deposit: Deposit,
   ): Promise<string | undefined> {
-    const data = await this.requestData(deposit, "1");
+    const data = await this.generateRequestData(deposit, "1");
 
     try {
       const response = await axios.post(this.url, data, {
         validateStatus: () => true,
+        responseType: "text",
       });
-      if (response.status !== 200) throw response.data;
+      if (
+        response.status !== 200 ||
+        !(response.data as string).includes(
+          "Haga clic sobre el &iacute;cono para descargar el CEP",
+        )
+      )
+        throw response.data;
 
       const cookies = response.headers["set-cookie"];
       if (!cookies)
@@ -103,7 +112,7 @@ export class BanxicoService {
   private async queryDepositStatus(
     deposit: Deposit,
   ): Promise<string | undefined> {
-    const data = await this.requestData(deposit, "0");
+    const data = await this.generateRequestData(deposit, "0");
     try {
       const response = await axios.post(this.url, data);
       if (response.status !== 200) throw response.data;
@@ -139,13 +148,64 @@ export class BanxicoService {
   }
 
   /**
+   * @returns bank ID
+   */
+  private async findBank(deposit: Deposit): Promise<string | null> {
+    const batchLookUp = async (
+      size: number,
+      round = 0,
+    ): Promise<AxiosResponse<string> | undefined> => {
+      if (round * size > bankCodes.length) return;
+
+      const requestDataArr = [];
+      for (let i = round * size; i < (round + 1) * size; i++) {
+        const reqData = await this.generateRequestData(
+          { ...deposit, sending_bank: bankCodes[i] },
+          "1",
+        );
+        requestDataArr.push(reqData);
+      }
+
+      const requests = requestDataArr.map(
+        (data) =>
+          new Promise<AxiosResponse<string>>((resolve, reject) => {
+            axios
+              .post<string>(this.url, data, { responseType: "text" })
+              .then((r) =>
+                r.data.includes(
+                  "Haga clic sobre el &iacute;cono para descargar el CEP",
+                )
+                  ? resolve(r)
+                  : reject(r.data),
+              );
+          }),
+      );
+
+      try {
+        return await Promise.any(requests);
+      } catch (e) {
+        return new Promise((resolve) =>
+          // Delay to avoid reaching banxico's request limit
+          setTimeout(() => resolve(batchLookUp(size, round + 1)), 2000),
+        );
+      }
+    };
+
+    const successful = await batchLookUp(3);
+    if (!successful) return null;
+    const queryString = new URLSearchParams(successful.config.data);
+    return queryString.get("emisor");
+  }
+
+  /**
    * @param queryType 1: CEP, 0: Payment status
    */
-  private async requestData(
+  private async generateRequestData(
     deposit: Deposit,
     queryType: "1" | "0",
   ): Promise<URLSearchParams> {
-    const agent = await UserRootDAO.getAgent();
+    const agent = this.agent || (await UserRootDAO.getAgent());
+    this.agent = agent;
     const bankAccount = agent!.bankAccount as RootBankAccount;
     const day = deposit.date.getDate(),
       month = (deposit.date.getMonth() + 1).toString().padStart(2, "0"),
