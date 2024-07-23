@@ -330,7 +330,7 @@ Endpoint para que el agente modifique el `tracking_number` de un depósito y dis
 ---|---|
 Método      |`POST`
 Body (json) | [`EditDepositRequest`](#editdepositrequest)
-Devuelve    |[`Deposit`](#deposit)
+Devuelve    |[`DepositResult`](#depositresult)
 Requiere rol| agent
 
 ### Editar Depósito 🔒
@@ -831,9 +831,6 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Cambiar start-staging por start:production en timba-api scripts
 - Generar allowed origin dinamicamente en producción para incluir localhost
 - Caracter invisible en metricas bot
-- Disparar flujo de verificacion de depósito desde agente cuando cep no OK
-- Verificación manual de depósitos: marcar como verificado y enviar fichas (boton en agent) 
-- Agent: mostrar depositos en rojo si `cep_ok` === false
 - Chequear que la lista de bancos no cambie
 
 ### Bono
