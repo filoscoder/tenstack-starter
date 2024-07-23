@@ -70,7 +70,7 @@ export const validateDepositRequest = () =>
       isNumeric: true,
       trim: true,
       custom: {
-        options: (val) => bankCodes.includes(val),
+        options: (val) => bankCodes.includes(val) || val === "-1",
         errorMessage: "invalid sending_bank",
       },
       errorMessage: "sending_bank is required",
@@ -100,7 +100,8 @@ export const validateDepositUpdateRequest = () =>
   checkSchema({
     status: {
       in: ["body"],
-      isEmpty: false,
+      // isEmpty: false,
+      optional: true,
       isString: true,
       trim: true,
       isIn: {
@@ -108,5 +109,11 @@ export const validateDepositUpdateRequest = () =>
         errorMessage: "invalid status",
       },
       errorMessage: "status is required",
+    },
+    tracking_number: {
+      in: ["body"],
+      optional: true,
+      isString: true,
+      errorMessage: "tracking_number is required",
     },
   });
