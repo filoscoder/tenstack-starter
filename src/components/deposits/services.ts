@@ -46,7 +46,7 @@ export class DepositServices extends ResourceService {
   ): Promise<Deposit> {
     await DepositsDAO.authorizeUpdate(deposit_id, agent);
 
-    return await DepositsDAO.update(deposit_id, request);
+    return await DepositsDAO.update(deposit_id, { ...request, dirty: false });
   }
 
   /**
@@ -98,6 +98,7 @@ export class DepositServices extends ResourceService {
       const casinoCoinsService = new CasinoCoinsService();
       coinTransferResult = await casinoCoinsService.agentToPlayer(deposit);
       if (coinTransferResult.ok) deposit = await this.markAsCompleted(deposit);
+      else deposit = await DepositsDAO.update(deposit.id, { dirty: false });
     } catch (e) {
       if (CONFIG.LOG.LEVEL === "debug") console.error(e);
       if (e instanceof CustomError && e.code === ERR.TRANSACTION_LOG.code)
@@ -221,7 +222,7 @@ export class DepositServices extends ResourceService {
     amount: number,
   ): Promise<Deposit & { Player: Player }> {
     return DepositsDAO.update(deposit.id, {
-      dirty: false,
+      // dirty: false,
       status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED,
       amount,
     });
