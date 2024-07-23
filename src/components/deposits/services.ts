@@ -1,10 +1,13 @@
-import { Deposit, Player } from "@prisma/client";
+import { Deposit, Player, Role } from "@prisma/client";
 import CONFIG from "@/config";
 import { ERR } from "@/config/errors";
 import { DepositsDAO } from "@/db/deposits";
 import { CustomError } from "@/helpers/error/CustomError";
 import { CasinoCoinsService } from "@/services/casino-coins.service";
-import { DepositRequest } from "@/types/request/transfers";
+import {
+  DepositRequest,
+  DepositUpdateRequest,
+} from "@/types/request/transfers";
 import { PlainPlayerResponse, RoledPlayer } from "@/types/response/players";
 import { CoinTransferResult, DepositResult } from "@/types/response/transfers";
 import { hidePassword } from "@/utils/auth";
@@ -35,6 +38,17 @@ export class DepositServices extends ResourceService {
 
     return await this.finalizeDeposit(deposit);
   }
+
+  async update(
+    agent: Player & { roles: Role[] },
+    deposit_id: string,
+    request: DepositUpdateRequest,
+  ): Promise<Deposit> {
+    await DepositsDAO.authorizeUpdate(deposit_id, agent);
+
+    return await DepositsDAO.update(deposit_id, { ...request, dirty: false });
+  }
+
   /**
    * Player announces they have completed a pending deposit
    */
@@ -84,6 +98,7 @@ export class DepositServices extends ResourceService {
       const casinoCoinsService = new CasinoCoinsService();
       coinTransferResult = await casinoCoinsService.agentToPlayer(deposit);
       if (coinTransferResult.ok) deposit = await this.markAsCompleted(deposit);
+      else deposit = await DepositsDAO.update(deposit.id, { dirty: false });
     } catch (e) {
       if (CONFIG.LOG.LEVEL === "debug") console.error(e);
       if (e instanceof CustomError && e.code === ERR.TRANSACTION_LOG.code)
@@ -207,7 +222,6 @@ export class DepositServices extends ResourceService {
     amount: number,
   ): Promise<Deposit & { Player: Player }> {
     return DepositsDAO.update(deposit.id, {
-      dirty: false,
       status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED,
       amount,
     });

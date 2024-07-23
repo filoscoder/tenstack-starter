@@ -1,6 +1,6 @@
 export interface BankAccountRequest {
   owner: string;
-  bankName: string;
+  bankId: string;
   bankNumber: string;
   bankAlias: string | null;
 }

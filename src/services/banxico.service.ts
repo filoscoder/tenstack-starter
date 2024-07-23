@@ -127,7 +127,7 @@ export class BanxicoService {
   private analyzeQueryResult(query: string): number | undefined {
     try {
       const match = query.match(/<tbody>[\s\S]*?<\/tbody>/);
-      if (!match || match.length > 1)
+      if (!match || match.length != 1)
         throw new Error("Banxico query result malformed");
       const table = match[0];
 
@@ -229,6 +229,10 @@ export class BanxicoService {
         event: "deposit_amount_mismatch",
       });
     } else {
+      await AnalyticsDAO.create({
+        source: "cep",
+        event: "allisgood",
+      });
       await DepositsDAO.update(deposit.id, { cep_ok: true });
       return;
     }

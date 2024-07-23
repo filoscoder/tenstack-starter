@@ -39,7 +39,7 @@ Comes with:
 + [Ver Depósitos Pendientes](#ver-depósitos-pendientes-)
 + [Ver Depósito](#ver-depósito-)
 + [Listar Depósitos](#listar-depósitos-)
-+ [Editar Depósito]()
++ [Editar Depósito](#editar-número-de-seguimiento-)
 + [Ver Cuenta Bancaria de Alquimia](#ver-cuenta-alquimia-)
 
 ### Pagos (plataforma ➡ jugador)
@@ -323,13 +323,23 @@ Query string| [`ResourceListQueryString`](#ResourceListQueryString)
 Devuelve    |[`Deposit[]`](#deposit)
 Requiere rol| agent
 
-### Editar Depósito 🔒
-Endpoint para que el agente modifique el `trackin_number` de un depósito y dispare el flujo de verificación.
+### Editar Número de seguimiento 🔒
+Endpoint para que el agente modifique el `tracking_number` de un depósito y dispare el flujo de verificación.
 
 |Endpoint| `/transactions/deposit/:id`|
 ---|---|
 Método      |`POST`
 Body (json) | [`EditDepositRequest`](#editdepositrequest)
+Devuelve    |[`DepositResult`](#depositresult)
+Requiere rol| agent
+
+### Editar Depósito 🔒
+Para que el agente marque un depósito como pagado
+
+|Endpoint| `/transactions/deposit/:id/update`|
+---|---|
+Método      |`POST`
+Body (json) | [`EditDepositStatusRequest`](#editdepositstatusrequest)
 Devuelve    |[`Deposit`](#deposit)
 Requiere rol| agent
 
@@ -556,7 +566,7 @@ Devuelve | [`AnalyticsSummary[]`]()
 ```typescript
 {
   owner: string                       // Nombre del beneficiario
-  bankName: string                    // Nombre del banco
+  bankId: string                    // Nombre del banco
   bankNumber: string                  // CBU
   bankAlias: string?   
 }
@@ -568,7 +578,7 @@ Devuelve | [`AnalyticsSummary[]`]()
   id: string        
   owner: string                       // Nombre del beneficiario
   player_id: string                   // ID de Player
-  bankName: string                    // Nombre del banco
+  bankId: string                    // Nombre del banco
   bankNumber: string                  // CBU
   bankAlias: string?       
   created_at: datetime                // 2024-01-29T18:14:41.534Z
@@ -640,7 +650,14 @@ Estado de transferencia de fichas
 ### EditDepositRequest
 ```typescript
 {
-  trackin_number: string
+  tracking_number: string
+}
+```
+
+### EditDepositStatusRequest
+```typescript
+{
+  status: "pending"|"verified"|"confirmed"|"completed"|"deleted"
 }
 ```
 
@@ -814,11 +831,6 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Cambiar start-staging por start:production en timba-api scripts
 - Generar allowed origin dinamicamente en producción para incluir localhost
 - Caracter invisible en metricas bot
-- Disparar flujo de verificacion de depósito desde agente cuando cep no OK
-- Verificación manual de depósitos: marcar como verificado y enviar fichas (boton en agent) 
-- Agent: mostrar depositos en rojo si `cep_ok` === false
-- Chequear los dos primeros cuando `sending_bank` === -1
-  + Empezar con STP, luego ASP y luego todos los demas en paralelo
 - Chequear que la lista de bancos no cambie
 
 ### Bono

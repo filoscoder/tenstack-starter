@@ -33,7 +33,7 @@ export const isKeyOfPayment = (key: string): key is keyof Payment => {
       player_id: "",
       owner: "",
       bankAlias: "",
-      bankName: "",
+      bankId: "",
       bankNumber: "",
       created_at: new Date(),
       updated_at: new Date(),

@@ -40,7 +40,7 @@ export class PaymentsDAO {
         where: {
           OR: [
             { BankAccount: { bankAlias: { contains: search } } },
-            { BankAccount: { bankName: { contains: search } } },
+            { BankAccount: { bankId: { contains: search } } },
             { BankAccount: { bankNumber: { contains: search } } },
             { BankAccount: { owner: { contains: search } } },
             { Player: { username: { contains: search } } },
