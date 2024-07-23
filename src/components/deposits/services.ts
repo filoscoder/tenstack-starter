@@ -222,7 +222,6 @@ export class DepositServices extends ResourceService {
     amount: number,
   ): Promise<Deposit & { Player: Player }> {
     return DepositsDAO.update(deposit.id, {
-      // dirty: false,
       status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED,
       amount,
     });

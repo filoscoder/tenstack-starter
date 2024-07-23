@@ -100,7 +100,6 @@ export const validateDepositUpdateRequest = () =>
   checkSchema({
     status: {
       in: ["body"],
-      // isEmpty: false,
       optional: true,
       isString: true,
       trim: true,
