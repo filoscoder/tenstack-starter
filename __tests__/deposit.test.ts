@@ -3,29 +3,30 @@ import { SuperAgentTest } from "supertest";
 import {
   BAD_REQUEST,
   FORBIDDEN,
+  NOT_FOUND,
   OK,
-  TOO_MANY_REQUESTS,
   UNAUTHORIZED,
 } from "http-status";
 import { initAgent } from "./helpers";
 import { TokenPair } from "@/types/response/jwt";
 import { AuthServices } from "@/components/auth/services";
 import CONFIG from "@/config";
-import { CashoutRequest, DepositRequest } from "@/types/request/transfers";
+import { DepositRequest } from "@/types/request/transfers";
+import { PlayersDAO } from "@/db/players";
 
 let agent: SuperAgentTest;
 let prisma: PrismaClient;
 let players: (Player & { BankAccounts: BankAccount[] })[];
 let depositRequests: DepositRequest[];
-let cashoutRequest: CashoutRequest;
 const tokens: TokenPair[] = [];
+let agentAccessToken: TokenPair;
 const deposits: Deposit[] = [];
 let confirmedDeposit: Deposit;
 
 beforeAll(initialize);
 afterAll(cleanUp);
 
-describe("[UNIT] => TRANSACTIONS", () => {
+describe("[UNIT] => DEPOSIT", () => {
   describe("POST: /transactions/deposit", () => {
     it("Should create a deposit", async () => {
       const response = await agent
@@ -54,6 +55,9 @@ describe("[UNIT] => TRANSACTIONS", () => {
     it.each`
       field                | message
       ${"tracking_number"} | ${"tracking_number is required"}
+      ${"amount"}          | ${"invalid amount"}
+      ${"date"}            | ${"invalid date"}
+      ${"sending_bank"}    | ${"sending_bank is required"}
     `("Should return 400 missing_fields", async ({ field, message }) => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
@@ -66,6 +70,25 @@ describe("[UNIT] => TRANSACTIONS", () => {
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe(message);
       expect(response.body.data[0].path).toBe(field);
+    });
+
+    it.each`
+      field             | value           | message
+      ${"amount"}       | ${"a"}          | ${"invalid amount"}
+      ${"date"}         | ${"11-03-2024"} | ${"invalid date"}
+      ${"sending_bank"} | ${123456}       | ${"invalid sending_bank"}
+      ${"sending_bank"} | ${90420}        | ${"invalid sending_bank"}
+    `("Should return 400 bad_request", async ({ field, value, message }) => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
+        .send({
+          ...depositRequests[0],
+          [field]: value,
+        })
+        .set("Authorization", `Bearer ${tokens[0].access}`);
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe(message);
     });
 
     it("Should return 400 unknown_field", async () => {
@@ -129,6 +152,62 @@ describe("[UNIT] => TRANSACTIONS", () => {
     });
   });
 
+  describe("POST: /transactions/deposit/:id/update", () => {
+    it("Should update a deposit", async () => {
+      const response = await agent
+        .post(
+          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+        )
+        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED })
+        .set("Authorization", `Bearer ${agentAccessToken.access}`);
+
+      expect(response.status).toBe(OK);
+      expect(response.body.data.status).toBe(
+        CONFIG.SD.DEPOSIT_STATUS.CONFIRMED,
+      );
+    });
+
+    it("Should return 400 unknown_field", async () => {
+      const response = await agent
+        .post(
+          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+        )
+        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED, unknown_field: 10 })
+        .set("Authorization", `Bearer ${agentAccessToken.access}`);
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].type).toBe("unknown_fields");
+    });
+
+    it("Should return 401", async () => {
+      const response = await agent.post(
+        `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+      );
+
+      expect(response.status).toBe(UNAUTHORIZED);
+    });
+
+    it("Should return 403", async () => {
+      const response = await agent
+        .post(
+          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+        )
+        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED })
+        .set("Authorization", `Bearer ${tokens[0].access}`);
+
+      expect(response.status).toBe(FORBIDDEN);
+    });
+
+    it("Should return 404", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/transactions/deposit/nonexistent/update`)
+        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED })
+        .set("Authorization", `Bearer ${agentAccessToken.access}`);
+
+      expect(response.status).toBe(NOT_FOUND);
+    });
+  });
+
   describe("GET: /transactions/deposit/pending", () => {
     it("Should return pending deposits", async () => {
       const response = await agent
@@ -146,6 +225,9 @@ describe("[UNIT] => TRANSACTIONS", () => {
         "status",
         "tracking_number",
         "amount",
+        "date",
+        "sending_bank",
+        "cep_ok",
         "created_at",
         "updated_at",
       ]);
@@ -161,80 +243,6 @@ describe("[UNIT] => TRANSACTIONS", () => {
       const response = await agent.get(
         `/app/${CONFIG.APP.VER}/transactions/deposit/pending`,
       );
-
-      expect(response.status).toBe(UNAUTHORIZED);
-    });
-  });
-
-  describe("POST: /transactions/cashout", () => {
-    it("Should create a withdrawal", async () => {
-      const result = await agent
-        .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
-        .send(cashoutRequest)
-        .set("Authorization", `Bearer ${tokens[0].access}`);
-
-      expect(result.status).toBe(OK);
-    });
-
-    it("Should return 429 too_many_requests", async () => {
-      const result = await agent
-        .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
-        .send(cashoutRequest)
-        .set("Authorization", `Bearer ${tokens[0].access}`);
-
-      expect(result.status).toBe(TOO_MANY_REQUESTS);
-    });
-
-    it.each`
-      field             | message
-      ${"amount"}       | ${"amount is required"}
-      ${"bank_account"} | ${"bank_account (account id) is required"}
-    `("Should return 400 missing_fields", async ({ field, message }) => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
-        .send({
-          ...cashoutRequest,
-          [field]: undefined,
-        })
-        .set("Authorization", `Bearer ${tokens[0].access}`);
-
-      expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.data[0].msg).toBe(message);
-      expect(response.body.data[0].path).toBe(field);
-    });
-
-    it("Should return 400 unknown_field", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
-        .send({
-          ...cashoutRequest,
-          unknown_field: "unknown",
-        })
-        .set("Authorization", `Bearer ${tokens[0].access}`);
-
-      expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.data[0].type).toBe("unknown_fields");
-    });
-
-    it("Should return 400 (amount too large)", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
-        .send({
-          ...cashoutRequest,
-          amount: 4294967297,
-        })
-        .set("Authorization", `Bearer ${tokens[0].access}`);
-
-      expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.data[0].msg).toBe(
-        "amount must be a number between 0 and 2**32",
-      );
-    });
-
-    it("Should return 401", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
-        .send(cashoutRequest);
 
       expect(response.status).toBe(UNAUTHORIZED);
     });
@@ -263,16 +271,17 @@ async function initialize() {
   depositRequests = [
     {
       tracking_number: TEST_DEPOSIT,
+      amount: 10,
+      date: "2024-03-11T03:00:00.000Z",
+      sending_bank: "90646",
     },
     {
       tracking_number: "test_tracking_number2" + Date.now(),
+      amount: 1,
+      date: "2024-03-11T03:00:00.000Z",
+      sending_bank: "40138",
     },
   ];
-
-  cashoutRequest = {
-    amount: 0.01,
-    bank_account: players[0].BankAccounts[0].id,
-  };
 
   confirmedDeposit = await prisma.deposit.create({
     data: {
@@ -281,34 +290,26 @@ async function initialize() {
       currency: "MXN",
       tracking_number: "test_tracking_number4" + Date.now(),
       amount: 0.01,
+      sending_bank: "foo",
+      date: new Date(),
     },
   });
+
+  const agentUser = await PlayersDAO.getAgent();
 
   const authServices = new AuthServices();
   const auth1 = await authServices.tokens(players[0].id, "jest_test");
   const auth2 = await authServices.tokens(players[1].id, "jest_test");
+  const auth3 = await authServices.tokens(agentUser!.id, "jest_test");
   tokens[0] = auth1.tokens;
   tokens[1] = auth2.tokens;
-
-  /**
-   * Clear latest cashouts
-   */
-  const dayInMs = 1000 * 60 * 60 * 24;
-  await prisma.payment.deleteMany({
-    where: {
-      player_id: players[0].id,
-      updated_at: { gte: new Date(Date.now() - dayInMs) },
-    },
-  });
+  agentAccessToken = auth3.tokens;
 }
 
 async function cleanUp() {
   try {
     await prisma.token.deleteMany({
-      where: { player_id: players[0].id },
-    });
-    await prisma.token.deleteMany({
-      where: { player_id: players[1].id },
+      where: { user_agent: "jest_test" },
     });
     await prisma.deposit.delete({ where: { id: confirmedDeposit.id } });
     await prisma.deposit.delete({ where: { id: deposits[0].id } });

@@ -50,7 +50,7 @@ export const validateBankAccountUpdate = () => {
   return checkSchema({
     name: optionalString,
     dni: optionalString,
-    bankName: optionalString,
+    bankId: optionalString,
     accountNumber: optionalString,
     clabe: optionalString,
     alias: optionalString,

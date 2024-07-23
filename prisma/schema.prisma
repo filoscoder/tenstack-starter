@@ -88,11 +88,11 @@ model Payment {
 
 model BankAccount {
   id                String        @id @default(uuid())
-  owner             String        // Nombre del beneficiario
+  owner             String                  // Nombre del beneficiario
   Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
-  player_id         String        // ID de Player
-  bankName          String        // Nombre del banco
-  bankNumber        String        // CBU
+  player_id         String                  // ID de Player
+  bankId            String                  // Como aparece en banxico
+  bankNumber        String        @unique   // CLABE
   bankAlias         String?       
   Payments          Payment[]
   created_at        DateTime      @default(now())
@@ -109,7 +109,10 @@ model Deposit {
   dirty             Boolean       @default(true)
   status            String
   tracking_number   String        @unique
-  amount            Float?         
+  amount            Float         
+  date              DateTime
+  sending_bank      String         
+  cep_ok            Boolean       @default(false)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 

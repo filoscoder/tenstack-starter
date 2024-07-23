@@ -35,6 +35,14 @@ agentRouter.post(
   paymentRateLimiter,
   AgentController.releasePayment,
 );
+agentRouter.post(
+  "/payments/:id/paid",
+  validatePaymentIndex(),
+  checkExact(),
+  throwIfBadRequest,
+  paymentRateLimiter,
+  AgentController.markPaymentAsPaid,
+);
 agentRouter.get("/bank-account", AgentController.getBankAccount);
 agentRouter.post(
   "/bank-account",

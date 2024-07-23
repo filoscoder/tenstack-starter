@@ -72,6 +72,8 @@ const CONFIG = {
     ALQ_TOKEN_URL: process.env.ALQ_TOKEN_URL,
     ALQ_SAVINGS_ACCOUNT_ID: Number(process.env.ALQ_SAVINGS_ACCOUNT_ID),
     ALQ_API_KEY: process.env.ALQ_API_KEY,
+    TELEGRAM_BOT_KEY: process.env.TELEGRAM_BOT_KEY,
+    TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
   },
   INTERNAL: {
     BOT_API_PORT: process.env.BOT_API_PORT,

@@ -39,7 +39,7 @@ Comes with:
 + [Ver Depósitos Pendientes](#ver-depósitos-pendientes-)
 + [Ver Depósito](#ver-depósito-)
 + [Listar Depósitos](#listar-depósitos-)
-+ [Editar Depósito]()
++ [Editar Depósito](#editar-número-de-seguimiento-)
 + [Ver Cuenta Bancaria de Alquimia](#ver-cuenta-alquimia-)
 
 ### Pagos (plataforma ➡ jugador)
@@ -49,7 +49,7 @@ Comes with:
 ### Agente
 + [Login de Agente](#login-agente)
 + [Marcar Pago Como Completado](#marcar-pago-como-completado-)
-
++ [Liberar Pago](#liberar-pago-)
 + [Ver QR](#ver-qr-)
 + [Ver Cuenta Bancaria](#ver-cuenta-bancaria-)
 + [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-)
@@ -296,6 +296,15 @@ Método      |`POST`
 Devuelve    |[`Payment`](#payment)
 Requiere rol| agent
 
+### Liberar Pago 🔒
+Transferir desde alquimia a la cuenta del jugador
+
+|Endpoint| `/agent/payments/:id/release`|
+---|---|
+Método      |`POST`
+Devuelve    |[`Payment`](#payment)
+Requiere rol| agent
+
 ### Ver Depósito 🔒
 
 |Endpoint| `/transactions/deposit/:id`|
@@ -314,13 +323,23 @@ Query string| [`ResourceListQueryString`](#ResourceListQueryString)
 Devuelve    |[`Deposit[]`](#deposit)
 Requiere rol| agent
 
-### Editar Depósito 🔒
-Endpoint para que el agente modifique el `trackin_number` de un depósito y dispare el flujo de verificación.
+### Editar Número de seguimiento 🔒
+Endpoint para que el agente modifique el `tracking_number` de un depósito y dispare el flujo de verificación.
 
 |Endpoint| `/transactions/deposit/:id`|
 ---|---|
 Método      |`POST`
 Body (json) | [`EditDepositRequest`](#editdepositrequest)
+Devuelve    |[`DepositResult`](#depositresult)
+Requiere rol| agent
+
+### Editar Depósito 🔒
+Para que el agente marque un depósito como pagado
+
+|Endpoint| `/transactions/deposit/:id/update`|
+---|---|
+Método      |`POST`
+Body (json) | [`EditDepositStatusRequest`](#editdepositstatusrequest)
 Devuelve    |[`Deposit`](#deposit)
 Requiere rol| agent
 
@@ -547,7 +566,7 @@ Devuelve | [`AnalyticsSummary[]`]()
 ```typescript
 {
   owner: string                       // Nombre del beneficiario
-  bankName: string                    // Nombre del banco
+  bankId: string                    // Nombre del banco
   bankNumber: string                  // CBU
   bankAlias: string?   
 }
@@ -559,7 +578,7 @@ Devuelve | [`AnalyticsSummary[]`]()
   id: string        
   owner: string                       // Nombre del beneficiario
   player_id: string                   // ID de Player
-  bankName: string                    // Nombre del banco
+  bankId: string                    // Nombre del banco
   bankNumber: string                  // CBU
   bankAlias: string?       
   created_at: datetime                // 2024-01-29T18:14:41.534Z
@@ -579,6 +598,9 @@ Devuelve | [`AnalyticsSummary[]`]()
 ```typescript
 {
   tracking_number: string;
+  amount: number;
+  date: datetime;                     // 2024-01-29T18:14:41.534Z 
+  sending_bank: string;               // valid bank ID
 }
 ```
 
@@ -628,7 +650,14 @@ Estado de transferencia de fichas
 ### EditDepositRequest
 ```typescript
 {
-  trackin_number: string
+  tracking_number: string
+}
+```
+
+### EditDepositStatusRequest
+```typescript
+{
+  status: "pending"|"verified"|"confirmed"|"completed"|"deleted"
 }
 ```
 
@@ -651,7 +680,7 @@ Estado de transferencia de fichas
 {
   name: string
   dni: string
-  bankName: string
+  bankId: string
   accountNumber: string
   clabe: string
   alias: string
@@ -800,7 +829,15 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 
 - Ambientes staging y prod en, bot-timba y alquimia
 - Cambiar start-staging por start:production en timba-api scripts
-- Boletear todo lo relacionado al bot de este repo
+- Generar allowed origin dinamicamente en producción para incluir localhost
+- Caracter invisible en metricas bot
+- Chequear que la lista de bancos no cambie
+
+### Bono
+- Tabla de bonos con diferentes tipos de bono
+- Cargar bono en la primer carga de crédito
+- Endpoint para transferir bono a saldo. Chequear si ya hizo un retiro, si ya hizo retiro, no se puede usar el bono.
+
 
 ### Fichas insuficientes
 
@@ -906,6 +943,56 @@ Datos que necesitamos saber:
 
 - Cuales son los distintos valores posibles, y que significan, del campo `estatus` en la respuesta de `/consulta-estatus-tx`
 - Cuales son los valores posibles, y que significan, del campo `estatus_transaccion` en la respuesta de `/cuenta-ahorro-cliente/$ACCOUNT_ID/transaccion`
+
+## Banxico
+
+### Verificar transferencia
+
+Enviar el siguiente pedido y guardar la cookie JSESSIONID de la respuesta
+```bash
+curl -X POST \
+-i \
+https://www.banxico.org.mx/cep/valida.do \
+-d 'tipoCriterio=T&fecha=11-03-2024&criterio=53771ALBO11032024195558814&emisor=90646&receptor=90659&cuenta=659437001005389354&receptorParticipante=0&monto=10&captcha=c&tipoConsulta=1' 
+```
+
+Despues
+```bash
+curl https://www.banxico.org.mx/cep/descarga.do?formato=XML \
+-H "Cookie: JSESSIONID=$JSESSIONID"
+```
+
+Respesta
+```xml
+<SPEI_Tercero 
+  FechaOperacion="2024-03-11" 
+  Hora="13:56:07" 
+  ClaveSPEI="90659" 
+  sello="DbcZSGP5NnDGhmfHt+2wBv1+tdOorVXVdM4rktrhjycj1okIAcgQSM7B3glPe6DEB9nsNZ6iM4ckjjwcdn1q0ub9aOi8qHwg1vuBDr+nmv00+VwKNGX/vDcIosPk2NzHW5pAYYeHQy+WINzFtSgJx4o30dK7rtlGFjWNfaLRKQC0Cau4E1KLWZ+AP8iYjC5CLJEHL2VZhcbJaUivupJ40bP1Idh1bOI1me+F2GQ4sQuuqms8vzMPX1wIsweqFCqysco8ycO1RaFCs0OsZ8Ij9delh3jZG8QftYwdLGjM6XOh85MoRs4P7HoMrOw07S9SzB6NNyZa+YgP2lpdUXq/eA==" 
+  numeroCertificado="00001000000505544848" 
+  cadenaCDA="||1|11032024|11032024|135607|90659|STP|CAROLINA MARUZZA|40|646180146003556692|MAXC720729MNERXR07|ASP INTEGRA OPC|TECHNOLOGY AND INTEROPERABILITY SA DE CV|40|659437001005389354|TIN160223BC2|sin concepto|0.00|10.00|NA|NA|0|0|NA|0|0.00|00001000000505544848||DbcZSGP5NnDGhmfHt+2wBv1+tdOorVXVdM4rktrhjycj1okIAcgQSM7B3glPe6DEB9nsNZ6iM4ckjjwcdn1q0ub9aOi8qHwg1vuBDr+nmv00+VwKNGX/vDcIosPk2NzHW5pAYYeHQy+WINzFtSgJx4o30dK7rtlGFjWNfaLRKQC0Cau4E1KLWZ+AP8iYjC5CLJEHL2VZhcbJaUivupJ40bP1Idh1bOI1me+F2GQ4sQuuqms8vzMPX1wIsweqFCqysco8ycO1RaFCs0OsZ8Ij9delh3jZG8QftYwdLGjM6XOh85MoRs4P7HoMrOw07S9SzB6NNyZa+YgP2lpdUXq/eA==" 
+  claveRastreo="53771ALBO11032024195558814">
+    <Beneficiario 
+      BancoReceptor="ASP INTEGRA OPC" 
+      Nombre="TECHNOLOGY AND INTEROPERABILITY SA DE CV" 
+      TipoCuenta="40" 
+      uenta="659437001005389354" 
+      RFC="TIN160223BC2" 
+      Concepto="sin concepto" 
+      IVA="0.00" 
+      MontoPago="10.00"/>
+    <Ordenante 
+      BancoEmisor="STP" 
+      Nombre="CAROLINA MARUZZA" 
+      TipoCuenta="40" 
+      Cuenta="646180146003556692" 
+      RFC="MAXC720729MNERXR07"/>
+</SPEI_Tercero>
+```
+
+Sacar el valor del atributo `MontoPago` del elemento `Beneficiario`
+
+
 
 ## Password restoration checklist
 

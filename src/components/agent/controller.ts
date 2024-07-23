@@ -33,6 +33,18 @@ export class AgentController {
     }
   }
 
+  static async markPaymentAsPaid(req: Req, res: Res, next: NextFn) {
+    try {
+      const { id } = req.params;
+
+      const payment = await AgentServices.markPaymentAsPaid(id);
+
+      res.status(OK).json(apiResponse(payment));
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async getBankAccount(_req: Req, res: Res, next: NextFn) {
     try {
       const bankAccount = await AgentServices.getBankAccount();
