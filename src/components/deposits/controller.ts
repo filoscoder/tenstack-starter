@@ -3,7 +3,10 @@ import { Deposit, Player } from "@prisma/client";
 import { DepositServices } from "./services";
 import { DepositsDAO } from "@/db/deposits";
 import { apiResponse } from "@/helpers/apiResponse";
-import { DepositRequest } from "@/types/request/transfers";
+import {
+  DepositRequest,
+  DepositUpdateRequest,
+} from "@/types/request/transfers";
 import { DepositResult } from "@/types/response/transfers";
 import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 import { hidePassword } from "@/utils/auth";
@@ -66,6 +69,20 @@ export class DepositController {
         result = await depositServices.confirm(player, deposit_id, request);
       }
 
+      res.status(OK).json(apiResponse(result));
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  static readonly update = async (req: Req, res: Res, next: NextFn) => {
+    const deposit_id = req.params.id;
+    const request: DepositUpdateRequest = req.body;
+    const agent = req.user!;
+
+    const depositServices = new DepositServices();
+    try {
+      const result = await depositServices.update(agent, deposit_id, request);
       res.status(OK).json(apiResponse(result));
     } catch (e) {
       next(e);

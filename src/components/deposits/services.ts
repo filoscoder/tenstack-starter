@@ -1,10 +1,13 @@
-import { Deposit, Player } from "@prisma/client";
+import { Deposit, Player, Role } from "@prisma/client";
 import CONFIG from "@/config";
 import { ERR } from "@/config/errors";
 import { DepositsDAO } from "@/db/deposits";
 import { CustomError } from "@/helpers/error/CustomError";
 import { CasinoCoinsService } from "@/services/casino-coins.service";
-import { DepositRequest } from "@/types/request/transfers";
+import {
+  DepositRequest,
+  DepositUpdateRequest,
+} from "@/types/request/transfers";
 import { PlainPlayerResponse, RoledPlayer } from "@/types/response/players";
 import { CoinTransferResult, DepositResult } from "@/types/response/transfers";
 import { hidePassword } from "@/utils/auth";
@@ -35,6 +38,17 @@ export class DepositServices extends ResourceService {
 
     return await this.finalizeDeposit(deposit);
   }
+
+  async update(
+    agent: Player & { roles: Role[] },
+    deposit_id: string,
+    request: DepositUpdateRequest,
+  ): Promise<Deposit> {
+    await DepositsDAO.authorizeUpdate(deposit_id, agent);
+
+    return await DepositsDAO.update(deposit_id, { ...request, dirty: false });
+  }
+
   /**
    * Player announces they have completed a pending deposit
    */
@@ -55,29 +69,36 @@ export class DepositServices extends ResourceService {
   }
 
   /**
-   * Verify a deposit and send coins to player if deposit confirmed
+   * @throws DepositResult
    */
-  async finalizeDeposit(
+  async verify(
+    deposit: Deposit & { Player: Player },
+  ): Promise<Deposit & { Player: Player }> {
+    if (
+      deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED ||
+      deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED
+    )
+      return deposit;
+
+    const amount = await this.verifyThroughBanxico(deposit);
+    if (!amount) {
+      throw {
+        error: "Deposito no confirmado",
+        deposit: await this.markAsPending(deposit),
+      } as DepositResult;
+    }
+    return await this.markAsVerified(deposit, amount);
+  }
+
+  async transfer(
     deposit: Deposit & { Player: Player },
   ): Promise<DepositResult> {
-    if (
-      deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED &&
-      deposit.status !== CONFIG.SD.DEPOSIT_STATUS.CONFIRMED
-    ) {
-      const amount = await this.verifyThroughBanxico(deposit);
-      if (!amount) {
-        return {
-          error: "Deposito no confirmado",
-          deposit: await this.markAsPending(deposit),
-        };
-      }
-      deposit = await this.markAsVerified(deposit, amount);
-    }
     let coinTransferResult: CoinTransferResult = { ok: false };
     try {
       const casinoCoinsService = new CasinoCoinsService();
       coinTransferResult = await casinoCoinsService.agentToPlayer(deposit);
       if (coinTransferResult.ok) deposit = await this.markAsCompleted(deposit);
+      else deposit = await DepositsDAO.update(deposit.id, { dirty: false });
     } catch (e) {
       if (CONFIG.LOG.LEVEL === "debug") console.error(e);
       if (e instanceof CustomError && e.code === ERR.TRANSACTION_LOG.code)
@@ -92,6 +113,20 @@ export class DepositServices extends ResourceService {
       error: coinTransferResult?.error,
       deposit,
     };
+  }
+
+  /**
+   * Verify a deposit and send coins to player if deposit confirmed
+   */
+  async finalizeDeposit(
+    deposit: Deposit & { Player: Player },
+  ): Promise<DepositResult> {
+    try {
+      deposit = await this.verify(deposit);
+      return await this.transfer(deposit);
+    } catch (e) {
+      return e as DepositResult;
+    }
   }
 
   /**
@@ -140,6 +175,7 @@ export class DepositServices extends ResourceService {
 
   /**
    * Verify receipt of Player's deposit through Banxico.
+   * @throws DepositResult
    */
   public async verifyThroughBanxico(
     deposit: Deposit,
@@ -151,6 +187,17 @@ export class DepositServices extends ResourceService {
       return deposit.amount!;
 
     const banxicoService = new BanxicoService();
+
+    if (deposit.sending_bank === "-1") {
+      const bank = await banxicoService.findBank(deposit);
+      if (!bank)
+        throw {
+          error: "Banco no encontrado",
+          deposit: await this.markAsPending(deposit),
+        } as DepositResult;
+      deposit = await DepositsDAO.update(deposit.id, { sending_bank: bank });
+    }
+
     try {
       const amount = await banxicoService.verifyDeposit(deposit);
 
@@ -175,7 +222,6 @@ export class DepositServices extends ResourceService {
     amount: number,
   ): Promise<Deposit & { Player: Player }> {
     return DepositsDAO.update(deposit.id, {
-      dirty: false,
       status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED,
       amount,
     });
