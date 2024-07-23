@@ -229,6 +229,10 @@ export class BanxicoService {
         event: "deposit_amount_mismatch",
       });
     } else {
+      await AnalyticsDAO.create({
+        source: "cep",
+        event: "allisgood",
+      });
       await DepositsDAO.update(deposit.id, { cep_ok: true });
       return;
     }
