@@ -246,6 +246,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
         "country",
         "balance_currency",
         "status",
+        "bonus_id",
         "created_at",
         "updated_at",
       ]);
@@ -293,6 +294,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
         "country",
         "balance_currency",
         "status",
+        "bonus_id",
         "created_at",
         "updated_at",
         "BankAccounts",
@@ -330,26 +332,33 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
     });
   });
 
-  describe("GET: /players/:id", () => {
-    it("Should return player info", async () => {
+  describe("GET: /players/:id/balance", () => {
+    const mockGetBalance = jest.fn(async () => 420);
+    jest
+      .spyOn(PlayerServices.prototype, "getBalance")
+      .mockImplementation(mockGetBalance);
+    it("Should return player balance", async () => {
       const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/players/${playerId}`)
+        .get(`/app/${CONFIG.APP.VER}/players/${playerId}/balance`)
         .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(OK);
-      expect(response.body.data[0].id).toBe(playerId);
+      expect(mockGetBalance).toHaveBeenCalledTimes(1);
+      expect(response.body.data).toBe(420);
     });
 
     it("Should return 401", async () => {
       const response = await agent.get(
-        `/app/${CONFIG.APP.VER}/players/${playerId}`,
+        `/app/${CONFIG.APP.VER}/players/${playerId}/balance`,
       );
 
       expect(response.status).toBe(UNAUTHORIZED);
     });
 
-    it("Should return 403", async () => {
-      const response = await agent.get(`/app/${CONFIG.APP.VER}/players/abcd`);
+    it("Should return 404", async () => {
+      const response = await agent.get(
+        `/app/${CONFIG.APP.VER}/players/nonexistent/balance`,
+      );
 
       expect(response.status).toBe(UNAUTHORIZED);
     });

@@ -6,7 +6,11 @@ import {
   PlayerRequest,
   PlayerUpdateRequest,
 } from "@/types/request/players";
-import { PlainPlayerResponse } from "@/types/response/players";
+import {
+  CertainUserResponse,
+  PlainPlayerResponse,
+  RoledPlayer,
+} from "@/types/response/players";
 import { compare, hash } from "@/utils/crypt";
 import { hidePassword } from "@/utils/auth";
 import { HttpService } from "@/services/http.service";
@@ -197,5 +201,25 @@ export class PlayerServices extends ResourceService {
       await TokenDAO.update({ player_id }, { invalid: true });
 
     return hidePassword(player);
+  }
+
+  async getBalance(player_id: string, player: RoledPlayer): Promise<Number> {
+    // const player = await PlayersDAO.getById(player_id);
+    await PlayersDAO.authorizeShow(player, player_id);
+
+    const httpService = new HttpService();
+    const response = await httpService.authedAgentApi.get<CertainUserResponse>(
+      `/pyramid/certain-user/${player.panel_id}`,
+    );
+    console.log("\nRESPONSE\n", response.data);
+    if (response.status !== 200)
+      throw new AgentApiError(
+        response.status,
+        "Error en el casino al obtener info de jugador",
+        response.data,
+      );
+
+    return Number(response.data.balance);
+    // return player.balance;
   }
 }

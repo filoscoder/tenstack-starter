@@ -29,6 +29,7 @@ export const isKeyOfDeposit = (key: string): key is keyof Deposit => {
       country: "",
       balance_currency: "",
       status: "",
+      bonus_id: null,
       created_at: new Date(),
       updated_at: new Date(),
     },

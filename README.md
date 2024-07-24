@@ -26,6 +26,7 @@ Comes with:
 + [Crear Jugador](#crear-jugador)
 + [Editar Jugador](#editar-jugador-)
 + [Login de Jugador](#login-jugador)
++ [Consultar Balance]
 
 
 ### Cuentas Bancarias
@@ -128,6 +129,18 @@ Requiere rol| agent
 Método      |`POST`
 Body (json) | [`Credenciales`](#credenciales)
 Devuelve    | [`LoginResponse`](#loginresponse)
+
+### Consultar Balance 🔒
+
+|Endpoint| `/players/:id/balance`|
+---|---|
+Método      |`GET`
+<!-- Body (json) | [`Credenciales`](#credenciales) -->
+Devuelve    | [`Number`]
+
+
+Cuentas Bancarias
+-----------------
 
 ### Ver Cuentas Bancarias 🔒
 
@@ -834,9 +847,10 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Chequear que la lista de bancos no cambie
 
 ### Bono
-- Tabla de bonos con diferentes tipos de bono
-- Cargar bono en la primer carga de crédito
+- Tabla de bonos => un bono por jugador
+- Cargar bono en la primer carga de crédito, dependiendo de si se cumple condicion (por ahora la condicion se cumple siempre)
 - Endpoint para transferir bono a saldo. Chequear si ya hizo un retiro, si ya hizo retiro, no se puede usar el bono.
+- Endpoint de jugador para ver balance
 
 
 ### Fichas insuficientes
