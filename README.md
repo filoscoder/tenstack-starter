@@ -848,6 +848,8 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Cargar bono en la primer carga de crédito, dependiendo de si se cumple condicion (por ahora la condicion se cumple siempre)
 - Endpoint para transferir bono a saldo. Chequear si ya hizo un retiro, si ya hizo retiro, no se puede usar el bono.
 
+Crear bono a partir de `player_id` => `/transactions/cashout` invalida el bono => POST `/players/:id/redeem-bonus` transfiere bono a balance si bono.status !== unavailable
+
 
 ### Fichas insuficientes
 

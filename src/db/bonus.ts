@@ -1,4 +1,4 @@
-import { Bonus, Player, PrismaClient } from "@prisma/client";
+import { Bonus, Player, Prisma, PrismaClient } from "@prisma/client";
 import { ForbiddenError, NotFoundException } from "@/helpers/error";
 import { hidePassword } from "@/utils/auth";
 import CONFIG from "@/config";
@@ -88,6 +88,23 @@ export class BonusDAO {
         where: { id },
         data,
         include: { Player: true },
+      });
+      return bonus;
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static async updateWhere(
+    where: Prisma.BonusWhereUniqueInput,
+    data: BonusUpdatableProps,
+  ): Promise<Bonus> {
+    try {
+      const bonus = await prisma.bonus.update({
+        where,
+        data,
       });
       return bonus;
     } catch (error) {
