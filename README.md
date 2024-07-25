@@ -135,7 +135,6 @@ Devuelve    | [`LoginResponse`](#loginresponse)
 |Endpoint| `/players/:id/balance`|
 ---|---|
 Método      |`GET`
-<!-- Body (json) | [`Credenciales`](#credenciales) -->
 Devuelve    | [`Number`]
 
 
@@ -844,13 +843,10 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Cambiar start-staging por start:production en timba-api scripts
 - Generar allowed origin dinamicamente en producción para incluir localhost
 - Caracter invisible en metricas bot
-- Chequear que la lista de bancos no cambie
 
 ### Bono
-- Tabla de bonos => un bono por jugador
 - Cargar bono en la primer carga de crédito, dependiendo de si se cumple condicion (por ahora la condicion se cumple siempre)
 - Endpoint para transferir bono a saldo. Chequear si ya hizo un retiro, si ya hizo retiro, no se puede usar el bono.
-- Endpoint de jugador para ver balance
 
 
 ### Fichas insuficientes

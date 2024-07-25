@@ -113,6 +113,16 @@ const CONFIG = {
       /** Error */
       ERROR: "error",
     },
+    BONUS_STATUS: {
+      /** Player signed up and bonus was assigned (amount = 0) */
+      ASSIGNED: "asignado",
+      /** Bonus was loaded into Player's account, not yet redeemed */
+      PENDING: "pendiente",
+      /** Bonus has been used */
+      REDEEMED: "canjeado",
+      /** Unavailable */
+      UNAVAILABLE: "no_disponible",
+    },
     ENVIRONMENTS: {
       TEST: "test",
       DEV: "development",
