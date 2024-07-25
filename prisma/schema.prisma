@@ -58,7 +58,6 @@ model Player {
   BankAccounts        BankAccount[]
   balance_currency    String        @db.VarChar(10) @default("MXN")
   status              String?       @db.VarChar(20) @default("ACTIVO")
-  bonus_id            String?       
   Payments            Payment[]       
   Deposits            Deposit[]
   Tokens              Token[]

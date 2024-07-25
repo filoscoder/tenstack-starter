@@ -1,6 +1,9 @@
-export type CreateBonusProps = {
+export type BonusSettings = {
   percentage: number;
   amount: number;
+};
+
+export type CreateBonusProps = BonusSettings & {
   player_id: string;
   status?: string;
 };

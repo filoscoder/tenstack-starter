@@ -5,7 +5,6 @@ import { BonusDAO } from "@/db/bonus";
 import { apiResponse } from "@/helpers/apiResponse";
 import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 import { hidePassword } from "@/utils/auth";
-import { CreateBonusProps } from "@/types/request/bonus";
 
 export class BonusController {
   static readonly index = async (req: Req, res: Res, next: NextFn) => {
@@ -51,28 +50,14 @@ export class BonusController {
   };
 
   static readonly create = async (req: Req, res: Res, next: NextFn) => {
-    const request: CreateBonusProps = req.body;
-    const player = req.user!;
+    const { player_id } = req.body;
 
     const bonusServices = new BonusServices();
     try {
-      const bonus = await bonusServices.create(request, player.id);
+      const bonus = await bonusServices.create(player_id);
       res.status(OK).json(apiResponse(bonus));
     } catch (e) {
       next(e);
     }
   };
-
-  // static readonly update = async (req: Req, res: Res, next: NextFn) => {
-  //   const bonus_id = req.params.id;
-  //   const request: BonusUpdatableProps = req.body;
-
-  //   const bonusServices = new BonusServices();
-  //   try {
-  //     const result = await bonusServices.update(agent, bonus_id, request);
-  //     res.status(OK).json(apiResponse(result));
-  //   } catch (e) {
-  //     next(e);
-  //   }
-  // };
 }

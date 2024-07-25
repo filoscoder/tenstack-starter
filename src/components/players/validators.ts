@@ -45,7 +45,6 @@ export const isKeyOfPlayer = (key: string): key is keyof Player => {
     country: "",
     balance_currency: "",
     status: "",
-    bonus_id: null,
     created_at: new Date(),
     updated_at: new Date(),
   };

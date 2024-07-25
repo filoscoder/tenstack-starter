@@ -23,7 +23,6 @@ export const isKeyOfBonus = (key: string): key is keyof Bonus => {
       country: "",
       balance_currency: "",
       status: "",
-      bonus_id: null,
       created_at: new Date(),
       updated_at: new Date(),
     },
@@ -45,17 +44,6 @@ export const validateBonusId = () =>
 
 export const validateBonusCreateRequest = () =>
   checkSchema({
-    amount: {
-      in: ["body"],
-      isInt: true,
-      isEmpty: false,
-    },
-    percentage: {
-      in: ["body"],
-      isInt: true,
-      isEmpty: false,
-      custom: { options: (val) => val >= 0 && val <= 100 },
-    },
     player_id: {
       in: ["body"],
       isString: true,
