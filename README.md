@@ -81,6 +81,12 @@ Comes with:
 + [Crear](#crear-analytics)
 + [Resumen](#resumen-de-analytics)
 
+### Bonus
++ [Listar Bonos](#listar-bonos-)
++ [Ver Bono](#ver-bono-)
++ [Crear Bono](#crear-bono-)
++ [Canjear Bono]()
+
 ### [Interfaces](#interfaces-1)
 
 ### [Despliegue](#despliegue-1)
@@ -191,6 +197,7 @@ Método      |`POST`
 Body (json) |[`DepositRequest`](#depositrequest)
 Devuelve    |[`DepositResult`](#depositresult)
 Requiere rol| player
+Rate-limited|1 every 10 seconds
 
 ### Retirar Premios 🔒
 
@@ -502,6 +509,42 @@ Requiere rol| agent
 Método      |`GET`
 Devuelve | [`AnalyticsSummary[]`]()
 
+Bonos
+-----
+
+### Listar Bonos 🔒
+
+|Endpoint| `/bonus`|
+---|---|
+Método      |`GET`
+Query string| [`ResourceListQueryString`](#ResourceListQueryString)
+Devuelve    |[`Bonus[]`](#bonus)
+Requiere rol| agent
+
+### Ver Bono 🔒
+Sólo muestra el bono si pertenece al usuario logueado o si el usuario logueado es agente
+
+|Endpoint| `/bonus/:id`|
+---|---|
+Método      |`GET`
+Devuelve    |[`Bonus[]`](#bonus)
+
+### Crear Bono 🔒
+
+|Endpoint| `/bonus/:id`|
+---|---|
+Método      |`POST`
+Body (json) |`{ player_id: string }`
+Devuelve    |[`Bonus[]`](#bonus)
+Requiere rol| player
+
+### Canjear Bono 🔒
+
+|Endpoint| `/bonus/:id/redeem`|
+---|---|
+Método      |`GET`
+Devuelve    |[`BonusRedemptionResult`](#bonusredemptionresult)
+Requiere rol| player
 
 ## Interfaces
 
@@ -803,6 +846,29 @@ Estado de transferencia de fichas
   _count: { event: number };
   source: string;
   event: string;
+}
+```
+
+### Bonus
+```typescript
+{
+  id: string
+  player_id: string
+  Player: Player
+  status: string
+  percentage: number  
+  amount: number  
+  created_at: DateTime
+  updated_at: DateTime
+}
+```
+
+### BonusRedemptionResult
+```typescript
+{
+  player_balance: number?             // undefined en caso de fichas no transferidas
+  error: string?                      // En caso de error, el motivo
+  bonus: Bonus
 }
 ```
 

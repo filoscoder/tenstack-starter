@@ -34,7 +34,7 @@ export const isKeyOfBonus = (key: string): key is keyof Bonus => {
 
 export const validateBonusId = () =>
   checkSchema({
-    bonus_id: {
+    id: {
       in: ["params"],
       isString: true,
       isEmpty: false,

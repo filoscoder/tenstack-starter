@@ -1,5 +1,5 @@
 import { Bonus, Deposit, Player } from "@prisma/client";
-import { OK } from "http-status";
+import { CREATED, OK } from "http-status";
 import { BonusServices } from "./services";
 import { BonusDAO } from "@/db/bonus";
 import { apiResponse } from "@/helpers/apiResponse";
@@ -55,6 +55,19 @@ export class BonusController {
     const bonusServices = new BonusServices();
     try {
       const bonus = await bonusServices.create(player_id);
+      res.status(CREATED).json(apiResponse(bonus));
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  static readonly redeem = async (req: Req, res: Res, next: NextFn) => {
+    const bonusId = req.params.id;
+    const user = req.user!;
+
+    const bonusServices = new BonusServices();
+    try {
+      const bonus = await bonusServices.redeem(bonusId, user);
       res.status(OK).json(apiResponse(bonus));
     } catch (e) {
       next(e);

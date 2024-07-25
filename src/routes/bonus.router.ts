@@ -26,12 +26,19 @@ bonusRouter.get(
 );
 bonusRouter.get(
   "/:id",
-  validateBonusId,
+  validateBonusId(),
   checkExact(),
   throwIfBadRequest,
   BonusController.show,
 );
 bonusRouter.use(requireUserRole);
+bonusRouter.get(
+  "/:id/redeem",
+  validateBonusId(),
+  checkExact(),
+  throwIfBadRequest,
+  BonusController.redeem,
+);
 bonusRouter.post(
   "/",
   validateBonusCreateRequest(),

@@ -1,6 +1,5 @@
 import { Bonus, Player, Prisma, PrismaClient } from "@prisma/client";
 import { ForbiddenError, NotFoundException } from "@/helpers/error";
-import { hidePassword } from "@/utils/auth";
 import CONFIG from "@/config";
 import { OrderBy } from "@/types/request/players";
 import { BonusUpdatableProps, CreateBonusProps } from "@/types/request/bonus";
@@ -56,21 +55,14 @@ export class BonusDAO {
     return prisma.bonus.count();
   }
 
-  /**
-   * Create a DB entry for a deposit
-   */
-  static async create(
-    data: CreateBonusProps,
-  ): Promise<Bonus & { Player: Player }> {
+  static async create(data: CreateBonusProps): Promise<Bonus> {
     try {
       const bonus = await prisma.bonus.create({
         data: {
           ...data,
           status: data.status ?? CONFIG.SD.BONUS_STATUS.ASSIGNED,
         },
-        include: { Player: true },
       });
-      bonus.Player = hidePassword(bonus.Player);
       return bonus;
     } catch (error) {
       throw error;
@@ -156,5 +148,37 @@ export class BonusDAO {
     } finally {
       prisma.$disconnect();
     }
+  }
+
+  static async authorizeRedemption(
+    bonusId: string,
+    user: Player,
+  ): Promise<Bonus & { Player: Player }> {
+    const authorized = await prisma.$transaction(async (tx) => {
+      const bonus = await tx.bonus.findUnique({
+        where: { id: bonusId },
+        include: { Player: true },
+      });
+
+      if (!bonus) throw new NotFoundException("Bonus not found");
+
+      if (bonus.Player.id !== user.id) throw new ForbiddenError("Unauthorized");
+
+      if (bonus.status === CONFIG.SD.BONUS_STATUS.UNAVAILABLE)
+        throw new ForbiddenError("Bono no disponible");
+
+      if (bonus.status === CONFIG.SD.BONUS_STATUS.REDEEMED)
+        throw new ForbiddenError("Bono ya canjeado");
+
+      if (bonus.status === CONFIG.SD.BONUS_STATUS.ASSIGNED)
+        throw new ForbiddenError("Bono vacio");
+
+      return await tx.bonus.update({
+        where: { id: bonusId },
+        data: { status: CONFIG.SD.BONUS_STATUS.REDEEMED },
+        include: { Player: true },
+      });
+    });
+    return authorized;
   }
 }
