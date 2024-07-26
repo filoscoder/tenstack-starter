@@ -27,8 +27,7 @@ Comes with:
 + [Editar Jugador](#editar-jugador-)
 + [Login de Jugador](#login-jugador)
 + [Consultar Balance](#consultar-balance-)
-+ [Consultar Bono]()
-
++ [Consultar Bono](#consultar-bono-)
 
 ### Cuentas Bancarias
 + [Ver Cuentas Bancarias](#ver-cuentas-bancarias-)
@@ -339,7 +338,6 @@ Requiere rol| agent
 |Endpoint| `/transactions/deposit/:id`|
 ---|---|
 Método      |`GET`
-Query string| [`ResourceListQueryString`](#ResourceListQueryString)
 Devuelve    |[`Deposit[]`](#deposit)
 Requiere rol| agent
 
@@ -492,16 +490,15 @@ Analytics
 |Endpoint| `/analytics/`|
 ---|---|
 Método      |`GET`
+Query string| [`ResourceListQueryString`](#ResourceListQueryString)
 Devuelve    |[`Analytics[]`](#analytics-2)
-Requiere rol| agent
 
 ### Ver Analytics
 
 |Endpoint| `/analytics/:id`|
 ---|---|
 Método      |`GET`
-Devuelve    |[`Analytics`](#analytics-2)
-Requiere rol| agent
+Devuelve    |[`Analytics[]`](#analytics-2)
 
 ### Crear Analytics
 
@@ -510,14 +507,13 @@ Requiere rol| agent
 Método      |`POST`
 Body (json) | [`AnalyticsRequest`](#analyticsrequest)
 Devuelve    |`Analytics`
-Requiere rol| agent
 
 ### Resumen de Analytics
 
 |Endpoint| `/analytics/summary`|
 ---|---|
 Método      |`GET`
-Devuelve | [`AnalyticsSummary[]`]()
+Devuelve    | [`AnalyticsSummary[]`]()
 
 Bonos
 -----
@@ -545,7 +541,7 @@ Devuelve    |[`Bonus[]`](#bonus-1)
 ---|---|
 Método      |`POST`
 Body (json) |`{ player_id: string }`
-Devuelve    |[`Bonus[]`](#bonus-1)
+Devuelve    |[`Bonus`](#bonus-1)
 Requiere rol| player
 
 ### Canjear Bono 🔒
