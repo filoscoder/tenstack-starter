@@ -115,13 +115,13 @@ const CONFIG = {
     },
     BONUS_STATUS: {
       /** Player signed up and bonus was assigned (amount = 0) */
-      ASSIGNED: "asignado",
+      ASSIGNED: "assigned",
       /** Bonus was loaded into Player's account, not yet redeemed */
-      PENDING: "pendiente",
+      PENDING: "pending",
       /** Bonus has been used */
-      REDEEMED: "canjeado",
+      REDEEMED: "redeemed",
       /** Unavailable */
-      UNAVAILABLE: "no_disponible",
+      UNAVAILABLE: "unavailable",
     },
     ENVIRONMENTS: {
       TEST: "test",
