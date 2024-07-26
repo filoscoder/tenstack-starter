@@ -51,6 +51,16 @@ export class BonusDAO {
     }
   }
 
+  static findMany(where: Prisma.BonusWhereInput) {
+    try {
+      return prisma.bonus.findMany({ where });
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
   static async count() {
     return prisma.bonus.count();
   }

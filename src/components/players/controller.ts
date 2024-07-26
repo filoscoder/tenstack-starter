@@ -139,4 +139,19 @@ export class PlayersController {
       next(error);
     }
   };
+
+  static async getBonus(req: Req, res: Res, next: NextFn) {
+    try {
+      const playersServices = new PlayerServices();
+
+      const playerId = req.params.id;
+      const user = req.user!;
+
+      const bonus = await playersServices.getBonus(playerId, user);
+
+      res.status(OK).json(apiResponse(bonus));
+    } catch (error) {
+      next(error);
+    }
+  }
 }

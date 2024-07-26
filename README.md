@@ -26,7 +26,8 @@ Comes with:
 + [Crear Jugador](#crear-jugador)
 + [Editar Jugador](#editar-jugador-)
 + [Login de Jugador](#login-jugador)
-+ [Consultar Balance]
++ [Consultar Balance](#consultar-balance-)
++ [Consultar Bono]()
 
 
 ### Cuentas Bancarias
@@ -142,6 +143,15 @@ Devuelve    | [`LoginResponse`](#loginresponse)
 ---|---|
 Método      |`GET`
 Devuelve    | [`Number`]
+
+### Consultar Bono 🔒
+
+|Endpoint| `/players/:id/bonus`|
+---|---|
+Método      |`GET`
+Devuelve    | [`Bonus[]`](#bonus-1)
+
+> **❗Nota**: devuelve un array.
 
 
 Cuentas Bancarias
@@ -518,7 +528,7 @@ Bonos
 ---|---|
 Método      |`GET`
 Query string| [`ResourceListQueryString`](#ResourceListQueryString)
-Devuelve    |[`Bonus[]`](#bonus)
+Devuelve    |[`Bonus[]`](#bonus-1)
 Requiere rol| agent
 
 ### Ver Bono 🔒
@@ -527,7 +537,7 @@ Sólo muestra el bono si pertenece al usuario logueado o si el usuario logueado 
 |Endpoint| `/bonus/:id`|
 ---|---|
 Método      |`GET`
-Devuelve    |[`Bonus[]`](#bonus)
+Devuelve    |[`Bonus[]`](#bonus-1)
 
 ### Crear Bono 🔒
 
@@ -535,7 +545,7 @@ Devuelve    |[`Bonus[]`](#bonus)
 ---|---|
 Método      |`POST`
 Body (json) |`{ player_id: string }`
-Devuelve    |[`Bonus[]`](#bonus)
+Devuelve    |[`Bonus[]`](#bonus-1)
 Requiere rol| player
 
 ### Canjear Bono 🔒
@@ -910,11 +920,6 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Generar allowed origin dinamicamente en producción para incluir localhost
 - Caracter invisible en metricas bot
 
-### Bono
-- Cargar bono en la primer carga de crédito, dependiendo de si se cumple condicion (por ahora la condicion se cumple siempre)
-- Endpoint para transferir bono a saldo. Chequear si ya hizo un retiro, si ya hizo retiro, no se puede usar el bono.
-
-Crear bono a partir de `player_id` => `/transactions/cashout` invalida el bono => POST `/players/:id/redeem-bonus` transfiere bono a balance si bono.status !== unavailable
 
 
 ### Fichas insuficientes
