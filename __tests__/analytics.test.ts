@@ -110,7 +110,7 @@ describe("[UNIT] => ANALYTICS ROUTER", () => {
       );
 
       expect(response.status).toBe(200);
-      expect(Object.keys(response.body.data)).toEqual([
+      expect(Object.keys(response.body.data[0])).toEqual([
         "id",
         "source",
         "event",

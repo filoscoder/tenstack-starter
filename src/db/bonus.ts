@@ -51,6 +51,16 @@ export class BonusDAO {
     }
   }
 
+  static findMany(where: Prisma.BonusWhereInput) {
+    try {
+      return prisma.bonus.findMany({ where });
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
   static async count() {
     return prisma.bonus.count();
   }
@@ -168,7 +178,9 @@ export class BonusDAO {
         throw new ForbiddenError("Lo siento, tu bono ya no esta disponible.");
 
       if (bonus.status === CONFIG.SD.BONUS_STATUS.REDEEMED)
-        throw new ForbiddenError("Ya has canjeado tu bono, gracias por elegirnos.");
+        throw new ForbiddenError(
+          "Ya has canjeado tu bono, gracias por elegirnos.",
+        );
 
       if (bonus.status === CONFIG.SD.BONUS_STATUS.ASSIGNED)
         throw new ForbiddenError("Has un deposito para acceder a tu bono");

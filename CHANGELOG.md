@@ -1,3 +1,8 @@
+## [1.0.0] - 2024-07-26
+
+### Added
+- GET `/players/:id/bonus` to see a player's bonus
+
 ## [1.0.0] - 2024-07-25
 
 ### Added

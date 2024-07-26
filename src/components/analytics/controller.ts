@@ -29,7 +29,8 @@ export class AnalyticsController {
 
   static async show(req: Req, res: Res, next: NextFn) {
     try {
-      const analytics = await AnalyticsDAO._getById(req.params.id);
+      const analyticsServices = new AnalyticsServices();
+      const analytics = await analyticsServices.show<Analytics>(req.params.id);
 
       res.status(OK).send(apiResponse(analytics));
     } catch (e) {

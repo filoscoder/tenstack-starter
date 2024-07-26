@@ -1,4 +1,4 @@
-import { Player } from "@prisma/client";
+import { Bonus, Player } from "@prisma/client";
 import { AuthServices } from "../auth/services";
 import { PlayersDAO } from "@/db/players";
 import {
@@ -25,6 +25,7 @@ import { ForbiddenError } from "@/helpers/error";
 import { ResourceService } from "@/services/resource.service";
 import { logtailLogger } from "@/helpers/loggers";
 import { AuthResult } from "@/types/response/auth";
+import { BonusDAO } from "@/db/bonus";
 
 export class PlayerServices extends ResourceService {
   constructor() {
@@ -204,7 +205,6 @@ export class PlayerServices extends ResourceService {
   }
 
   async getBalance(player_id: string, player: RoledPlayer): Promise<Number> {
-    // const player = await PlayersDAO.getById(player_id);
     await PlayersDAO.authorizeShow(player, player_id);
 
     const httpService = new HttpService();
@@ -220,6 +220,10 @@ export class PlayerServices extends ResourceService {
       );
 
     return Number(response.data.balance);
-    // return player.balance;
+  }
+
+  async getBonus(player_id: string, player: RoledPlayer): Promise<Bonus[]> {
+    await PlayersDAO.authorizeShow(player, player_id);
+    return BonusDAO.findMany({ Player: { id: player_id } });
   }
 }

@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-// import { ANALYTICS_EVENTS } from "@/config";
 import { AnalyticsDAO } from "@/db/analytics";
 import { ResourceService } from "@/services/resource.service";
 import { AnalyticsSummary } from "@/types/response/analytics";

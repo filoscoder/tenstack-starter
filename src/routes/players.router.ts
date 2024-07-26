@@ -32,6 +32,7 @@ playersRouter.use(
 );
 playersRouter.get("/:id", PlayersController.show);
 playersRouter.get("/:id/balance", PlayersController.getBalance);
+playersRouter.get("/:id/bonus", PlayersController.getBonus);
 playersRouter.use(requireAgentRole);
 playersRouter.get(
   "/",
