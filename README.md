@@ -26,6 +26,7 @@ Comes with:
 + [Crear Jugador](#crear-jugador)
 + [Editar Jugador](#editar-jugador-)
 + [Login de Jugador](#login-jugador)
++ [Consultar Balance]
 
 
 ### Cuentas Bancarias
@@ -80,6 +81,12 @@ Comes with:
 + [Crear](#crear-analytics)
 + [Resumen](#resumen-de-analytics)
 
+### Bonus
++ [Listar Bonos](#listar-bonos-)
++ [Ver Bono](#ver-bono-)
++ [Crear Bono](#crear-bono-)
++ [Canjear Bono]()
+
 ### [Interfaces](#interfaces-1)
 
 ### [Despliegue](#despliegue-1)
@@ -128,6 +135,17 @@ Requiere rol| agent
 Método      |`POST`
 Body (json) | [`Credenciales`](#credenciales)
 Devuelve    | [`LoginResponse`](#loginresponse)
+
+### Consultar Balance 🔒
+
+|Endpoint| `/players/:id/balance`|
+---|---|
+Método      |`GET`
+Devuelve    | [`Number`]
+
+
+Cuentas Bancarias
+-----------------
 
 ### Ver Cuentas Bancarias 🔒
 
@@ -179,6 +197,7 @@ Método      |`POST`
 Body (json) |[`DepositRequest`](#depositrequest)
 Devuelve    |[`DepositResult`](#depositresult)
 Requiere rol| player
+Rate-limited|1 every 10 seconds
 
 ### Retirar Premios 🔒
 
@@ -490,6 +509,42 @@ Requiere rol| agent
 Método      |`GET`
 Devuelve | [`AnalyticsSummary[]`]()
 
+Bonos
+-----
+
+### Listar Bonos 🔒
+
+|Endpoint| `/bonus`|
+---|---|
+Método      |`GET`
+Query string| [`ResourceListQueryString`](#ResourceListQueryString)
+Devuelve    |[`Bonus[]`](#bonus)
+Requiere rol| agent
+
+### Ver Bono 🔒
+Sólo muestra el bono si pertenece al usuario logueado o si el usuario logueado es agente
+
+|Endpoint| `/bonus/:id`|
+---|---|
+Método      |`GET`
+Devuelve    |[`Bonus[]`](#bonus)
+
+### Crear Bono 🔒
+
+|Endpoint| `/bonus/:id`|
+---|---|
+Método      |`POST`
+Body (json) |`{ player_id: string }`
+Devuelve    |[`Bonus[]`](#bonus)
+Requiere rol| player
+
+### Canjear Bono 🔒
+
+|Endpoint| `/bonus/:id/redeem`|
+---|---|
+Método      |`GET`
+Devuelve    |[`BonusRedemptionResult`](#bonusredemptionresult)
+Requiere rol| player
 
 ## Interfaces
 
@@ -794,6 +849,29 @@ Estado de transferencia de fichas
 }
 ```
 
+### Bonus
+```typescript
+{
+  id: string
+  player_id: string
+  Player: Player
+  status: string
+  percentage: number  
+  amount: number  
+  created_at: DateTime
+  updated_at: DateTime
+}
+```
+
+### BonusRedemptionResult
+```typescript
+{
+  player_balance: number?             // undefined en caso de fichas no transferidas
+  error: string?                      // En caso de error, el motivo
+  bonus: Bonus
+}
+```
+
 ## Load Testing
 
 ### Ddosify
@@ -831,12 +909,12 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Cambiar start-staging por start:production en timba-api scripts
 - Generar allowed origin dinamicamente en producción para incluir localhost
 - Caracter invisible en metricas bot
-- Chequear que la lista de bancos no cambie
 
 ### Bono
-- Tabla de bonos con diferentes tipos de bono
-- Cargar bono en la primer carga de crédito
+- Cargar bono en la primer carga de crédito, dependiendo de si se cumple condicion (por ahora la condicion se cumple siempre)
 - Endpoint para transferir bono a saldo. Chequear si ya hizo un retiro, si ya hizo retiro, no se puede usar el bono.
+
+Crear bono a partir de `player_id` => `/transactions/cashout` invalida el bono => POST `/players/:id/redeem-bonus` transfiere bono a balance si bono.status !== unavailable
 
 
 ### Fichas insuficientes

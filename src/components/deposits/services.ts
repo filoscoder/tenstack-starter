@@ -250,6 +250,7 @@ export class DepositServices extends ResourceService {
    */
   static async showPending(player_id: string): Promise<Deposit[]> {
     const deposits = await DepositsDAO.getPending(player_id);
+
     return deposits;
   }
 

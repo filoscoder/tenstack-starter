@@ -63,6 +63,7 @@ model Player {
   Tokens              Token[]
   roles               Role[]
   PasswordResetTokens PasswordResetToken[]
+  Bonus               Bonus?         
   created_at          DateTime      @default(now())
   updated_at          DateTime      @updatedAt     
 
@@ -193,4 +194,17 @@ model Analytics {
   updated_at                  DateTime  @updatedAt 
 
   @@map("ANALYTICS")
+}
+
+model Bonus {
+  id                          String    @id @default(uuid())
+  player_id                   String    @unique
+  Player                      Player    @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  status                      String    @db.VarChar(32)
+  percentage                  Int
+  amount                      Int
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @updatedAt 
+  
+  @@map("BONUS")
 }

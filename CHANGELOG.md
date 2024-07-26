@@ -1,3 +1,16 @@
+## [1.0.0] - 2024-07-25
+
+### Added
+- GET `/bonus` to list bonus.
+- GET `/bonus/:id` to view bonus.
+- GET `/bonus/:id/redeem` to redeem a bonus.
+- POST `/bonus` to create a bonus.
+
+## [1.0.0] - 2024-07-24
+
+### Added
+- `/players/:id/balance` to query player's balance.
+
 ## [1.0.0] - 2024-07-19
 
 ### Changed

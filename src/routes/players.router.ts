@@ -31,6 +31,7 @@ playersRouter.use(
   passport.authenticate("jwt", { session: false, failWithError: true }),
 );
 playersRouter.get("/:id", PlayersController.show);
+playersRouter.get("/:id/balance", PlayersController.getBalance);
 playersRouter.use(requireAgentRole);
 playersRouter.get(
   "/",

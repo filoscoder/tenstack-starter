@@ -75,6 +75,28 @@ export class CasinoCoinsService {
     return parsedResult;
   }
 
+  async bonusAgentToPlayer(request: CoinTransferRequest) {
+    const transferDetails = await this.generateTransferDetails(
+      "deposit",
+      request.panel_id,
+      request.amount!,
+      request.currency,
+    );
+    const result = await this.transfer(transferDetails);
+    if (result.data.code == "insuficient_balance") {
+      const difference =
+        transferDetails.amount - result.data.variables.balance_amount;
+      await WebPush.agent({
+        title: "Fichas insuficientes",
+        body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
+        tag: CONFIG.SD.INSUFICIENT_CREDITS,
+      });
+    }
+    const parsedResult = parseTransferResult(result, transferDetails.type);
+    await this.logTransaction(parsedResult.ok, transferDetails);
+    return parsedResult;
+  }
+
   /**
    * Send coins
    * @throws AgentApiError
@@ -145,3 +167,9 @@ export class CasinoCoinsService {
     }
   }
 }
+
+export type CoinTransferRequest = {
+  panel_id: number;
+  amount: number;
+  currency: string;
+};

@@ -1,12 +1,5 @@
 import { Location, checkSchema } from "express-validator";
-import CONFIG from "@/config";
-import { PlayersDAO } from "@/db/players";
-
-const ensurePlayerRole = async (id: string) => {
-  const user = await PlayersDAO._getById(id);
-  if (user?.roles.some((r) => r.name !== CONFIG.ROLES.PLAYER))
-    throw new Error();
-};
+import { validatePlayerId } from "@/helpers/validateUserId";
 
 export const validateCredentials = () =>
   checkSchema({
@@ -123,7 +116,7 @@ export const validateResetPasswordRequest = () =>
       notEmpty: true,
       trim: true,
       custom: {
-        options: ensurePlayerRole,
+        options: validatePlayerId,
         errorMessage: "only player passwords can be updated",
       },
       errorMessage: "user_id is required",
