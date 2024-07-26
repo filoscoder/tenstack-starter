@@ -165,13 +165,13 @@ export class BonusDAO {
       if (bonus.Player.id !== user.id) throw new ForbiddenError("Unauthorized");
 
       if (bonus.status === CONFIG.SD.BONUS_STATUS.UNAVAILABLE)
-        throw new ForbiddenError("Bono no disponible");
+        throw new ForbiddenError("Lo siento, tu bono ya no esta disponible.");
 
       if (bonus.status === CONFIG.SD.BONUS_STATUS.REDEEMED)
-        throw new ForbiddenError("Bono ya canjeado");
+        throw new ForbiddenError("Ya has canjeado tu bono, gracias por elegirnos.");
 
       if (bonus.status === CONFIG.SD.BONUS_STATUS.ASSIGNED)
-        throw new ForbiddenError("Bono vacio");
+        throw new ForbiddenError("Has un deposito para acceder a tu bono");
 
       return await tx.bonus.update({
         where: { id: bonusId },
