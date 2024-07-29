@@ -96,7 +96,7 @@ export const validateDepositIndex = () =>
     },
   });
 
-export const validateDepositUpdateRequest = () =>
+export const validateDepositSetStatusRequest = () =>
   checkSchema({
     status: {
       in: ["body"],
@@ -109,10 +109,10 @@ export const validateDepositUpdateRequest = () =>
       },
       errorMessage: "status is required",
     },
-    tracking_number: {
-      in: ["body"],
-      optional: true,
-      isString: true,
-      errorMessage: "tracking_number is required",
-    },
+    // tracking_number: {
+    //   in: ["body"],
+    //   optional: true,
+    //   isString: true,
+    //   errorMessage: "tracking_number is required",
+    // },
   });

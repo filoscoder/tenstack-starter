@@ -7,9 +7,9 @@ import {
   DepositRequest,
   DepositUpdateRequest,
 } from "@/types/request/transfers";
-import { DepositResult } from "@/types/response/transfers";
 import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 import { hidePassword } from "@/utils/auth";
+import { CasinoCoinsService } from "@/services/casino-coins.service";
 
 export class DepositController {
   static readonly index = async (req: Req, res: Res, next: NextFn) => {
@@ -50,24 +50,38 @@ export class DepositController {
   /**
    * Create new deposit or verify existing
    */
-  static readonly create = async (req: Req, res: Res, next: NextFn) => {
+  static readonly upsert = async (req: Req, res: Res, next: NextFn) => {
     const deposit_id = req.params.id;
     const request: Omit<DepositRequest, "player_id"> = req.body;
     const player = req.user!;
 
     const depositServices = new DepositServices();
+    const casinoCoinServices = new CasinoCoinsService();
     try {
-      let result: DepositResult;
-      const deposit = await DepositsDAO.getByTrackingNumber(
-        request.tracking_number,
-      );
-      if (deposit && !deposit_id) {
-        result = await depositServices.confirm(player, deposit.id, request);
-      } else if (!deposit && !deposit_id) {
-        result = await depositServices.create(player, request);
+      // let result: DepositResult;
+      // const deposit = await DepositsDAO.getByTrackingNumber(
+      //   request.tracking_number,
+      // );
+      if (deposit_id) {
+        const deposit = await depositServices.update(
+          player,
+          deposit_id,
+          request,
+        );
       } else {
-        result = await depositServices.confirm(player, deposit_id, request);
+        const deposit = await depositServices.create(player, request);
+        const bonus = await depositServices.loadWelcomeBonus(player, deposit);
+        const coinTransferResult = await casinoCoinServices.agentToPlayer(
+          deposit.coin_transfer_id,
+        );
       }
+      // if (deposit && !deposit_id) {
+      //   result = await depositServices.confirm(player, deposit.id, request);
+      // } else if (!deposit && !deposit_id) {
+      //   result = await depositServices.create(player, request);
+      // } else {
+      //   result = await depositServices.confirm(player, deposit_id, request);
+      // }
 
       res.status(OK).json(apiResponse(result));
     } catch (e) {
@@ -75,14 +89,18 @@ export class DepositController {
     }
   };
 
-  static readonly update = async (req: Req, res: Res, next: NextFn) => {
+  static readonly setStatus = async (req: Req, res: Res, next: NextFn) => {
     const deposit_id = req.params.id;
     const request: DepositUpdateRequest = req.body;
     const agent = req.user!;
 
     const depositServices = new DepositServices();
     try {
-      const result = await depositServices.update(agent, deposit_id, request);
+      const result = await depositServices.setStatus(
+        agent,
+        deposit_id,
+        request,
+      );
       res.status(OK).json(apiResponse(result));
     } catch (e) {
       next(e);

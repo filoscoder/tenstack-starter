@@ -3,10 +3,7 @@ import CONFIG from "@/config";
 import { BonusDAO } from "@/db/bonus";
 import { ResourceService } from "@/services/resource.service";
 import { BonusSettings } from "@/types/request/bonus";
-import {
-  CasinoCoinsService,
-  CoinTransferRequest,
-} from "@/services/casino-coins.service";
+import { CasinoCoinsService } from "@/services/casino-coins.service";
 import { logtailLogger } from "@/helpers/loggers";
 import { BonusRedemptionResult } from "@/types/response/bonus";
 import { CoinTransferResult } from "@/types/response/transfers";
@@ -72,10 +69,7 @@ export class BonusServices extends ResourceService {
   /**
    * Set bonus' amount according to bonus percentage and Deposit amount
    */
-  async load(
-    bonus_id: string,
-    deposit_amount: number,
-  ): Promise<Bonus & { Player: Player }> {
+  async load(bonus_id: string, deposit_amount: number): Promise<Bonus> {
     const bonus = await BonusDAO._getById(bonus_id);
     if (!bonus) throw new NotFoundException("Bonus not found");
 
@@ -87,6 +81,8 @@ export class BonusServices extends ResourceService {
         status: CONFIG.SD.BONUS_STATUS.PENDING,
       });
 
-    return bonus;
+    const clientSafeBonus: Bonus & { Player?: Player } = bonus;
+    delete clientSafeBonus.Player;
+    return clientSafeBonus;
   }
 }

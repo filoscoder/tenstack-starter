@@ -92,15 +92,12 @@ export class BonusDAO {
     }
   }
 
-  static async update(
-    id: string,
-    data: BonusUpdatableProps,
-  ): Promise<Bonus & { Player: Player }> {
+  static async update(id: string, data: BonusUpdatableProps): Promise<Bonus> {
     try {
       const bonus = await prisma.bonus.update({
         where: { id },
         data,
-        include: { Player: true },
+        // include: { Player: true },
       });
       return bonus;
     } catch (error) {

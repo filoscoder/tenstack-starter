@@ -1,14 +1,20 @@
+// export type CoinTransferRequest = {
+//   panel_id: number;
+//   amount: number;
+//   currency: string;
+// };
+
 export type CoinTransferResult = {
   ok: boolean;
   player_balance?: number;
   error?: string;
 };
 
-import { Deposit, Payment } from "@prisma/client";
+import { CoinTransfer, Deposit, Payment } from "@prisma/client";
 
 export type DepositResult = {
-  player_balance?: number;
-  error?: string;
+  // player_balance?: number;
+  coinTransfer?: CoinTransfer;
   deposit: Deposit;
 };
 

@@ -1,7 +1,14 @@
+## [1.0.0] - 2024-07-29
+
+### Changed
+- Rename `DepositServices.update` to `DepositServices.setStatus`.
+- Rename `/deposit/:id/update` to `/deposit/:id/set-status`.
+- Rename `DepositController.create` to `DepositController.upsert`.
+
 ## [1.0.0] - 2024-07-26
 
 ### Added
-- GET `/players/:id/bonus` to see a player's bonus
+- GET `/players/:id/bonus` to see a player's bonus.
 
 ## [1.0.0] - 2024-07-25
 

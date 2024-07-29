@@ -123,6 +123,10 @@ const CONFIG = {
       /** Unavailable */
       UNAVAILABLE: "unavailable",
     },
+    COIN_TRANSFER_STATUS: {
+      PENDING: "pending",
+      COMPLETED: "completed",
+    },
     ENVIRONMENTS: {
       TEST: "test",
       DEV: "development",

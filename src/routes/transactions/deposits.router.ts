@@ -13,7 +13,7 @@ import {
   isKeyOfDeposit,
   validateDepositIndex,
   validateDepositRequest,
-  validateDepositUpdateRequest,
+  validateDepositSetStatusRequest,
 } from "@/components/deposits/validators";
 import { DepositController } from "@/components/deposits/controller";
 import { validateResourceSearchRequest } from "@/components/players/validators";
@@ -35,7 +35,7 @@ depositsRouter.post(
   checkExact(),
   throwIfBadRequest,
   depositRateLimiter,
-  DepositController.create,
+  DepositController.upsert,
 );
 depositsRouter.get(
   "/bank-details",
@@ -57,12 +57,13 @@ depositsRouter.get(
   DepositController.show,
 );
 depositsRouter.post(
-  "/deposit/:id/update",
+  // "/deposit/:id/update",
+  "/deposit/:id/set-status",
   validateDepositIndex(),
-  validateDepositUpdateRequest(),
+  validateDepositSetStatusRequest(),
   checkExact(),
   throwIfBadRequest,
-  DepositController.update,
+  DepositController.setStatus,
 );
 depositsRouter.get(
   "/deposit",

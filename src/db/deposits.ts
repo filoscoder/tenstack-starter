@@ -1,4 +1,10 @@
-import { Deposit, Player, PrismaClient, Role } from "@prisma/client";
+import {
+  CoinTransfer,
+  Deposit,
+  Player,
+  PrismaClient,
+  Role,
+} from "@prisma/client";
 import {
   CreateDepositProps,
   DepositRequest,
@@ -66,13 +72,13 @@ export class DepositsDAO {
    */
   static async create(
     data: CreateDepositProps,
-  ): Promise<Deposit & { Player: Player }> {
+  ): Promise<Deposit & { CoinTransfer: CoinTransfer }> {
     try {
       const deposit = await prisma.deposit.create({
         data: { ...data, status: CONFIG.SD.DEPOSIT_STATUS.PENDING },
-        include: { Player: true },
+        include: { CoinTransfer: true },
       });
-      deposit.Player = hidePassword(deposit.Player);
+      // deposit.Player = hidePassword(deposit.Player);
       return deposit;
     } catch (error) {
       throw error;

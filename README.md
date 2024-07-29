@@ -916,6 +916,18 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Generar allowed origin dinamicamente en producción para incluir localhost
 - Caracter invisible en metricas bot
 
+### Coin Transfers
+
+- Create CoinTransfer model
+- Create CoinTransfer Service 
+- Update Deposit flow to use coin service
+- Update Payment flow to use coin service
+- Remove TRANSACTIONS table
+- Update README
+- Update CHANGELOG
+- Rename `/deposit/:id/update` to `/deposit/:id/set-status` on agent-timba
+
+
 
 ### Fichas insuficientes
 

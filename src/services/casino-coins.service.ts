@@ -1,17 +1,14 @@
-import { Deposit, Player } from "@prisma/client";
+import { Player } from "@prisma/client";
 import { AxiosResponse } from "axios";
 import { HttpService } from "./http.service";
 import CONFIG from "@/config";
-import { TransactionsDAO } from "@/db/transactions";
 import { UserRootDAO } from "@/db/user-root";
 import { CashoutRequest, TransferDetails } from "@/types/request/transfers";
-import { Transaction } from "@/types/response/transactions";
 import { parseTransferResult } from "@/utils/parser";
 import { CoinTransferResult } from "@/types/response/transfers";
-import { ERR } from "@/config/errors";
-import { CustomError } from "@/helpers/error/CustomError";
 import { AgentApiError } from "@/helpers/error/AgentApiError";
 import { WebPush } from "@/notification/web-push";
+import { CoinTransferDAO } from "@/db/coin-transfer";
 
 /**
  * Interact with the casino's coins transfer endpoints and log results into
@@ -36,7 +33,7 @@ export class CasinoCoinsService {
     );
     const result = await this.transfer(transferDetails);
     const parsedResult = parseTransferResult(result, transferDetails.type);
-    await this.logTransaction(parsedResult.ok, transferDetails);
+    // await this.logTransaction(parsedResult.ok, transferDetails);
     return parsedResult;
   }
 
@@ -46,56 +43,57 @@ export class CasinoCoinsService {
    * @throws CustomError (transaction_log)
    */
   async agentToPlayer(
-    deposit: Deposit & { Player: Player },
+    // request: CoinTransferRequest,
+    coin_transfer_id: string,
   ): Promise<CoinTransferResult> {
+    const coinTransfer = await CoinTransferDAO.findById(coin_transfer_id);
+    const parent = coinTransfer?.Bonus || coinTransfer?.Deposit;
     const transferDetails = await this.generateTransferDetails(
       "deposit",
-      deposit.Player.panel_id,
-      deposit.amount!,
-      deposit.Player.balance_currency,
+      parent!.Player.panel_id,
+      parent!.amount,
+      parent!.Player.balance_currency,
     );
 
-    if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED) {
-      await this.logTransaction(true, transferDetails);
-      return { ok: true };
-    }
+    // if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED) {
+    //   await this.logTransaction(true, transferDetails);
+    //   return { ok: true };
+    // }
 
     const result = await this.transfer(transferDetails);
-    if (result.data.code == "insuficient_balance") {
-      const difference =
-        transferDetails.amount - result.data.variables.balance_amount;
-      await WebPush.agent({
-        title: "Fichas insuficientes",
-        body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
-        tag: CONFIG.SD.INSUFICIENT_CREDITS,
-      });
-    }
-    const parsedResult = parseTransferResult(result, transferDetails.type);
-    await this.logTransaction(parsedResult.ok, transferDetails);
-    return parsedResult;
+
+    if (result.data.code == "insuficient_balance")
+      await this.notifyInsuficientBalance(
+        transferDetails.amount,
+        result.data.variables.balance_amount,
+      );
+
+    return parseTransferResult(result, transferDetails.type);
+    // await this.logTransaction(parsedResult.ok, transferDetails);
+    // return parsedResult;
   }
 
-  async bonusAgentToPlayer(request: CoinTransferRequest) {
-    const transferDetails = await this.generateTransferDetails(
-      "deposit",
-      request.panel_id,
-      request.amount!,
-      request.currency,
-    );
-    const result = await this.transfer(transferDetails);
-    if (result.data.code == "insuficient_balance") {
-      const difference =
-        transferDetails.amount - result.data.variables.balance_amount;
-      await WebPush.agent({
-        title: "Fichas insuficientes",
-        body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
-        tag: CONFIG.SD.INSUFICIENT_CREDITS,
-      });
-    }
-    const parsedResult = parseTransferResult(result, transferDetails.type);
-    await this.logTransaction(parsedResult.ok, transferDetails);
-    return parsedResult;
-  }
+  // async bonusAgentToPlayer(request: CoinTransferRequest) {
+  //   const transferDetails = await this.generateTransferDetails(
+  //     "deposit",
+  //     request.panel_id,
+  //     request.amount!,
+  //     request.currency,
+  //   );
+  //   const result = await this.transfer(transferDetails);
+  //   if (result.data.code == "insuficient_balance") {
+  //     const difference =
+  //       transferDetails.amount - result.data.variables.balance_amount;
+  //     await WebPush.agent({
+  //       title: "Fichas insuficientes",
+  //       body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
+  //       tag: CONFIG.SD.INSUFICIENT_CREDITS,
+  //     });
+  //   }
+  //   const parsedResult = parseTransferResult(result, transferDetails.type);
+  //   // await this.logTransaction(parsedResult.ok, transferDetails);
+  //   return parsedResult;
+  // }
 
   /**
    * Send coins
@@ -147,29 +145,37 @@ export class CasinoCoinsService {
     };
   }
 
+  // TODO
+  // delete
   /**
    * Log into Transaction History table
    * @throws CustomError (transaction_log)
    */
-  private async logTransaction(ok: boolean, transferDetails: TransferDetails) {
-    try {
-      const transaction: Transaction = {
-        sender_id: transferDetails.sender_id,
-        recipient_id: transferDetails.recipient_id,
-        amount: transferDetails.amount,
-        date: new Date().toISOString(),
-        ok,
-      };
-      await TransactionsDAO.create(transaction);
-    } catch (e) {
-      if (CONFIG.LOG.LEVEL === "debug") console.error(e);
-      throw new CustomError(ERR.TRANSACTION_LOG);
-    }
+  // private async logTransaction(ok: boolean, transferDetails: TransferDetails) {
+  //   try {
+  //     const transaction: Transaction = {
+  //       sender_id: transferDetails.sender_id,
+  //       recipient_id: transferDetails.recipient_id,
+  //       amount: transferDetails.amount,
+  //       date: new Date().toISOString(),
+  //       ok,
+  //     };
+  //     await TransactionsDAO.create(transaction);
+  //   } catch (e) {
+  //     if (CONFIG.LOG.LEVEL === "debug") console.error(e);
+  //     throw new CustomError(ERR.TRANSACTION_LOG);
+  //   }
+  // }
+
+  private notifyInsuficientBalance(
+    transferAmount: number,
+    currentBalance: number,
+  ): Promise<void> {
+    const difference = transferAmount - currentBalance;
+    return WebPush.agent({
+      title: "Fichas insuficientes",
+      body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
+      tag: CONFIG.SD.INSUFICIENT_CREDITS,
+    });
   }
 }
-
-export type CoinTransferRequest = {
-  panel_id: number;
-  amount: number;
-  currency: string;
-};
