@@ -165,13 +165,16 @@ export class BanxicoService {
         new Promise<AxiosResponse<string>>((resolve, reject) => {
           axios
             .post<string>(this.url, data, { responseType: "text" })
-            .then((r) =>
+            .then((r) => {
+              if (CONFIG.LOG.LEVEL === "debug")
+                console.log("\nBANK RESPONSE\n", r.data);
+
               r.data.includes(
                 "Haga clic sobre el &iacute;cono para descargar el CEP",
               )
                 ? resolve(r)
-                : reject(r.data),
-            );
+                : reject(r.data);
+            });
         }),
     );
 
