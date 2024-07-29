@@ -655,6 +655,21 @@ describe("[UNIT] => AGENT ROUTER", () => {
   });
 
   describe("POST: /agent/reset-player-password", () => {
+    let tmpPlayer: Player;
+    beforeAll(async () => {
+      tmpPlayer = await prisma.player.create({
+        data: {
+          email: "tmp@example.com",
+          password: "1234",
+          panel_id: -314,
+          username: "tmpPlayer",
+          roles: { connect: { name: CONFIG.ROLES.PLAYER } },
+        },
+      });
+    });
+    afterAll(
+      async () => await prisma.player.delete({ where: { id: tmpPlayer.id } }),
+    );
     jest.spyOn(PlayerServices.prototype, "resetPassword").mockResolvedValue();
 
     it("Should reset player password", async () => {
@@ -663,7 +678,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("Authorization", `Bearer ${access}`)
         .send({
           new_password: "1234",
-          user_id: player.id,
+          user_id: tmpPlayer.id,
         });
 
       expect(response.status).toBe(OK);
@@ -676,7 +691,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("Authorization", `Bearer ${access}`)
         .send({
           new_password: "1234",
-          user_id: player.id,
+          user_id: tmpPlayer.id,
           unknownField: "foo",
         });
 

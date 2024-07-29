@@ -1,4 +1,5 @@
 import { Deposit, Player, Role } from "@prisma/client";
+import { BonusServices } from "../bonus/services";
 import CONFIG from "@/config";
 import { ERR } from "@/config/errors";
 import { DepositsDAO } from "@/db/deposits";
@@ -16,6 +17,7 @@ import { AlqMovementResponse } from "@/types/response/alquimia";
 import { logtailLogger } from "@/helpers/loggers";
 import { ResourceService } from "@/services/resource.service";
 import { BanxicoService } from "@/services/banxico.service";
+import { BonusDAO } from "@/db/bonus";
 
 export class DepositServices extends ResourceService {
   constructor() {
@@ -35,6 +37,8 @@ export class DepositServices extends ResourceService {
       ...request,
       player_id: player.id,
     });
+
+    await this.loadWelcomeBonus(player, deposit);
 
     return await this.finalizeDeposit(deposit);
   }
@@ -262,5 +266,11 @@ export class DepositServices extends ResourceService {
     });
 
     return total;
+  }
+
+  private async loadWelcomeBonus(player: Player, deposit: Deposit) {
+    const bonusServices = new BonusServices();
+    const bonus_id = (await BonusDAO.findByPlayerId(player.id))[0]?.id;
+    if (bonus_id) await bonusServices.load(bonus_id, deposit.amount);
   }
 }

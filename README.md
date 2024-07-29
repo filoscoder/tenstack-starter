@@ -917,7 +917,6 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Caracter invisible en metricas bot
 
 
-
 ### Fichas insuficientes
 
 - Revisar respuesta y avisarle al agente si quedaron transferencias sin liberar

@@ -10,6 +10,7 @@ import {
 import { logtailLogger } from "@/helpers/loggers";
 import { BonusRedemptionResult } from "@/types/response/bonus";
 import { CoinTransferResult } from "@/types/response/transfers";
+import { NotFoundException } from "@/helpers/error";
 
 export class BonusServices extends ResourceService {
   constructor() {
@@ -31,10 +32,12 @@ export class BonusServices extends ResourceService {
     return await BonusDAO.updateWhere(
       {
         player_id,
-        OR: [
-          { status: CONFIG.SD.BONUS_STATUS.ASSIGNED },
-          { status: CONFIG.SD.BONUS_STATUS.PENDING },
-        ],
+        AND: {
+          OR: [
+            { status: CONFIG.SD.BONUS_STATUS.ASSIGNED },
+            { status: CONFIG.SD.BONUS_STATUS.PENDING },
+          ],
+        },
       },
       { status: CONFIG.SD.BONUS_STATUS.UNAVAILABLE },
     );
@@ -64,5 +67,26 @@ export class BonusServices extends ResourceService {
       player_balance: transferResult.player_balance,
       bonus,
     };
+  }
+
+  /**
+   * Set bonus' amount according to bonus percentage and Deposit amount
+   */
+  async load(
+    bonus_id: string,
+    deposit_amount: number,
+  ): Promise<Bonus & { Player: Player }> {
+    const bonus = await BonusDAO._getById(bonus_id);
+    if (!bonus) throw new NotFoundException("Bonus not found");
+
+    const amount = (bonus.percentage / 100) * deposit_amount;
+
+    if (bonus.status === CONFIG.SD.BONUS_STATUS.ASSIGNED)
+      return await BonusDAO.update(bonus_id, {
+        amount,
+        status: CONFIG.SD.BONUS_STATUS.PENDING,
+      });
+
+    return bonus;
   }
 }

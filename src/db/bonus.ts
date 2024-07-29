@@ -4,6 +4,7 @@ import CONFIG from "@/config";
 import { OrderBy } from "@/types/request/players";
 import { BonusUpdatableProps, CreateBonusProps } from "@/types/request/bonus";
 import { RoledPlayer } from "@/types/response/players";
+import { PlayerServices } from "@/components/players/services";
 
 const prisma = new PrismaClient();
 
@@ -54,6 +55,16 @@ export class BonusDAO {
   static findMany(where: Prisma.BonusWhereInput) {
     try {
       return prisma.bonus.findMany({ where });
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static findByPlayerId(player_id: string) {
+    try {
+      return prisma.bonus.findMany({ where: { player_id } });
     } catch (error) {
       throw error;
     } finally {
@@ -164,15 +175,25 @@ export class BonusDAO {
     bonusId: string,
     user: Player,
   ): Promise<Bonus & { Player: Player }> {
+    const playerServices = new PlayerServices();
     const authorized = await prisma.$transaction(async (tx) => {
       const bonus = await tx.bonus.findUnique({
         where: { id: bonusId },
-        include: { Player: true },
+        include: { Player: { include: { roles: true } } },
       });
 
       if (!bonus) throw new NotFoundException("Bonus not found");
 
       if (bonus.Player.id !== user.id) throw new ForbiddenError("Unauthorized");
+
+      const balance = await playerServices.getBalance(
+        bonus.Player.id,
+        bonus.Player,
+      );
+      if (balance > 10)
+        throw new ForbiddenError(
+          "El bono solo se puede canjear cuando el balance es menor que 10.",
+        );
 
       if (bonus.status === CONFIG.SD.BONUS_STATUS.UNAVAILABLE)
         throw new ForbiddenError("Lo siento, tu bono ya no esta disponible.");
@@ -183,7 +204,7 @@ export class BonusDAO {
         );
 
       if (bonus.status === CONFIG.SD.BONUS_STATUS.ASSIGNED)
-        throw new ForbiddenError("Has un deposito para acceder a tu bono");
+        throw new ForbiddenError("Has un deposito para acceder a tu bono.");
 
       return await tx.bonus.update({
         where: { id: bonusId },
