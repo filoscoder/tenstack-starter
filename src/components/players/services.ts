@@ -204,14 +204,13 @@ export class PlayerServices extends ResourceService {
     return hidePassword(player);
   }
 
-  async getBalance(player_id: string, player: RoledPlayer): Promise<Number> {
+  async getBalance(player_id: string, player: RoledPlayer): Promise<number> {
     await PlayersDAO.authorizeShow(player, player_id);
 
     const httpService = new HttpService();
     const response = await httpService.authedAgentApi.get<CertainUserResponse>(
       `/pyramid/certain-user/${player.panel_id}`,
     );
-    console.log("\nRESPONSE\n", response.data);
     if (response.status !== 200)
       throw new AgentApiError(
         response.status,

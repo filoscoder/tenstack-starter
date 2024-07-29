@@ -88,7 +88,6 @@ describe("[UNIT] => BONUS ROUTER", () => {
         .get(`/app/${CONFIG.APP.VER}/bonus/${pendingBonus.id}/redeem`)
         .set("Authorization", "Bearer " + playerAccessToken);
 
-      console.log("\nRESPONSE\n", response.body);
       expect(response.status).toBe(OK);
       expect(response.body.data.bonus.status).toBe(
         CONFIG.SD.BONUS_STATUS.REDEEMED,

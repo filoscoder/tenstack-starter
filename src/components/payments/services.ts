@@ -24,7 +24,7 @@ export class PaymentServices extends ResourceService {
     await PaymentsDAO.authorizeCreation(request.bank_account, player.id);
 
     const bonusServices = new BonusServices();
-    await bonusServices.invalidate(player.id);
+    await bonusServices.invalidate(player.id).catch(() => null);
 
     const casinoCoinsService = new CasinoCoinsService();
     let transferResult: CoinTransferResult | undefined;
