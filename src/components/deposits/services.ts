@@ -38,9 +38,15 @@ export class DepositServices extends ResourceService {
       player_id: player.id,
     });
 
-    await this.loadWelcomeBonus(player, deposit);
+    const result = await this.finalizeDeposit(deposit);
+    if (
+      result.deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED ||
+      result.deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED ||
+      result.deposit.status === CONFIG.SD.DEPOSIT_STATUS.COMPLETED
+    )
+      await this.loadWelcomeBonus(player, deposit);
 
-    return await this.finalizeDeposit(deposit);
+    return result;
   }
 
   async update(
@@ -69,7 +75,15 @@ export class DepositServices extends ResourceService {
 
     const deposit = (await DepositsDAO.update(deposit_id, request))!;
 
-    return await this.finalizeDeposit(deposit);
+    const result = await this.finalizeDeposit(deposit);
+    if (
+      result.deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED ||
+      result.deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED ||
+      result.deposit.status === CONFIG.SD.DEPOSIT_STATUS.COMPLETED
+    )
+      await this.loadWelcomeBonus(player, deposit);
+
+    return result;
   }
 
   /**
