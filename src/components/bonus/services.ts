@@ -70,7 +70,8 @@ export class BonusServices extends ResourceService {
   }
 
   /**
-   * Set bonus' amount according to bonus percentage and Deposit amount
+   * Set bonus' amount according to bonus percentage and Deposit amount.
+   * Only if bonus is in ASSIGNED status
    */
   async load(
     bonus_id: string,
