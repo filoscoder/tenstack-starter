@@ -11,6 +11,8 @@ export class BankAccountServices {
   }
 
   async create(player_id: string, request: BankAccountRequest) {
+    await BankAccountsDAO.authorizeCreation(request);
+
     return await BankAccountsDAO.create(player_id, request);
   }
 

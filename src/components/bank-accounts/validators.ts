@@ -48,7 +48,7 @@ export const validateBankAccount = () =>
       notEmpty: true,
       isString: true,
       trim: true,
-      custom: { options: verifyClabe, errorMessage: "Invalid bankNumber" },
+      custom: { options: verifyClabe, errorMessage: "CLABE inválida" },
       errorMessage: "Bank number is required",
     },
     bankAlias: {
