@@ -18,12 +18,13 @@ export class BanxicoService {
     const cookies = await this.prepareCepDownload(deposit);
     if (!cookies) return;
 
-    const cep = await this.cepDownload(cookies);
-    const cepAmount = await this.analyzeCep(cep);
-
     const query = await this.queryDepositStatus(deposit);
     if (!query) return;
     const queryAmount = this.analyzeQueryResult(query);
+    if (!queryAmount) return;
+
+    const cep = await this.cepDownload(cookies);
+    const cepAmount = await this.analyzeCep(cep);
 
     await this.cepAnalytics(deposit, cep, cepAmount, queryAmount);
 
@@ -117,6 +118,8 @@ export class BanxicoService {
       const response = await axios.post(this.url, data);
       if (response.status !== 200) throw response.data;
 
+      if (response.data.includes("Operación no encontrada")) return;
+
       return response.data;
     } catch (e: any) {
       this.errorHandler(e.data ?? e);
@@ -167,7 +170,7 @@ export class BanxicoService {
             .post<string>(this.url, data, { responseType: "text" })
             .then((r) => {
               if (CONFIG.LOG.LEVEL === "debug")
-                console.log("\nBANK RESPONSE\n", r.data);
+                console.log("\n[DEBUG] BANK RESPONSE\n", r.data);
 
               r.data.includes(
                 "Haga clic sobre el &iacute;cono para descargar el CEP",
@@ -178,7 +181,8 @@ export class BanxicoService {
         }),
     );
 
-    const successful = await Promise.any(requests);
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const successful = await Promise.any(requests).catch(() => undefined);
     if (!successful) return null;
 
     const queryString = new URLSearchParams(successful.config.data);
@@ -246,7 +250,7 @@ export class BanxicoService {
     if (CONFIG.LOG.LEVEL === "debug") console.error(e);
     if (CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.PRODUCTION) {
       logtailLogger.error(e);
-      await Telegram.arturito(e);
+      await Telegram.arturito(e?.toString() ?? e.message ?? e);
     }
   }
 }

@@ -46,6 +46,8 @@ export class DepositServices extends ResourceService {
     )
       await this.loadWelcomeBonus(player, deposit);
 
+    // @ts-ignore
+    delete result.deposit.Player;
     return result;
   }
 
@@ -83,6 +85,8 @@ export class DepositServices extends ResourceService {
     )
       await this.loadWelcomeBonus(player, deposit);
 
+    // @ts-ignore
+    delete result.deposit.Player;
     return result;
   }
 
@@ -100,10 +104,8 @@ export class DepositServices extends ResourceService {
 
     const amount = await this.verifyThroughBanxico(deposit);
     if (!amount) {
-      throw {
-        error: "Deposito no confirmado",
-        deposit: await this.markAsPending(deposit),
-      } as DepositResult;
+      deposit = await this.markAsPending(deposit);
+      throw { error: "Deposito no confirmado", deposit } as DepositResult;
     }
     return await this.markAsVerified(deposit, amount);
   }
