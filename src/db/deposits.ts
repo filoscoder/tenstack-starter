@@ -214,7 +214,7 @@ export class DepositsDAO {
         deposit.player_id !== player.id &&
         !player.roles.some((r) => r.name === CONFIG.ROLES.AGENT)
       )
-        throw new ForbiddenError("No autorizado");
+        throw new ForbiddenError("El depósito no le pertenece.");
 
       return deposit;
     } catch (error) {
@@ -276,7 +276,10 @@ export class DepositsDAO {
       const deposit = await prisma.deposit.findUnique({
         where: { tracking_number: request.tracking_number },
       });
-      if (deposit) throw new ForbiddenError("already exists");
+      if (deposit)
+        throw new ForbiddenError(
+          "Un depósito con ese número de seguimiento ya existe",
+        );
       return deposit;
     } catch (error) {
       throw error;

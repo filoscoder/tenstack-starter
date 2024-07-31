@@ -88,8 +88,8 @@ export const ERR: { [key: string]: ErrorData } = {
     description: "Demasiadas solicitudes",
   },
   DEPOSIT_ALREADY_EXISTS: {
-    status: 400,
+    status: 403,
     code: "already_exists",
-    description: "Deposito ya existe",
+    description: "Un depósito con ese número de seguimiento ya existe",
   },
 };

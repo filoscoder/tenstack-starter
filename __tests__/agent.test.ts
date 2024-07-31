@@ -332,9 +332,9 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .send({
           name: "Test name",
           dni: "12345678",
-          bankId: "40138",
+          bankId: "90659",
           accountNumber: "1234567890",
-          clabe: "12345678901234567890",
+          clabe: "659437001005389354",
           alias: "Test alias",
         });
 
@@ -342,9 +342,9 @@ describe("[UNIT] => AGENT ROUTER", () => {
       expect(response.body.data).toStrictEqual({
         name: "Test name",
         dni: "12345678",
-        bankId: "40138",
+        bankId: "90659",
         accountNumber: "1234567890",
-        clabe: "12345678901234567890",
+        clabe: "659437001005389354",
         alias: "Test alias",
       });
     });

@@ -50,7 +50,7 @@ export class DepositController {
   /**
    * Create new deposit or verify existing
    */
-  static readonly create = async (req: Req, res: Res, next: NextFn) => {
+  static readonly upsert = async (req: Req, res: Res, next: NextFn) => {
     const deposit_id = req.params.id;
     const request: Omit<DepositRequest, "player_id"> = req.body;
     const player = req.user!;
@@ -58,15 +58,11 @@ export class DepositController {
     const depositServices = new DepositServices();
     try {
       let result: DepositResult;
-      const deposit = await DepositsDAO.getByTrackingNumber(
-        request.tracking_number,
-      );
-      if (deposit && !deposit_id) {
-        result = await depositServices.confirm(player, deposit.id, request);
-      } else if (!deposit && !deposit_id) {
-        result = await depositServices.create(player, request);
-      } else {
+
+      if (deposit_id) {
         result = await depositServices.confirm(player, deposit_id, request);
+      } else {
+        result = await depositServices.create(player, request);
       }
 
       res.status(OK).json(apiResponse(result));
