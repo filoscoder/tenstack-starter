@@ -38,7 +38,7 @@ export const validateBankAccount = () =>
       isString: true,
       trim: true,
       custom: {
-        options: (val) => bankCodes.includes(val),
+        options: (val) => bankCodes.includes(val) || val === "-1",
         errorMessage: "Invalid bank ID",
       },
       errorMessage: "Bank id is required",
@@ -48,7 +48,7 @@ export const validateBankAccount = () =>
       notEmpty: true,
       isString: true,
       trim: true,
-      custom: { options: verifyClabe, errorMessage: "CLABE inválida" },
+      custom: { options: verifyClabe, errorMessage: "Cuenta CLABE invalida" },
       errorMessage: "Bank number is required",
     },
     bankAlias: {

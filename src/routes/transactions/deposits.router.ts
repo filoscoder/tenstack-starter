@@ -35,7 +35,7 @@ depositsRouter.post(
   checkExact(),
   throwIfBadRequest,
   depositRateLimiter,
-  DepositController.create,
+  DepositController.upsert,
 );
 depositsRouter.get(
   "/bank-details",

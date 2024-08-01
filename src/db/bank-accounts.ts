@@ -99,6 +99,6 @@ export class BankAccountsDAO {
     });
 
     if (existing)
-      throw new ForbiddenError("Ya existe una cuenta con ese número");
+      throw new ForbiddenError("Cuenta CLABE ya registrada previamente");
   }
 }

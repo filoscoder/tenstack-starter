@@ -54,7 +54,10 @@ export const validateDepositRequest = () =>
       in: ["body"],
       isEmpty: false,
       isNumeric: true,
-      custom: { options: (val) => !isNaN(Number(val)) },
+      custom: {
+        options: (val) => !isNaN(Number(val)),
+        errorMessage: "amount debe ser un numero",
+      },
       customSanitizer: { options: (val) => Number(val) },
       errorMessage: "invalid amount",
     },

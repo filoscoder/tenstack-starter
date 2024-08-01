@@ -8,8 +8,6 @@ import { ForbiddenError, NotFoundException } from "@/helpers/error";
 import { hidePassword } from "@/utils/auth";
 import CONFIG from "@/config";
 import { RoledPlayer } from "@/types/response/players";
-import { ERR } from "@/config/errors";
-import { CustomError } from "@/helpers/error/CustomError";
 import { OrderBy } from "@/types/request/players";
 
 const prisma = new PrismaClient();
@@ -214,7 +212,7 @@ export class DepositsDAO {
         deposit.player_id !== player.id &&
         !player.roles.some((r) => r.name === CONFIG.ROLES.AGENT)
       )
-        throw new ForbiddenError("No autorizado");
+        throw new ForbiddenError("El depósito no le pertenece.");
 
       return deposit;
     } catch (error) {
@@ -256,7 +254,8 @@ export class DepositsDAO {
           NOT: { id: deposit_id },
         },
       });
-      if (duplicate) throw new CustomError(ERR.DEPOSIT_ALREADY_EXISTS);
+      if (duplicate)
+        throw new ForbiddenError("Deposito ya acreditado previamente.");
 
       deposit = await prisma.deposit.update({
         where: { id: deposit_id },
@@ -276,7 +275,8 @@ export class DepositsDAO {
       const deposit = await prisma.deposit.findUnique({
         where: { tracking_number: request.tracking_number },
       });
-      if (deposit) throw new ForbiddenError("already exists");
+      if (deposit)
+        throw new ForbiddenError("Deposito ya acreditado previamente.");
       return deposit;
     } catch (error) {
       throw error;
