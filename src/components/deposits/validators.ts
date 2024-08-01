@@ -55,8 +55,8 @@ export const validateDepositRequest = () =>
       isEmpty: false,
       isNumeric: true,
       custom: {
-        options: (val) => !isNaN(Number(val)) && val >= 40,
-        errorMessage: "El depósito debe ser de al menos 40 MXN",
+        options: (val) => !isNaN(Number(val)),
+        errorMessage: "amount debe ser un numero",
       },
       customSanitizer: { options: (val) => Number(val) },
       errorMessage: "invalid amount",

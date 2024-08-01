@@ -21,17 +21,18 @@ export class PaymentServices extends ResourceService {
     player: PlainPlayerResponse,
     request: CashoutRequest,
   ): Promise<CoinTransferResult> {
-    await PaymentsDAO.authorizeCreation(request.bank_account, player.id);
-
     const bonusServices = new BonusServices();
-    await bonusServices.invalidate(player.id).catch(() => null);
+    await PaymentsDAO.authorizeCreation(request.bank_account, player.id);
 
     const casinoCoinsService = new CasinoCoinsService();
     let transferResult: CoinTransferResult | undefined;
     try {
       transferResult = await casinoCoinsService.playerToAgent(request, player);
 
-      if (transferResult.ok) this.createDbObject(player, request);
+      if (transferResult.ok) {
+        this.createDbObject(player, request);
+        await bonusServices.invalidate(player.id).catch(() => null);
+      }
 
       return transferResult;
     } catch (e) {

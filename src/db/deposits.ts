@@ -8,8 +8,6 @@ import { ForbiddenError, NotFoundException } from "@/helpers/error";
 import { hidePassword } from "@/utils/auth";
 import CONFIG from "@/config";
 import { RoledPlayer } from "@/types/response/players";
-import { ERR } from "@/config/errors";
-import { CustomError } from "@/helpers/error/CustomError";
 import { OrderBy } from "@/types/request/players";
 
 const prisma = new PrismaClient();
@@ -256,7 +254,8 @@ export class DepositsDAO {
           NOT: { id: deposit_id },
         },
       });
-      if (duplicate) throw new CustomError(ERR.DEPOSIT_ALREADY_EXISTS);
+      if (duplicate)
+        throw new ForbiddenError("Deposito ya acreditado previamente.");
 
       deposit = await prisma.deposit.update({
         where: { id: deposit_id },
@@ -277,9 +276,7 @@ export class DepositsDAO {
         where: { tracking_number: request.tracking_number },
       });
       if (deposit)
-        throw new ForbiddenError(
-          "Un depósito con ese número de seguimiento ya existe",
-        );
+        throw new ForbiddenError("Deposito ya acreditado previamente.");
       return deposit;
     } catch (error) {
       throw error;
