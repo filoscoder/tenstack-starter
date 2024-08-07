@@ -30,7 +30,7 @@ export const parseTransferResult = (
   type: "deposit" | "cashout",
 ): CoinTransferResult => {
   const ok = transfer.status === 201;
-  let player_balance: number | undefined = undefined;
+  let player_balance: string | undefined = undefined;
 
   ok && type === "deposit"
     ? (player_balance = transfer.data.recipient_balance_after)
@@ -44,7 +44,9 @@ export const parseTransferResult = (
 
   const result: CoinTransferResult = {
     ok,
-    player_balance,
+    player_balance: player_balance
+      ? Number(player_balance?.slice(0, 5))
+      : undefined,
     error: ok ? undefined : CONFIG.SD.INSUFICIENT_BALANCE,
   };
   return result;

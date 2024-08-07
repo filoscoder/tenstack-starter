@@ -26,7 +26,7 @@ depositsRouter.use(
 depositsRouter.get(
   "/deposit/pending",
   requireUserRole,
-  DepositController.pending,
+  DepositController.getPending,
 );
 depositsRouter.post(
   "/deposit/:id?",
@@ -57,6 +57,7 @@ depositsRouter.get(
   DepositController.show,
 );
 depositsRouter.post(
+  // TODO
   // "/deposit/:id/update",
   "/deposit/:id/set-status",
   validateDepositIndex(),

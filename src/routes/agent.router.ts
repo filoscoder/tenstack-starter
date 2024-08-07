@@ -53,7 +53,8 @@ agentRouter.post(
 );
 agentRouter.get("/balance/casino", AgentController.getCasinoBalance);
 agentRouter.get("/balance/alquimia", AgentController.getAlqBalance);
-agentRouter.get("/pending/deposits", AgentController.completePendingDeposits);
+// TODO
+// agentRouter.get("/pending/deposits", AgentController.completePendingDeposits);
 agentRouter.post(
   "/on-call",
   validateOnCallRequest(),

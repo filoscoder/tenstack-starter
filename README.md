@@ -40,7 +40,7 @@ Comes with:
 + [Ver Depósitos Pendientes](#ver-depósitos-pendientes-)
 + [Ver Depósito](#ver-depósito-)
 + [Listar Depósitos](#listar-depósitos-)
-+ [Editar Depósito](#editar-número-de-seguimiento-)
++ [Cambiar Estado del Depósito](#cambiar-estado-del-depósito-)
 + [Ver Cuenta Bancaria de Alquimia](#ver-cuenta-alquimia-)
 
 ### Pagos (plataforma ➡ jugador)
@@ -57,7 +57,6 @@ Comes with:
 + [Ver Balance Casino](#ver-balance-casino-)
 + [Ver Balance Alquimia](#ver-balance-alquimia-)
 + [Ver Transferencias de Fichas Pendientes](#ver-transferencias-de-fichas-pendientes-)
-+ [Liberar Fichas Pendientes](#liberar-fichas-pendientes-)
 + [Indicar Que El Agente Esta De Guardia](#setear-guardia-)
 + [Ver Estado De Guardia](#ver-guardia-)
 + [Ver Números de Soporte](#ver-números-de-soporte-)
@@ -85,7 +84,10 @@ Comes with:
 + [Listar Bonos](#listar-bonos-)
 + [Ver Bono](#ver-bono-)
 + [Crear Bono](#crear-bono-)
-+ [Canjear Bono]()
++ [Canjear Bono](#canjear-bono-)
+
+### Transferencias de Fichas
++ [Liberar Pendientes]
 
 ### [Interfaces](#interfaces-1)
 
@@ -236,14 +238,6 @@ Requiere rol| player
 
 > **Nota:** siempre devuelve un array
 
-### Confirmar Depósito Pendiente 🔒
-
-|Endpoint| `/transactions/deposit/:id/confirm`|
----|---|
-Método      |`POST`
-Devuelve    |[`DepositResult`](#depositresult)
-Requiere rol| player
-
 ### Ver Cuenta Alquimia 🔒
 
 |Endpoint| `/transactions/bank-details`|
@@ -350,7 +344,7 @@ Query string| [`ResourceListQueryString`](#ResourceListQueryString)
 Devuelve    |[`Deposit[]`](#deposit)
 Requiere rol| agent
 
-### Editar Número de seguimiento 🔒
+### Editar Depósito 🔒
 Endpoint para que el agente modifique el `tracking_number` de un depósito y dispare el flujo de verificación.
 
 |Endpoint| `/transactions/deposit/:id`|
@@ -360,13 +354,13 @@ Body (json) | [`EditDepositRequest`](#editdepositrequest)
 Devuelve    |[`DepositResult`](#depositresult)
 Requiere rol| agent
 
-### Editar Depósito 🔒
+### Cambiar Estado del Depósito 🔒
 Para que el agente marque un depósito como pagado
 
-|Endpoint| `/transactions/deposit/:id/update`|
+|Endpoint| `/transactions/deposit/:id/set-status`|
 ---|---|
 Método      |`POST`
-Body (json) | [`EditDepositStatusRequest`](#editdepositstatusrequest)
+Body (json) | [`SetDepositStatusRequest`](#setdepositstatusrequest)
 Devuelve    |[`Deposit`](#deposit)
 Requiere rol| agent
 
@@ -414,14 +408,6 @@ Método      |`GET`
 Devuelve    |`number`
 Requiere rol| agent
 
-### Liberar Fichas Pendientes 🔒
-Liberar transferencias que hayan quedado pendientes en el caso que un jugador quiera comprar mas fichas de las que tiene dispoibles el agente
-
-|Endpoint| `/agent/pending/deposits`|
----|---|
-Método      |`GET`
-Devuelve    |[`Deposit[]`](#deposit) - los depositos afectados
-Requiere rol| agent
 
 ### Setear Guardia 🔒
 Indicar que alguien está al teléfono para que el bot muestre el menú "contactanos".
@@ -552,6 +538,20 @@ Método      |`GET`
 Devuelve    |[`BonusRedemptionResult`](#bonusredemptionresult)
 Requiere rol| player
 
+Transferencia de Fichas
+-----------------------
+
+### Liberar Fichas Pendientes 🔒
+Liberar transferencias de fichas que hayan quedado pendientes en el caso que un jugador quiera comprar mas fichas de las que tiene dispoibles el agente
+
+// TODO
+// Actualizar la respuesta
+|Endpoint| `/coin-transfer/release-pending`|
+---|---|
+Método      |`GET`
+Devuelve    |[`Deposit[]`](#deposit) - los depositos afectados
+Requiere rol| agent
+
 ## Interfaces
 
 ### Player
@@ -678,7 +678,7 @@ Estado de transferencia de fichas
 ```typescript
 {
   ok: boolean
-  player_balance: number
+  player_balance: number?             // undefined en caso de fichas no transferidas
   error: string?                      // En caso de error, el motivo
 }
 ```
@@ -686,9 +686,11 @@ Estado de transferencia de fichas
 ### DepositResult
 ```typescript
 {
-  player_balance: number?             // undefined en caso de fichas no transferidas
-  error: string?                      // En caso de error, el motivo
   deposit: Deposit
+  bonus: Bonus?
+  coinTransfer: CoinTransferResult?
+  // error:
+  // playerBalance:
 }
 ```
 
@@ -699,10 +701,11 @@ Estado de transferencia de fichas
   player_id: string
   currency: string
   dirty: boolean
-  // Esperando verificacion | verificado en alquimia | verificado y fichas enviadas | todo OK | eliminado por agente
-  status: "pending"|"verified"|"confirmed"|"completed"|"deleted"
+  // Esperando verificacion | verificacion fallida | verificado | eliminado por agente
+  status: "pending"|"unverified"|"verified"|"deleted"
   tracking_number: string
   amount: number
+  sending_bank: string
   created_at: datetime                // 2024-02-23T12:35:51.017Z
   updated_at: datetime                // 2024-02-23T12:35:51.017Z
 }
@@ -715,10 +718,10 @@ Estado de transferencia de fichas
 }
 ```
 
-### EditDepositStatusRequest
+### SetDepositStatusRequest
 ```typescript
 {
-  status: "pending"|"verified"|"confirmed"|"completed"|"deleted"
+  status: "pending"|"unverified"|"verified"|"deleted"
 }
 ```
 
@@ -926,6 +929,8 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Update README
 - Update CHANGELOG
 - Rename `/deposit/:id/update` to `/deposit/:id/set-status` on agent-timba
+- Testear el uso de instancia global de prisma
+- Boletear todos los *DAO
 
 
 

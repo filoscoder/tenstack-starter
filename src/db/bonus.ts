@@ -81,7 +81,12 @@ export class BonusDAO {
       const bonus = await prisma.bonus.create({
         data: {
           ...data,
+          player_id: undefined,
           status: data.status ?? CONFIG.SD.BONUS_STATUS.ASSIGNED,
+          CoinTransfer: {
+            create: { status: CONFIG.SD.COIN_TRANSFER_STATUS.PENDING },
+          },
+          Player: { connect: { id: data.player_id } },
         },
       });
       return bonus;
@@ -171,7 +176,7 @@ export class BonusDAO {
   static async authorizeRedemption(
     bonusId: string,
     user: Player,
-  ): Promise<Bonus & { Player: Player }> {
+  ): Promise<Bonus> {
     const playerServices = new PlayerServices();
     const authorized = await prisma.$transaction(async (tx) => {
       const bonus = await tx.bonus.findUnique({
@@ -187,7 +192,7 @@ export class BonusDAO {
         bonus.Player.id,
         bonus.Player,
       );
-      if (balance > 10)
+      if (balance >= 10)
         throw new ForbiddenError(
           "El bono solo se puede canjear cuando el balance es menor que 10.",
         );
@@ -206,7 +211,6 @@ export class BonusDAO {
       return await tx.bonus.update({
         where: { id: bonusId },
         data: { status: CONFIG.SD.BONUS_STATUS.REDEEMED },
-        include: { Player: true },
       });
     });
     return authorized;

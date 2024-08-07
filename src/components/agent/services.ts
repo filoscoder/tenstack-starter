@@ -1,11 +1,9 @@
-import { Deposit, Payment } from "@prisma/client";
+import { Payment } from "@prisma/client";
 import { AxiosResponse } from "axios";
 import { AuthServices } from "../auth/services";
-import { DepositServices } from "../deposits/services";
 import { Credentials } from "@/types/request/players";
 import { compare } from "@/utils/crypt";
 import { PaymentsDAO } from "@/db/payments";
-import { DepositsDAO } from "@/db/deposits";
 import {
   AgentBankAccount,
   BalanceResponse,
@@ -134,18 +132,19 @@ export class AgentServices {
     };
   }
 
-  static async freePendingCoinTransfers(): Promise<Deposit[]> {
-    const deposits = await DepositsDAO.getPendingCoinTransfers();
-    const response: Deposit[] = [];
-    const depositServices = new DepositServices();
-    for (const deposit of deposits) {
-      if (deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED) continue;
-      const result = await depositServices.finalizeDeposit(deposit);
-      response.push(result.deposit);
-    }
+  // TODO
+  // static async freePendingCoinTransfers(): Promise<Deposit[]> {
+  //   const deposits = await DepositsDAO.getPendingCoinTransfers();
+  //   const response: Deposit[] = [];
+  //   const depositServices = new DepositServices();
+  //   for (const deposit of deposits) {
+  //     if (deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED) continue;
+  //     const result = await depositServices.finalizeDeposit(deposit);
+  //     response.push(result.deposit);
+  //   }
 
-    return response;
-  }
+  //   return response;
+  // }
 
   static async setOnCallBotFlow(active: boolean): Promise<void> {
     await BotFlowsDAO.setOnCall(active);

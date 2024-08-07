@@ -219,6 +219,7 @@ model CoinTransfer {
   id                          String    @id @default(uuid())
   status                      String    @db.VarChar(32)
   transfered_at               DateTime?
+  player_balance_after        Float?
   Bonus                       Bonus?
   Deposit                     Deposit?
   Payment                     Payment?

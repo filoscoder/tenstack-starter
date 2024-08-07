@@ -12,6 +12,7 @@ export const isKeyOfPayment = (key: string): key is keyof Payment => {
     player_id: "",
     status: "",
     alquimia_id: 0,
+    coin_transfer_id: "",
     Player: {
       id: "",
       panel_id: 0,

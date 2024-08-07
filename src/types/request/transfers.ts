@@ -25,8 +25,8 @@ export type CreateDepositProps = DepositRequest & {
   cep_ok?: boolean;
 };
 
-export type DepositUpdateRequest = {
-  status: string;
+export type SetDepositStatusRequest = {
+  status: "pending" | "unverified" | "verified" | "deleted";
 };
 
 export type DepositUpdatableProps = {

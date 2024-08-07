@@ -1,18 +1,15 @@
-import { Bonus, Deposit, Player, Role } from "@prisma/client";
-import { BonusServices } from "../bonus/services";
+import { Bonus, Deposit, Player, PrismaClient, Role } from "@prisma/client";
 import CONFIG from "@/config";
 import { DepositsDAO } from "@/db/deposits";
 import {
   DepositRequest,
-  DepositUpdateRequest,
+  SetDepositStatusRequest,
 } from "@/types/request/transfers";
 import { PlainPlayerResponse, RoledPlayer } from "@/types/response/players";
-import { DepositResult } from "@/types/response/transfers";
 import { HttpService } from "@/services/http.service";
 import { AlqMovementResponse } from "@/types/response/alquimia";
 import { ResourceService } from "@/services/resource.service";
 import { BanxicoService } from "@/services/banxico.service";
-import { BonusDAO } from "@/db/bonus";
 import { CoinTransferDAO } from "@/db/coin-transfer";
 
 export class DepositServices extends ResourceService {
@@ -23,76 +20,68 @@ export class DepositServices extends ResourceService {
   /**
    * Create and verify deposit.
    */
-  async create(
-    player: PlainPlayerResponse,
-    request: DepositRequest,
-  ): Promise<Deposit> {
+  async create(player: PlainPlayerResponse, request: DepositRequest) {
     await DepositsDAO.authorizeCreation(request);
 
     const coinTransfer = await CoinTransferDAO.create({});
 
     const deposit = await DepositsDAO.create({
-      ...request,
-      player_id: player.id,
-      coin_transfer_id: coinTransfer.id,
+      data: {
+        ...request,
+        player_id: player.id,
+        coin_transfer_id: coinTransfer.id,
+        status: CONFIG.SD.DEPOSIT_STATUS.PENDING,
+      },
     });
 
-    // await this.loadWelcomeBonus(player, deposit);
-
-    // return await this.finalizeDeposit(deposit);
     return await this.verify(deposit);
   }
 
-  // async update()
-
-  async setStatus(
-    // async update(
-    agent: Player & { roles: Role[] },
-    deposit_id: string,
-    request: DepositUpdateRequest,
-  ): Promise<Deposit> {
-    await DepositsDAO.authorizeUpdate(deposit_id, agent);
-
-    return await DepositsDAO.update(deposit_id, { ...request, dirty: false });
-  }
-
   /**
-   * Player announces they have completed a pending deposit
+   * Update and verify an existing deposit
    */
   async update(
     player: RoledPlayer,
     deposit_id: string,
     request: DepositRequest,
-  ): Promise<Deposit> {
-    await DepositsDAO.authorizeConfirmation(
+  ) {
+    await DepositsDAO.authorizeUpdate(
       deposit_id,
-      request.tracking_number,
       player,
+      request.tracking_number,
     );
 
-    const deposit = (await DepositsDAO.update(deposit_id, request))!;
+    const deposit = await DepositsDAO.update({
+      where: { id: deposit_id },
+      data: request,
+    });
 
     return await this.verify(deposit);
   }
 
-  /**
-   * @throws DepositResult
-   */
-  async verify(deposit: Deposit): Promise<Deposit> {
-    if (
-      deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED ||
-      deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED
-    )
-      return deposit;
+  async setStatus(
+    agent: Player & { roles: Role[] },
+    deposit_id: string,
+    request: SetDepositStatusRequest,
+  ): Promise<Deposit> {
+    await DepositsDAO.authorizeUpdate(deposit_id, agent);
+
+    return await DepositsDAO.update({
+      where: { id: deposit_id },
+      data: { ...request, dirty: false },
+    });
+  }
+
+  async verify(
+    deposit: Deposit,
+  ): Promise<Deposit & { Player: Player & { Bonus: Bonus | null } }> {
+    // if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED) return deposit;
 
     const amount = await this.verifyThroughBanxico(deposit);
-    if (!amount) {
-      throw {
-        error: "Deposito no confirmado",
-        deposit: await this.markAsPending(deposit),
-      } as DepositResult;
-    }
-    return await this.markAsVerified(deposit, amount);
+
+    if (amount) return await this.markAsVerified(deposit, amount);
+
+    return await this.markAsUnverified(deposit);
   }
 
   // async transfer(
@@ -140,10 +129,7 @@ export class DepositServices extends ResourceService {
   public async verifyThroughAlquimia(
     deposit: Deposit,
   ): Promise<number | undefined> {
-    if (
-      deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED ||
-      deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED
-    )
+    if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED)
       return deposit.amount!;
 
     try {
@@ -180,75 +166,85 @@ export class DepositServices extends ResourceService {
 
   /**
    * Verify receipt of Player's deposit through Banxico.
-   * @throws DepositResult
+   * @returns verified deposit amount
    */
   public async verifyThroughBanxico(
     deposit: Deposit,
   ): Promise<number | undefined> {
-    if (
-      deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED ||
-      deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED
-    )
+    if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED)
       return deposit.amount!;
 
     const banxicoService = new BanxicoService();
 
     if (deposit.sending_bank === "-1") {
       const bank = await banxicoService.findBank(deposit);
-      if (!bank)
-        throw {
-          error: "Banco no encontrado",
-          deposit: await this.markAsPending(deposit),
-        } as DepositResult;
-      deposit = await DepositsDAO.update(deposit.id, { sending_bank: bank });
+      if (!bank) return;
+
+      deposit = await DepositsDAO.update({
+        where: { id: deposit.id },
+        data: { sending_bank: bank },
+      });
     }
 
     try {
-      const amount = await banxicoService.verifyDeposit(deposit);
-
-      return amount;
+      return await banxicoService.verifyDeposit(deposit);
     } catch (e) {
       if (CONFIG.LOG.LEVEL === "debug") console.error(e);
       return;
     }
   }
 
-  private markAsPending(
-    deposit: Deposit,
-  ): Promise<Deposit & { Player: Player }> {
-    return DepositsDAO.update(deposit.id, {
-      dirty: false,
-      status: CONFIG.SD.DEPOSIT_STATUS.PENDING,
+  // private markAsPending(
+  //   deposit: Deposit,
+  // ): Promise<Deposit & { Player: Player }> {
+  //   return DepositsDAO.update(deposit.id, {
+  //     dirty: false,
+  //     status: CONFIG.SD.DEPOSIT_STATUS.PENDING,
+  //   });
+  // }
+
+  private markAsVerified(deposit: Deposit, amount: number) {
+    const prisma = new PrismaClient();
+    return prisma.deposit.update({
+      where: { id: deposit.id },
+      data: {
+        status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED,
+        amount,
+        dirty: false,
+      },
+      include: { Player: { include: { Bonus: true } } },
     });
   }
 
-  private markAsVerified(
-    deposit: Deposit,
-    amount: number,
-  ): Promise<Deposit & { Player: Player }> {
-    return DepositsDAO.update(deposit.id, {
-      status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED,
-      amount,
+  private markAsUnverified(deposit: Deposit) {
+    const prisma = new PrismaClient();
+    return prisma.deposit.update({
+      where: { id: deposit.id },
+      data: {
+        dirty: false,
+        status: CONFIG.SD.DEPOSIT_STATUS.UNVERIFIED,
+      },
+      include: { Player: { include: { Bonus: true } } },
     });
   }
 
-  private markAsConfirmed(
-    deposit: Deposit,
-  ): Promise<Deposit & { Player: Player }> {
-    return DepositsDAO.update(deposit.id, {
-      dirty: false,
-      status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED,
-    });
-  }
+  // private markAsConfirmed(
+  //   deposit: Deposit,
+  // ): Promise<Deposit & { Player: Player }> {
+  //   return DepositsDAO.update(deposit.id, {
+  //     dirty: false,
+  //     status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED,
+  //   });
+  // }
 
-  private markAsCompleted(
-    deposit: Deposit,
-  ): Promise<Deposit & { Player: Player }> {
-    return DepositsDAO.update(deposit.id, {
-      dirty: false,
-      status: CONFIG.SD.DEPOSIT_STATUS.COMPLETED,
-    });
-  }
+  // private markAsCompleted(
+  //   deposit: Deposit,
+  // ): Promise<Deposit & { Player: Player }> {
+  //   return DepositsDAO.update(deposit.id, {
+  //     dirty: false,
+  //     status: CONFIG.SD.DEPOSIT_STATUS.COMPLETED,
+  //   });
+  // }
 
   /**
    * Show deposits which have pending actions
@@ -259,23 +255,27 @@ export class DepositServices extends ResourceService {
     return deposits;
   }
 
-  static async pendingCoinTransfers(): Promise<number> {
-    const deposits = await DepositsDAO.getPendingCoinTransfers();
-    let total = 0;
-    deposits.forEach((deposit) => {
-      total += deposit.amount!;
-    });
+  // static async pendingCoinTransfers(): Promise<number> {
+  //   const deposits = await DepositsDAO.getPendingCoinTransfers();
+  //   let total = 0;
+  //   deposits.forEach((deposit) => {
+  //     total += deposit.amount!;
+  //   });
 
-    return total;
-  }
+  //   return total;
+  // }
 
-  async loadWelcomeBonus(
-    player: Player,
-    deposit: Deposit,
-  ): Promise<Bonus | null> {
-    const bonusServices = new BonusServices();
-    const bonus_id = (await BonusDAO.findByPlayerId(player.id))[0]?.id;
-    if (bonus_id) return await bonusServices.load(bonus_id, deposit.amount);
-    return null;
-  }
+  // async loadWelcomeBonus(
+  //   player: Player,
+  //   deposit: Deposit,
+  // ): Promise<Bonus | null> {
+  //   if (deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED) return null;
+
+  //   const bonusServices = new BonusServices();
+  //   const bonus_id = (await BonusDAO.findByPlayerId(player.id))[0]?.id;
+
+  //   if (bonus_id) return await bonusServices.load(bonus_id, deposit.amount);
+
+  //   return null;
+  // }
 }

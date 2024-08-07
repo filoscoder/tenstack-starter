@@ -1,5 +1,4 @@
-import { Player } from "@prisma/client";
-import { AxiosResponse } from "axios";
+import { CoinTransfer, Player } from "@prisma/client";
 import { HttpService } from "./http.service";
 import CONFIG from "@/config";
 import { UserRootDAO } from "@/db/user-root";
@@ -9,17 +8,16 @@ import { CoinTransferResult } from "@/types/response/transfers";
 import { AgentApiError } from "@/helpers/error/AgentApiError";
 import { WebPush } from "@/notification/web-push";
 import { CoinTransferDAO } from "@/db/coin-transfer";
+import NotFoundException from "@/helpers/error/NotFoundException";
+import { logtailLogger } from "@/helpers/loggers";
 
 /**
- * Interact with the casino's coins transfer endpoints and log results into
- * TRANSACTIONS table
+ * Interact with the casino's coins transfer endpoints
  *
  */
 export class CasinoCoinsService {
   /**
    * Transfer coins from player to agent (Cashout)
-   * @throws AgentApiError
-   * @throws CustomError (transaction_log)
    */
   async playerToAgent(
     cashOutRequest: CashoutRequest,
@@ -32,22 +30,20 @@ export class CasinoCoinsService {
       player.balance_currency,
     );
     const result = await this.transfer(transferDetails);
-    const parsedResult = parseTransferResult(result, transferDetails.type);
+    // const parsedResult = parseTransferResult(result, transferDetails.type);
     // await this.logTransaction(parsedResult.ok, transferDetails);
-    return parsedResult;
+    return result;
   }
 
   /**
-   * Transfer coins from agent to player (Deposit)
+   * Transfer coins from agent to player
    * @throws AgentApiError
-   * @throws CustomError (transaction_log)
    */
-  async agentToPlayer(
-    // request: CoinTransferRequest,
-    coin_transfer_id: string,
-  ): Promise<CoinTransferResult> {
+  async agentToPlayer(coin_transfer_id: string): Promise<CoinTransfer> {
     const coinTransfer = await CoinTransferDAO.findById(coin_transfer_id);
-    const parent = coinTransfer?.Bonus || coinTransfer?.Deposit;
+    if (!coinTransfer) throw new NotFoundException("CoinTransfer not found");
+
+    const parent = coinTransfer.Bonus || coinTransfer.Deposit;
     const transferDetails = await this.generateTransferDetails(
       "deposit",
       parent!.Player.panel_id,
@@ -55,45 +51,21 @@ export class CasinoCoinsService {
       parent!.Player.balance_currency,
     );
 
-    // if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.CONFIRMED) {
-    //   await this.logTransaction(true, transferDetails);
-    //   return { ok: true };
-    // }
-
     const result = await this.transfer(transferDetails);
 
-    if (result.data.code == "insuficient_balance")
-      await this.notifyInsuficientBalance(
-        transferDetails.amount,
-        result.data.variables.balance_amount,
-      );
+    // const parsedResult = parseTransferResult(result, transferDetails.type);
 
-    return parseTransferResult(result, transferDetails.type);
-    // await this.logTransaction(parsedResult.ok, transferDetails);
-    // return parsedResult;
+    return await CoinTransferDAO.update(
+      { id: coinTransfer.id },
+      {
+        status: result.ok
+          ? CONFIG.SD.COIN_TRANSFER_STATUS.COMPLETED
+          : CONFIG.SD.COIN_TRANSFER_STATUS.PENDING,
+        player_balance_after: result.player_balance,
+        transfered_at: new Date(),
+      },
+    );
   }
-
-  // async bonusAgentToPlayer(request: CoinTransferRequest) {
-  //   const transferDetails = await this.generateTransferDetails(
-  //     "deposit",
-  //     request.panel_id,
-  //     request.amount!,
-  //     request.currency,
-  //   );
-  //   const result = await this.transfer(transferDetails);
-  //   if (result.data.code == "insuficient_balance") {
-  //     const difference =
-  //       transferDetails.amount - result.data.variables.balance_amount;
-  //     await WebPush.agent({
-  //       title: "Fichas insuficientes",
-  //       body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
-  //       tag: CONFIG.SD.INSUFICIENT_CREDITS,
-  //     });
-  //   }
-  //   const parsedResult = parseTransferResult(result, transferDetails.type);
-  //   // await this.logTransaction(parsedResult.ok, transferDetails);
-  //   return parsedResult;
-  // }
 
   /**
    * Send coins
@@ -101,18 +73,25 @@ export class CasinoCoinsService {
    */
   private async transfer(
     transferDetails: TransferDetails,
-  ): Promise<AxiosResponse> {
+  ): Promise<CoinTransferResult> {
     const { authedAgentApi } = new HttpService();
     const url = "/backoffice/transactions/";
     const result = await authedAgentApi.post<any>(url, transferDetails);
 
-    if (result.status !== 201 && result.status !== 400)
-      throw new AgentApiError(
-        result.status,
-        "Error en el panel al transferir fichas",
-        result.data,
+    if (result.data.code == "insuficient_balance")
+      await this.notifyInsuficientBalance(
+        transferDetails.amount,
+        result.data.variables.balance_amount,
       );
-    return result;
+
+    if (result.status !== 201 && result.status !== 400) {
+      if (CONFIG.LOG.LEVEL === "debug") console.log(result.data);
+      const errMsg = "Error en el panel al transferir fichas";
+      const err = new AgentApiError(result.status, errMsg, result.data);
+      logtailLogger.error({ err });
+      return { ok: false, error: errMsg };
+    }
+    return parseTransferResult(result, transferDetails.type);
   }
 
   private async generateTransferDetails(

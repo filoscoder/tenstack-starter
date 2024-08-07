@@ -1,15 +1,18 @@
 import { OK } from "http-status";
-import { Deposit, Player } from "@prisma/client";
+import { Bonus, CoinTransfer, Deposit, Player } from "@prisma/client";
+import { BonusServices } from "../bonus/services";
 import { DepositServices } from "./services";
 import { DepositsDAO } from "@/db/deposits";
 import { apiResponse } from "@/helpers/apiResponse";
 import {
   DepositRequest,
-  DepositUpdateRequest,
+  SetDepositStatusRequest,
 } from "@/types/request/transfers";
 import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 import { hidePassword } from "@/utils/auth";
 import { CasinoCoinsService } from "@/services/casino-coins.service";
+import CONFIG from "@/config";
+import { DepositResult } from "@/types/response/transfers";
 
 export class DepositController {
   static readonly index = async (req: Req, res: Res, next: NextFn) => {
@@ -55,35 +58,37 @@ export class DepositController {
     const request: Omit<DepositRequest, "player_id"> = req.body;
     const player = req.user!;
 
-    const depositServices = new DepositServices();
-    const casinoCoinServices = new CasinoCoinsService();
+    const depositServices = new DepositServices(),
+      casinoCoinServices = new CasinoCoinsService(),
+      bonusServices = new BonusServices();
+    let deposit:
+        | (Deposit & { Player: Player & { Bonus: Bonus | null } })
+        | undefined,
+      bonus: Bonus | undefined,
+      coinTransfer: CoinTransfer | undefined;
+
     try {
-      // let result: DepositResult;
-      // const deposit = await DepositsDAO.getByTrackingNumber(
-      //   request.tracking_number,
-      // );
       if (deposit_id) {
-        const deposit = await depositServices.update(
-          player,
-          deposit_id,
-          request,
-        );
+        deposit = await depositServices.update(player, deposit_id, request);
       } else {
-        const deposit = await depositServices.create(player, request);
-        const bonus = await depositServices.loadWelcomeBonus(player, deposit);
-        const coinTransferResult = await casinoCoinServices.agentToPlayer(
+        deposit = await depositServices.create(player, request);
+      }
+
+      if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED) {
+        bonus = await bonusServices.load(
+          deposit.amount,
+          deposit.Player.Bonus?.id,
+        );
+        coinTransfer = await casinoCoinServices.agentToPlayer(
           deposit.coin_transfer_id,
         );
       }
-      // if (deposit && !deposit_id) {
-      //   result = await depositServices.confirm(player, deposit.id, request);
-      // } else if (!deposit && !deposit_id) {
-      //   result = await depositServices.create(player, request);
-      // } else {
-      //   result = await depositServices.confirm(player, deposit_id, request);
-      // }
 
-      res.status(OK).json(apiResponse(result));
+      // @ts-ignore
+      delete deposit.Player;
+      res
+        .status(OK)
+        .json(apiResponse({ deposit, bonus, coinTransfer } as DepositResult));
     } catch (e) {
       next(e);
     }
@@ -91,7 +96,7 @@ export class DepositController {
 
   static readonly setStatus = async (req: Req, res: Res, next: NextFn) => {
     const deposit_id = req.params.id;
-    const request: DepositUpdateRequest = req.body;
+    const request: SetDepositStatusRequest = req.body;
     const agent = req.user!;
 
     const depositServices = new DepositServices();
@@ -110,7 +115,7 @@ export class DepositController {
   /**
    * Show player's pending deposits
    */
-  static readonly pending = async (req: Req, res: Res, next: NextFn) => {
+  static readonly getPending = async (req: Req, res: Res, next: NextFn) => {
     const player = req.user!;
 
     try {
@@ -129,8 +134,12 @@ export class DepositController {
     res: Res,
     next: NextFn,
   ) => {
+    // const coinTransferServices = new CoinTransferServices();
     try {
-      const amount = await DepositServices.pendingCoinTransfers();
+      // TODO
+      // Implement
+      // const amount = await coinTransferServices.getPendingTotal();
+      const amount = 1;
       res.status(OK).json(apiResponse(amount));
     } catch (err) {
       next(err);

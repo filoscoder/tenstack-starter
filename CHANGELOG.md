@@ -1,3 +1,17 @@
+## [1.0.0] - 2024-08-01
+
+### Changed
+- New possible Deposit status:
+    + pending: just created, verification not yet attempted.
+    + unverified: verification attempted and failed.
+    + verified: verification succesful
+    + deleted: deleted by agent.
+- Updated [`DepositResult`](./README.md#depositresult) to include `Bonus` and separate coin transfer info.
+- Replaced `/agent/pending/deposits` with `/coin-transfer/release-pending`
+
+### Added
+- `/coin-transfer` routes
+
 ## [1.0.0] - 2024-07-29
 
 ### Changed

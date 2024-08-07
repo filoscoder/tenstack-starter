@@ -1,5 +1,5 @@
-import { BankAccount, Payment, PrismaClient } from "@prisma/client";
-import { PaymentRequest } from "@/types/request/transfers";
+import { BankAccount, Payment, Prisma, PrismaClient } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 import { PaymentUpdatableProps } from "@/types/request/transfers";
 import { NotFoundException, ForbiddenError } from "@/helpers/error";
 import CONFIG from "@/config";
@@ -12,9 +12,16 @@ export class PaymentsDAO {
   /**
    * Create a DB entry for a deposit
    */
-  static async create(data: PaymentRequest) {
+  static async create(data: {
+    select?: Prisma.PaymentSelect<DefaultArgs> | null | undefined;
+    include?: Prisma.PaymentInclude<DefaultArgs> | null | undefined;
+    data: Prisma.XOR<
+      Prisma.PaymentCreateInput,
+      Prisma.PaymentUncheckedCreateInput
+    >;
+  }) {
     try {
-      const deposit = await prisma.payment.create({ data });
+      const deposit = await prisma.payment.create(data);
 
       return deposit;
     } catch (error) {

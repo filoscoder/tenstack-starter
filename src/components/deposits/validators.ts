@@ -16,6 +16,7 @@ export const isKeyOfDeposit = (key: string): key is keyof Deposit => {
     date: new Date(),
     sending_bank: "",
     cep_ok: false,
+    coin_transfer_id: "",
     Player: {
       id: "",
       panel_id: 0,
@@ -54,7 +55,10 @@ export const validateDepositRequest = () =>
       in: ["body"],
       isEmpty: false,
       isNumeric: true,
-      custom: { options: (val) => !isNaN(Number(val)) },
+      custom: {
+        options: (val) => !isNaN(Number(val)),
+        errorMessage: "amount debe ser un numero",
+      },
       customSanitizer: { options: (val) => Number(val) },
       errorMessage: "invalid amount",
     },
@@ -104,7 +108,7 @@ export const validateDepositSetStatusRequest = () =>
       isString: true,
       trim: true,
       isIn: {
-        options: [Object.values(CONFIG.SD.DEPOSIT_STATUS)],
+        options: Object.values(CONFIG.SD.DEPOSIT_STATUS),
         errorMessage: "invalid status",
       },
       errorMessage: "status is required",

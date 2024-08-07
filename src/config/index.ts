@@ -88,14 +88,12 @@ const CONFIG = {
     INSUFICIENT_BALANCE: "Saldo insuficiente",
     INSUFICIENT_CREDITS: "FichasInsuficientes",
     DEPOSIT_STATUS: {
-      /** Created by user, awaiting confirmation at alquimia */
+      /** Created by user, yet to be verified. */
       PENDING: "pending",
-      /** Found and verified at alquimia. Coins not sent yet */
+      /** Unsucsessful verification attempt was made */
+      UNVERIFIED: "unverified",
+      /** Found and verified at alquimia or bank. */
       VERIFIED: "verified",
-      /** Payment verified and coins sent to player. Not yet logged into DB */
-      CONFIRMED: "confirmed",
-      /** Allisgood */
-      COMPLETED: "completed",
       /** Deleted by agent */
       DELETED: "deleted",
     },
@@ -118,6 +116,8 @@ const CONFIG = {
       ASSIGNED: "assigned",
       /** Bonus was loaded into Player's account, not yet redeemed */
       PENDING: "pending",
+      /** Bonus was requested by Player but coins not yet transfered */
+      REQUESTED: "requested",
       /** Bonus has been used */
       REDEEMED: "redeemed",
       /** Unavailable */

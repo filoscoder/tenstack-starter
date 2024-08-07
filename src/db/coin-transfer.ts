@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import CONFIG from "@/config";
 import { CreateCoinTransferProps } from "@/types/services/coin-transfer";
 
@@ -29,6 +29,32 @@ export class CoinTransferDAO {
           Bonus: { include: { Player: true } },
         },
       });
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static async findMany(where: Prisma.CoinTransferWhereInput) {
+    try {
+      return await prisma.coinTransfer.findMany({ where });
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
+
+  static async update(
+    where: Prisma.CoinTransferWhereUniqueInput,
+    data: Prisma.XOR<
+      Prisma.CoinTransferUpdateInput,
+      Prisma.CoinTransferUncheckedUpdateInput
+    >,
+  ) {
+    try {
+      return prisma.coinTransfer.update({ where, data });
     } catch (error) {
       throw error;
     } finally {

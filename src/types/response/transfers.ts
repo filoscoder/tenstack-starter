@@ -10,12 +10,13 @@ export type CoinTransferResult = {
   error?: string;
 };
 
-import { CoinTransfer, Deposit, Payment } from "@prisma/client";
+import { Bonus, CoinTransfer, Deposit, Payment } from "@prisma/client";
 
 export type DepositResult = {
   // player_balance?: number;
-  coinTransfer?: CoinTransfer;
   deposit: Deposit;
+  coinTransfer?: CoinTransfer;
+  bonus?: Bonus;
 };
 
 export type CashoutResult = {
