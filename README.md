@@ -56,7 +56,6 @@ Comes with:
 + [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-)
 + [Ver Balance Casino](#ver-balance-casino-)
 + [Ver Balance Alquimia](#ver-balance-alquimia-)
-+ [Ver Transferencias de Fichas Pendientes](#ver-transferencias-de-fichas-pendientes-)
 + [Indicar Que El Agente Esta De Guardia](#setear-guardia-)
 + [Ver Estado De Guardia](#ver-guardia-)
 + [Ver Números de Soporte](#ver-números-de-soporte-)
@@ -87,7 +86,8 @@ Comes with:
 + [Canjear Bono](#canjear-bono-)
 
 ### Transferencias de Fichas
-+ [Liberar Pendientes]
++ [Liberar Pendientes](#liberar-fichas-pendientes-)
++ [Ver Total de Transferencias Pendientes](#ver-total-de-transferencias-pendientes-)
 
 ### [Interfaces](#interfaces-1)
 
@@ -399,16 +399,6 @@ Método      |`GET`
 Devuelve    |[`Balance`](#balance)
 Requiere rol| agent
 
-### Ver Transferencias de Fichas Pendientes 🔒
-Devuelve el total de fichas que debe cargar el agente para liberar transferencias pendientes
-
-|Endpoint| `/agent/pending/pending-coin-transfers`|
----|---|
-Método      |`GET`
-Devuelve    |`number`
-Requiere rol| agent
-
-
 ### Setear Guardia 🔒
 Indicar que alguien está al teléfono para que el bot muestre el menú "contactanos".
 
@@ -548,6 +538,14 @@ Liberar transferencias de fichas que hayan quedado pendientes en el caso que un 
 ---|---|
 Método      |`GET`
 Devuelve    |[`CoinTransfer[]`](#cointransfer)
+Requiere rol| agent
+
+### Ver Total de Transferencias Pendientes 🔒
+
+|Endpoint| `/coin-transfer/pending-total`|
+---|---|
+Método      |`GET`
+Devuelve    |`number`
 Requiere rol| agent
 
 ## Interfaces
