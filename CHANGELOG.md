@@ -1,15 +1,8 @@
 ## [1.0.0] - 2024-08-09
 
 ### Changed
-- `/transactions/cashout` returns `CoinTransfer | ERR.COIN_TRANSFER_UNSUCCESSFUL`
-```ts
-COIN_TRANSFER_UNSUCCESSFUL 
-{
-    status: 502
-    code: "bad_gateway"
-    description: "No se pudo transferir las fichas."
-}
-```
+- `/transactions/cashout` returns `CoinTransfer | ERR.COIN_TRANSFER_UNSUCCESSFUL | ERR.INSUFICIENT_BALANCE`
+
 - Removed `error` and `player_balance` from `BonusRedemptionResult`.
 - Added `coinTransfer` to `BonusRedemptionResult`.
 
