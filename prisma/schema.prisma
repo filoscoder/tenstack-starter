@@ -82,7 +82,7 @@ model Payment {
   dirty             Boolean       @default(false)
   alquimia_id       Int?
   coin_transfer_id  String        @unique
-  CoinTransfer      CoinTransfer  @relation(fields: [coin_transfer_id], references: [id])
+  CoinTransfer      CoinTransfer  @relation(fields: [coin_transfer_id], references: [id], onDelete: Cascade)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
@@ -117,7 +117,7 @@ model Deposit {
   sending_bank      String         
   cep_ok            Boolean       @default(false)
   coin_transfer_id  String        @unique
-  CoinTransfer      CoinTransfer  @relation(fields: [coin_transfer_id], references: [id])
+  CoinTransfer      CoinTransfer  @relation(fields: [coin_transfer_id], references: [id], onDelete: Cascade)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
@@ -208,7 +208,7 @@ model Bonus {
   percentage                  Int
   amount                      Int
   coin_transfer_id            String        @unique
-  CoinTransfer                CoinTransfer  @relation(fields: [coin_transfer_id], references: [id])
+  CoinTransfer                CoinTransfer  @relation(fields: [coin_transfer_id], references: [id], onDelete: Cascade)
   created_at                  DateTime      @default(now())
   updated_at                  DateTime      @updatedAt 
   
@@ -218,7 +218,6 @@ model Bonus {
 model CoinTransfer {
   id                          String    @id @default(uuid())
   status                      String    @db.VarChar(32)
-  transfered_at               DateTime?
   player_balance_after        Float?
   Bonus                       Bonus?
   Deposit                     Deposit?

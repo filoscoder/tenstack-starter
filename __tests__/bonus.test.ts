@@ -1,12 +1,11 @@
 import { SuperAgentTest } from "supertest";
-import { Bonus, Player, PrismaClient } from "@prisma/client";
+import { Bonus, CoinTransfer, Player, PrismaClient } from "@prisma/client";
 import { BAD_REQUEST, CREATED, OK, UNAUTHORIZED } from "http-status";
 import { initAgent } from "./helpers";
-import CONFIG from "@/config";
+import CONFIG, { BONUS_STATUS, COIN_TRANSFER_STATUS } from "@/config";
 import { AuthServices } from "@/components/auth/services";
 import { BonusServices } from "@/components/bonus/services";
-import { CoinTransferResult } from "@/types/response/transfers";
-import { CasinoCoinsService } from "@/services/casino-coins.service";
+import { CoinTransferServices } from "@/components/coin-transfers/services";
 
 let agent: SuperAgentTest;
 let pendingBonus: Bonus;
@@ -23,7 +22,8 @@ describe("[UNIT] => BONUS ROUTER", () => {
     amount: 1,
     percentage: 100,
     player_id: "baz",
-    status: CONFIG.SD.BONUS_STATUS.ASSIGNED,
+    status: BONUS_STATUS.ASSIGNED,
+    coin_transfer_id: "bar",
     created_at: new Date(),
     updated_at: new Date(),
   };
@@ -74,14 +74,17 @@ describe("[UNIT] => BONUS ROUTER", () => {
   });
 
   describe("GET /bonus/:id/redeem", () => {
-    const mockCoinTransferResult: CoinTransferResult = {
-      ok: true,
-      player_balance: 1,
+    const mockCoinTransferResult: CoinTransfer = {
+      id: "foo",
+      player_balance_after: 1,
+      status: COIN_TRANSFER_STATUS.COMPLETED,
+      created_at: new Date(),
+      updated_at: new Date(),
     };
-    const mockBonusAgentToPlayer = jest.fn(async () => mockCoinTransferResult);
+    const mockAgentToPlayer = jest.fn(async () => mockCoinTransferResult);
     jest
-      .spyOn(CasinoCoinsService.prototype, "bonusAgentToPlayer")
-      .mockImplementation(mockBonusAgentToPlayer);
+      .spyOn(CoinTransferServices.prototype, "agentToPlayer")
+      .mockImplementation(mockAgentToPlayer);
 
     it("Should redeem a bonus", async () => {
       const response = await agent
@@ -89,11 +92,9 @@ describe("[UNIT] => BONUS ROUTER", () => {
         .set("Authorization", "Bearer " + playerAccessToken);
 
       expect(response.status).toBe(OK);
-      expect(response.body.data.bonus.status).toBe(
-        CONFIG.SD.BONUS_STATUS.REDEEMED,
-      );
-      expect(response.body.data.player_balance).toBe(1);
-      expect(mockBonusAgentToPlayer).toHaveBeenCalledTimes(1);
+      expect(response.body.data.bonus.status).toBe(BONUS_STATUS.REDEEMED);
+      expect(response.body.data.coinTransfer.player_balance_after).toBe(1);
+      expect(mockAgentToPlayer).toHaveBeenCalledTimes(1);
     });
   });
 });
@@ -110,8 +111,9 @@ async function initialize() {
     data: {
       amount: 1,
       percentage: 100,
-      player_id: player!.id,
-      status: CONFIG.SD.BONUS_STATUS.PENDING,
+      Player: { connect: { id: player!.id } },
+      status: BONUS_STATUS.PENDING,
+      CoinTransfer: { create: { status: COIN_TRANSFER_STATUS.PENDING } },
     },
   });
 

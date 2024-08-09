@@ -216,7 +216,7 @@ Rate-limited|1 every 10 seconds
 ---|---|
 Método      |`POST`
 Body (json) |[`CashoutRequest`](#cashoutrequest)
-Devuelve    |[`CoinTransferResult`](#cointransferresult)
+Devuelve    |[`CoinTransfer`](#cointransfer) \|  [`ERR.INSUFICIENT_BALANCE`](#errinsuficient_balance) \| [`ERR.COIN_TRANSFER_UNSUCCESSFUL`](#errcoin_transfer_unsuccessful)
 Requiere rol| player
 
 ### Listar Pagos 🔒
@@ -683,14 +683,24 @@ Estado de transferencia de fichas
 }
 ```
 
+### CoinTransfer
+```typescript
+{
+  id: string
+  status: string
+  transfered_at?: datetime            // 2024-02-23T12:35:51.017Z
+  player_balance_after?: number
+  updated_at: datetime                // 2024-02-23T12:35:51.017Z
+  created_at: datetime                // 2024-02-23T12:35:51.017Z
+}
+```
+
 ### DepositResult
 ```typescript
 {
   deposit: Deposit
-  bonus: Bonus?
-  coinTransfer: CoinTransferResult?
-  // error:
-  // playerBalance:
+  bonus?: Bonus
+  coinTransfer?: CoinTransfer
 }
 ```
 
@@ -875,9 +885,26 @@ Estado de transferencia de fichas
 ### BonusRedemptionResult
 ```typescript
 {
-  player_balance: number?             // undefined en caso de fichas no transferidas
-  error: string?                      // En caso de error, el motivo
+  coinTransfer: CoinTransfer
   bonus: Bonus
+}
+```
+
+### ERR.INSUFICIENT_BALANCE
+```typescript
+{
+  status: 400,
+  code: "insuficient_balance",
+  description: "Saldo insuficiente",
+}
+```
+
+### ERR.COIN_TRANSFER_UNSUCCESSFUL
+```typescript
+{
+  status: 502,
+  code: "bad_gateway",
+  description: "No se pudo transferir las fichas.",
 }
 ```
 
@@ -921,16 +948,10 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 
 ### Coin Transfers
 
-- Create CoinTransfer model
-- Create CoinTransfer Service 
-- Update Deposit flow to use coin service
-- Update Payment flow to use coin service
 - Remove TRANSACTIONS table
 - Update README
 - Update CHANGELOG
 - Rename `/deposit/:id/update` to `/deposit/:id/set-status` on agent-timba
-- Testear el uso de instancia global de prisma
-- Boletear todos los *DAO
 
 
 

@@ -13,5 +13,6 @@ coinTransferRouter.get(
   "/release-pending",
   CoinTransferControler.releasePending,
 );
+coinTransferRouter.get("/pending-total", CoinTransferControler.getPendingTotal);
 
 export default coinTransferRouter;

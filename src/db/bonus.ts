@@ -1,6 +1,6 @@
 import { Bonus, Player, Prisma, PrismaClient } from "@prisma/client";
 import { ForbiddenError, NotFoundException } from "@/helpers/error";
-import CONFIG from "@/config";
+import CONFIG, { BONUS_STATUS, COIN_TRANSFER_STATUS } from "@/config";
 import { OrderBy } from "@/types/request/players";
 import { BonusUpdatableProps, CreateBonusProps } from "@/types/request/bonus";
 import { RoledPlayer } from "@/types/response/players";
@@ -82,9 +82,9 @@ export class BonusDAO {
         data: {
           ...data,
           player_id: undefined,
-          status: data.status ?? CONFIG.SD.BONUS_STATUS.ASSIGNED,
+          status: data.status ?? BONUS_STATUS.ASSIGNED,
           CoinTransfer: {
-            create: { status: CONFIG.SD.COIN_TRANSFER_STATUS.PENDING },
+            create: { status: COIN_TRANSFER_STATUS.PENDING },
           },
           Player: { connect: { id: data.player_id } },
         },
@@ -102,7 +102,6 @@ export class BonusDAO {
       const bonus = await prisma.bonus.update({
         where: { id },
         data,
-        // include: { Player: true },
       });
       return bonus;
     } catch (error) {
@@ -197,21 +196,18 @@ export class BonusDAO {
           "El bono solo se puede canjear cuando el balance es menor que 10.",
         );
 
-      if (bonus.status === CONFIG.SD.BONUS_STATUS.UNAVAILABLE)
+      if (bonus.status === BONUS_STATUS.UNAVAILABLE)
         throw new ForbiddenError("Lo siento, tu bono ya no esta disponible.");
 
-      if (bonus.status === CONFIG.SD.BONUS_STATUS.REDEEMED)
+      if (bonus.status === BONUS_STATUS.REDEEMED)
         throw new ForbiddenError(
           "Ya has canjeado tu bono, gracias por elegirnos.",
         );
 
-      if (bonus.status === CONFIG.SD.BONUS_STATUS.ASSIGNED)
+      if (bonus.status === BONUS_STATUS.ASSIGNED)
         throw new ForbiddenError("Has un deposito para acceder a tu bono.");
 
-      return await tx.bonus.update({
-        where: { id: bonusId },
-        data: { status: CONFIG.SD.BONUS_STATUS.REDEEMED },
-      });
+      return bonus;
     });
     return authorized;
   }

@@ -1,0 +1,17 @@
+-- DropForeignKey
+ALTER TABLE `BONUS` DROP FOREIGN KEY `BONUS_coin_transfer_id_fkey`;
+
+-- DropForeignKey
+ALTER TABLE `DEPOSITS` DROP FOREIGN KEY `DEPOSITS_coin_transfer_id_fkey`;
+
+-- DropForeignKey
+ALTER TABLE `PAYMENTS` DROP FOREIGN KEY `PAYMENTS_coin_transfer_id_fkey`;
+
+-- AddForeignKey
+ALTER TABLE `PAYMENTS` ADD CONSTRAINT `PAYMENTS_coin_transfer_id_fkey` FOREIGN KEY (`coin_transfer_id`) REFERENCES `COIN_TRANSFERS`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `DEPOSITS` ADD CONSTRAINT `DEPOSITS_coin_transfer_id_fkey` FOREIGN KEY (`coin_transfer_id`) REFERENCES `COIN_TRANSFERS`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `BONUS` ADD CONSTRAINT `BONUS_coin_transfer_id_fkey` FOREIGN KEY (`coin_transfer_id`) REFERENCES `COIN_TRANSFERS`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

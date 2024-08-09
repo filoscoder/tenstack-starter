@@ -10,7 +10,7 @@ import {
 import { initAgent } from "./helpers";
 import { TokenPair } from "@/types/response/jwt";
 import { AuthServices } from "@/components/auth/services";
-import CONFIG from "@/config";
+import CONFIG, { COIN_TRANSFER_STATUS, DEPOSIT_STATUS } from "@/config";
 import { DepositRequest } from "@/types/request/transfers";
 import { PlayersDAO } from "@/db/players";
 
@@ -152,36 +152,46 @@ describe("[UNIT] => DEPOSIT", () => {
     });
   });
 
-  describe("POST: /transactions/deposit/:id/update", () => {
+  describe("POST: /transactions/deposit/:id/set-status", () => {
     it("Should update a deposit", async () => {
       const response = await agent
         .post(
-          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[1].id}/set-status`,
         )
-        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED })
+        .send({ status: DEPOSIT_STATUS.PENDING })
         .set("Authorization", `Bearer ${agentAccessToken.access}`);
 
       expect(response.status).toBe(OK);
-      expect(response.body.data.status).toBe(
-        CONFIG.SD.DEPOSIT_STATUS.CONFIRMED,
-      );
+      expect(response.body.data.status).toBe(DEPOSIT_STATUS.PENDING);
     });
 
     it("Should return 400 unknown_field", async () => {
       const response = await agent
         .post(
-          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/set-status`,
         )
-        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED, unknown_field: 10 })
+        .send({ status: DEPOSIT_STATUS.VERIFIED, unknown_field: 10 })
         .set("Authorization", `Bearer ${agentAccessToken.access}`);
 
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].type).toBe("unknown_fields");
     });
 
+    it("Should return 400 invalid status", async () => {
+      const response = await agent
+        .post(
+          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/set-status`,
+        )
+        .send({ status: "invalid_status_value" })
+        .set("Authorization", `Bearer ${agentAccessToken.access}`);
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe("invalid status");
+    });
+
     it("Should return 401", async () => {
       const response = await agent.post(
-        `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+        `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/set-status`,
       );
 
       expect(response.status).toBe(UNAUTHORIZED);
@@ -190,9 +200,9 @@ describe("[UNIT] => DEPOSIT", () => {
     it("Should return 403", async () => {
       const response = await agent
         .post(
-          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/update`,
+          `/app/${CONFIG.APP.VER}/transactions/deposit/${deposits[0].id}/set-status`,
         )
-        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED })
+        .send({ status: DEPOSIT_STATUS.VERIFIED })
         .set("Authorization", `Bearer ${tokens[0].access}`);
 
       expect(response.status).toBe(FORBIDDEN);
@@ -200,8 +210,10 @@ describe("[UNIT] => DEPOSIT", () => {
 
     it("Should return 404", async () => {
       const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/transactions/deposit/nonexistent/update`)
-        .send({ status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED })
+        .post(
+          `/app/${CONFIG.APP.VER}/transactions/deposit/nonexistent/set-status`,
+        )
+        .send({ status: DEPOSIT_STATUS.VERIFIED })
         .set("Authorization", `Bearer ${agentAccessToken.access}`);
 
       expect(response.status).toBe(NOT_FOUND);
@@ -228,6 +240,7 @@ describe("[UNIT] => DEPOSIT", () => {
         "date",
         "sending_bank",
         "cep_ok",
+        "coin_transfer_id",
         "created_at",
         "updated_at",
       ]);
@@ -285,13 +298,14 @@ async function initialize() {
 
   confirmedDeposit = await prisma.deposit.create({
     data: {
-      status: CONFIG.SD.DEPOSIT_STATUS.CONFIRMED,
-      player_id: players[0].id,
+      status: DEPOSIT_STATUS.VERIFIED,
+      Player: { connect: { id: players[0].id } },
       currency: "MXN",
       tracking_number: "test_tracking_number4" + Date.now(),
       amount: 0.01,
       sending_bank: "foo",
       date: new Date(),
+      CoinTransfer: { create: { status: COIN_TRANSFER_STATUS.PENDING } },
     },
   });
 

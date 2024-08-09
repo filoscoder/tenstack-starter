@@ -2,7 +2,7 @@ import { BAD_REQUEST, CREATED, FORBIDDEN, OK, UNAUTHORIZED } from "http-status";
 import { SuperAgentTest } from "supertest";
 import { Bonus, PrismaClient, PrismaPromise } from "@prisma/client";
 import { initAgent } from "./helpers";
-import CONFIG from "@/config";
+import CONFIG, { BONUS_STATUS } from "@/config";
 import { Whatsapp } from "@/notification/whatsapp";
 import { PlayerServices } from "@/components/players/services";
 import { AuthServices } from "@/components/auth/services";
@@ -368,7 +368,8 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       player_id: playerId,
       amount: 0,
       percentage: 100,
-      status: CONFIG.SD.BONUS_STATUS.ASSIGNED,
+      status: BONUS_STATUS.ASSIGNED,
+      coin_transfer_id: "eggs",
       created_at: new Date(),
       updated_at: new Date(),
     };

@@ -1,6 +1,7 @@
 import { OK } from "http-status";
 import { Bonus, CoinTransfer, Deposit, Player } from "@prisma/client";
 import { BonusServices } from "../bonus/services";
+import { CoinTransferServices } from "../coin-transfers/services";
 import { DepositServices } from "./services";
 import { DepositsDAO } from "@/db/deposits";
 import { apiResponse } from "@/helpers/apiResponse";
@@ -10,8 +11,7 @@ import {
 } from "@/types/request/transfers";
 import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 import { hidePassword } from "@/utils/auth";
-import { CasinoCoinsService } from "@/services/casino-coins.service";
-import CONFIG from "@/config";
+import { DEPOSIT_STATUS } from "@/config";
 import { DepositResult } from "@/types/response/transfers";
 
 export class DepositController {
@@ -59,7 +59,7 @@ export class DepositController {
     const player = req.user!;
 
     const depositServices = new DepositServices(),
-      casinoCoinServices = new CasinoCoinsService(),
+      coinTransferServices = new CoinTransferServices(),
       bonusServices = new BonusServices();
     let deposit:
         | (Deposit & { Player: Player & { Bonus: Bonus | null } })
@@ -74,13 +74,13 @@ export class DepositController {
         deposit = await depositServices.create(player, request);
       }
 
-      if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED) {
+      if (deposit.status === DEPOSIT_STATUS.VERIFIED) {
+        coinTransfer = await coinTransferServices.agentToPlayer(
+          deposit.coin_transfer_id,
+        );
         bonus = await bonusServices.load(
           deposit.amount,
           deposit.Player.Bonus?.id,
-        );
-        coinTransfer = await casinoCoinServices.agentToPlayer(
-          deposit.coin_transfer_id,
         );
       }
 
@@ -126,23 +126,23 @@ export class DepositController {
     }
   };
 
+  // TODO
   /**
    * Show total amount of pending coin transfers
    */
-  static readonly pendingCoinTransfers = async (
-    _req: Req,
-    res: Res,
-    next: NextFn,
-  ) => {
-    // const coinTransferServices = new CoinTransferServices();
-    try {
-      // TODO
-      // Implement
-      // const amount = await coinTransferServices.getPendingTotal();
-      const amount = 1;
-      res.status(OK).json(apiResponse(amount));
-    } catch (err) {
-      next(err);
-    }
-  };
+  // static readonly pendingCoinTransfers = async (
+  //   _req: Req,
+  //   res: Res,
+  //   next: NextFn,
+  // ) => {
+  //   // const coinTransferServices = new CoinTransferServices();
+  //   try {
+  //     // Implement
+  //     // const amount = await coinTransferServices.getPendingTotal();
+  //     const amount = 1;
+  //     res.status(OK).json(apiResponse(amount));
+  //   } catch (err) {
+  //     next(err);
+  //   }
+  // };
 }

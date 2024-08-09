@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import CONFIG from "@/config";
+import { COIN_TRANSFER_STATUS } from "@/config";
 import { CreateCoinTransferProps } from "@/types/services/coin-transfer";
 
 const prisma = new PrismaClient();
@@ -9,7 +9,7 @@ export class CoinTransferDAO {
       return await prisma.coinTransfer.create({
         data: {
           ...props,
-          status: props.status ?? CONFIG.SD.COIN_TRANSFER_STATUS.PENDING,
+          status: props.status ?? COIN_TRANSFER_STATUS.PENDING,
         },
       });
     } catch (error) {
@@ -36,15 +36,7 @@ export class CoinTransferDAO {
     }
   }
 
-  static async findMany(where: Prisma.CoinTransferWhereInput) {
-    try {
-      return await prisma.coinTransfer.findMany({ where });
-    } catch (error) {
-      throw error;
-    } finally {
-      prisma.$disconnect();
-    }
-  }
+  static findMany = prisma.coinTransfer.findMany;
 
   static async update(
     where: Prisma.CoinTransferWhereUniqueInput,

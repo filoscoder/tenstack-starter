@@ -1,3 +1,23 @@
+## [1.0.0] - 2024-08-09
+
+### Changed
+- `/transactions/cashout` returns `CoinTransfer | ERR.COIN_TRANSFER_UNSUCCESSFUL`
+```ts
+COIN_TRANSFER_UNSUCCESSFUL 
+{
+    status: 502
+    code: "bad_gateway"
+    description: "No se pudo transferir las fichas."
+}
+```
+- Removed `error` and `player_balance` from `BonusRedemptionResult`.
+- Added `coinTransfer` to `BonusRedemptionResult`.
+
+## [1.0.0] - 2024-08-08
+
+### Changed
+- Rename `transactions/deposit/pending-coin-transfers` to `/coin-transfer/pending-total`
+
 ## [1.0.0] - 2024-08-01
 
 ### Changed
@@ -7,6 +27,7 @@
     + verified: verification succesful
     + deleted: deleted by agent.
 - Updated [`DepositResult`](./README.md#depositresult) to include `Bonus` and separate coin transfer info.
+    + `DepositResult.player_balance` is now `DepositResult.coinTransfer.player_balance_after`
 - Replaced `/agent/pending/deposits` with `/coin-transfer/release-pending`
 
 ### Added

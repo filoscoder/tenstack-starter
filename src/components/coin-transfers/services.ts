@@ -1,9 +1,162 @@
-import { CoinTransfer } from "@prisma/client";
-import CONFIG from "@/config";
+import { CoinTransfer, PrismaClient } from "@prisma/client";
+import CONFIG, {
+  BONUS_STATUS,
+  COIN_TRANSFER_STATUS,
+  DEPOSIT_STATUS,
+} from "@/config";
 import { CoinTransferDAO } from "@/db/coin-transfer";
-import { CasinoCoinsService } from "@/services/casino-coins.service";
+import { ERR } from "@/config/errors";
+import { UserRootDAO } from "@/db/user-root";
+import { NotFoundException } from "@/helpers/error";
+import { AgentApiError } from "@/helpers/error/AgentApiError";
+import { CustomError } from "@/helpers/error/CustomError";
+import { logtailLogger } from "@/helpers/loggers";
+import { WebPush } from "@/notification/web-push";
+import { HttpService } from "@/services/http.service";
+import { TransferDetails } from "@/types/request/transfers";
+import { CoinTransferResult } from "@/types/response/transfers";
+import { parseTransferResult } from "@/utils/parser";
 
 export class CoinTransferServices {
+  constructor(private tx?: PrismaTransactionClient) {}
+  /**
+   * Transfer coins from player to agent (Cashout)
+   *
+   * @throws {CustomError} INSUFICIENT_BALANCE | COIN_TRANSFER_UNSUCCESSFUL
+   */
+  async playerToAgent(coin_transfer_id: string): Promise<CoinTransfer> {
+    const prisma = this.tx || new PrismaClient();
+
+    const coinTransfer = await prisma.coinTransfer.findFirst({
+      where: { id: coin_transfer_id },
+      include: { Payment: { include: { Player: true } } },
+    });
+    if (!coinTransfer) throw new NotFoundException("CoinTransfer not found");
+
+    const transferDetails = await this.generateTransferDetails(
+      "cashout",
+      coinTransfer.Payment!.Player.panel_id,
+      coinTransfer.Payment!.amount,
+      coinTransfer.Payment!.Player.balance_currency,
+    );
+
+    const result = await prisma.coinTransfer.update({
+      where: { id: coinTransfer.id },
+      data: {
+        status: COIN_TRANSFER_STATUS.COMPLETED,
+      },
+    });
+
+    const coinTransferResult = await this.transfer(transferDetails);
+
+    if (coinTransferResult.error === CONFIG.SD.INSUFICIENT_BALANCE)
+      throw new CustomError(ERR.INSUFICIENT_BALANCE);
+
+    if (!coinTransferResult.ok)
+      throw new CustomError(ERR.COIN_TRANSFER_UNSUCCESSFUL);
+
+    return result;
+  }
+
+  /**
+   * Transfer coins from agent to player
+   */
+  async agentToPlayer(coin_transfer_id: string): Promise<CoinTransfer> {
+    const coinTransfer = await CoinTransferDAO.findById(coin_transfer_id);
+    if (!coinTransfer) throw new NotFoundException("CoinTransfer not found");
+
+    const parent = coinTransfer.Bonus || coinTransfer.Deposit;
+    const transferDetails = await this.generateTransferDetails(
+      "deposit",
+      parent!.Player.panel_id,
+      parent!.amount,
+      parent!.Player.balance_currency,
+    );
+
+    const result = await this.transfer(transferDetails);
+
+    return await CoinTransferDAO.update(
+      { id: coinTransfer.id },
+      {
+        status: result.ok
+          ? COIN_TRANSFER_STATUS.COMPLETED
+          : COIN_TRANSFER_STATUS.PENDING,
+        player_balance_after: result.player_balance,
+      },
+    );
+  }
+
+  /**
+   * Send coins
+   * @throws AgentApiError
+   */
+  private async transfer(
+    transferDetails: TransferDetails,
+  ): Promise<CoinTransferResult> {
+    const { authedAgentApi } = new HttpService();
+    const url = "/backoffice/transactions/";
+    const result = await authedAgentApi.post<any>(url, transferDetails);
+
+    if (
+      result.data.code == "insuficient_balance" &&
+      transferDetails.type === "deposit"
+    )
+      await this.notifyInsuficientBalance(
+        transferDetails.amount,
+        result.data.variables.balance_amount,
+      );
+
+    if (result.status !== 201 && result.status !== 400) {
+      if (CONFIG.LOG.LEVEL === "debug") console.log(result.data);
+      const errMsg = "Error en el panel al transferir fichas";
+      const err = new AgentApiError(result.status, errMsg, result.data);
+      logtailLogger.error({ err });
+      return { ok: false, error: errMsg };
+    }
+    return parseTransferResult(result, transferDetails.type);
+  }
+
+  private async generateTransferDetails(
+    type: "deposit" | "cashout",
+    playerPanelId: number,
+    amount: number,
+    currency: string,
+  ): Promise<TransferDetails> {
+    const agent = await UserRootDAO.getAgent();
+
+    let recipient_id, sender_id;
+
+    switch (type) {
+      case "deposit":
+        recipient_id = playerPanelId;
+        sender_id = agent!.panel_id;
+        break;
+      case "cashout":
+        recipient_id = agent!.panel_id;
+        sender_id = playerPanelId;
+        break;
+    }
+
+    return {
+      recipient_id,
+      sender_id,
+      amount: amount,
+      currency: currency,
+      type,
+    };
+  }
+
+  private notifyInsuficientBalance(
+    transferAmount: number,
+    currentBalance: number,
+  ): Promise<void> {
+    const difference = transferAmount - currentBalance;
+    return WebPush.agent({
+      title: "Fichas insuficientes",
+      body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
+      tag: CONFIG.SD.INSUFICIENT_CREDITS,
+    });
+  }
   /**
    * Release all pending transfers that might have accumulated due to players
    * requesting more coins than the agent has on balance.
@@ -11,30 +164,49 @@ export class CoinTransferServices {
   async releasePending(): Promise<CoinTransfer[]> {
     // TODO
     // Check
-    const casinoCoinServices = new CasinoCoinsService();
+    const coinTransferServices = new CoinTransferServices();
     const pendingTransfers = await CoinTransferDAO.findMany({
-      status: CONFIG.SD.COIN_TRANSFER_STATUS.PENDING,
-      AND: {
-        OR: [
-          { Deposit: { status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED } },
-          { Bonus: { status: CONFIG.SD.BONUS_STATUS.REQUESTED } },
-        ],
+      where: {
+        status: COIN_TRANSFER_STATUS.PENDING,
+        AND: {
+          OR: [
+            { Deposit: { status: DEPOSIT_STATUS.VERIFIED } },
+            { Bonus: { status: BONUS_STATUS.REQUESTED } },
+          ],
+        },
       },
     });
     const result: CoinTransfer[] = [];
     for (const transfer of pendingTransfers) {
-      result.push(await casinoCoinServices.agentToPlayer(transfer.id));
+      result.push(await coinTransferServices.agentToPlayer(transfer.id));
     }
     return result;
-    // const deposits = await DepositsDAO.getPendingCoinTransfers();
-    // const response: Deposit[] = [];
-    // const depositServices = new DepositServices();
-    // for (const deposit of deposits) {
-    //   if (deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED) continue;
-    //   const result = await depositServices.finalizeDeposit(deposit);
-    //   response.push(result.deposit);
-    // }
+  }
 
-    // return response;
+  /**
+   * Get the sum of amounts of pending transfers (where deposit is VERIFIED or
+   * bonus is REQUESTED)
+   */
+  async getPendingTotal(): Promise<number> {
+    const pendingTransfers = await CoinTransferDAO.findMany({
+      where: {
+        status: COIN_TRANSFER_STATUS.PENDING,
+        AND: {
+          OR: [
+            { Deposit: { status: DEPOSIT_STATUS.VERIFIED } },
+            { Bonus: { status: BONUS_STATUS.REQUESTED } },
+          ],
+        },
+      },
+      include: { Deposit: true, Bonus: true },
+    });
+
+    let total = 0;
+    pendingTransfers.forEach((transfer) => {
+      const parent = transfer.Deposit || transfer.Bonus;
+      total += parent!.amount!;
+    });
+
+    return total;
   }
 }

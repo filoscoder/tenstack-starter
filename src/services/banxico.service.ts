@@ -1,7 +1,7 @@
 import { Deposit, UserRoot } from "@prisma/client";
 import axios, { AxiosResponse } from "axios";
 import { XMLParser } from "fast-xml-parser";
-import CONFIG from "@/config";
+import CONFIG, { ENVIRONMENTS } from "@/config";
 import { logtailLogger } from "@/helpers/loggers";
 import { UserRootDAO } from "@/db/user-root";
 import { RootBankAccount } from "@/types/request/user-root";
@@ -254,7 +254,7 @@ export class BanxicoService {
 
   private async errorHandler(e: any) {
     if (CONFIG.LOG.LEVEL === "debug") console.error(e);
-    if (CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.PRODUCTION) {
+    if (CONFIG.APP.ENV === ENVIRONMENTS.PRODUCTION) {
       logtailLogger.error(e);
       await Telegram.arturito(e?.toString() ?? e.message ?? e);
     }

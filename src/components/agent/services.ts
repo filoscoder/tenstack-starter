@@ -14,7 +14,7 @@ import { TokenPair } from "@/types/response/jwt";
 import { HttpService } from "@/services/http.service";
 import { NotFoundException, UnauthorizedError } from "@/helpers/error";
 import { PlayersDAO } from "@/db/players";
-import CONFIG from "@/config";
+import CONFIG, { PAYMENT_STATUS } from "@/config";
 import { ERR } from "@/config/errors";
 import { BotFlowsDAO } from "@/db/bot-flows";
 import {
@@ -72,7 +72,7 @@ export class AgentServices {
     await PaymentsDAO.authorizeRelease(payment_id);
     try {
       const updated = await PaymentsDAO.update(payment_id, {
-        status: CONFIG.SD.PAYMENT_STATUS.COMPLETED,
+        status: PAYMENT_STATUS.COMPLETED,
       });
       return updated;
     } catch (e) {

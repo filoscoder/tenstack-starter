@@ -3,8 +3,7 @@ import { DefaultArgs } from "@prisma/client/runtime/library";
 import { DepositRequest } from "@/types/request/transfers";
 import { ForbiddenError, NotFoundException } from "@/helpers/error";
 import { hidePassword } from "@/utils/auth";
-import CONFIG from "@/config";
-import { RoledPlayer } from "@/types/response/players";
+import CONFIG, { DEPOSIT_STATUS } from "@/config";
 import { OrderBy } from "@/types/request/players";
 
 const prisma = new PrismaClient();
@@ -83,8 +82,8 @@ export class DepositsDAO {
           ? {}
           : {
               OR: [
-                { status: CONFIG.SD.DEPOSIT_STATUS.PENDING },
-                { status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED },
+                { status: DEPOSIT_STATUS.PENDING },
+                { status: DEPOSIT_STATUS.VERIFIED },
               ],
             },
         include: { Player: true },
@@ -136,8 +135,8 @@ export class DepositsDAO {
           player_id,
           AND: {
             OR: [
-              { status: CONFIG.SD.DEPOSIT_STATUS.PENDING },
-              { status: CONFIG.SD.DEPOSIT_STATUS.UNVERIFIED },
+              { status: DEPOSIT_STATUS.PENDING },
+              { status: DEPOSIT_STATUS.UNVERIFIED },
             ],
           },
         },
@@ -159,7 +158,7 @@ export class DepositsDAO {
   //   try {
   //     return prisma.deposit.findMany({
   //       where: {
-  //         status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED,
+  //         status: DEPOSIT_STATUS.VERIFIED,
   //       },
   //       include: { Player: { include: { roles: true } } },
   //     });
@@ -198,28 +197,29 @@ export class DepositsDAO {
     }
   }
 
+  // TODO
   /**
    * Ensures deposit exists and belongs to authed user or user is agent.
    * @throws if checks fail.
    */
-  static async authorizeTransaction(deposit_id: string, player: RoledPlayer) {
-    try {
-      const deposit = await this.getById(deposit_id);
-      if (!deposit) throw new NotFoundException();
+  // static async authorizeTransaction(deposit_id: string, player: RoledPlayer) {
+  //   try {
+  //     const deposit = await this.getById(deposit_id);
+  //     if (!deposit) throw new NotFoundException();
 
-      if (
-        deposit.player_id !== player.id &&
-        !player.roles.some((r) => r.name === CONFIG.ROLES.AGENT)
-      )
-        throw new ForbiddenError("El depósito no le pertenece.");
+  //     if (
+  //       deposit.player_id !== player.id &&
+  //       !player.roles.some((r) => r.name === CONFIG.ROLES.AGENT)
+  //     )
+  //       throw new ForbiddenError("El depósito no le pertenece.");
 
-      return deposit;
-    } catch (error) {
-      throw error;
-    } finally {
-      prisma.$disconnect();
-    }
-  }
+  //     return deposit;
+  //   } catch (error) {
+  //     throw error;
+  //   } finally {
+  //     prisma.$disconnect();
+  //   }
+  // }
 
   /**
    * Checks if:
@@ -238,11 +238,11 @@ export class DepositsDAO {
   // ) {
   //   try {
   //     let deposit = await this.authorizeTransaction(deposit_id, player);
-  //     if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED)
+  //     if (deposit.status === DEPOSIT_STATUS.VERIFIED)
   //       throw new ForbiddenError(
   //         "No se pueden modificar depositos verificados",
   //       );
-  //     if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.DELETED)
+  //     if (deposit.status === DEPOSIT_STATUS.DELETED)
   //       throw new ForbiddenError("No se pueden modificar depositos eliminados");
   //     if (deposit.dirty)
   //       throw new ForbiddenError("El deposito esta siendo confirmado");
@@ -289,7 +289,7 @@ export class DepositsDAO {
    *  - deposit exists and
    *  - belongs to player or
    *  - user has role of agent.
-   *  - deposit is not completed or deleted.
+   *  - deposit is not verified or deleted.
    *  - deposit is not being confirmed (dirty).
    *  - another deposit with same tracking_number exists.
    *
@@ -301,14 +301,14 @@ export class DepositsDAO {
     user: Player & { roles: Role[] },
     tracking_number?: string,
   ) {
-    const authorized = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       const deposit = await tx.deposit.findFirst({ where: { id: deposit_id } });
-      if (!deposit) throw new NotFoundException();
+      if (!deposit) throw new NotFoundException("Deposit not found");
 
-      if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.VERIFIED)
+      if (deposit.status === DEPOSIT_STATUS.VERIFIED)
         throw new ForbiddenError("El deposito ya está verificado");
 
-      if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.DELETED)
+      if (deposit.status === DEPOSIT_STATUS.DELETED)
         throw new ForbiddenError("No se pueden modificar depositos eliminados");
 
       if (deposit.dirty)
@@ -329,11 +329,10 @@ export class DepositsDAO {
       if (tracking_number && duplicate)
         throw new ForbiddenError("Deposito ya acreditado previamente.");
 
-      return await tx.deposit.update({
+      await tx.deposit.update({
         where: { id: deposit_id },
         data: { dirty: true },
       });
     });
-    return authorized;
   }
 }

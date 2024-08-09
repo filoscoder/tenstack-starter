@@ -1,11 +1,11 @@
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import { ERR } from "@/config/errors";
-import CONFIG from "@/config";
+import CONFIG, { ENVIRONMENTS } from "@/config";
 import { CustomError } from "@/helpers/error/CustomError";
 import { PasswordRestoreRequest } from "@/types/request/pass-restore";
 
 const rateLimiter = new RateLimiterMemory({
-  points: CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.DEV ? 10 : 1,
+  points: CONFIG.APP.ENV === ENVIRONMENTS.DEV ? 10 : 1,
   duration: 600,
 });
 

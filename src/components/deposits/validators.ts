@@ -2,7 +2,7 @@ import { Deposit, Player } from "@prisma/client";
 import { checkSchema } from "express-validator";
 import { isKeyOfNestedObject } from "../players/validators";
 import { bankCodes } from "@/config/bank-codes";
-import CONFIG from "@/config";
+import { DEPOSIT_STATUS } from "@/config";
 
 export const isKeyOfDeposit = (key: string): key is keyof Deposit => {
   const mockDeposit: Deposit & { Player: Player } = {
@@ -107,16 +107,10 @@ export const validateDepositSetStatusRequest = () =>
       optional: true,
       isString: true,
       trim: true,
-      isIn: {
-        options: Object.values(CONFIG.SD.DEPOSIT_STATUS),
+      custom: {
+        options: (val) => Object.values(Object(DEPOSIT_STATUS)).includes(val),
         errorMessage: "invalid status",
       },
       errorMessage: "status is required",
     },
-    // tracking_number: {
-    //   in: ["body"],
-    //   optional: true,
-    //   isString: true,
-    //   errorMessage: "tracking_number is required",
-    // },
   });
