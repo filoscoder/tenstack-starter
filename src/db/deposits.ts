@@ -206,7 +206,6 @@ export class DepositsDAO {
   //   try {
   //     const deposit = await this.getById(deposit_id);
   //     if (!deposit) throw new NotFoundException();
-
   //     if (
   //       deposit.player_id !== player.id &&
   //       !player.roles.some((r) => r.name === CONFIG.ROLES.AGENT)
