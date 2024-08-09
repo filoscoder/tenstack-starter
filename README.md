@@ -544,12 +544,10 @@ Transferencia de Fichas
 ### Liberar Fichas Pendientes 🔒
 Liberar transferencias de fichas que hayan quedado pendientes en el caso que un jugador quiera comprar mas fichas de las que tiene dispoibles el agente
 
-// TODO
-// Actualizar la respuesta
 |Endpoint| `/coin-transfer/release-pending`|
 ---|---|
 Método      |`GET`
-Devuelve    |[`Deposit[]`](#deposit) - los depositos afectados
+Devuelve    |[`CoinTransfer[]`](#cointransfer)
 Requiere rol| agent
 
 ## Interfaces

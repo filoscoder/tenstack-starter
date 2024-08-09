@@ -125,24 +125,4 @@ export class DepositController {
       next(err);
     }
   };
-
-  // TODO
-  /**
-   * Show total amount of pending coin transfers
-   */
-  // static readonly pendingCoinTransfers = async (
-  //   _req: Req,
-  //   res: Res,
-  //   next: NextFn,
-  // ) => {
-  //   // const coinTransferServices = new CoinTransferServices();
-  //   try {
-  //     // Implement
-  //     // const amount = await coinTransferServices.getPendingTotal();
-  //     const amount = 1;
-  //     res.status(OK).json(apiResponse(amount));
-  //   } catch (err) {
-  //     next(err);
-  //   }
-  // };
 }

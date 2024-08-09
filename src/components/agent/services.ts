@@ -132,20 +132,6 @@ export class AgentServices {
     };
   }
 
-  // TODO
-  // static async freePendingCoinTransfers(): Promise<Deposit[]> {
-  //   const deposits = await DepositsDAO.getPendingCoinTransfers();
-  //   const response: Deposit[] = [];
-  //   const depositServices = new DepositServices();
-  //   for (const deposit of deposits) {
-  //     if (deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED) continue;
-  //     const result = await depositServices.finalizeDeposit(deposit);
-  //     response.push(result.deposit);
-  //   }
-
-  //   return response;
-  // }
-
   static async setOnCallBotFlow(active: boolean): Promise<void> {
     await BotFlowsDAO.setOnCall(active);
   }

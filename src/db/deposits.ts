@@ -148,27 +148,6 @@ export class DepositsDAO {
     }
   }
 
-  //TODO
-  // delete
-  /**
-   * Get deposits where the money has been confirmed to have arrived at
-   * Alquimia but coins haven't been transfered yet.
-   */
-  // static getPendingCoinTransfers() {
-  //   try {
-  //     return prisma.deposit.findMany({
-  //       where: {
-  //         status: DEPOSIT_STATUS.VERIFIED,
-  //       },
-  //       include: { Player: { include: { roles: true } } },
-  //     });
-  //   } catch (error) {
-  //     throw error;
-  //   } finally {
-  //     prisma.$disconnect();
-  //   }
-  // }
-
   static async update(data: {
     select?: Prisma.DepositSelect<DefaultArgs> | null | undefined;
     include?: Prisma.DepositInclude<DefaultArgs> | null | undefined;
@@ -196,77 +175,6 @@ export class DepositsDAO {
       prisma.$disconnect();
     }
   }
-
-  // TODO
-  /**
-   * Ensures deposit exists and belongs to authed user or user is agent.
-   * @throws if checks fail.
-   */
-  // static async authorizeTransaction(deposit_id: string, player: RoledPlayer) {
-  //   try {
-  //     const deposit = await this.getById(deposit_id);
-  //     if (!deposit) throw new NotFoundException();
-  //     if (
-  //       deposit.player_id !== player.id &&
-  //       !player.roles.some((r) => r.name === CONFIG.ROLES.AGENT)
-  //     )
-  //       throw new ForbiddenError("El depósito no le pertenece.");
-
-  //     return deposit;
-  //   } catch (error) {
-  //     throw error;
-  //   } finally {
-  //     prisma.$disconnect();
-  //   }
-  // }
-
-  /**
-   * Checks if:
-   *  - deposit exists and belongs to player
-   *  - deposit is not completed or deleted
-   *  - deposit is not being confirmed (dirty)
-   *  - another deposit with same tracking_number exists
-   *
-   * If checks pass, sets dirty flag to true (deposit is being confirmed)
-   * @throws if checks fail
-   */
-  // static async authorizeUpdate(
-  //   deposit_id: string,
-  //   tracking_number: string,
-  //   player: RoledPlayer,
-  // ) {
-  //   try {
-  //     let deposit = await this.authorizeTransaction(deposit_id, player);
-  //     if (deposit.status === DEPOSIT_STATUS.VERIFIED)
-  //       throw new ForbiddenError(
-  //         "No se pueden modificar depositos verificados",
-  //       );
-  //     if (deposit.status === DEPOSIT_STATUS.DELETED)
-  //       throw new ForbiddenError("No se pueden modificar depositos eliminados");
-  //     if (deposit.dirty)
-  //       throw new ForbiddenError("El deposito esta siendo confirmado");
-
-  //     const duplicate = await prisma.deposit.findFirst({
-  //       where: {
-  //         tracking_number,
-  //         NOT: { id: deposit_id },
-  //       },
-  //     });
-  //     if (duplicate)
-  //       throw new ForbiddenError("Deposito ya acreditado previamente.");
-
-  //     deposit = await prisma.deposit.update({
-  //       where: { id: deposit_id },
-  //       data: { dirty: true },
-  //       include: { Player: true },
-  //     });
-  //     return deposit;
-  //   } catch (error) {
-  //     throw error;
-  //   } finally {
-  //     prisma.$disconnect();
-  //   }
-  // }
 
   static async authorizeCreation(request: DepositRequest) {
     try {
