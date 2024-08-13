@@ -1,3 +1,9 @@
+## [1.0.0] - 2024-08-12
+
+## Added
+- Rate limiter to `/bonus/:id/redeem`: 1 request every 10 seconds for the same `:id`.
+- "Dirty" column to Bonus table.
+
 ## [1.0.0] - 2024-08-09
 
 ### Changed

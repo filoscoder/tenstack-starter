@@ -14,6 +14,7 @@ import {
   validateBonusCreateRequest,
   validateBonusId,
 } from "@/components/bonus/validators";
+import { bonusRateLimiter } from "@/middlewares/rate-limiters/bonus";
 
 const bonusRouter = Router();
 
@@ -42,6 +43,7 @@ bonusRouter.get(
   validateBonusId(),
   checkExact(),
   throwIfBadRequest,
+  bonusRateLimiter,
   BonusController.redeem,
 );
 bonusRouter.post(

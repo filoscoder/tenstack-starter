@@ -527,6 +527,7 @@ Requiere rol| player
 Método      |`GET`
 Devuelve    |[`BonusRedemptionResult`](#bonusredemptionresult)
 Requiere rol| player
+Rate-limited|1 every 10 seconds for the same `:id`
 
 Transferencia de Fichas
 -----------------------
@@ -1105,6 +1106,55 @@ Respesta
 Sacar el valor del atributo `MontoPago` del elemento `Beneficiario`
 
 
+## Subagent
+
+### Create
+
+POST https://agent.casinomex.vip/api/pyramid/create/agent/
+
+Request
+```json
+{
+  "username":"testsubagent01",
+  "password":"1234",
+  "email":"",
+  "social_links":[
+    {
+      "link":"",
+     "social_type":"WA"
+    }
+  ],
+  "user_info":{
+    "mobile_number":"",
+    "first_name":"",
+    "last_name":""
+  },
+  "agent_info":{
+    "payments_percentage":50
+  }
+}
+```
+
+Response
+```json
+{
+  "username":"testsubagent01",
+  "password":"1234",
+  "email":"",
+  "social_links":[{
+      "link":"",
+      "social_type":"WA"
+  }],
+  "user_info": {
+    "mobile_number":"",
+    "first_name":"",
+    "last_name":""
+  },
+  "agent_info": {
+    "payments_percentage":50
+  }
+}
+```
 
 ## Password restoration checklist
 

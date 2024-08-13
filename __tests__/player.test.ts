@@ -370,6 +370,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       percentage: 100,
       status: BONUS_STATUS.ASSIGNED,
       coin_transfer_id: "eggs",
+      dirty: false,
       created_at: new Date(),
       updated_at: new Date(),
     };

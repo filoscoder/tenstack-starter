@@ -1,4 +1,5 @@
-import { CoinTransfer, PrismaClient } from "@prisma/client";
+import { CoinTransfer } from "@prisma/client";
+import { PlayerServices } from "../players/services";
 import CONFIG, {
   BONUS_STATUS,
   COIN_TRANSFER_STATUS,
@@ -16,18 +17,19 @@ import { HttpService } from "@/services/http.service";
 import { TransferDetails } from "@/types/request/transfers";
 import { CoinTransferResult } from "@/types/response/transfers";
 import { parseTransferResult } from "@/utils/parser";
+import { useTransaction } from "@/helpers/useTransaction";
 
 export class CoinTransferServices {
-  constructor(private tx?: PrismaTransactionClient) {}
   /**
    * Transfer coins from player to agent (Cashout)
    *
    * @throws {CustomError} INSUFICIENT_BALANCE | COIN_TRANSFER_UNSUCCESSFUL
    */
-  async playerToAgent(coin_transfer_id: string): Promise<CoinTransfer> {
-    const prisma = this.tx || new PrismaClient();
-
-    const coinTransfer = await prisma.coinTransfer.findFirst({
+  async playerToAgent(
+    coin_transfer_id: string,
+    tx: PrismaTransactionClient,
+  ): Promise<CoinTransfer> {
+    const coinTransfer = await tx.coinTransfer.findFirst({
       where: { id: coin_transfer_id },
       include: { Payment: { include: { Player: true } } },
     });
@@ -40,7 +42,7 @@ export class CoinTransferServices {
       coinTransfer.Payment!.Player.balance_currency,
     );
 
-    const result = await prisma.coinTransfer.update({
+    const result = await tx.coinTransfer.update({
       where: { id: coinTransfer.id },
       data: {
         status: COIN_TRANSFER_STATUS.COMPLETED,
@@ -48,21 +50,27 @@ export class CoinTransferServices {
     });
 
     const coinTransferResult = await this.transfer(transferDetails);
-
-    if (coinTransferResult.error === CONFIG.SD.INSUFICIENT_BALANCE)
-      throw new CustomError(ERR.INSUFICIENT_BALANCE);
-
-    if (!coinTransferResult.ok)
-      throw new CustomError(ERR.COIN_TRANSFER_UNSUCCESSFUL);
+    this.handleTransferError(coinTransferResult);
 
     return result;
   }
 
   /**
    * Transfer coins from agent to player
+   *
+   * @throws {CustomError} INSUFICIENT_BALANCE | COIN_TRANSFER_UNSUCCESSFUL
    */
-  async agentToPlayer(coin_transfer_id: string): Promise<CoinTransfer> {
-    const coinTransfer = await CoinTransferDAO.findById(coin_transfer_id);
+  async agentToPlayer(
+    coin_transfer_id: string,
+    tx: PrismaTransactionClient,
+  ): Promise<CoinTransfer> {
+    const coinTransfer = await tx.coinTransfer.findFirst({
+      where: { id: coin_transfer_id },
+      include: {
+        Deposit: { include: { Player: { include: { roles: true } } } },
+        Bonus: { include: { Player: { include: { roles: true } } } },
+      },
+    });
     if (!coinTransfer) throw new NotFoundException("CoinTransfer not found");
 
     const parent = coinTransfer.Bonus || coinTransfer.Deposit;
@@ -73,22 +81,28 @@ export class CoinTransferServices {
       parent!.Player.balance_currency,
     );
 
-    const result = await this.transfer(transferDetails);
-
-    return await CoinTransferDAO.update(
-      { id: coinTransfer.id },
-      {
-        status: result.ok
-          ? COIN_TRANSFER_STATUS.COMPLETED
-          : COIN_TRANSFER_STATUS.PENDING,
-        player_balance_after: result.player_balance,
-      },
+    const playerServices = new PlayerServices();
+    const currentBalance = await playerServices.getBalance(
+      parent!.Player.id,
+      parent!.Player,
     );
+
+    const result = await tx.coinTransfer.update({
+      where: { id: coinTransfer.id },
+      data: {
+        status: COIN_TRANSFER_STATUS.COMPLETED,
+        player_balance_after: currentBalance + parent!.amount,
+      },
+    });
+
+    const coinTransferResult = await this.transfer(transferDetails);
+    this.handleTransferError(coinTransferResult);
+
+    return result;
   }
 
   /**
    * Send coins
-   * @throws AgentApiError
    */
   private async transfer(
     transferDetails: TransferDetails,
@@ -157,6 +171,7 @@ export class CoinTransferServices {
       tag: CONFIG.SD.INSUFICIENT_CREDITS,
     });
   }
+
   /**
    * Release all pending transfers that might have accumulated due to players
    * requesting more coins than the agent has on balance.
@@ -164,7 +179,6 @@ export class CoinTransferServices {
   async releasePending(): Promise<CoinTransfer[]> {
     // TODO
     // Check
-    const coinTransferServices = new CoinTransferServices();
     const pendingTransfers = await CoinTransferDAO.findMany({
       where: {
         status: COIN_TRANSFER_STATUS.PENDING,
@@ -178,7 +192,10 @@ export class CoinTransferServices {
     });
     const result: CoinTransfer[] = [];
     for (const transfer of pendingTransfers) {
-      result.push(await coinTransferServices.agentToPlayer(transfer.id));
+      const coinTransfer = await useTransaction<CoinTransfer>((tx) =>
+        this.agentToPlayer(transfer.id, tx),
+      );
+      coinTransfer && result.push(coinTransfer);
     }
     return result;
   }
@@ -208,5 +225,13 @@ export class CoinTransferServices {
     });
 
     return total;
+  }
+
+  private handleTransferError(coinTransferResult: CoinTransferResult) {
+    if (coinTransferResult.error === CONFIG.SD.INSUFICIENT_BALANCE)
+      throw new CustomError(ERR.INSUFICIENT_BALANCE);
+
+    if (!coinTransferResult.ok)
+      throw new CustomError(ERR.COIN_TRANSFER_UNSUCCESSFUL);
   }
 }

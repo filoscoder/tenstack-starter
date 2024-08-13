@@ -24,6 +24,7 @@ describe("[UNIT] => BONUS ROUTER", () => {
     player_id: "baz",
     status: BONUS_STATUS.ASSIGNED,
     coin_transfer_id: "bar",
+    dirty: false,
     created_at: new Date(),
     updated_at: new Date(),
   };

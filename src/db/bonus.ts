@@ -187,14 +187,7 @@ export class BonusDAO {
 
       if (bonus.Player.id !== user.id) throw new ForbiddenError("Unauthorized");
 
-      const balance = await playerServices.getBalance(
-        bonus.Player.id,
-        bonus.Player,
-      );
-      if (balance >= 10)
-        throw new ForbiddenError(
-          "El bono solo se puede canjear cuando el balance es menor que 10.",
-        );
+      if (bonus.dirty) throw new ForbiddenError("El bono está siendo canjeado");
 
       if (bonus.status === BONUS_STATUS.UNAVAILABLE)
         throw new ForbiddenError("Lo siento, tu bono ya no esta disponible.");
@@ -206,6 +199,15 @@ export class BonusDAO {
 
       if (bonus.status === BONUS_STATUS.ASSIGNED)
         throw new ForbiddenError("Has un deposito para acceder a tu bono.");
+
+      const balance = await playerServices.getBalance(
+        bonus.Player.id,
+        bonus.Player,
+      );
+      if (balance >= 10)
+        throw new ForbiddenError(
+          "El bono solo se puede canjear cuando el balance es menor que 10.",
+        );
 
       return bonus;
     });
