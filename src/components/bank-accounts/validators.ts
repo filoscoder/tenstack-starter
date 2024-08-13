@@ -1,4 +1,5 @@
 import { checkSchema } from "express-validator";
+import { bankCodes } from "@/config/bank-codes";
 
 const verifyClabe = (clabe: string): boolean => {
   if (clabe.length !== 18) return false;
@@ -31,19 +32,23 @@ export const validateBankAccount = () =>
       trim: true,
       errorMessage: "Owner name is required",
     },
-    bankName: {
+    bankId: {
       in: ["body"],
       notEmpty: true,
       isString: true,
       trim: true,
-      errorMessage: "Bank name is required",
+      custom: {
+        options: (val) => bankCodes.includes(val) || val === "-1",
+        errorMessage: "Invalid bank ID",
+      },
+      errorMessage: "Bank id is required",
     },
     bankNumber: {
       in: ["body"],
       notEmpty: true,
       isString: true,
       trim: true,
-      custom: { options: verifyClabe, errorMessage: "Invalid bankNumber" },
+      custom: { options: verifyClabe, errorMessage: "Cuenta CLABE invalida" },
       errorMessage: "Bank number is required",
     },
     bankAlias: {
@@ -62,11 +67,15 @@ export const validateAccountUpdate = () =>
       isString: true,
       trim: true,
     },
-    bankName: {
+    bankId: {
       in: ["body"],
       optional: true,
       isString: true,
       trim: true,
+      custom: {
+        options: (val) => bankCodes.includes(val),
+        errorMessage: "Invalid bank ID",
+      },
     },
     bankNumber: {
       in: ["body"],

@@ -8,6 +8,7 @@ import webPushRouter from "./web-push";
 import botRouter from "./bot.router";
 import transactionsRouter from "./transactions";
 import analyticsRouter from "./analytics.router";
+import bonusRouter from "./bonus.router";
 
 const mainRouter = Router();
 
@@ -20,5 +21,6 @@ mainRouter.use("/auth", authRouter);
 mainRouter.use("/web-push", webPushRouter);
 mainRouter.use("/bot", botRouter);
 mainRouter.use("/analytics", analyticsRouter);
+mainRouter.use("/bonus", bonusRouter);
 
 export default mainRouter;

@@ -5,5 +5,5 @@ export type AnalyticsFindManyProps = {
 export type AnalyticsCreateRequest = {
   source: string;
   event: string;
-  data: object;
+  data?: object;
 };

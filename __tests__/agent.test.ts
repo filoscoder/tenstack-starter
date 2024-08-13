@@ -19,6 +19,7 @@ import { initAgent } from "./helpers";
 import CONFIG from "@/config";
 import { AuthServices } from "@/components/auth/services";
 import { PlayerServices } from "@/components/players/services";
+import { AgentServices } from "@/components/agent/services";
 
 let agent: SuperAgentTest;
 let prisma: PrismaClient;
@@ -166,7 +167,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       .spyOn(AlquimiaTransferService.prototype, "pay")
       .mockResolvedValue(mockResponse);
 
-    it("Should mark payment as paid", async () => {
+    it("Should release a payment", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/release`)
         .set("Authorization", `Bearer ${access}`);
@@ -213,6 +214,37 @@ describe("[UNIT] => AGENT ROUTER", () => {
     });
   });
 
+  describe("POST: /agent/payments/:id/paid", () => {
+    const mockResponse = {
+      id: "bacon",
+      player_id: "spam",
+      amount: 10,
+      status: CONFIG.SD.PAYMENT_STATUS.COMPLETED,
+      bank_account: "baz",
+      currency: "MXN",
+      dirty: false,
+      alquimia_id: null,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
+    jest
+      .spyOn(AgentServices, "markPaymentAsPaid")
+      .mockResolvedValue(mockResponse);
+
+    it("Should mark payment as paid", async () => {
+      const response = await agent
+        .post(`/app/${CONFIG.APP.VER}/agent/payments/${payment.id}/paid`)
+        .set("Authorization", `Bearer ${access}`);
+
+      expect(response.status).toBe(OK);
+      expect(response.body.data.id).toEqual("bacon");
+      expect(response.body.data.status).toEqual(
+        CONFIG.SD.PAYMENT_STATUS.COMPLETED,
+      );
+    });
+  });
+
   describe("GET: /transactions/deposit", () => {
     it("Should return deposits", async () => {
       const response = await agent
@@ -230,6 +262,9 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "status",
         "tracking_number",
         "amount",
+        "date",
+        "sending_bank",
+        "cep_ok",
         "created_at",
         "updated_at",
         "Player",
@@ -297,9 +332,9 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .send({
           name: "Test name",
           dni: "12345678",
-          bankName: "Test bank name",
+          bankId: "90659",
           accountNumber: "1234567890",
-          clabe: "12345678901234567890",
+          clabe: "659437001005389354",
           alias: "Test alias",
         });
 
@@ -307,9 +342,9 @@ describe("[UNIT] => AGENT ROUTER", () => {
       expect(response.body.data).toStrictEqual({
         name: "Test name",
         dni: "12345678",
-        bankName: "Test bank name",
+        bankId: "90659",
         accountNumber: "1234567890",
-        clabe: "12345678901234567890",
+        clabe: "659437001005389354",
         alias: "Test alias",
       });
     });
@@ -354,7 +389,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
       expect(Object.keys(response.body.data)).toStrictEqual([
         "name",
         "dni",
-        "bankName",
+        "bankId",
         "accountNumber",
         "clabe",
         "alias",
@@ -620,6 +655,21 @@ describe("[UNIT] => AGENT ROUTER", () => {
   });
 
   describe("POST: /agent/reset-player-password", () => {
+    let tmpPlayer: Player;
+    beforeAll(async () => {
+      tmpPlayer = await prisma.player.create({
+        data: {
+          email: "tmp@example.com",
+          password: "1234",
+          panel_id: -314,
+          username: "tmpPlayer",
+          roles: { connect: { name: CONFIG.ROLES.PLAYER } },
+        },
+      });
+    });
+    afterAll(
+      async () => await prisma.player.delete({ where: { id: tmpPlayer.id } }),
+    );
     jest.spyOn(PlayerServices.prototype, "resetPassword").mockResolvedValue();
 
     it("Should reset player password", async () => {
@@ -628,7 +678,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("Authorization", `Bearer ${access}`)
         .send({
           new_password: "1234",
-          user_id: player.id,
+          user_id: tmpPlayer.id,
         });
 
       expect(response.status).toBe(OK);
@@ -641,7 +691,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("Authorization", `Bearer ${access}`)
         .send({
           new_password: "1234",
-          user_id: player.id,
+          user_id: tmpPlayer.id,
           unknownField: "foo",
         });
 
@@ -677,7 +727,7 @@ async function initialize() {
       BankAccounts: {
         create: [
           {
-            bankName: "Test Bank " + Date.now(),
+            bankId: "40138",
             bankNumber: `${Date.now()}`,
             owner: "Test owner",
             bankAlias: "Test alias",
@@ -724,6 +774,8 @@ async function initialize() {
       currency: "MXN",
       status: CONFIG.SD.DEPOSIT_STATUS.PENDING,
       tracking_number: "test_tracking_number3" + Date.now(),
+      date: new Date(),
+      sending_bank: "foo",
     },
   });
 

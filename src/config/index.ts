@@ -72,6 +72,8 @@ const CONFIG = {
     ALQ_TOKEN_URL: process.env.ALQ_TOKEN_URL,
     ALQ_SAVINGS_ACCOUNT_ID: Number(process.env.ALQ_SAVINGS_ACCOUNT_ID),
     ALQ_API_KEY: process.env.ALQ_API_KEY,
+    TELEGRAM_BOT_KEY: process.env.TELEGRAM_BOT_KEY,
+    TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
   },
   INTERNAL: {
     BOT_API_PORT: process.env.BOT_API_PORT,
@@ -110,6 +112,16 @@ const CONFIG = {
       COMPLETED: "LIQUIDADA",
       /** Error */
       ERROR: "error",
+    },
+    BONUS_STATUS: {
+      /** Player signed up and bonus was assigned (amount = 0) */
+      ASSIGNED: "assigned",
+      /** Bonus was loaded into Player's account, not yet redeemed */
+      PENDING: "pending",
+      /** Bonus has been used */
+      REDEEMED: "redeemed",
+      /** Unavailable */
+      UNAVAILABLE: "unavailable",
     },
     ENVIRONMENTS: {
       TEST: "test",

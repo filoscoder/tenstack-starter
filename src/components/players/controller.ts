@@ -124,4 +124,34 @@ export class PlayersController {
       next(error);
     }
   };
+
+  static getBalance = async (req: Req, res: Res, next: NextFn) => {
+    try {
+      const playersServices = new PlayerServices();
+
+      const playerId = req.params.id;
+      const player = req.user!;
+
+      const balance = await playersServices.getBalance(playerId, player);
+
+      res.status(OK).json(apiResponse(balance));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  static async getBonus(req: Req, res: Res, next: NextFn) {
+    try {
+      const playersServices = new PlayerServices();
+
+      const playerId = req.params.id;
+      const user = req.user!;
+
+      const bonus = await playersServices.getBonus(playerId, user);
+
+      res.status(OK).json(apiResponse(bonus));
+    } catch (error) {
+      next(error);
+    }
+  }
 }

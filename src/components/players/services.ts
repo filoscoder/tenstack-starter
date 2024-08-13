@@ -1,4 +1,4 @@
-import { Player } from "@prisma/client";
+import { Bonus, Player } from "@prisma/client";
 import { AuthServices } from "../auth/services";
 import { PlayersDAO } from "@/db/players";
 import {
@@ -6,7 +6,11 @@ import {
   PlayerRequest,
   PlayerUpdateRequest,
 } from "@/types/request/players";
-import { PlainPlayerResponse } from "@/types/response/players";
+import {
+  CertainUserResponse,
+  PlainPlayerResponse,
+  RoledPlayer,
+} from "@/types/response/players";
 import { compare, hash } from "@/utils/crypt";
 import { hidePassword } from "@/utils/auth";
 import { HttpService } from "@/services/http.service";
@@ -21,6 +25,7 @@ import { ForbiddenError } from "@/helpers/error";
 import { ResourceService } from "@/services/resource.service";
 import { logtailLogger } from "@/helpers/loggers";
 import { AuthResult } from "@/types/response/auth";
+import { BonusDAO } from "@/db/bonus";
 
 export class PlayerServices extends ResourceService {
   constructor() {
@@ -197,5 +202,27 @@ export class PlayerServices extends ResourceService {
       await TokenDAO.update({ player_id }, { invalid: true });
 
     return hidePassword(player);
+  }
+
+  async getBalance(player_id: string, player: RoledPlayer): Promise<number> {
+    await PlayersDAO.authorizeShow(player, player_id);
+
+    const httpService = new HttpService();
+    const response = await httpService.authedAgentApi.get<CertainUserResponse>(
+      `/pyramid/certain-user/${player.panel_id}`,
+    );
+    if (response.status !== 200)
+      throw new AgentApiError(
+        response.status,
+        "Error en el casino al obtener info de jugador",
+        response.data,
+      );
+
+    return Number(response.data.balance);
+  }
+
+  async getBonus(player_id: string, player: RoledPlayer): Promise<Bonus[]> {
+    await PlayersDAO.authorizeShow(player, player_id);
+    return BonusDAO.findMany({ Player: { id: player_id } });
   }
 }

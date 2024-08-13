@@ -13,33 +13,42 @@ export type TransferDetails = {
   type: "deposit" | "cashout";
 };
 
-export interface DepositRequest {
+export type DepositRequest = {
   tracking_number: string;
-}
-
-export interface CreateDepositProps extends DepositRequest {
+  date: string; // ISO-8601
+  sending_bank: string;
+  amount: number;
+};
+export type CreateDepositProps = DepositRequest & {
   player_id: string;
-}
+  cep_ok?: boolean;
+};
 
-export interface DepositUpdatableProps {
+export type DepositUpdateRequest = {
+  status: string;
+};
+
+export type DepositUpdatableProps = {
   dirty?: boolean;
   status?: string;
   tracking_number?: string;
   amount?: number;
-}
+  cep_ok?: boolean;
+  sending_bank?: string;
+};
 
-export interface PaymentRequest {
+export type PaymentRequest = {
   player_id: string;
   bank_account: string;
   amount: number;
   currency: string;
-}
+};
 
-export interface PaymentUpdatableProps {
+export type PaymentUpdatableProps = {
   bank_account?: string;
   amount?: number;
   currency?: string;
   status?: string;
   dirty?: boolean;
   alquimia_id?: number;
-}
+};

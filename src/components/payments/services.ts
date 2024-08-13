@@ -1,4 +1,5 @@
 import { Player, Payment } from "@prisma/client";
+import { BonusServices } from "../bonus/services";
 import { ERR } from "@/config/errors";
 import { PaymentsDAO } from "@/db/payments";
 import { CustomError } from "@/helpers/error/CustomError";
@@ -20,13 +21,18 @@ export class PaymentServices extends ResourceService {
     player: PlainPlayerResponse,
     request: CashoutRequest,
   ): Promise<CoinTransferResult> {
+    const bonusServices = new BonusServices();
     await PaymentsDAO.authorizeCreation(request.bank_account, player.id);
+
     const casinoCoinsService = new CasinoCoinsService();
     let transferResult: CoinTransferResult | undefined;
     try {
       transferResult = await casinoCoinsService.playerToAgent(request, player);
 
-      if (transferResult.ok) this.createDbObject(player, request);
+      if (transferResult.ok) {
+        this.createDbObject(player, request);
+        await bonusServices.invalidate(player.id).catch(() => null);
+      }
 
       return transferResult;
     } catch (e) {

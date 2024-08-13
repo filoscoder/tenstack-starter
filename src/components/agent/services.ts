@@ -70,6 +70,19 @@ export class AgentServices {
     }
   }
 
+  static async markPaymentAsPaid(payment_id: string): Promise<Payment> {
+    await PaymentsDAO.authorizeRelease(payment_id);
+    try {
+      const updated = await PaymentsDAO.update(payment_id, {
+        status: CONFIG.SD.PAYMENT_STATUS.COMPLETED,
+      });
+      return updated;
+    } catch (e) {
+      await PaymentsDAO.update(payment_id, { dirty: false });
+      throw e;
+    }
+  }
+
   static async getBankAccount(): Promise<AgentBankAccount> {
     const account = UserRootDAO.getBankAccount();
     return account;
@@ -127,9 +140,7 @@ export class AgentServices {
     const depositServices = new DepositServices();
     for (const deposit of deposits) {
       if (deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED) continue;
-      const result = await depositServices.confirm(deposit.Player, deposit.id, {
-        tracking_number: deposit.tracking_number,
-      });
+      const result = await depositServices.finalizeDeposit(deposit);
       response.push(result.deposit);
     }
 

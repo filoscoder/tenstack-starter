@@ -46,7 +46,7 @@ export class AlquimiaTransferService {
       medio_pago: 4,
       importe: this.payment.amount,
       cuenta_destino: this.payment.BankAccount.bankNumber,
-      nombre_beneficiario: this.payment.BankAccount.bankName,
+      nombre_beneficiario: this.payment.BankAccount.owner,
       rfc_beneficiario: "NA",
       concepto: "casino-mex.com",
       no_referencia: 101010,

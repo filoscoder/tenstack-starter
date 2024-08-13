@@ -1,3 +1,43 @@
+## [1.0.0] - 2024-07-26
+
+### Added
+- GET `/players/:id/bonus` to see a player's bonus
+
+## [1.0.0] - 2024-07-25
+
+### Added
+- GET `/bonus` to list bonus.
+- GET `/bonus/:id` to view bonus.
+- GET `/bonus/:id/redeem` to redeem a bonus.
+- POST `/bonus` to create a bonus.
+
+## [1.0.0] - 2024-07-24
+
+### Added
+- `/players/:id/balance` to query player's balance.
+
+## [1.0.0] - 2024-07-19
+
+### Changed
+- Replaced `bankName` with `bankId` on BankAccount model.
+
+## [1.0.0] - 2024-07-17
+### Added
+- `/transactions/deposit/:id/update` for agent to mark a deposit as confirmed.
+
+## [1.0.0] - 2024-07-17
+
+### Added
+- Re-added ability to mark payments as paid by agent (meaning payment was made manually).
+
+### Changed
+- Replaced `bankName` with `bankId` on `UserRoot.bankAccount`.
+
+## [1.0.0] - 2024-07-16
+
+### Changed
+- Added `amount`, `date` and `sending_bank` to create deposit request.
+
 ## [1.0.0] - 2024-06-24
 
 ### Changed

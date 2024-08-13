@@ -1,11 +1,12 @@
-import { BAD_REQUEST, CREATED, OK, UNAUTHORIZED } from "http-status";
+import { BAD_REQUEST, CREATED, FORBIDDEN, OK, UNAUTHORIZED } from "http-status";
 import { SuperAgentTest } from "supertest";
-import { PrismaClient } from "@prisma/client";
+import { Bonus, PrismaClient, PrismaPromise } from "@prisma/client";
 import { initAgent } from "./helpers";
 import CONFIG from "@/config";
 import { Whatsapp } from "@/notification/whatsapp";
 import { PlayerServices } from "@/components/players/services";
 import { AuthServices } from "@/components/auth/services";
+import { BonusDAO } from "@/db/bonus";
 
 let agent: SuperAgentTest;
 let prisma: PrismaClient;
@@ -330,28 +331,79 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
     });
   });
 
-  describe("GET: /players/:id", () => {
-    it("Should return player info", async () => {
+  describe("GET: /players/:id/balance", () => {
+    const mockGetBalance = jest.fn(async () => 420);
+    jest
+      .spyOn(PlayerServices.prototype, "getBalance")
+      .mockImplementation(mockGetBalance);
+    it("Should return player balance", async () => {
       const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/players/${playerId}`)
+        .get(`/app/${CONFIG.APP.VER}/players/${playerId}/balance`)
         .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(OK);
-      expect(response.body.data[0].id).toBe(playerId);
+      expect(mockGetBalance).toHaveBeenCalledTimes(1);
+      expect(response.body.data).toBe(420);
     });
 
     it("Should return 401", async () => {
       const response = await agent.get(
-        `/app/${CONFIG.APP.VER}/players/${playerId}`,
+        `/app/${CONFIG.APP.VER}/players/${playerId}/balance`,
+      );
+
+      expect(response.status).toBe(UNAUTHORIZED);
+    });
+
+    it("Should return 404", async () => {
+      const response = await agent.get(
+        `/app/${CONFIG.APP.VER}/players/nonexistent/balance`,
+      );
+
+      expect(response.status).toBe(UNAUTHORIZED);
+    });
+  });
+  describe("GET: /players/:id/bonus", () => {
+    const mockBonus: Bonus = {
+      id: "spam",
+      player_id: playerId,
+      amount: 0,
+      percentage: 100,
+      status: CONFIG.SD.BONUS_STATUS.ASSIGNED,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+    const mockFindMany = jest.fn(async () => [
+      mockBonus,
+    ]) as () => PrismaPromise<Bonus[]>;
+
+    jest.spyOn(BonusDAO, "findMany").mockImplementation(mockFindMany);
+
+    it("Should return player bonus", async () => {
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/players/${playerId}/bonus`)
+        .set("Authorization", `Bearer ${playerAccessToken}`);
+
+      expect(response.status).toBe(OK);
+      expect(mockFindMany).toHaveBeenCalledTimes(1);
+      expect(JSON.stringify(response.body.data)).toBe(
+        JSON.stringify([mockBonus]),
+      );
+    });
+
+    it("Should return 401", async () => {
+      const response = await agent.get(
+        `/app/${CONFIG.APP.VER}/players/${playerId}/bonus`,
       );
 
       expect(response.status).toBe(UNAUTHORIZED);
     });
 
     it("Should return 403", async () => {
-      const response = await agent.get(`/app/${CONFIG.APP.VER}/players/abcd`);
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/players/lord-farquard/bonus`)
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
-      expect(response.status).toBe(UNAUTHORIZED);
+      expect(response.status).toBe(FORBIDDEN);
     });
   });
 });

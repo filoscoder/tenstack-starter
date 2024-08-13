@@ -92,4 +92,13 @@ export class BankAccountsDAO {
   static authorizeDelete = this.authorizeUpdate;
 
   static authorizeView = this.authorizeUpdate;
+
+  static async authorizeCreation(request: BankAccountRequest) {
+    const existing = await prisma.bankAccount.findFirst({
+      where: { bankNumber: request.bankNumber },
+    });
+
+    if (existing)
+      throw new ForbiddenError("Cuenta CLABE ya registrada previamente");
+  }
 }
