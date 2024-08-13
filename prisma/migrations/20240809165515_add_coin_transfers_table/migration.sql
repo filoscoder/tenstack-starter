@@ -1,48 +1,36 @@
-/*
-  Warnings:
+-- 1. Agregar las columnas coin_transfer_id sin restricciones
+ALTER TABLE `BONUS` ADD COLUMN `coin_transfer_id` VARCHAR(191);
+ALTER TABLE `DEPOSITS` ADD COLUMN `coin_transfer_id` VARCHAR(191);
+ALTER TABLE `PAYMENTS` ADD COLUMN `coin_transfer_id` VARCHAR(191);
 
-  - A unique constraint covering the columns `[coin_transfer_id]` on the table `BONUS` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[coin_transfer_id]` on the table `DEPOSITS` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[coin_transfer_id]` on the table `PAYMENTS` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `coin_transfer_id` to the `BONUS` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `coin_transfer_id` to the `DEPOSITS` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `coin_transfer_id` to the `PAYMENTS` table without a default value. This is not possible if the table is not empty.
+-- 2. Generar valores únicos para coin_transfer_id donde sea NULL y asignarlos
+UPDATE `BONUS` SET `coin_transfer_id` = UUID() WHERE `coin_transfer_id` IS NULL;
+UPDATE `DEPOSITS` SET `coin_transfer_id` = UUID() WHERE `coin_transfer_id` IS NULL;
+UPDATE `PAYMENTS` SET `coin_transfer_id` = UUID() WHERE `coin_transfer_id` IS NULL;
 
-*/
--- AlterTable
-ALTER TABLE `BONUS` ADD COLUMN `coin_transfer_id` VARCHAR(191) NOT NULL;
+-- 3. Insertar registros en la tabla COIN_TRANSFERS
+INSERT INTO `COIN_TRANSFERS` (`id`, `status`, `created_at`, `updated_at`)
+SELECT `coin_transfer_id`, 'completed', NOW(), NOW() FROM `BONUS` WHERE `coin_transfer_id` IS NOT NULL
+ON DUPLICATE KEY UPDATE `status` = 'completed';
 
--- AlterTable
-ALTER TABLE `DEPOSITS` ADD COLUMN `coin_transfer_id` VARCHAR(191) NOT NULL;
+INSERT INTO `COIN_TRANSFERS` (`id`, `status`, `created_at`, `updated_at`)
+SELECT `coin_transfer_id`, 'completed', NOW(), NOW() FROM `DEPOSITS` WHERE `coin_transfer_id` IS NOT NULL
+ON DUPLICATE KEY UPDATE `status` = 'completed';
 
--- AlterTable
-ALTER TABLE `PAYMENTS` ADD COLUMN `coin_transfer_id` VARCHAR(191) NOT NULL;
+INSERT INTO `COIN_TRANSFERS` (`id`, `status`, `created_at`, `updated_at`)
+SELECT `coin_transfer_id`, 'completed', NOW(), NOW() FROM `PAYMENTS` WHERE `coin_transfer_id` IS NOT NULL
+ON DUPLICATE KEY UPDATE `status` = 'completed';
 
--- CreateTable
-CREATE TABLE `COIN_TRANSFERS` (
-    `id` VARCHAR(191) NOT NULL,
-    `status` VARCHAR(32) NOT NULL,
-    `player_balance_after` DOUBLE NULL,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updated_at` DATETIME(3) NOT NULL,
+-- 4. Modificar las columnas coin_transfer_id para que sean NOT NULL
+ALTER TABLE `BONUS` MODIFY COLUMN `coin_transfer_id` VARCHAR(191) NOT NULL;
+ALTER TABLE `DEPOSITS` MODIFY COLUMN `coin_transfer_id` VARCHAR(191) NOT NULL;
+ALTER TABLE `PAYMENTS` MODIFY COLUMN `coin_transfer_id` VARCHAR(191) NOT NULL;
 
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateIndex
+-- 5. Crear índices únicos y claves foráneas
 CREATE UNIQUE INDEX `BONUS_coin_transfer_id_key` ON `BONUS`(`coin_transfer_id`);
-
--- CreateIndex
 CREATE UNIQUE INDEX `DEPOSITS_coin_transfer_id_key` ON `DEPOSITS`(`coin_transfer_id`);
-
--- CreateIndex
 CREATE UNIQUE INDEX `PAYMENTS_coin_transfer_id_key` ON `PAYMENTS`(`coin_transfer_id`);
 
--- AddForeignKey
 ALTER TABLE `PAYMENTS` ADD CONSTRAINT `PAYMENTS_coin_transfer_id_fkey` FOREIGN KEY (`coin_transfer_id`) REFERENCES `COIN_TRANSFERS`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `DEPOSITS` ADD CONSTRAINT `DEPOSITS_coin_transfer_id_fkey` FOREIGN KEY (`coin_transfer_id`) REFERENCES `COIN_TRANSFERS`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `BONUS` ADD CONSTRAINT `BONUS_coin_transfer_id_fkey` FOREIGN KEY (`coin_transfer_id`) REFERENCES `COIN_TRANSFERS`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
