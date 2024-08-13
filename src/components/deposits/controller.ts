@@ -13,6 +13,7 @@ import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 import { hidePassword } from "@/utils/auth";
 import { DEPOSIT_STATUS } from "@/config";
 import { DepositResult } from "@/types/response/transfers";
+import { useTransaction } from "@/helpers/useTransaction";
 
 export class DepositController {
   static readonly index = async (req: Req, res: Res, next: NextFn) => {
@@ -75,8 +76,8 @@ export class DepositController {
       }
 
       if (deposit.status === DEPOSIT_STATUS.VERIFIED) {
-        coinTransfer = await coinTransferServices.agentToPlayer(
-          deposit.coin_transfer_id,
+        coinTransfer = await useTransaction((tx) =>
+          coinTransferServices.agentToPlayer(deposit!.coin_transfer_id, tx),
         );
         bonus = await bonusServices.load(
           deposit.amount,

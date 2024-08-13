@@ -1,12 +1,13 @@
 import { Bonus, Player, PrismaClient } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { CoinTransferServices } from "../coin-transfers/services";
-import { BONUS_STATUS, COIN_TRANSFER_STATUS } from "@/config";
+import { BONUS_STATUS } from "@/config";
 import { BonusDAO } from "@/db/bonus";
 import { ResourceService } from "@/services/resource.service";
 import { BonusSettings } from "@/types/request/bonus";
 import { BonusRedemptionResult } from "@/types/response/bonus";
 import { NotFoundException } from "@/helpers/error";
+import { useTransaction } from "@/helpers/useTransaction";
 
 export class BonusServices extends ResourceService {
   constructor(private tx?: PrismaTransactionClient) {
@@ -50,23 +51,31 @@ export class BonusServices extends ResourceService {
     }
   }
 
-  async redeem(bonusId: string, user: Player): Promise<BonusRedemptionResult> {
+  async redeem(
+    bonusId: string,
+    user: Player,
+  ): Promise<BonusRedemptionResult | undefined> {
     let bonus: Bonus = await BonusDAO.authorizeRedemption(bonusId, user);
-    const coinTransferServices = new CoinTransferServices();
 
-    // TODO
-    // use transactions
-    const coinTransfer = await coinTransferServices.agentToPlayer(
-      bonus.coin_transfer_id,
-    );
+    return await useTransaction(async (tx) => {
+      bonus = await tx.bonus.update({
+        where: { id: bonusId },
+        data: {
+          status: BONUS_STATUS.REDEEMED,
+        },
+      });
 
-    if (coinTransfer.status === COIN_TRANSFER_STATUS.COMPLETED)
-      bonus = await BonusDAO.update(bonusId, { status: BONUS_STATUS.REDEEMED });
+      const coinTransferServices = new CoinTransferServices();
+      const coinTransfer = await coinTransferServices.agentToPlayer(
+        bonus.coin_transfer_id,
+        tx,
+      );
 
-    return {
-      coinTransfer,
-      bonus,
-    };
+      return {
+        coinTransfer,
+        bonus,
+      };
+    });
   }
 
   /**

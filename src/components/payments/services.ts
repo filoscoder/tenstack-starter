@@ -1,4 +1,4 @@
-import { CoinTransfer, PrismaClient } from "@prisma/client";
+import { CoinTransfer } from "@prisma/client";
 import { BonusServices } from "../bonus/services";
 import { CoinTransferServices } from "../coin-transfers/services";
 import { PaymentsDAO } from "@/db/payments";
@@ -6,6 +6,7 @@ import { CashoutRequest } from "@/types/request/transfers";
 import { PlainPlayerResponse } from "@/types/response/players";
 import { ResourceService } from "@/services/resource.service";
 import { COIN_TRANSFER_STATUS, PAYMENT_STATUS } from "@/config";
+import { useTransaction } from "@/helpers/useTransaction";
 
 export class PaymentServices extends ResourceService {
   constructor() {
@@ -18,12 +19,10 @@ export class PaymentServices extends ResourceService {
   async create(
     player: PlainPlayerResponse,
     request: CashoutRequest,
-  ): Promise<CoinTransfer> {
+  ): Promise<CoinTransfer | undefined> {
     await PaymentsDAO.authorizeCreation(request.bank_account, player.id);
 
-    const prisma = new PrismaClient();
-
-    return await prisma.$transaction(async (tx) => {
+    return await useTransaction(async (tx) => {
       const payment = await tx.payment.create({
         data: {
           Player: { connect: { id: player.id } },
@@ -40,9 +39,10 @@ export class PaymentServices extends ResourceService {
       const bonusServices = new BonusServices(tx);
       await bonusServices.invalidate(player.id);
 
-      const coinTransferServices = new CoinTransferServices(tx);
+      const coinTransferServices = new CoinTransferServices();
       const coinTransfer = await coinTransferServices.playerToAgent(
         payment.coin_transfer_id,
+        tx,
       );
       return coinTransfer;
     });
