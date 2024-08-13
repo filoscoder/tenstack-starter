@@ -42,18 +42,21 @@ export class DepositServices extends ResourceService {
     deposit_id: string,
     request: DepositRequest,
   ) {
+    const deposit = await DepositsDAO._getById(deposit_id);
+    if (deposit?.status === DEPOSIT_STATUS.VERIFIED) return deposit;
+
     await DepositsDAO.authorizeUpdate(
       deposit_id,
       player,
       request.tracking_number,
     );
 
-    const deposit = await DepositsDAO.update({
+    const updated = await DepositsDAO.update({
       where: { id: deposit_id },
       data: request,
     });
 
-    return await this.verify(deposit);
+    return await this.verify(updated);
   }
 
   async setStatus(

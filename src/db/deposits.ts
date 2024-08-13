@@ -42,12 +42,12 @@ export class DepositsDAO {
     try {
       return await prisma.deposit.findUnique({
         where: { id },
-        include: { Player: true },
+        include: { Player: { include: { Bonus: true } } },
       });
     } catch (error) {
       throw error;
     } finally {
-      prisma.$disconnect();
+      // prisma.$disconnect();
     }
   }
 
