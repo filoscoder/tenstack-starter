@@ -1,6 +1,6 @@
 import { Bonus, Player, Prisma, PrismaClient } from "@prisma/client";
 import { ForbiddenError, NotFoundException } from "@/helpers/error";
-import CONFIG from "@/config";
+import CONFIG, { BONUS_STATUS, COIN_TRANSFER_STATUS } from "@/config";
 import { OrderBy } from "@/types/request/players";
 import { BonusUpdatableProps, CreateBonusProps } from "@/types/request/bonus";
 import { RoledPlayer } from "@/types/response/players";
@@ -81,7 +81,12 @@ export class BonusDAO {
       const bonus = await prisma.bonus.create({
         data: {
           ...data,
-          status: data.status ?? CONFIG.SD.BONUS_STATUS.ASSIGNED,
+          player_id: undefined,
+          status: data.status ?? BONUS_STATUS.ASSIGNED,
+          CoinTransfer: {
+            create: { status: COIN_TRANSFER_STATUS.PENDING },
+          },
+          Player: { connect: { id: data.player_id } },
         },
       });
       return bonus;
@@ -92,15 +97,11 @@ export class BonusDAO {
     }
   }
 
-  static async update(
-    id: string,
-    data: BonusUpdatableProps,
-  ): Promise<Bonus & { Player: Player }> {
+  static async update(id: string, data: BonusUpdatableProps): Promise<Bonus> {
     try {
       const bonus = await prisma.bonus.update({
         where: { id },
         data,
-        include: { Player: true },
       });
       return bonus;
     } catch (error) {
@@ -174,7 +175,7 @@ export class BonusDAO {
   static async authorizeRedemption(
     bonusId: string,
     user: Player,
-  ): Promise<Bonus & { Player: Player }> {
+  ): Promise<Bonus> {
     const playerServices = new PlayerServices();
     const authorized = await prisma.$transaction(async (tx) => {
       const bonus = await tx.bonus.findUnique({
@@ -186,31 +187,29 @@ export class BonusDAO {
 
       if (bonus.Player.id !== user.id) throw new ForbiddenError("Unauthorized");
 
-      const balance = await playerServices.getBalance(
-        bonus.Player.id,
-        bonus.Player,
-      );
-      if (balance > 10)
-        throw new ForbiddenError(
-          "El bono solo se puede canjear cuando el balance es menor que 10.",
-        );
+      if (bonus.dirty) throw new ForbiddenError("El bono está siendo canjeado");
 
-      if (bonus.status === CONFIG.SD.BONUS_STATUS.UNAVAILABLE)
+      if (bonus.status === BONUS_STATUS.UNAVAILABLE)
         throw new ForbiddenError("Lo siento, tu bono ya no esta disponible.");
 
-      if (bonus.status === CONFIG.SD.BONUS_STATUS.REDEEMED)
+      if (bonus.status === BONUS_STATUS.REDEEMED)
         throw new ForbiddenError(
           "Ya has canjeado tu bono, gracias por elegirnos.",
         );
 
-      if (bonus.status === CONFIG.SD.BONUS_STATUS.ASSIGNED)
+      if (bonus.status === BONUS_STATUS.ASSIGNED)
         throw new ForbiddenError("Has un deposito para acceder a tu bono.");
 
-      return await tx.bonus.update({
-        where: { id: bonusId },
-        data: { status: CONFIG.SD.BONUS_STATUS.REDEEMED },
-        include: { Player: true },
-      });
+      const balance = await playerServices.getBalance(
+        bonus.Player.id,
+        bonus.Player,
+      );
+      if (balance >= 10)
+        throw new ForbiddenError(
+          "El bono solo se puede canjear cuando el balance es menor que 10.",
+        );
+
+      return bonus;
     });
     return authorized;
   }

@@ -1,7 +1,6 @@
-import { Bonus } from "@prisma/client";
+import { Bonus, CoinTransfer } from "@prisma/client";
 
 export type BonusRedemptionResult = {
-  player_balance?: number;
-  error?: string;
   bonus: Bonus;
+  coinTransfer: CoinTransfer;
 };

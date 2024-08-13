@@ -1,11 +1,9 @@
-import { Deposit, Payment } from "@prisma/client";
+import { Payment } from "@prisma/client";
 import { AxiosResponse } from "axios";
 import { AuthServices } from "../auth/services";
-import { DepositServices } from "../deposits/services";
 import { Credentials } from "@/types/request/players";
 import { compare } from "@/utils/crypt";
 import { PaymentsDAO } from "@/db/payments";
-import { DepositsDAO } from "@/db/deposits";
 import {
   AgentBankAccount,
   BalanceResponse,
@@ -16,7 +14,7 @@ import { TokenPair } from "@/types/response/jwt";
 import { HttpService } from "@/services/http.service";
 import { NotFoundException, UnauthorizedError } from "@/helpers/error";
 import { PlayersDAO } from "@/db/players";
-import CONFIG from "@/config";
+import CONFIG, { PAYMENT_STATUS } from "@/config";
 import { ERR } from "@/config/errors";
 import { BotFlowsDAO } from "@/db/bot-flows";
 import {
@@ -74,7 +72,7 @@ export class AgentServices {
     await PaymentsDAO.authorizeRelease(payment_id);
     try {
       const updated = await PaymentsDAO.update(payment_id, {
-        status: CONFIG.SD.PAYMENT_STATUS.COMPLETED,
+        status: PAYMENT_STATUS.COMPLETED,
       });
       return updated;
     } catch (e) {
@@ -132,19 +130,6 @@ export class AgentServices {
     return {
       balance: Number(account.saldo_ahorro),
     };
-  }
-
-  static async freePendingCoinTransfers(): Promise<Deposit[]> {
-    const deposits = await DepositsDAO.getPendingCoinTransfers();
-    const response: Deposit[] = [];
-    const depositServices = new DepositServices();
-    for (const deposit of deposits) {
-      if (deposit.status !== CONFIG.SD.DEPOSIT_STATUS.VERIFIED) continue;
-      const result = await depositServices.finalizeDeposit(deposit);
-      response.push(result.deposit);
-    }
-
-    return response;
   }
 
   static async setOnCallBotFlow(active: boolean): Promise<void> {

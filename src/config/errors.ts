@@ -87,4 +87,14 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "too_many_requests",
     description: "Demasiadas solicitudes",
   },
+  COIN_TRANSFER_UNSUCCESSFUL: {
+    status: 502,
+    code: "bad_gateway",
+    description: "No se pudo transferir las fichas.",
+  },
+  INSUFICIENT_BALANCE: {
+    status: 400,
+    code: "insuficient_balance",
+    description: "Saldo insuficiente",
+  },
 };

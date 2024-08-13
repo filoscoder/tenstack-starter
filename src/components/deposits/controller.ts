@@ -1,15 +1,19 @@
 import { OK } from "http-status";
-import { Deposit, Player } from "@prisma/client";
+import { Bonus, CoinTransfer, Deposit, Player } from "@prisma/client";
+import { BonusServices } from "../bonus/services";
+import { CoinTransferServices } from "../coin-transfers/services";
 import { DepositServices } from "./services";
 import { DepositsDAO } from "@/db/deposits";
 import { apiResponse } from "@/helpers/apiResponse";
 import {
   DepositRequest,
-  DepositUpdateRequest,
+  SetDepositStatusRequest,
 } from "@/types/request/transfers";
-import { DepositResult } from "@/types/response/transfers";
 import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 import { hidePassword } from "@/utils/auth";
+import { DEPOSIT_STATUS } from "@/config";
+import { DepositResult } from "@/types/response/transfers";
+import { useTransaction } from "@/helpers/useTransaction";
 
 export class DepositController {
   static readonly index = async (req: Req, res: Res, next: NextFn) => {
@@ -55,30 +59,54 @@ export class DepositController {
     const request: Omit<DepositRequest, "player_id"> = req.body;
     const player = req.user!;
 
-    const depositServices = new DepositServices();
-    try {
-      let result: DepositResult;
+    const depositServices = new DepositServices(),
+      coinTransferServices = new CoinTransferServices(),
+      bonusServices = new BonusServices();
+    let deposit:
+        | (Deposit & { Player: Player & { Bonus: Bonus | null } })
+        | undefined,
+      bonus: Bonus | undefined,
+      coinTransfer: CoinTransfer | undefined;
 
+    try {
       if (deposit_id) {
-        result = await depositServices.confirm(player, deposit_id, request);
+        deposit = await depositServices.update(player, deposit_id, request);
       } else {
-        result = await depositServices.create(player, request);
+        deposit = await depositServices.create(player, request);
       }
 
-      res.status(OK).json(apiResponse(result));
+      if (deposit.status === DEPOSIT_STATUS.VERIFIED) {
+        coinTransfer = await useTransaction((tx) =>
+          coinTransferServices.agentToPlayer(deposit!.coin_transfer_id, tx),
+        ).catch(() => undefined);
+        bonus = await bonusServices.load(
+          deposit.amount,
+          deposit.Player.Bonus?.id,
+        );
+      }
+
+      // @ts-ignore
+      delete deposit.Player;
+      res
+        .status(OK)
+        .json(apiResponse({ deposit, bonus, coinTransfer } as DepositResult));
     } catch (e) {
       next(e);
     }
   };
 
-  static readonly update = async (req: Req, res: Res, next: NextFn) => {
+  static readonly setStatus = async (req: Req, res: Res, next: NextFn) => {
     const deposit_id = req.params.id;
-    const request: DepositUpdateRequest = req.body;
+    const request: SetDepositStatusRequest = req.body;
     const agent = req.user!;
 
     const depositServices = new DepositServices();
     try {
-      const result = await depositServices.update(agent, deposit_id, request);
+      const result = await depositServices.setStatus(
+        agent,
+        deposit_id,
+        request,
+      );
       res.status(OK).json(apiResponse(result));
     } catch (e) {
       next(e);
@@ -88,28 +116,12 @@ export class DepositController {
   /**
    * Show player's pending deposits
    */
-  static readonly pending = async (req: Req, res: Res, next: NextFn) => {
+  static readonly getPending = async (req: Req, res: Res, next: NextFn) => {
     const player = req.user!;
 
     try {
       const deposits = await DepositServices.showPending(player.id);
       res.status(OK).json(apiResponse(deposits));
-    } catch (err) {
-      next(err);
-    }
-  };
-
-  /**
-   * Show total amount of pending coin transfers
-   */
-  static readonly pendingCoinTransfers = async (
-    _req: Req,
-    res: Res,
-    next: NextFn,
-  ) => {
-    try {
-      const amount = await DepositServices.pendingCoinTransfers();
-      res.status(OK).json(apiResponse(amount));
     } catch (err) {
       next(err);
     }

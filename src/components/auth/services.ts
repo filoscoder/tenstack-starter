@@ -2,7 +2,7 @@ import jwtStrategy, { StrategyOptions } from "passport-jwt";
 import { Token } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JwtService } from "../../services/jwt.service";
-import CONFIG from "@/config";
+import CONFIG, { ENVIRONMENTS } from "@/config";
 import { TokenDAO } from "@/db/token";
 import { JWTPayload, TokenPair, TokenResult } from "@/types/response/jwt";
 import { PlayersDAO } from "@/db/players";
@@ -101,7 +101,7 @@ export class AuthServices extends JwtService {
   };
 
   private async validateUserAgent(req: Req, jti: string) {
-    if (CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.TEST) return;
+    if (CONFIG.APP.ENV === ENVIRONMENTS.TEST) return;
 
     const token = await TokenDAO.getById(jti);
     const user_agent = req.headers["user-agent"] ?? "";

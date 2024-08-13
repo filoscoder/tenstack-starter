@@ -10,6 +10,8 @@ export const isKeyOfBonus = (key: string): key is keyof Bonus => {
     percentage: 0,
     player_id: "",
     status: "",
+    coin_transfer_id: "",
+    dirty: false,
     Player: {
       id: "",
       panel_id: 0,

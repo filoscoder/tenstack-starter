@@ -4,6 +4,7 @@ export type BonusSettings = {
 };
 
 export type CreateBonusProps = BonusSettings & {
+  // coin_transfer_id?: string;
   player_id: string;
   status?: string;
 };

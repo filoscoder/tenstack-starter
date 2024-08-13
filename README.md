@@ -40,7 +40,7 @@ Comes with:
 + [Ver Depósitos Pendientes](#ver-depósitos-pendientes-)
 + [Ver Depósito](#ver-depósito-)
 + [Listar Depósitos](#listar-depósitos-)
-+ [Editar Depósito](#editar-número-de-seguimiento-)
++ [Cambiar Estado del Depósito](#cambiar-estado-del-depósito-)
 + [Ver Cuenta Bancaria de Alquimia](#ver-cuenta-alquimia-)
 
 ### Pagos (plataforma ➡ jugador)
@@ -56,8 +56,6 @@ Comes with:
 + [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-)
 + [Ver Balance Casino](#ver-balance-casino-)
 + [Ver Balance Alquimia](#ver-balance-alquimia-)
-+ [Ver Transferencias de Fichas Pendientes](#ver-transferencias-de-fichas-pendientes-)
-+ [Liberar Fichas Pendientes](#liberar-fichas-pendientes-)
 + [Indicar Que El Agente Esta De Guardia](#setear-guardia-)
 + [Ver Estado De Guardia](#ver-guardia-)
 + [Ver Números de Soporte](#ver-números-de-soporte-)
@@ -85,7 +83,11 @@ Comes with:
 + [Listar Bonos](#listar-bonos-)
 + [Ver Bono](#ver-bono-)
 + [Crear Bono](#crear-bono-)
-+ [Canjear Bono]()
++ [Canjear Bono](#canjear-bono-)
+
+### Transferencias de Fichas
++ [Liberar Pendientes](#liberar-fichas-pendientes-)
++ [Ver Total de Transferencias Pendientes](#ver-total-de-transferencias-pendientes-)
 
 ### [Interfaces](#interfaces-1)
 
@@ -214,7 +216,7 @@ Rate-limited|1 every 10 seconds
 ---|---|
 Método      |`POST`
 Body (json) |[`CashoutRequest`](#cashoutrequest)
-Devuelve    |[`CoinTransferResult`](#cointransferresult)
+Devuelve    |[`CoinTransfer`](#cointransfer) \|  [`ERR.INSUFICIENT_BALANCE`](#errinsuficient_balance) \| [`ERR.COIN_TRANSFER_UNSUCCESSFUL`](#errcoin_transfer_unsuccessful)
 Requiere rol| player
 
 ### Listar Pagos 🔒
@@ -235,14 +237,6 @@ Devuelve    |[`Deposit[]`](#deposit)
 Requiere rol| player
 
 > **Nota:** siempre devuelve un array
-
-### Confirmar Depósito Pendiente 🔒
-
-|Endpoint| `/transactions/deposit/:id/confirm`|
----|---|
-Método      |`POST`
-Devuelve    |[`DepositResult`](#depositresult)
-Requiere rol| player
 
 ### Ver Cuenta Alquimia 🔒
 
@@ -350,7 +344,7 @@ Query string| [`ResourceListQueryString`](#ResourceListQueryString)
 Devuelve    |[`Deposit[]`](#deposit)
 Requiere rol| agent
 
-### Editar Número de seguimiento 🔒
+### Editar Depósito 🔒
 Endpoint para que el agente modifique el `tracking_number` de un depósito y dispare el flujo de verificación.
 
 |Endpoint| `/transactions/deposit/:id`|
@@ -360,13 +354,13 @@ Body (json) | [`EditDepositRequest`](#editdepositrequest)
 Devuelve    |[`DepositResult`](#depositresult)
 Requiere rol| agent
 
-### Editar Depósito 🔒
+### Cambiar Estado del Depósito 🔒
 Para que el agente marque un depósito como pagado
 
-|Endpoint| `/transactions/deposit/:id/update`|
+|Endpoint| `/transactions/deposit/:id/set-status`|
 ---|---|
 Método      |`POST`
-Body (json) | [`EditDepositStatusRequest`](#editdepositstatusrequest)
+Body (json) | [`SetDepositStatusRequest`](#setdepositstatusrequest)
 Devuelve    |[`Deposit`](#deposit)
 Requiere rol| agent
 
@@ -403,24 +397,6 @@ Requiere rol| agent
 ---|---|
 Método      |`GET`
 Devuelve    |[`Balance`](#balance)
-Requiere rol| agent
-
-### Ver Transferencias de Fichas Pendientes 🔒
-Devuelve el total de fichas que debe cargar el agente para liberar transferencias pendientes
-
-|Endpoint| `/agent/pending/pending-coin-transfers`|
----|---|
-Método      |`GET`
-Devuelve    |`number`
-Requiere rol| agent
-
-### Liberar Fichas Pendientes 🔒
-Liberar transferencias que hayan quedado pendientes en el caso que un jugador quiera comprar mas fichas de las que tiene dispoibles el agente
-
-|Endpoint| `/agent/pending/deposits`|
----|---|
-Método      |`GET`
-Devuelve    |[`Deposit[]`](#deposit) - los depositos afectados
 Requiere rol| agent
 
 ### Setear Guardia 🔒
@@ -551,6 +527,27 @@ Requiere rol| player
 Método      |`GET`
 Devuelve    |[`BonusRedemptionResult`](#bonusredemptionresult)
 Requiere rol| player
+Rate-limited|1 every 10 seconds for the same `:id`
+
+Transferencia de Fichas
+-----------------------
+
+### Liberar Fichas Pendientes 🔒
+Liberar transferencias de fichas que hayan quedado pendientes en el caso que un jugador quiera comprar mas fichas de las que tiene dispoibles el agente
+
+|Endpoint| `/coin-transfer/release-pending`|
+---|---|
+Método      |`GET`
+Devuelve    |[`CoinTransfer[]`](#cointransfer)
+Requiere rol| agent
+
+### Ver Total de Transferencias Pendientes 🔒
+
+|Endpoint| `/coin-transfer/pending-total`|
+---|---|
+Método      |`GET`
+Devuelve    |`number`
+Requiere rol| agent
 
 ## Interfaces
 
@@ -678,17 +675,29 @@ Estado de transferencia de fichas
 ```typescript
 {
   ok: boolean
-  player_balance: number
+  player_balance: number?             // undefined en caso de fichas no transferidas
   error: string?                      // En caso de error, el motivo
+}
+```
+
+### CoinTransfer
+```typescript
+{
+  id: string
+  status: string
+  transfered_at?: datetime            // 2024-02-23T12:35:51.017Z
+  player_balance_after?: number
+  updated_at: datetime                // 2024-02-23T12:35:51.017Z
+  created_at: datetime                // 2024-02-23T12:35:51.017Z
 }
 ```
 
 ### DepositResult
 ```typescript
 {
-  player_balance: number?             // undefined en caso de fichas no transferidas
-  error: string?                      // En caso de error, el motivo
   deposit: Deposit
+  bonus?: Bonus
+  coinTransfer?: CoinTransfer
 }
 ```
 
@@ -699,10 +708,11 @@ Estado de transferencia de fichas
   player_id: string
   currency: string
   dirty: boolean
-  // Esperando verificacion | verificado en alquimia | verificado y fichas enviadas | todo OK | eliminado por agente
-  status: "pending"|"verified"|"confirmed"|"completed"|"deleted"
+  // Esperando verificacion | verificacion fallida | verificado | eliminado por agente
+  status: "pending"|"unverified"|"verified"|"deleted"
   tracking_number: string
   amount: number
+  sending_bank: string
   created_at: datetime                // 2024-02-23T12:35:51.017Z
   updated_at: datetime                // 2024-02-23T12:35:51.017Z
 }
@@ -715,10 +725,10 @@ Estado de transferencia de fichas
 }
 ```
 
-### EditDepositStatusRequest
+### SetDepositStatusRequest
 ```typescript
 {
-  status: "pending"|"verified"|"confirmed"|"completed"|"deleted"
+  status: "pending"|"unverified"|"verified"|"deleted"
 }
 ```
 
@@ -872,9 +882,26 @@ Estado de transferencia de fichas
 ### BonusRedemptionResult
 ```typescript
 {
-  player_balance: number?             // undefined en caso de fichas no transferidas
-  error: string?                      // En caso de error, el motivo
+  coinTransfer: CoinTransfer
   bonus: Bonus
+}
+```
+
+### ERR.INSUFICIENT_BALANCE
+```typescript
+{
+  status: 400,
+  code: "insuficient_balance",
+  description: "Saldo insuficiente",
+}
+```
+
+### ERR.COIN_TRANSFER_UNSUCCESSFUL
+```typescript
+{
+  status: 502,
+  code: "bad_gateway",
+  description: "No se pudo transferir las fichas.",
 }
 ```
 
@@ -915,6 +942,14 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 - Cambiar start-staging por start:production en timba-api scripts
 - Generar allowed origin dinamicamente en producción para incluir localhost
 - Caracter invisible en metricas bot
+
+### Coin Transfers
+
+- Remove TRANSACTIONS table
+- Update README
+- Update CHANGELOG
+- Rename `/deposit/:id/update` to `/deposit/:id/set-status` on agent-timba
+
 
 
 ### Fichas insuficientes
@@ -1071,6 +1106,55 @@ Respesta
 Sacar el valor del atributo `MontoPago` del elemento `Beneficiario`
 
 
+## Subagent
+
+### Create
+
+POST https://agent.casinomex.vip/api/pyramid/create/agent/
+
+Request
+```json
+{
+  "username":"testsubagent01",
+  "password":"1234",
+  "email":"",
+  "social_links":[
+    {
+      "link":"",
+     "social_type":"WA"
+    }
+  ],
+  "user_info":{
+    "mobile_number":"",
+    "first_name":"",
+    "last_name":""
+  },
+  "agent_info":{
+    "payments_percentage":50
+  }
+}
+```
+
+Response
+```json
+{
+  "username":"testsubagent01",
+  "password":"1234",
+  "email":"",
+  "social_links":[{
+      "link":"",
+      "social_type":"WA"
+  }],
+  "user_info": {
+    "mobile_number":"",
+    "first_name":"",
+    "last_name":""
+  },
+  "agent_info": {
+    "payments_percentage":50
+  }
+}
+```
 
 ## Password restoration checklist
 

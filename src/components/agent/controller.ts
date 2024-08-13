@@ -87,16 +87,6 @@ export class AgentController {
     }
   }
 
-  static async completePendingDeposits(_req: Req, res: Res, next: NextFn) {
-    try {
-      const deposits = await AgentServices.freePendingCoinTransfers();
-
-      res.status(OK).json(apiResponse(deposits));
-    } catch (error) {
-      next(error);
-    }
-  }
-
   static async setOnCallBotFlow(req: Req, res: Res, next: NextFn) {
     try {
       const { active } = req.body;

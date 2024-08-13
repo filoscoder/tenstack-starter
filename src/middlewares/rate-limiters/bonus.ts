@@ -1,6 +1,6 @@
 import { RateLimiterMemory } from "rate-limiter-flexible";
-import { ERR } from "@/config/errors";
 import CONFIG, { ENVIRONMENTS } from "@/config";
+import { ERR } from "@/config/errors";
 import { CustomError } from "@/helpers/error/CustomError";
 
 const rateLimiter = new RateLimiterMemory({
@@ -9,10 +9,10 @@ const rateLimiter = new RateLimiterMemory({
 });
 
 /**
- * Limit the amount of requests with the same payment ID to 1 every
+ * Limit the amount of requests with the same bonus ID to 1 every
  * 10 seconds
  */
-export const paymentRateLimiter = (req: Req, res: Res, next: NextFn) => {
+export const bonusRateLimiter = (req: Req, res: Res, next: NextFn) => {
   rateLimiter
     .consume(req.params.id, 1)
     .then(() => next())

@@ -1,13 +1,9 @@
-import { Deposit, Player, PrismaClient, Role } from "@prisma/client";
-import {
-  CreateDepositProps,
-  DepositRequest,
-  DepositUpdatableProps,
-} from "@/types/request/transfers";
+import { Deposit, Player, Prisma, PrismaClient, Role } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library";
+import { DepositRequest } from "@/types/request/transfers";
 import { ForbiddenError, NotFoundException } from "@/helpers/error";
 import { hidePassword } from "@/utils/auth";
-import CONFIG from "@/config";
-import { RoledPlayer } from "@/types/response/players";
+import CONFIG, { DEPOSIT_STATUS } from "@/config";
 import { OrderBy } from "@/types/request/players";
 
 const prisma = new PrismaClient();
@@ -46,12 +42,12 @@ export class DepositsDAO {
     try {
       return await prisma.deposit.findUnique({
         where: { id },
-        include: { Player: true },
+        include: { Player: { include: { Bonus: true } } },
       });
     } catch (error) {
       throw error;
     } finally {
-      prisma.$disconnect();
+      // prisma.$disconnect();
     }
   }
 
@@ -62,16 +58,16 @@ export class DepositsDAO {
   /**
    * Create a DB entry for a deposit
    */
-  static async create(
-    data: CreateDepositProps,
-  ): Promise<Deposit & { Player: Player }> {
+  static async create(data: {
+    select?: Prisma.DepositSelect<DefaultArgs> | null | undefined;
+    include?: Prisma.DepositInclude<DefaultArgs> | null | undefined;
+    data: Prisma.XOR<
+      Prisma.DepositCreateInput,
+      Prisma.DepositUncheckedCreateInput
+    >;
+  }) {
     try {
-      const deposit = await prisma.deposit.create({
-        data: { ...data, status: CONFIG.SD.DEPOSIT_STATUS.PENDING },
-        include: { Player: true },
-      });
-      deposit.Player = hidePassword(deposit.Player);
-      return deposit;
+      return await prisma.deposit.create(data);
     } catch (error) {
       throw error;
     } finally {
@@ -86,8 +82,8 @@ export class DepositsDAO {
           ? {}
           : {
               OR: [
-                { status: CONFIG.SD.DEPOSIT_STATUS.PENDING },
-                { status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED },
+                { status: DEPOSIT_STATUS.PENDING },
+                { status: DEPOSIT_STATUS.VERIFIED },
               ],
             },
         include: { Player: true },
@@ -139,8 +135,8 @@ export class DepositsDAO {
           player_id,
           AND: {
             OR: [
-              { status: CONFIG.SD.DEPOSIT_STATUS.PENDING },
-              { status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED },
+              { status: DEPOSIT_STATUS.PENDING },
+              { status: DEPOSIT_STATUS.UNVERIFIED },
             ],
           },
         },
@@ -152,36 +148,17 @@ export class DepositsDAO {
     }
   }
 
-  /**
-   * Get deposits where the money has been confirmed to have arrived at
-   * Alquimia but coins haven't been transfered yet.
-   */
-  static getPendingCoinTransfers() {
+  static async update(data: {
+    select?: Prisma.DepositSelect<DefaultArgs> | null | undefined;
+    include?: Prisma.DepositInclude<DefaultArgs> | null | undefined;
+    data: Prisma.XOR<
+      Prisma.DepositUpdateInput,
+      Prisma.DepositUncheckedUpdateInput
+    >;
+    where: Prisma.DepositWhereUniqueInput;
+  }) {
     try {
-      return prisma.deposit.findMany({
-        where: {
-          status: CONFIG.SD.DEPOSIT_STATUS.VERIFIED,
-        },
-        include: { Player: { include: { roles: true } } },
-      });
-    } catch (error) {
-      throw error;
-    } finally {
-      prisma.$disconnect();
-    }
-  }
-
-  static async update(
-    id: string,
-    data: DepositUpdatableProps,
-  ): Promise<Deposit & { Player: Player }> {
-    try {
-      const deposit = await prisma.deposit.update({
-        where: { id },
-        data,
-        include: { Player: true },
-      });
-      return deposit;
+      return await prisma.deposit.update(data);
     } catch (error) {
       throw error;
     } finally {
@@ -192,77 +169,6 @@ export class DepositsDAO {
   static delete(id: string) {
     try {
       return prisma.deposit.delete({ where: { id } });
-    } catch (error) {
-      throw error;
-    } finally {
-      prisma.$disconnect();
-    }
-  }
-
-  /**
-   * Ensures deposit exists and belongs to authed user or user is agent.
-   * @throws if checks fail.
-   */
-  static async authorizeTransaction(deposit_id: string, player: RoledPlayer) {
-    try {
-      const deposit = await this.getById(deposit_id);
-      if (!deposit) throw new NotFoundException();
-
-      if (
-        deposit.player_id !== player.id &&
-        !player.roles.some((r) => r.name === CONFIG.ROLES.AGENT)
-      )
-        throw new ForbiddenError("El depósito no le pertenece.");
-
-      return deposit;
-    } catch (error) {
-      throw error;
-    } finally {
-      prisma.$disconnect();
-    }
-  }
-
-  /**
-   * Checks if:
-   *  - deposit exists and belongs to player
-   *  - deposit is not completed or deleted
-   *  - deposit is not being confirmed (dirty)
-   *  - another deposit with same tracking_number exists
-   *
-   * If checks pass, sets dirty flag to true (deposit is being confirmed)
-   * @throws if checks fail
-   */
-  static async authorizeConfirmation(
-    deposit_id: string,
-    tracking_number: string,
-    player: RoledPlayer,
-  ) {
-    try {
-      let deposit = await this.authorizeTransaction(deposit_id, player);
-      if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.COMPLETED)
-        throw new ForbiddenError(
-          "No se pueden modificar depositos completados",
-        );
-      if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.DELETED)
-        throw new ForbiddenError("No se pueden modificar depositos eliminados");
-      if (deposit.dirty)
-        throw new ForbiddenError("El deposito esta siendo confirmado");
-
-      const duplicate = await prisma.deposit.findFirst({
-        where: {
-          tracking_number,
-          NOT: { id: deposit_id },
-        },
-      });
-      if (duplicate)
-        throw new ForbiddenError("Deposito ya acreditado previamente.");
-
-      deposit = await prisma.deposit.update({
-        where: { id: deposit_id },
-        data: { dirty: true },
-        include: { Player: true },
-      });
-      return deposit;
     } catch (error) {
       throw error;
     } finally {
@@ -287,39 +193,53 @@ export class DepositsDAO {
 
   /**
    * Checks if:
-   *  - deposit exists
-   *  - user has role of agent
-   *  - deposit is not completed or deleted
-   *  - deposit is not being confirmed (dirty)
+   *  - deposit exists and
+   *  - belongs to player or
+   *  - user has role of agent.
+   *  - deposit is not verified or deleted.
+   *  - deposit is not being confirmed (dirty).
+   *  - another deposit with same tracking_number exists.
    *
    * If checks pass, sets dirty flag to true (deposit is being confirmed)
    * @throws if checks fail
    */
   static async authorizeUpdate(
     deposit_id: string,
-    agent: Player & { roles: Role[] },
+    user: Player & { roles: Role[] },
+    tracking_number?: string,
   ) {
-    const authorized = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       const deposit = await tx.deposit.findFirst({ where: { id: deposit_id } });
-      if (!deposit) throw new NotFoundException();
+      if (!deposit) throw new NotFoundException("Deposit not found");
 
-      if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.COMPLETED)
-        throw new ForbiddenError("El deposito ya está completado");
+      if (deposit.status === DEPOSIT_STATUS.VERIFIED)
+        throw new ForbiddenError("El deposito ya está verificado");
 
-      if (deposit.status === CONFIG.SD.DEPOSIT_STATUS.DELETED)
+      if (deposit.status === DEPOSIT_STATUS.DELETED)
         throw new ForbiddenError("No se pueden modificar depositos eliminados");
 
       if (deposit.dirty)
         throw new ForbiddenError("El deposito está siendo procesado");
 
-      if (!agent.roles.some((r) => r.name === CONFIG.ROLES.AGENT))
-        throw new ForbiddenError("No autorizado");
+      if (
+        deposit.player_id !== user.id &&
+        !user.roles.some((r) => r.name === CONFIG.ROLES.AGENT)
+      )
+        throw new ForbiddenError("El depósito no le pertenece.");
 
-      return await tx.deposit.update({
+      const duplicate = await tx.deposit.findFirst({
+        where: {
+          tracking_number,
+          NOT: { id: deposit_id },
+        },
+      });
+      if (tracking_number && duplicate)
+        throw new ForbiddenError("Deposito ya acreditado previamente.");
+
+      await tx.deposit.update({
         where: { id: deposit_id },
         data: { dirty: true },
       });
     });
-    return authorized;
   }
 }

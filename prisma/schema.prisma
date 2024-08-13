@@ -81,6 +81,8 @@ model Payment {
   currency          String        @default("MXN")
   dirty             Boolean       @default(false)
   alquimia_id       Int?
+  coin_transfer_id  String        @unique
+  CoinTransfer      CoinTransfer  @relation(fields: [coin_transfer_id], references: [id], onDelete: Cascade)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
@@ -114,6 +116,8 @@ model Deposit {
   date              DateTime
   sending_bank      String         
   cep_ok            Boolean       @default(false)
+  coin_transfer_id  String        @unique
+  CoinTransfer      CoinTransfer  @relation(fields: [coin_transfer_id], references: [id], onDelete: Cascade)
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt    
 
@@ -197,14 +201,30 @@ model Analytics {
 }
 
 model Bonus {
-  id                          String    @id @default(uuid())
-  player_id                   String    @unique
-  Player                      Player    @relation(fields: [player_id], references: [id], onDelete: Cascade)
-  status                      String    @db.VarChar(32)
+  id                          String        @id @default(uuid())
+  player_id                   String        @unique
+  Player                      Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  status                      String        @db.VarChar(32)
   percentage                  Int
   amount                      Int
-  created_at                  DateTime  @default(now())
-  updated_at                  DateTime  @updatedAt 
+  coin_transfer_id            String        @unique
+  CoinTransfer                CoinTransfer  @relation(fields: [coin_transfer_id], references: [id], onDelete: Cascade)
+  dirty                       Boolean       @default(false)
+  created_at                  DateTime      @default(now())
+  updated_at                  DateTime      @updatedAt 
   
   @@map("BONUS")
+}
+
+model CoinTransfer {
+  id                          String    @id @default(uuid())
+  status                      String    @db.VarChar(32)
+  player_balance_after        Float?
+  Bonus                       Bonus?    
+  Deposit                     Deposit?
+  Payment                     Payment?
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @updatedAt 
+
+  @@map("COIN_TRANSFERS")
 }

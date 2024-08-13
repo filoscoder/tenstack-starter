@@ -1,5 +1,5 @@
 import axios from "axios";
-import CONFIG from "@/config";
+import CONFIG, { ENVIRONMENTS } from "@/config";
 import { logtailLogger } from "@/helpers/loggers";
 
 export class Telegram {
@@ -18,8 +18,7 @@ export class Telegram {
       });
     } catch (e) {
       if (CONFIG.LOG.LEVEL === "debug") console.error(e);
-      if (CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.PRODUCTION)
-        logtailLogger.warn(e);
+      if (CONFIG.APP.ENV === ENVIRONMENTS.PRODUCTION) logtailLogger.warn(e);
     }
   }
 }
