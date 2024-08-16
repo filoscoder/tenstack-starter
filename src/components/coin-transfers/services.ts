@@ -1,5 +1,4 @@
 import { CoinTransfer } from "@prisma/client";
-import { PlayerServices } from "../players/services";
 import CONFIG, {
   BONUS_STATUS,
   COIN_TRANSFER_STATUS,
@@ -37,12 +36,6 @@ export class CoinTransferServices {
     });
     if (!coinTransfer) throw new NotFoundException("CoinTransfer not found");
 
-    const playerServices = new PlayerServices();
-    const currentBalance = await playerServices.getBalance(
-      coinTransfer.Payment!.Player.id,
-      coinTransfer.Payment!.Player,
-    );
-
     const transferDetails = await this.generateTransferDetails(
       "cashout",
       coinTransfer.Payment!.Player.panel_id,
@@ -50,18 +43,22 @@ export class CoinTransferServices {
       coinTransfer.Payment!.Player.balance_currency,
     );
 
-    const result = await tx.coinTransfer.update({
+    await tx.coinTransfer.update({
       where: { id: coinTransfer.id },
       data: {
         status: COIN_TRANSFER_STATUS.COMPLETED,
-        player_balance_after: currentBalance - coinTransfer.Payment!.amount,
       },
     });
 
     const coinTransferResult = await this.transfer(transferDetails);
     this.handleTransferError(coinTransferResult);
 
-    return result;
+    return await tx.coinTransfer.update({
+      where: { id: coinTransfer.id },
+      data: {
+        player_balance_after: coinTransferResult.player_balance,
+      },
+    });
   }
 
   /**
@@ -90,24 +87,22 @@ export class CoinTransferServices {
       parent!.Player.balance_currency,
     );
 
-    const playerServices = new PlayerServices();
-    const currentBalance = await playerServices.getBalance(
-      parent!.Player.id,
-      parent!.Player,
-    );
-
-    const result = await tx.coinTransfer.update({
+    await tx.coinTransfer.update({
       where: { id: coinTransfer.id },
       data: {
         status: COIN_TRANSFER_STATUS.COMPLETED,
-        player_balance_after: currentBalance + parent!.amount,
       },
     });
 
     const coinTransferResult = await this.transfer(transferDetails);
     this.handleTransferError(coinTransferResult);
 
-    return result;
+    return await tx.coinTransfer.update({
+      where: { id: coinTransfer.id },
+      data: {
+        player_balance_after: coinTransferResult.player_balance,
+      },
+    });
   }
 
   /**
@@ -244,3 +239,35 @@ export class CoinTransferServices {
       throw new CustomError(ERR.COIN_TRANSFER_UNSUCCESSFUL);
   }
 }
+
+/**
+ * try
+ * transfer = Mandar las fichas()
+ *
+ * db = Actualizar objeto Payment()
+ * responder al cliente player_balance = transfer.player_balance_after
+ * catch
+ *  db error
+ *  Actualizar objeto Payment con "status fichas no mandadas"
+ *
+ *
+ *
+ * BEGIN TRANSACTION
+ *
+ * tx...
+ *
+ * 1. Actualizar objeto Payment
+ * 2. Actualizar objeto CoinTransfer
+ *  2.1 status = complete
+ *  2.1 player_balance_after = 0
+ *
+ * 3. Lamada API externa
+ *
+ * 4. Actualizar objeto CooinTransfer
+ *  4.1 player_balance_after = current - payment.amount
+ *
+ *
+ * IF ERROR
+ *  ROLLBACK
+ * END TRANSACTION
+ */
