@@ -1,5 +1,4 @@
 import { CoinTransfer } from "@prisma/client";
-import { PlayerServices } from "../players/services";
 import CONFIG, {
   BONUS_STATUS,
   COIN_TRANSFER_STATUS,
@@ -31,7 +30,9 @@ export class CoinTransferServices {
   ): Promise<CoinTransfer> {
     const coinTransfer = await tx.coinTransfer.findFirst({
       where: { id: coin_transfer_id },
-      include: { Payment: { include: { Player: true } } },
+      include: {
+        Payment: { include: { Player: true } },
+      },
     });
     if (!coinTransfer) throw new NotFoundException("CoinTransfer not found");
 
@@ -42,7 +43,7 @@ export class CoinTransferServices {
       coinTransfer.Payment!.Player.balance_currency,
     );
 
-    const result = await tx.coinTransfer.update({
+    await tx.coinTransfer.update({
       where: { id: coinTransfer.id },
       data: {
         status: COIN_TRANSFER_STATUS.COMPLETED,
@@ -52,7 +53,12 @@ export class CoinTransferServices {
     const coinTransferResult = await this.transfer(transferDetails);
     this.handleTransferError(coinTransferResult);
 
-    return result;
+    return await tx.coinTransfer.update({
+      where: { id: coinTransfer.id },
+      data: {
+        player_balance_after: coinTransferResult.player_balance,
+      },
+    });
   }
 
   /**
@@ -81,24 +87,22 @@ export class CoinTransferServices {
       parent!.Player.balance_currency,
     );
 
-    const playerServices = new PlayerServices();
-    const currentBalance = await playerServices.getBalance(
-      parent!.Player.id,
-      parent!.Player,
-    );
-
-    const result = await tx.coinTransfer.update({
+    await tx.coinTransfer.update({
       where: { id: coinTransfer.id },
       data: {
         status: COIN_TRANSFER_STATUS.COMPLETED,
-        player_balance_after: currentBalance + parent!.amount,
       },
     });
 
     const coinTransferResult = await this.transfer(transferDetails);
     this.handleTransferError(coinTransferResult);
 
-    return result;
+    return await tx.coinTransfer.update({
+      where: { id: coinTransfer.id },
+      data: {
+        player_balance_after: coinTransferResult.player_balance,
+      },
+    });
   }
 
   /**
