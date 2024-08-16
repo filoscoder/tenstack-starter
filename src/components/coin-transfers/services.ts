@@ -31,9 +31,17 @@ export class CoinTransferServices {
   ): Promise<CoinTransfer> {
     const coinTransfer = await tx.coinTransfer.findFirst({
       where: { id: coin_transfer_id },
-      include: { Payment: { include: { Player: true } } },
+      include: {
+        Payment: { include: { Player: { include: { roles: true } } } },
+      },
     });
     if (!coinTransfer) throw new NotFoundException("CoinTransfer not found");
+
+    const playerServices = new PlayerServices();
+    const currentBalance = await playerServices.getBalance(
+      coinTransfer.Payment!.Player.id,
+      coinTransfer.Payment!.Player,
+    );
 
     const transferDetails = await this.generateTransferDetails(
       "cashout",
@@ -46,6 +54,7 @@ export class CoinTransferServices {
       where: { id: coinTransfer.id },
       data: {
         status: COIN_TRANSFER_STATUS.COMPLETED,
+        player_balance_after: currentBalance - coinTransfer.Payment!.amount,
       },
     });
 
