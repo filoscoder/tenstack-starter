@@ -31,7 +31,7 @@ export class CoinTransferServices {
     const coinTransfer = await tx.coinTransfer.findFirst({
       where: { id: coin_transfer_id },
       include: {
-        Payment: { include: { Player: { include: { roles: true } } } },
+        Payment: { include: { Player: true } },
       },
     });
     if (!coinTransfer) throw new NotFoundException("CoinTransfer not found");
@@ -239,35 +239,3 @@ export class CoinTransferServices {
       throw new CustomError(ERR.COIN_TRANSFER_UNSUCCESSFUL);
   }
 }
-
-/**
- * try
- * transfer = Mandar las fichas()
- *
- * db = Actualizar objeto Payment()
- * responder al cliente player_balance = transfer.player_balance_after
- * catch
- *  db error
- *  Actualizar objeto Payment con "status fichas no mandadas"
- *
- *
- *
- * BEGIN TRANSACTION
- *
- * tx...
- *
- * 1. Actualizar objeto Payment
- * 2. Actualizar objeto CoinTransfer
- *  2.1 status = complete
- *  2.1 player_balance_after = 0
- *
- * 3. Lamada API externa
- *
- * 4. Actualizar objeto CooinTransfer
- *  4.1 player_balance_after = current - payment.amount
- *
- *
- * IF ERROR
- *  ROLLBACK
- * END TRANSACTION
- */
