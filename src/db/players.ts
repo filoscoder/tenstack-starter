@@ -1,4 +1,10 @@
-import { BankAccount, Player, PrismaClient, Role } from "@prisma/client";
+import {
+  BankAccount,
+  Player,
+  Prisma,
+  PrismaClient,
+  Role,
+} from "@prisma/client";
 import {
   PlainPlayerResponse,
   PlayerResponse,
@@ -17,14 +23,44 @@ import { ForbiddenError } from "@/helpers/error";
 const prisma = new PrismaClient();
 
 export class PlayersDAO {
-  static get count() {
+  static count(where?: Prisma.PlayerWhereInput) {
     try {
-      return prisma.player.count();
+      return prisma.player.count({ where });
     } catch (e) {
       throw e;
     } finally {
       prisma.$disconnect();
     }
+  }
+
+  static getPlayersQuery(
+    page: number,
+    itemsPerPage: number,
+    search?: string,
+    orderBy?: OrderBy<Player>,
+    cashierId?: string,
+  ) {
+    const whereClause: Prisma.PlayerWhereInput = {
+      roles: { some: { name: CONFIG.ROLES.PLAYER } },
+      AND: {
+        OR: [
+          { first_name: { contains: search } },
+          { last_name: { contains: search } },
+          { email: { contains: search } },
+          { username: { contains: search } },
+          { movile_number: { contains: search } },
+        ],
+      },
+    };
+
+    if (cashierId) whereClause.cashier_id = cashierId;
+
+    return {
+      skip: page * itemsPerPage,
+      take: itemsPerPage,
+      where: whereClause,
+      orderBy,
+    };
   }
 
   static _getAll = async (
@@ -34,30 +70,38 @@ export class PlayersDAO {
     orderBy?: OrderBy<Player>,
   ): Promise<Player[]> => {
     try {
-      const playersPrisma = await prisma.player.findMany({
-        skip: page * itemsPerPage,
-        take: itemsPerPage,
-        where: {
-          roles: { some: { name: CONFIG.ROLES.PLAYER } },
-          AND: {
-            OR: [
-              { first_name: { contains: search } },
-              { last_name: { contains: search } },
-              { email: { contains: search } },
-              { username: { contains: search } },
-              { movile_number: { contains: search } },
-            ],
-          },
-        },
-        orderBy,
-      });
-      return playersPrisma;
+      const query = this.getPlayersQuery(page, itemsPerPage, search, orderBy);
+      return await prisma.player.findMany(query);
     } catch (error: any) {
       throw error;
     } finally {
       prisma.$disconnect();
     }
   };
+
+  static _getAllByCashier = async (
+    page: number,
+    itemsPerPage: number,
+    search?: string,
+    orderBy?: OrderBy<Player>,
+    cashierId?: string,
+  ): Promise<Player[]> => {
+    try {
+      const query = this.getPlayersQuery(
+        page,
+        itemsPerPage,
+        search,
+        orderBy,
+        cashierId,
+      );
+      return await prisma.player.findMany(query);
+    } catch (error: any) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  };
+
   /**
    * @description Get player information by ID.
    * @param playerId ID of the player to retrieve information.
@@ -144,9 +188,7 @@ export class PlayersDAO {
       const player = await prisma.player.create({
         data: {
           ...request,
-          roles: {
-            connect: { name: CONFIG.ROLES.PLAYER },
-          },
+          roles: { connect: request.roles.map((r) => ({ name: r })) },
         },
       });
       return player;

@@ -6,7 +6,9 @@ import {
 } from "express-validator";
 import { Player } from "@prisma/client";
 import { PlayersDAO } from "@/db/players";
-import { PLAYER_STATUS } from "@/config";
+import CONFIG, { PLAYER_STATUS } from "@/config";
+import { mockPlayer } from "@/config/mockPlayer";
+import { NotFoundException } from "@/helpers/error";
 
 const isDate: CustomValidator = (value: string, { req }) => {
   if (value.length === 0) return true;
@@ -32,22 +34,6 @@ export const isKeyOfNestedObject = (
 };
 
 export const isKeyOfPlayer = (key: string): key is keyof Player => {
-  const mockPlayer: Player = {
-    id: "",
-    panel_id: 0,
-    username: "",
-    password: "",
-    email: "",
-    first_name: "",
-    last_name: "",
-    date_of_birth: new Date(),
-    movile_number: "",
-    country: "",
-    balance_currency: "",
-    status: "",
-    created_at: new Date(),
-    updated_at: new Date(),
-  };
   return isKeyOfNestedObject(mockPlayer, key);
 };
 
@@ -60,6 +46,21 @@ const isPlayerStatus = (
 ): value is PLAYER_STATUS.ACTIVE | PLAYER_STATUS.BANNED => {
   return value === PLAYER_STATUS.ACTIVE || value === PLAYER_STATUS.BANNED;
 };
+
+const isCashierId = async (id: string) => {
+  const user = await PlayersDAO._getById(id);
+  if (!user) throw new NotFoundException();
+  const isCashier = user.roles.some((r) => r.name === CONFIG.ROLES.CASHIER);
+  if (!isCashier) throw new Error("User is not a cashier");
+};
+
+const isRoleList = (value: string[]) => {
+  const roles = CONFIG.ROLES;
+  // @ts-ignore
+  return value.every((role) => Object.values(roles).includes(role));
+};
+
+const removeDuplicates = (val: string[]) => Array.from(new Set(val));
 
 export const validatePlayerRequest = () => {
   const optionalString: {
@@ -133,6 +134,22 @@ export const validatePlayerRequest = () => {
       errorMessage: "movile_number must be a numeric string",
     },
     country: optionalString,
+    roles: {
+      in: ["body"],
+      default: { options: [[CONFIG.ROLES.PLAYER]] },
+      customSanitizer: { options: removeDuplicates },
+      custom: { options: isRoleList, errorMessage: "Rol invalido" },
+    },
+    cashier_id: {
+      in: ["body"],
+      optional: true,
+      isString: true,
+      custom: {
+        options: isCashierId,
+        errorMessage: "cashier_id no es un ID de cajero",
+      },
+      errorMessage: "cashier_id is required",
+    },
   });
 };
 

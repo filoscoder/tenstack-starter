@@ -7,6 +7,8 @@ export type PlayerRequest = {
   password: string;
   panel_id: number;
   email: string;
+  roles: string[];
+  cashier_id?: string;
   first_name?: string;
   last_name?: string;
   date_of_birth?: string;

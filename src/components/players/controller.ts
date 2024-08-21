@@ -1,7 +1,8 @@
 import { NOT_FOUND, OK, CREATED } from "http-status/lib";
 import { Response } from "express";
-import { Player } from "@prisma/client";
+import { Cashier, Player } from "@prisma/client";
 import { AuthServices } from "../auth/services";
+import { CashierServices } from "../cashier/services";
 import { PlayerServices } from "./services";
 import { apiResponse } from "@/helpers/apiResponse";
 import { Credentials, PlayerRequest } from "@/types/request/players";
@@ -9,6 +10,7 @@ import { NotFoundException, UnauthorizedError } from "@/helpers/error";
 import { PlayersDAO } from "@/db/players";
 import { hidePassword } from "@/utils/auth";
 import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
+import CONFIG from "@/config";
 
 export class PlayersController {
   /**
@@ -28,7 +30,7 @@ export class PlayersController {
         orderBy,
       );
       const result = players.map((p) => hidePassword(p));
-      const total = await PlayersDAO.count;
+      const total = await PlayersDAO.count();
 
       res.status(OK).json(apiResponse({ result, total }));
     } catch (error) {
@@ -79,7 +81,14 @@ export class PlayersController {
       const request: PlayerRequest = req.body;
       const user_agent = req.headers["user-agent"] ?? "";
 
-      const player = await playersServices.create(request);
+      let cashier: Cashier | undefined;
+      if (request.roles.includes(CONFIG.ROLES.CASHIER))
+        cashier = await new CashierServices().create();
+
+      const player = await playersServices.create({
+        ...request,
+        cashier_id: cashier?.id,
+      });
       const { tokens } = await authServices.tokens(player.id, user_agent);
       const response = { ...tokens, player };
 

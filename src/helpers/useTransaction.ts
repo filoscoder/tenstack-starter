@@ -1,9 +1,10 @@
 import { PrismaClient } from "@prisma/client";
+import { CustomError } from "./error/CustomError";
 import { TransactionCallback } from "@/types/helpers/useTransaction";
 
 export async function useTransaction<T>(
   cb: TransactionCallback<T>,
-): Promise<T | undefined> {
+): Promise<T> {
   const prisma = new PrismaClient();
   const MAX_RETRIES = 3;
   let retries = 0;
@@ -22,5 +23,9 @@ export async function useTransaction<T>(
     }
   }
 
-  return;
+  throw new CustomError({
+    status: 500,
+    code: "database",
+    description: "Error en la base de datos",
+  });
 }

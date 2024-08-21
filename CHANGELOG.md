@@ -1,3 +1,14 @@
+## [1.1.0] - 2024-08-19
+
+### Added
+- GET `/cashier/:cashierId/player` to retrieve cashier's players. Supports search and pagination.
+- GET `/cashier/:cashierId/player/:playerId` to see a player's details.
+
+## [1.1.0] - 2024-08-17
+
+### Added
+- Optional parameter `role` to POST `/players`. Options: "player", "cashier". Default: "player".
+
 ## [1.0.0] - 2024-08-12
 
 ## Added

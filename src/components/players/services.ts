@@ -147,6 +147,7 @@ export class PlayerServices extends ResourceService {
         password: await hash(credentials.password),
         panel_id: id,
         email,
+        roles: [CONFIG.ROLES.PLAYER],
       },
     );
   }

@@ -21,7 +21,6 @@ describe("[UNIT] => COIN TRANSFER ROUTER", () => {
       const response = await agent
         .get(`/app/${CONFIG.APP.VER}/coin-transfer/pending-total`)
         .set("Authorization", `Bearer ${agentAccessToken}`);
-      console.log("PENDING TOTAL RESPONSE", response.body);
       expect(response.status).toBe(OK);
       expect(response.body.data).toBeGreaterThanOrEqual(0);
     });

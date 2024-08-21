@@ -51,10 +51,7 @@ export class BonusServices extends ResourceService {
     }
   }
 
-  async redeem(
-    bonusId: string,
-    user: Player,
-  ): Promise<BonusRedemptionResult | undefined> {
+  async redeem(bonusId: string, user: Player): Promise<BonusRedemptionResult> {
     let bonus: Bonus = await BonusDAO.authorizeRedemption(bonusId, user);
 
     return await useTransaction(async (tx) => {

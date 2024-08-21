@@ -7,12 +7,21 @@ import { CasinoTokenService } from "@/services/casino-token.service";
 const prisma = new PrismaClient();
 
 async function ensureRolesExist() {
-  const roles = await prisma.role.findMany();
-  if (roles.length === 0) {
+  const roles = Object.values(CONFIG.ROLES);
+  const dbRoles = await prisma.role.findMany();
+  if (dbRoles.length === 0) {
     await prisma.role.createMany({
-      data: [{ name: CONFIG.ROLES.AGENT }, { name: CONFIG.ROLES.PLAYER }],
+      data: roles.map((role) => ({ name: role })),
+    });
+  } else {
+    roles.forEach(async (role) => {
+      if (dbRoles.some((r) => r.name === role)) return;
+
+      await prisma.role.create({ data: { name: role } });
     });
   }
+
+  console.log("\nRoles OK 👍\n");
 }
 
 async function createUserRoot() {

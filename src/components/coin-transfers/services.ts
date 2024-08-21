@@ -75,11 +75,13 @@ export class CoinTransferServices {
       include: {
         Deposit: { include: { Player: { include: { roles: true } } } },
         Bonus: { include: { Player: { include: { roles: true } } } },
+        CashierPayout: { include: { Player: { include: { roles: true } } } },
       },
     });
     if (!coinTransfer) throw new NotFoundException("CoinTransfer not found");
 
-    const parent = coinTransfer.Bonus || coinTransfer.Deposit;
+    const parent =
+      coinTransfer.Bonus || coinTransfer.Deposit || coinTransfer.CashierPayout;
     const transferDetails = await this.generateTransferDetails(
       "deposit",
       parent!.Player.panel_id,
