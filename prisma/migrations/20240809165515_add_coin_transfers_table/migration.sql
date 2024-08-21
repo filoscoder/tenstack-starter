@@ -1,23 +1,24 @@
 -- 1. Verificar si las columnas existen antes de crearlas
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
-               WHERE TABLE_NAME = 'BONUS' AND COLUMN_NAME = 'coin_transfer_id') THEN
-  ALTER TABLE `BONUS` ADD COLUMN `coin_transfer_id` VARCHAR(191);
-END IF;
-
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
-               WHERE TABLE_NAME = 'DEPOSITS' AND COLUMN_NAME = 'coin_transfer_id') THEN
-  ALTER TABLE `DEPOSITS` ADD COLUMN `coin_transfer_id` VARCHAR(191);
-END IF;
-
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
-               WHERE TABLE_NAME = 'PAYMENTS' AND COLUMN_NAME = 'coin_transfer_id') THEN
-  ALTER TABLE `PAYMENTS` ADD COLUMN `coin_transfer_id` VARCHAR(191);
-END IF;
+ALTER TABLE `BONUS` ADD COLUMN IF NOT EXISTS `coin_transfer_id` VARCHAR(191);
+ALTER TABLE `DEPOSITS` ADD COLUMN IF NOT EXISTS `coin_transfer_id` VARCHAR(191);
+ALTER TABLE `PAYMENTS` ADD COLUMN IF NOT EXISTS `coin_transfer_id` VARCHAR(191);
 
 -- 2. Generar valores únicos para coin_transfer_id donde sea NULL y asignarlos
 UPDATE `BONUS` SET `coin_transfer_id` = UUID() WHERE `coin_transfer_id` IS NULL;
 UPDATE `DEPOSITS` SET `coin_transfer_id` = UUID() WHERE `coin_transfer_id` IS NULL;
 UPDATE `PAYMENTS` SET `coin_transfer_id` = UUID() WHERE `coin_transfer_id` IS NULL;
+
+-- Crear tabla COIN_TRANSFERS si no existe
+CREATE TABLE IF NOT EXISTS `COIN_TRANSFERS` (
+  `id` VARCHAR(191) NOT NULL,
+  `status` VARCHAR(32) NOT NULL,
+  `player_balance_after` DOUBLE NULL,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` DATETIME(3) NOT NULL,
+
+  PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  
 
 -- 3. Insertar registros en la tabla COIN_TRANSFERS si no existen
 INSERT INTO `COIN_TRANSFERS` (`id`, `status`, `created_at`, `updated_at`)
