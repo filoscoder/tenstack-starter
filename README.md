@@ -197,7 +197,6 @@ Devuelve    | [`Bonus[]`](#bonus-1)
 
 > **❗Nota**: devuelve un array.
 
-</details>
 
 Cuentas Bancarias
 -----------------
@@ -1006,28 +1005,6 @@ $ ddosify -t 'http://host.docker.internal:8080/app/v1/endpoint \
 ## TODO
 
 - Generar allowed origin dinamicamente en producción para incluir localhost
-
-### Cajeros
-
-> Se puede cargar fichas desde luquin a un jugador que le pertenezca al subagente. Esto **no** afecta las metricas de ganancia del jugador.
-
-- Agregar tabla "cashiers". ✅
-  + Agregar columna comision (porcentaje de ganancia).✅
-  + Columna balance.✅
-- Agregar columna "cashier_id" a Players para relacionar jugadores con cajero ✅
-- Agregar rol "cashier" a tabla roles. ✅
-- Agregar `{ role?: string }` al endpoint POST `/player` para crear cajero ✅
-  + Crear cajero en db local. ✅
-  + Crear cuenta de jugador con los datos ingresados. Guardar en tabla PLAYERS con rol cashier y cashier_id del cajero recien creado. ✅
-- Agregar `{ cashier_id?: string }` al endpoint de crear jugador para vincular jugador al cajero al crearlo. ✅
-- Endpoint GET `/cashier/:id/player` para listar jugadores del cajero. ✅
-- Endpoint GET `/cashier/:id/balance` para ver ganancias. ✅
-- Endpoint GET `/cashier/:id/cashout` para liberar ganancias a su cuenta de jugador. ✅
-- Metricas de player: depositos y retiros. Frecuencia.
-- Deposito: cuando un jugador hace un depósito, iniciar un proceso que revise las jugadas del jugador a partir de la fecha y hora del depósito, si en algún momento las pérdidas suman un valor igual al del depósito, sumarle un porcentaje de ese depósito a su cajero en nuestra base de datos. Las fichas se envían directo del agente (luquin) al jugador.
-- Actualizar README con endpoints nuevos. ✅
-- Actualizar CHANGELOG.
-- Aplastar migraciones.
 
 
 ### Fichas insuficientes
