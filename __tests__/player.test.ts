@@ -18,8 +18,7 @@ import {
   preparePlayerBonusTest,
 } from "./mocks/player/bonus";
 import CONFIG from "@/config";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { compare } from "@/utils/crypt";
+import * as crypt from "@/utils/crypt";
 
 let agent: SuperAgentTest;
 let agentAccessToken: string;
@@ -194,7 +193,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
   describe("POST: /players/login", () => {
     beforeAll(() => {
       //@ts-ignore
-      compare = jest.fn((a, b) => a == b);
+      crypt.compare = jest.fn((a, b) => a == b);
     });
 
     it("Should log player in", async () => {
