@@ -235,6 +235,8 @@ model CoinTransfer {
 
 model Cashier {
   id                          String        @id @default(uuid())
+  username                    String
+  password                    String
   commission                  Float         // 0 - 1
   balance                     Float         @default(0)
   Players                     Player[]      
