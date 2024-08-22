@@ -3,45 +3,56 @@ import { CoinTransferServices } from "../coin-transfers/services";
 import CONFIG, { COIN_TRANSFER_STATUS } from "@/config";
 import { CashierDAO } from "@/db/cashier";
 import { PlayersDAO } from "@/db/players";
-import { OrderBy } from "@/types/request/players";
+import { OrderBy, PlayerRequest } from "@/types/request/players";
 import { NotFoundException } from "@/helpers/error";
 import { useTransaction } from "@/helpers/useTransaction";
 import { RoledPlayer } from "@/types/response/players";
-// import { PrismaClient } from "@prisma/client";
+import { HttpService } from "@/services/http.service";
+import { AgentApiError } from "@/helpers/error/AgentApiError";
+import { generateRandomPassword } from "@/utils/auth";
+import { encrypt } from "@/utils/crypt";
 
 export class CashierServices {
-  async create(): Promise<Cashier> {
-    // const url = "/pyramid/create/agent/";
-    // const httpService = new HttpService();
-    const agentPayoutPercentage = CONFIG.SUBAGENT.PAYMENT_PERCENTAGE;
+  async create(playerRequest: PlayerRequest): Promise<Cashier> {
+    const commission = CONFIG.SUBAGENT.PAYMENT_PERCENTAGE;
+    const username = `agent_${playerRequest.username}`;
+    const plainTextPassword = await generateRandomPassword();
+    const encryptedPassword = encrypt(plainTextPassword);
 
-    // const data = {
-    //   username: `agent_${playerRequest.username}`,
-    //   password: playerRequest.password,
-    //   agent_info: {
-    //     payments_percentage: agentPayoutPercentage * 100,
-    //   },
-    // };
-
-    // const response = await httpService.authedAgentApi.post(url, data);
-
-    // console.log("SUBAGENT CREATION RESPOSNE\n", response.data);
-    // console.log("SUBAGENT CREATION RESPOSNE STATUS\n", response.status);
-    // if (response.status !== 200)
-    //   throw new AgentApiError(
-    //     502,
-    //     "Error en el casino al crear subagente",
-    //     response.data,
-    //   );
+    await this.createSubAgent(username, plainTextPassword, commission);
 
     return await CashierDAO.create({
       data: {
-        commission: agentPayoutPercentage,
+        username,
+        password: encryptedPassword,
+        commission,
       },
     });
-    // const prisma = new PrismaClient();
+  }
 
-    // const cashier = await prisma.cashier.create({ data: { commission: agentPayoutPercentage, }})
+  private async createSubAgent(
+    username: string,
+    password: string,
+    commission: number,
+  ) {
+    const url = "/pyramid/create/agent/";
+    const httpService = new HttpService();
+    const data = {
+      username,
+      password,
+      agent_info: {
+        payments_percentage: commission * 100,
+      },
+    };
+
+    const response = await httpService.authedAgentApi.post(url, data);
+
+    if (response.status !== 200)
+      throw new AgentApiError(
+        502,
+        "Error en el casino al crear subagente",
+        response.data,
+      );
   }
 
   async listPlayers(

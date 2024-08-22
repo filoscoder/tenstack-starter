@@ -83,7 +83,7 @@ export class PlayersController {
 
       let cashier: Cashier | undefined;
       if (request.roles.includes(CONFIG.ROLES.CASHIER))
-        cashier = await new CashierServices().create();
+        cashier = await new CashierServices().create(request);
 
       const player = await playersServices.create({
         ...request,
