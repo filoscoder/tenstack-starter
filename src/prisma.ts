@@ -10,7 +10,10 @@ export const prisma = prismaClient.$extends({
     player: {
       async findAgent(): Promise<Cashier> {
         const user = await prismaClient.player.findFirst({
-          where: { roles: { every: { name: CONFIG.ROLES.AGENT } } },
+          where: {
+            roles: { every: { name: CONFIG.ROLES.AGENT } },
+            cashier_id: { not: null },
+          },
           select: { Cashier: true },
         });
 

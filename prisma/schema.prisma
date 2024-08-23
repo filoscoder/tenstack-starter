@@ -239,7 +239,7 @@ model CoinTransfer {
 model Cashier {
   id                          String        @id @default(uuid())
   handle                      String        @unique
-  username                    String
+  username                    String        @unique
   password                    String        @db.Text
   panel_id                    Int?
   access                      String?       @db.VarChar(800)

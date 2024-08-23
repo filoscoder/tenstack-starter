@@ -51,7 +51,7 @@ cashierRouter.get(
 //   CashierController.cashout,
 // );
 cashierRouter.post(
-  "/:id/handle",
+  "/:id/update",
   validateCashierId(),
   validateHandleUpdateRequest(),
   checkExact(),

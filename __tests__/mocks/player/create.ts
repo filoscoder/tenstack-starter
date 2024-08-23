@@ -7,8 +7,13 @@ import { Whatsapp } from "@/notification/whatsapp";
 
 export const mockCashier: Cashier = {
   id: "cashier_id",
-  balance: 0,
-  commission: 0.5,
+  access: "access_token",
+  refresh: "refresh_token",
+  dirty: false,
+  username: "foo",
+  password: "baz",
+  handle: "@foo",
+  panel_id: -69,
   created_at: new Date(),
   updated_at: new Date(),
 };
@@ -27,6 +32,10 @@ const mockTokens = jest.fn(async () => ({
 }));
 
 export function preparePlayerTest() {
+  jest
+    .spyOn((PlayerServices as any).prototype, "findAgent")
+    .mockResolvedValue(mockCashier);
+
   jest
     .spyOn((PlayerServices as any).prototype, "createCasinoPlayer")
     .mockImplementation(mockCreateCasinoPlayer);

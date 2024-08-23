@@ -124,9 +124,10 @@ Comes with:
   <summary>Cajeros</summary>
 
   + [Listar Jugadores de Cajero](#listar-jugadores-de-cajero-)
-  + [Ver Jugador de Cajero](#ver-jugador-de-cajero)
-  + [Ver Balance de Cajero](#ver-balance-de-cajero)
-  + [Cobrar Ganancias](#cobrar-ganancias)
+  + [Ver Jugador de Cajero](#ver-jugador-de-cajero-)
+  + [Ver Balance de Cajero](#ver-balance-de-cajero-)
+  + [Cobrar Ganancias](#cobrar-ganancias-)
+  + [Actualizar Alias](#actualizar-alias-)
 </details>
 
 ### [Interfaces](#interfaces-1)
@@ -156,7 +157,9 @@ Requiere rol| player
 ### Crear Jugador
 Usar `roles: ["player"]` o `roles: undefined` en `PlayerRequest` para dar de alta un jugador.
 
-Usar `roles: ["player", "cashier"]` (ambos tienen que estar presentes) en `PlayerRequest` para dar de alta un cajero.
+Usar `roles: ["cashier"[, "player"]]` en `PlayerRequest` para dar de alta un cajero.
+
+Usar `cashier_id: string` en `PlayerRequest` para crear un jugador vinculado a un cajero. Si `cashier_id` está presente, roles debe ser `["player"]`.
 
 |Endpoint:| `/players`|
 ---|---|
@@ -627,6 +630,15 @@ Método      |`GET`
 Devuelve    |[`CoinTransfer`](#cointransfer)
 Requiere rol| cashier
 
+### Actualizar Alias
+
+|Endpoint| `/cashier/:cashier_id/update`|
+---|---|
+Método      |`POST`
+Body (json) |[`CashierUpdateRequest`](#cashierupdaterequest)
+Devuelve    |[`Cashier`](#cashier)
+Requiere rol| cashier
+
 ## Interfaces
 
 ### Player
@@ -955,6 +967,30 @@ Requiere rol| cashier
 {
   coinTransfer: CoinTransfer
   bonus: Bonus
+}
+```
+
+### CashierUpdateRequest
+```typescript
+{
+  handle: string
+}
+```
+
+### Cashier
+```typescript
+{
+  id: string       
+  handle: string   
+  username: string
+  password: string 
+  panel_id: number?
+  access: string?  
+  refresh: string? 
+  dirty: boolean   
+  Players: Player[]      
+  created_at: DateTime      // 2024-01-29T18:14:41.534Z
+  updated_at: DateTime      // 2024-01-29T18:14:41.534Z
 }
 ```
 

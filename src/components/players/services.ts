@@ -38,10 +38,7 @@ export class PlayerServices extends ResourceService {
    * @throws if user exists or something goes wrong
    */
   create = async (player: PlayerRequest): Promise<PlainPlayerResponse> => {
-    const cashier = player.cashier_id
-      ? await CashierDAO.findFirst({ where: { id: player.cashier_id } })
-      : await prisma.player.findAgent();
-    if (!cashier) throw new NotFoundException("Cajero no encontrado");
+    const cashier = await this.findAgent(player.cashier_id);
 
     const panel_id = await this.createCasinoPlayer(
       player.username,
@@ -60,6 +57,16 @@ export class PlayerServices extends ResourceService {
 
     return hidePassword(localPlayer);
   };
+
+  private async findAgent(cashier_id?: string) {
+    const cashier = cashier_id
+      ? await CashierDAO.findFirst({ where: { id: cashier_id } })
+      : await prisma.player.findAgent();
+
+    if (!cashier) throw new NotFoundException("Cajero no encontrado");
+
+    return cashier;
+  }
 
   private async createCasinoPlayer(
     username: string,

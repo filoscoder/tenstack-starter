@@ -47,7 +47,21 @@ const users = {
           { name: CONFIG.ROLES.PLAYER },
         ],
       },
-      Cashier: { create: { commission: 0.1, balance: 10 } },
+      Cashier: {
+        connectOrCreate: {
+          where: {
+            username: "Cashier33",
+          },
+          create: {
+            panel_id: -42,
+            access: "",
+            refresh: "",
+            username: "Cashier33",
+            password: "",
+            handle: "@Cashier33",
+          },
+        },
+      },
     },
     include: {
       roles: true,
@@ -73,5 +87,15 @@ async function cleanUp() {
     testPrisma.player.delete({ where: { id: (await u).id } }),
   );
 
-  return Promise.all(deletePlayers);
+  const cashier_id = (await users[CONFIG.ROLES.CASHIER]).cashier_id;
+  let deleteCashier;
+  if (cashier_id)
+    deleteCashier = testPrisma.cashier
+      .delete({
+        where: { id: cashier_id },
+      })
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      .catch(() => {});
+
+  return Promise.all([...deletePlayers, deleteCashier]);
 }

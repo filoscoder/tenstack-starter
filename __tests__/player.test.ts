@@ -1,6 +1,6 @@
 import { BAD_REQUEST, CREATED, FORBIDDEN, OK, UNAUTHORIZED } from "http-status";
 import { SuperAgentTest } from "supertest";
-import { Player } from "@prisma/client";
+import { Cashier, Player } from "@prisma/client";
 import { initAgent } from "./helpers";
 import {
   mockCreateCasinoPlayer,
@@ -25,6 +25,7 @@ let agentAccessToken: string;
 let agentEmail: string;
 let playerAccessToken: string;
 let player: Player;
+let cashier: Cashier;
 let cleanUp: () => Promise<any>;
 
 beforeAll(setUp);
@@ -68,6 +69,19 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
 
       expect(response.status).toBe(CREATED);
       expect(result.player.cashier_id).toBe(undefined);
+    });
+
+    it("Should create a player as child of cashier", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        cashier_id: cashier.id,
+      });
+      const result = response.body.data;
+
+      expect(response.status).toBe(CREATED);
+      expect(result.player.cashier_id).toBe(cashier.id);
     });
 
     it("Should create a player with role of cashier", async () => {
@@ -147,6 +161,35 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
 
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe("Usuario con ese email ya existe");
+    });
+
+    it("Should return 400 invalid cashier_id", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        cashier_id: "foo",
+      });
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe(
+        "cashier_id no es un ID de cajero válido.",
+      );
+    });
+
+    it("Should return 400", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        cashier_id: cashier.id,
+        roles: [CONFIG.ROLES.CASHIER],
+      });
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe(
+        "No se puede crear un cajero como hijo de otro cajero.",
+      );
     });
   });
 
@@ -419,4 +462,8 @@ async function setUp() {
   ({ token: playerAccessToken, user: player } = await generateAccessToken(
     CONFIG.ROLES.PLAYER,
   ));
+
+  ({
+    user: { Cashier: cashier },
+  } = await generateAccessToken(CONFIG.ROLES.CASHIER));
 }
