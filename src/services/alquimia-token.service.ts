@@ -1,3 +1,4 @@
+import { AgentConfig, PrismaClient } from "@prisma/client";
 import { JwtService } from "./jwt.service";
 import { HttpService } from "./http.service";
 import CONFIG from "@/config";
@@ -7,9 +8,10 @@ import {
   AlqToken,
   AlqTokenResponse,
 } from "@/types/response/alquimia";
-import { UserRootDAO } from "@/db/user-root";
 import { ITokenRetreiver } from "@/types/services/http";
 import { CustomError } from "@/helpers/error/CustomError";
+import { PlayersDAO } from "@/db/players";
+import { RootUpdatableProps } from "@/types/request/user-root";
 
 export class AlquimiaTokenService
   extends JwtService
@@ -65,7 +67,7 @@ export class AlquimiaTokenService
     )
       return this._apiManagerToken;
 
-    const agent = await UserRootDAO.getAgent();
+    const agent = await this.fetchAgentFromDb();
     if (!agent || !agent.alq_api_manager) return null;
 
     this._apiManagerToken = agent.alq_api_manager;
@@ -87,7 +89,7 @@ export class AlquimiaTokenService
     if (response.status !== 200) throw new CustomError(ERR.ALQ_TOKEN_ERROR);
 
     this._apiManagerToken = response.data.access_token;
-    await UserRootDAO.update({ alq_api_manager: this._apiManagerToken });
+    await this.updateAgentConfig({ alq_api_manager: this._apiManagerToken });
     return this._apiManagerToken;
   }
 
@@ -99,7 +101,7 @@ export class AlquimiaTokenService
     if (this._verifyAlqToken(this._alquimiaTokenResult))
       return this._alquimiaTokenResult.token;
 
-    const agent = await UserRootDAO.getAgent();
+    const agent = await this.fetchAgentFromDb();
     if (!agent || !agent.alq_token) return null;
 
     const parsed = JSON.parse(agent.alq_token) as AlqToken;
@@ -111,7 +113,9 @@ export class AlquimiaTokenService
   private async _fetchAlquimiaToken() {
     const response = await this._httpService.alqTokenApi.post<AlqTokenResponse>(
       "",
-      "grant_type=password&client_id=testclient&client_secret=testpass&username=alpha.contact.369@proton.me&password=BpiYQp3qg%",
+      "grant_type=password&client_id=testclient&client_secret=testpass" +
+        `&username=${CONFIG.AUTH.ALQUIMIA_USERNAME}` +
+        `&password=${CONFIG.AUTH.ALQUIMIA_PASSWORD}`,
     );
 
     if (response.status !== 200) throw new CustomError(ERR.ALQ_TOKEN_ERROR);
@@ -126,7 +130,7 @@ export class AlquimiaTokenService
       token: data.access_token,
       expires_at: Date.now() / 1000 + data.expires_in,
     };
-    await UserRootDAO.update({
+    await this.updateAgentConfig({
       alq_token: JSON.stringify(this._alquimiaTokenResult),
     });
   }
@@ -135,5 +139,22 @@ export class AlquimiaTokenService
     if (!data) return false;
     if (data.expires_at < Date.now() / 1000 + 10) return false;
     return true;
+  }
+
+  private async fetchAgentFromDb(): Promise<AgentConfig> {
+    const agent = await PlayersDAO.findFirst({
+      where: { roles: { every: { name: CONFIG.ROLES.AGENT } } },
+      select: { AgentConfig: true },
+    });
+    if (!agent?.AgentConfig) throw new CustomError(ERR.AGENT_UNSET);
+    return agent.AgentConfig;
+  }
+
+  private updateAgentConfig(data: RootUpdatableProps) {
+    const prisma = new PrismaClient();
+    return prisma.agentConfig.updateMany({
+      where: { Player: { roles: { every: { name: CONFIG.ROLES.AGENT } } } },
+      data,
+    });
   }
 }

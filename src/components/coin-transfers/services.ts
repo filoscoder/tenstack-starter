@@ -6,7 +6,6 @@ import CONFIG, {
 } from "@/config";
 import { CoinTransferDAO } from "@/db/coin-transfer";
 import { ERR } from "@/config/errors";
-import { UserRootDAO } from "@/db/user-root";
 import { NotFoundException } from "@/helpers/error";
 import { AgentApiError } from "@/helpers/error/AgentApiError";
 import { CustomError } from "@/helpers/error/CustomError";
@@ -17,6 +16,7 @@ import { TransferDetails } from "@/types/request/transfers";
 import { CoinTransferResult } from "@/types/response/transfers";
 import { parseTransferResult } from "@/utils/parser";
 import { useTransaction } from "@/helpers/useTransaction";
+import { prisma } from "@/prisma";
 
 export class CoinTransferServices {
   /**
@@ -142,17 +142,18 @@ export class CoinTransferServices {
     amount: number,
     currency: string,
   ): Promise<TransferDetails> {
-    const agent = await UserRootDAO.getAgent();
+    const cashier = await prisma.player.findAgent();
+    if (!cashier.panel_id) throw new CustomError(ERR.AGENT_UNSET);
 
     let recipient_id, sender_id;
 
     switch (type) {
       case "deposit":
         recipient_id = playerPanelId;
-        sender_id = agent!.panel_id;
+        sender_id = cashier.panel_id;
         break;
       case "cashout":
-        recipient_id = agent!.panel_id;
+        recipient_id = cashier.panel_id;
         sender_id = playerPanelId;
         break;
     }

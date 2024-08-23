@@ -97,4 +97,9 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "insuficient_balance",
     description: "Saldo insuficiente",
   },
+  AGENT_BANK_ACCOUNT_UNSET: {
+    status: 500,
+    code: "agent_bank_account_unset",
+    description: "No se encontro la cuenta bancaria del agente en la BD.",
+  },
 };

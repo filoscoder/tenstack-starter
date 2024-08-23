@@ -11,15 +11,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model UserRoot {
+model AgentConfig {
   id                String        @id @default(uuid())
-  username          String        @db.VarChar(50) @unique
-  password          String        @db.Text
-  panel_id          Int
-  access            String        @db.VarChar(800)
-  refresh           String        @db.VarChar(800)
-  json_response     String        @db.Text
-  dirty             Boolean       @default(false)     // El agente está siendo logueado
+  player_id         String        @unique    
+  Player            Player        @relation(fields: [player_id], references: [id])
+  // username          String        @db.VarChar(50) @unique
+  // password          String        @db.Text
+  // panel_id          Int
+  // access            String        @db.VarChar(800)
+  // refresh           String        @db.VarChar(800)
+  // json_response     String        @db.Text
+  // dirty             Boolean       @default(false)     // El agente está siendo logueado
   bankAccount       Json?      
   alq_api_manager   String?       @db.Text
   alq_token         String?       @db.VarChar(800)
@@ -28,7 +30,7 @@ model UserRoot {
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 
-  @@map("USERS_ROOT")
+  @@map("AGENT_CONFIG")
 }
 
 model Transactions {
@@ -66,7 +68,8 @@ model Player {
   Bonus               Bonus?   
   cashier_id          String?
   Cashier             Cashier?      @relation(fields: [cashier_id], references: [id], onDelete: Cascade)
-  CashierPayouts      CashierPayout[]      
+  CashierPayouts      CashierPayout[]   
+  AgentConfig         AgentConfig?   
   created_at          DateTime      @default(now())
   updated_at          DateTime      @updatedAt     
 
@@ -235,10 +238,13 @@ model CoinTransfer {
 
 model Cashier {
   id                          String        @id @default(uuid())
+  handle                      String        @unique
   username                    String
-  password                    String
-  commission                  Float         // 0 - 1
-  balance                     Float         @default(0)
+  password                    String        @db.Text
+  panel_id                    Int?
+  access                      String?       @db.VarChar(800)
+  refresh                     String?       @db.VarChar(800)
+  dirty                       Boolean       @default(false) 
   Players                     Player[]      
   created_at                  DateTime      @default(now())
   updated_at                  DateTime      @updatedAt

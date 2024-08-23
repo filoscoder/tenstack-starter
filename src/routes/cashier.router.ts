@@ -10,6 +10,7 @@ import {
 } from "@/components/players/validators";
 import {
   validateCashierId,
+  validateHandleUpdateRequest,
   validatePlayerId,
 } from "@/components/cashier/validator";
 
@@ -21,6 +22,7 @@ cashierRouter.use(
 cashierRouter.use(requireCashierRole);
 cashierRouter.get(
   "/:id/player",
+  validateCashierId(),
   validateResourceSearchRequest(isKeyOfPlayer),
   checkExact(),
   throwIfBadRequest,
@@ -34,19 +36,27 @@ cashierRouter.get(
   throwIfBadRequest,
   CashierController.showPlayer,
 );
-cashierRouter.get(
-  "/:id/balance",
+// cashierRouter.get(
+//   "/:id/balance",
+//   validateCashierId(),
+//   checkExact(),
+//   throwIfBadRequest,
+//   CashierController.showBalance,
+// );
+// cashierRouter.get(
+//   "/:id/cashout",
+//   validateCashierId(),
+//   checkExact(),
+//   throwIfBadRequest,
+//   CashierController.cashout,
+// );
+cashierRouter.post(
+  "/:id/handle",
   validateCashierId(),
+  validateHandleUpdateRequest(),
   checkExact(),
   throwIfBadRequest,
-  CashierController.showBalance,
-);
-cashierRouter.get(
-  "/:id/cashout",
-  validateCashierId(),
-  checkExact(),
-  throwIfBadRequest,
-  CashierController.cashout,
+  CashierController.update,
 );
 
 export default cashierRouter;

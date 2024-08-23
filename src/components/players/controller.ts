@@ -86,8 +86,8 @@ export class PlayersController {
         cashier = await new CashierServices().create(request);
 
       const player = await playersServices.create({
-        ...request,
         cashier_id: cashier?.id,
+        ...request,
       });
       const { tokens } = await authServices.tokens(player.id, user_agent);
       const response = { ...tokens, player };

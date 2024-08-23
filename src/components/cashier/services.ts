@@ -1,16 +1,16 @@
-import { Cashier, CoinTransfer, Player } from "@prisma/client";
-import { CoinTransferServices } from "../coin-transfers/services";
-import CONFIG, { COIN_TRANSFER_STATUS } from "@/config";
+import { Cashier, Player } from "@prisma/client";
+import CONFIG from "@/config";
 import { CashierDAO } from "@/db/cashier";
 import { PlayersDAO } from "@/db/players";
 import { OrderBy, PlayerRequest } from "@/types/request/players";
-import { NotFoundException } from "@/helpers/error";
-import { useTransaction } from "@/helpers/useTransaction";
-import { RoledPlayer } from "@/types/response/players";
 import { HttpService } from "@/services/http.service";
 import { AgentApiError } from "@/helpers/error/AgentApiError";
 import { generateRandomPassword } from "@/utils/auth";
 import { encrypt } from "@/utils/crypt";
+import { prisma } from "@/prisma";
+import { ERR } from "@/config/errors";
+import { CustomError } from "@/helpers/error/CustomError";
+import { CashierUpdateRequest } from "@/types/request/cashier";
 
 export class CashierServices {
   async create(playerRequest: PlayerRequest): Promise<Cashier> {
@@ -25,7 +25,7 @@ export class CashierServices {
       data: {
         username,
         password: encryptedPassword,
-        commission,
+        handle: `@${username}`,
       },
     });
   }
@@ -36,7 +36,8 @@ export class CashierServices {
     commission: number,
   ) {
     const url = "/pyramid/create/agent/";
-    const httpService = new HttpService();
+    const agent = await prisma.player.findAgent();
+    const httpService = new HttpService(agent);
     const data = {
       username,
       password,
@@ -45,14 +46,20 @@ export class CashierServices {
       },
     };
 
-    const response = await httpService.authedAgentApi.post(url, data);
+    const response = await httpService.authedAgentApi.post<any>(url, data);
 
-    if (response.status !== 200)
+    if (response.status !== 200 && response.status !== 400)
       throw new AgentApiError(
-        502,
-        "Error en el casino al crear subagente",
+        response.status,
+        "Error en el panel al crear el usuario",
         response.data,
       );
+    if (
+      response.status === 400 &&
+      (response.data.code === "already_exists" ||
+        response.data.code === "user_already_exists")
+    )
+      throw new CustomError(ERR.USER_ALREADY_EXISTS);
   }
 
   async listPlayers(
@@ -71,36 +78,40 @@ export class CashierServices {
     );
   }
 
-  async showBalance(cashierId: string) {
-    const cashier = await CashierDAO.findFirst({ where: { id: cashierId } });
-    if (!cashier) throw new NotFoundException("Cajero no encontrado");
-    return cashier.balance;
+  async update(cashier_id: string, data: CashierUpdateRequest) {
+    return await CashierDAO.update({ where: { id: cashier_id }, data });
   }
 
-  async cashout(cashierId: string, user: RoledPlayer): Promise<CoinTransfer> {
-    const coinTransferServices = new CoinTransferServices();
-    const cashier = await CashierDAO.findFirst({ where: { id: cashierId } });
-    if (!cashier) throw new NotFoundException("Cajero no encontrado");
+  // async showBalance(cashierId: string) {
+  //   const cashier = await CashierDAO.findFirst({ where: { id: cashierId } });
+  //   if (!cashier) throw new NotFoundException("Cajero no encontrado");
+  //   return cashier.balance;
+  // }
 
-    return useTransaction<CoinTransfer>(async (tx) => {
-      const coinTransfer = await tx.coinTransfer.create({
-        data: { status: COIN_TRANSFER_STATUS.PENDING },
-      });
+  // async cashout(cashierId: string, user: RoledPlayer): Promise<CoinTransfer> {
+  //   const coinTransferServices = new CoinTransferServices();
+  //   const cashier = await CashierDAO.findFirst({ where: { id: cashierId } });
+  //   if (!cashier) throw new NotFoundException("Cajero no encontrado");
 
-      await tx.cashierPayout.create({
-        data: {
-          coin_transfer_id: coinTransfer.id,
-          player_id: user.id,
-          amount: cashier.balance,
-        },
-      });
+  //   return useTransaction<CoinTransfer>(async (tx) => {
+  //     const coinTransfer = await tx.coinTransfer.create({
+  //       data: { status: COIN_TRANSFER_STATUS.PENDING },
+  //     });
 
-      await tx.cashier.update({
-        where: { id: cashierId },
-        data: { balance: 0 },
-      });
+  //     await tx.cashierPayout.create({
+  //       data: {
+  //         coin_transfer_id: coinTransfer.id,
+  //         player_id: user.id,
+  //         amount: cashier.balance,
+  //       },
+  //     });
 
-      return await coinTransferServices.agentToPlayer(coinTransfer.id, tx);
-    });
-  }
+  //     await tx.cashier.update({
+  //       where: { id: cashierId },
+  //       data: { balance: 0 },
+  //     });
+
+  //     return await coinTransferServices.agentToPlayer(coinTransfer.id, tx);
+  //   });
+  // }
 }

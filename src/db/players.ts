@@ -240,4 +240,6 @@ export class PlayersDAO {
 
     if (user.id !== user_id) throw new ForbiddenError("No autorizado");
   }
+
+  static findFirst = prisma.player.findFirst;
 }

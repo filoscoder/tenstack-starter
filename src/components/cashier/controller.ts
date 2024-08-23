@@ -5,8 +5,8 @@ import { CashierServices } from "./services";
 import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 import { apiResponse } from "@/helpers/apiResponse";
 import { PlayersDAO } from "@/db/players";
-import { RoledPlayer } from "@/types/response/players";
 import { CashierDAO } from "@/db/cashier";
+import { CashierUpdateRequest } from "@/types/request/cashier";
 
 export class CashierController {
   static async listPlayers(req: Req, res: Res, next: NextFn) {
@@ -51,35 +51,52 @@ export class CashierController {
     }
   }
 
-  static async showBalance(req: Req, res: Res, next: NextFn) {
+  static async update(req: Req, res: Res, next: NextFn) {
     try {
       const cashierId = req.params.id;
-      const user: RoledPlayer = req.user!;
-
-      CashierDAO.authorizeShow(cashierId, user);
-
-      const cashierServices = new CashierServices();
-      const balance = await cashierServices.showBalance(cashierId);
-
-      res.status(OK).send(apiResponse(balance));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async cashout(req: Req, res: Res, next: NextFn) {
-    try {
-      const cashierId = req.params.id;
-      const user: RoledPlayer = req.user!;
+      const user = req.user!;
+      const request: CashierUpdateRequest = req.body;
 
       CashierDAO.authorizeUpdate(cashierId, user);
 
       const cashierServices = new CashierServices();
-      const result = await cashierServices.cashout(cashierId, user);
+      const player = await cashierServices.update(cashierId, request);
 
-      res.status(OK).send(apiResponse(result));
+      res.status(OK).send(apiResponse(player));
     } catch (error) {
       next(error);
     }
   }
+
+  // static async showBalance(req: Req, res: Res, next: NextFn) {
+  //   try {
+  //     const cashierId = req.params.id;
+  //     const user: RoledPlayer = req.user!;
+
+  //     CashierDAO.authorizeShow(cashierId, user);
+
+  //     const cashierServices = new CashierServices();
+  //     const balance = await cashierServices.showBalance(cashierId);
+
+  //     res.status(OK).send(apiResponse(balance));
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
+
+  // static async cashout(req: Req, res: Res, next: NextFn) {
+  //   try {
+  //     const cashierId = req.params.id;
+  //     const user: RoledPlayer = req.user!;
+
+  //     CashierDAO.authorizeUpdate(cashierId, user);
+
+  //     const cashierServices = new CashierServices();
+  //     const result = await cashierServices.cashout(cashierId, user);
+
+  //     res.status(OK).send(apiResponse(result));
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 }

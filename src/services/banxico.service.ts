@@ -1,18 +1,19 @@
-import { Deposit, UserRoot } from "@prisma/client";
+import { Deposit } from "@prisma/client";
 import axios, { AxiosResponse } from "axios";
 import { XMLParser } from "fast-xml-parser";
 import CONFIG, { ENVIRONMENTS } from "@/config";
 import { logtailLogger } from "@/helpers/loggers";
-import { UserRootDAO } from "@/db/user-root";
-import { RootBankAccount } from "@/types/request/user-root";
 import { DepositsDAO } from "@/db/deposits";
 import { Telegram } from "@/notification/telegram";
 import { AnalyticsDAO } from "@/db/analytics";
 import { bankCodes } from "@/config/bank-codes";
+import { AgentConfigDAO } from "@/db/agentConfig";
+import { CustomError } from "@/helpers/error/CustomError";
+import { ERR } from "@/config/errors";
 
 export class BanxicoService {
   private url = "https://www.banxico.org.mx/cep/valida.do";
-  private agent: UserRoot | null = null;
+  // private agent: UserRoot | null = null;
 
   public async verifyDeposit(deposit: Deposit): Promise<number | undefined> {
     const cookies = await this.prepareCepDownload(deposit);
@@ -196,9 +197,9 @@ export class BanxicoService {
     deposit: Deposit,
     queryType: "1" | "0",
   ): Promise<URLSearchParams> {
-    const agent = this.agent || (await UserRootDAO.getAgent());
-    this.agent = agent;
-    const bankAccount = agent!.bankAccount as RootBankAccount;
+    const bankAccount = await AgentConfigDAO.getBankAccount();
+    if (!bankAccount) throw new CustomError(ERR.AGENT_BANK_ACCOUNT_UNSET);
+
     const day = deposit.date.getDate(),
       month = (deposit.date.getMonth() + 1).toString().padStart(2, "0"),
       year = deposit.date.getFullYear(),

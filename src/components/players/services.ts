@@ -1,4 +1,4 @@
-import { Bonus, Player } from "@prisma/client";
+import { Bonus, Cashier, Player } from "@prisma/client";
 import { AuthServices } from "../auth/services";
 import { PlayersDAO } from "@/db/players";
 import {
@@ -21,11 +21,13 @@ import { Mail } from "@/helpers/email/email";
 import { TokenDAO } from "@/db/token";
 import { Whatsapp } from "@/notification/whatsapp";
 import CONFIG, { PLAYER_STATUS } from "@/config";
-import { ForbiddenError } from "@/helpers/error";
+import { ForbiddenError, NotFoundException } from "@/helpers/error";
 import { ResourceService } from "@/services/resource.service";
 import { logtailLogger } from "@/helpers/loggers";
 import { AuthResult } from "@/types/response/auth";
 import { BonusDAO } from "@/db/bonus";
+import { CashierDAO } from "@/db/cashier";
+import { prisma } from "@/prisma";
 
 export class PlayerServices extends ResourceService {
   constructor() {
@@ -36,9 +38,15 @@ export class PlayerServices extends ResourceService {
    * @throws if user exists or something goes wrong
    */
   create = async (player: PlayerRequest): Promise<PlainPlayerResponse> => {
+    const cashier = player.cashier_id
+      ? await CashierDAO.findFirst({ where: { id: player.cashier_id } })
+      : await prisma.player.findAgent();
+    if (!cashier) throw new NotFoundException("Cajero no encontrado");
+
     const panel_id = await this.createCasinoPlayer(
       player.username,
       player.password,
+      cashier,
     );
 
     const localPlayer = await this.createLocalPlayer(panel_id, player);
@@ -56,10 +64,11 @@ export class PlayerServices extends ResourceService {
   private async createCasinoPlayer(
     username: string,
     password: string,
+    cashier: Cashier,
   ): Promise<number> {
     const playerLoginUrl = "/accounts/login/";
     const panelSignUpUrl = "/pyramid/create/player/";
-    const { authedAgentApi, playerApi } = new HttpService();
+    const { authedAgentApi, playerApi } = new HttpService(cashier);
 
     let response = await authedAgentApi.post<any>(panelSignUpUrl, {
       username,

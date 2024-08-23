@@ -8,7 +8,7 @@ import { Player } from "@prisma/client";
 import { PlayersDAO } from "@/db/players";
 import CONFIG, { PLAYER_STATUS } from "@/config";
 import { mockPlayer } from "@/config/mockPlayer";
-import { NotFoundException } from "@/helpers/error";
+import { CashierDAO } from "@/db/cashier";
 
 const isDate: CustomValidator = (value: string, { req }) => {
   if (value.length === 0) return true;
@@ -47,11 +47,16 @@ const isPlayerStatus = (
   return value === PLAYER_STATUS.ACTIVE || value === PLAYER_STATUS.BANNED;
 };
 
-const isCashierId = async (id: string) => {
-  const user = await PlayersDAO._getById(id);
-  if (!user) throw new NotFoundException();
-  const isCashier = user.roles.some((r) => r.name === CONFIG.ROLES.CASHIER);
-  if (!isCashier) throw new Error("User is not a cashier");
+const isCashierId: CustomValidator = async (id: string) => {
+  const user = await CashierDAO.findFirst({ where: { id } });
+  if (!user) throw new Error("El cajero no existe");
+};
+
+const validateCashierId: CustomValidator = (cashier_id: string, { req }) => {
+  return !(
+    cashier_id &&
+    (req.body.roles.length > 1 || !req.body.roles.includes(CONFIG.ROLES.PLAYER))
+  );
 };
 
 const isRoleList = (value: string[]) => {
@@ -144,9 +149,14 @@ export const validatePlayerRequest = () => {
       in: ["body"],
       optional: true,
       isString: true,
+      trim: true,
       custom: {
         options: isCashierId,
-        errorMessage: "cashier_id no es un ID de cajero",
+        errorMessage: "cashier_id no es un ID de cajero válido.",
+      },
+      anotherValidator: {
+        custom: validateCashierId,
+        errorMessage: "No se puede crear un cajero como hijo de otro cajero.",
       },
       errorMessage: "cashier_id is required",
     },

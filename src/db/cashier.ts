@@ -10,6 +10,8 @@ export class CashierDAO {
 
   static findFirst = prisma.cashier.findFirst;
 
+  static update = prisma.cashier.update;
+
   /**
    * Checks if
    * - user has agent role OR

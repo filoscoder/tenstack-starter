@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE `CASHIERS` MODIFY `access` VARCHAR(800) NULL,
+    MODIFY `panel_id` INTEGER NULL,
+    MODIFY `refresh` VARCHAR(800) NULL;
