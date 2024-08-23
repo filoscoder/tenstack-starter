@@ -630,7 +630,7 @@ Método      |`GET`
 Devuelve    |[`CoinTransfer`](#cointransfer)
 Requiere rol| cashier
 
-### Actualizar Alias
+### Actualizar Alias 🔒
 
 |Endpoint| `/cashier/:cashier_id/update`|
 ---|---|
@@ -988,7 +988,6 @@ Requiere rol| cashier
   access: string?  
   refresh: string? 
   dirty: boolean   
-  Players: Player[]      
   created_at: DateTime      // 2024-01-29T18:14:41.534Z
   updated_at: DateTime      // 2024-01-29T18:14:41.534Z
 }

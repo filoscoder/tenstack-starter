@@ -176,6 +176,18 @@ describe("[UNIT] => CASHIER ROUTER", () => {
         .set("Authorization", `Bearer ${cashierAccessToken}`);
 
       expect(response.status).toBe(OK);
+      expect(Object.keys(response.body.data)).toEqual([
+        "id",
+        "handle",
+        "username",
+        "password",
+        "panel_id",
+        "access",
+        "refresh",
+        "dirty",
+        "created_at",
+        "updated_at",
+      ]);
     });
 
     it("Should return 400", async () => {
