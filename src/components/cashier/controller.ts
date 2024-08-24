@@ -7,6 +7,7 @@ import { apiResponse } from "@/helpers/apiResponse";
 import { PlayersDAO } from "@/db/players";
 import { CashierDAO } from "@/db/cashier";
 import { CashierUpdateRequest } from "@/types/request/cashier";
+import { RoledPlayer } from "@/types/response/players";
 
 export class CashierController {
   static async listPlayers(req: Req, res: Res, next: NextFn) {
@@ -68,21 +69,21 @@ export class CashierController {
     }
   }
 
-  // static async showBalance(req: Req, res: Res, next: NextFn) {
-  //   try {
-  //     const cashierId = req.params.id;
-  //     const user: RoledPlayer = req.user!;
+  static async showBalance(req: Req, res: Res, next: NextFn) {
+    try {
+      const cashierId = req.params.id;
+      const user: RoledPlayer = req.user!;
 
-  //     CashierDAO.authorizeShow(cashierId, user);
+      CashierDAO.authorizeShow(cashierId, user);
 
-  //     const cashierServices = new CashierServices();
-  //     const balance = await cashierServices.showBalance(cashierId);
+      const cashierServices = new CashierServices();
+      const balance = await cashierServices.showBalance(cashierId);
 
-  //     res.status(OK).send(apiResponse(balance));
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
+      res.status(OK).send(apiResponse(balance));
+    } catch (error) {
+      next(error);
+    }
+  }
 
   // static async cashout(req: Req, res: Res, next: NextFn) {
   //   try {

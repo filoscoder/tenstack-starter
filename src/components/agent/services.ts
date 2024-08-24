@@ -1,4 +1,4 @@
-import { Payment } from "@prisma/client";
+import { Cashier, Payment } from "@prisma/client";
 import { AxiosResponse } from "axios";
 import { AuthServices } from "../auth/services";
 import { Credentials } from "@/types/request/players";
@@ -93,9 +93,9 @@ export class AgentServices {
     return config.bankAccount as AgentBankAccount;
   }
 
-  static async getCasinoBalance(): Promise<BalanceResponse> {
+  static async getCasinoBalance(agent: Cashier): Promise<BalanceResponse> {
     const url = "accounts/user";
-    const httpService = new HttpService();
+    const httpService = new HttpService(agent);
     const response: AxiosResponse = await httpService.authedAgentApi.get(url);
     if (response.status !== 200)
       throw new CustomError({
@@ -109,9 +109,9 @@ export class AgentServices {
     };
   }
 
-  static async getAlqBalance(): Promise<BalanceResponse> {
+  static async getAlqBalance(agent: Cashier): Promise<BalanceResponse> {
     const url = "cuenta-ahorro-cliente";
-    const httpService = new HttpService();
+    const httpService = new HttpService(agent);
     const response: AxiosResponse = await httpService.authedAlqApi.get(url);
     if (response.status !== 200)
       throw new CustomError({

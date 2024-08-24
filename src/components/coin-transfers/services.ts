@@ -113,7 +113,8 @@ export class CoinTransferServices {
   private async transfer(
     transferDetails: TransferDetails,
   ): Promise<CoinTransferResult> {
-    const { authedAgentApi } = new HttpService();
+    const agent = await prisma.player.findAgent();
+    const { authedAgentApi } = new HttpService(agent);
     const url = "/backoffice/transactions/";
     const result = await authedAgentApi.post<any>(url, transferDetails);
 

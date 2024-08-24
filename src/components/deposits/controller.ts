@@ -78,7 +78,10 @@ export class DepositController {
       if (deposit.status === DEPOSIT_STATUS.VERIFIED) {
         coinTransfer = await useTransaction((tx) =>
           coinTransferServices.agentToPlayer(deposit!.coin_transfer_id, tx),
-        ).catch(() => undefined);
+        ).catch((e) => {
+          console.log(e);
+          return undefined;
+        });
         bonus = await bonusServices.load(
           deposit.amount,
           deposit.Player.Bonus?.id,

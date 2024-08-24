@@ -1,14 +1,20 @@
-import { UserRootDAO } from "@/db/user-root";
+import { Cashier } from "@prisma/client";
+import { prisma } from "@/prisma";
 import { HttpService } from "@/services/http.service";
+import { CashierDAO } from "@/db/cashier";
 
 let service: HttpService;
+let agent: Cashier;
+
 beforeAll(async () => {
-  service = new HttpService();
-  await UserRootDAO.update({
-    access: "",
-    refresh: "",
-    alq_token: "",
-    alq_api_manager: "",
+  agent = await prisma.player.findAgent();
+  service = new HttpService(agent);
+  await CashierDAO.update({
+    where: { id: agent.id },
+    data: {
+      access: "",
+      refresh: "",
+    },
   });
 });
 describe("HttpService", () => {

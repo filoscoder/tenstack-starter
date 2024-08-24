@@ -1,11 +1,6 @@
+import { Player, Prisma, PrismaClient } from "@prisma/client";
 import {
-  BankAccount,
-  Player,
-  Prisma,
-  PrismaClient,
-  Role,
-} from "@prisma/client";
-import {
+  FullUser,
   PlainPlayerResponse,
   PlayerResponse,
   RoledPlayer,
@@ -107,15 +102,11 @@ export class PlayersDAO {
    * @param playerId ID of the player to retrieve information.
    * @returns Raw player, including sensitive data
    */
-  static _getById = async (
-    playerId: getPlayerId,
-  ): Promise<
-    (Player & { BankAccounts: BankAccount[]; roles: Role[] }) | null
-  > => {
+  static _getById = async (playerId: getPlayerId): Promise<FullUser | null> => {
     try {
       const playerPrisma = await prisma.player.findUnique({
         where: { id: playerId },
-        include: { BankAccounts: true, roles: true },
+        include: { BankAccounts: true, roles: true, Cashier: true },
       });
 
       return playerPrisma;

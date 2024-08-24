@@ -11,6 +11,8 @@ import { prisma } from "@/prisma";
 import { ERR } from "@/config/errors";
 import { CustomError } from "@/helpers/error/CustomError";
 import { CashierUpdateRequest } from "@/types/request/cashier";
+import { NotFoundException } from "@/helpers/error";
+import { ComissionResponse } from "@/types/response/cashier";
 
 export class CashierServices {
   async create(playerRequest: PlayerRequest): Promise<Cashier> {
@@ -82,11 +84,49 @@ export class CashierServices {
     return await CashierDAO.update({ where: { id: cashier_id }, data });
   }
 
-  // async showBalance(cashierId: string) {
-  //   const cashier = await CashierDAO.findFirst({ where: { id: cashierId } });
-  //   if (!cashier) throw new NotFoundException("Cajero no encontrado");
-  //   return cashier.balance;
-  // }
+  async showBalance(cashierId: string): Promise<number | undefined> {
+    const cashier = await CashierDAO.findFirst({ where: { id: cashierId } });
+    if (!cashier) throw new NotFoundException("Cajero no encontrado");
+
+    const agent = await prisma.player.findAgent();
+    const httpService = new HttpService(agent);
+    const url = this.genereateBalanceRequestUrl(cashier);
+
+    const response = await httpService.authedAgentApi.get<ComissionResponse>(
+      url,
+    );
+
+    if (response.status !== 200)
+      throw new AgentApiError(
+        response.status,
+        "Error en el casino al obtener el balance",
+        response.data,
+      );
+
+    const result = Object.values(response.data)[0];
+
+    if (!result) return;
+
+    return Number(result.commission);
+  }
+
+  private genereateBalanceRequestUrl(cashier: Cashier): string {
+    const endpoint = "/pyramid/agent/commissions/";
+    const lastCashout = cashier.last_cashout.toISOString();
+    const now = new Date().toISOString();
+    const searchParams = new URLSearchParams();
+    searchParams.append(
+      "date_from",
+      lastCashout.slice(0, lastCashout.lastIndexOf(":")) + "Z",
+    );
+    searchParams.append(
+      "date_to",
+      now.slice(0, lastCashout.lastIndexOf(":")) + "Z",
+    );
+    searchParams.append("username", cashier.username);
+
+    return endpoint + "?" + searchParams.toString();
+  }
 
   // async cashout(cashierId: string, user: RoledPlayer): Promise<CoinTransfer> {
   //   const coinTransferServices = new CoinTransferServices();

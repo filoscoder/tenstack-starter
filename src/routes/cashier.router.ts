@@ -36,13 +36,13 @@ cashierRouter.get(
   throwIfBadRequest,
   CashierController.showPlayer,
 );
-// cashierRouter.get(
-//   "/:id/balance",
-//   validateCashierId(),
-//   checkExact(),
-//   throwIfBadRequest,
-//   CashierController.showBalance,
-// );
+cashierRouter.get(
+  "/:id/balance",
+  validateCashierId(),
+  checkExact(),
+  throwIfBadRequest,
+  CashierController.showBalance,
+);
 // cashierRouter.get(
 //   "/:id/cashout",
 //   validateCashierId(),

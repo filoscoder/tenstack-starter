@@ -246,6 +246,7 @@ model Cashier {
   refresh                     String?       @db.VarChar(800)
   dirty                       Boolean       @default(false) 
   Players                     Player[]      
+  last_cashout                DateTime      @default(now())      
   created_at                  DateTime      @default(now())
   updated_at                  DateTime      @updatedAt
 

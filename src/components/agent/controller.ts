@@ -67,9 +67,10 @@ export class AgentController {
     }
   }
 
-  static async getCasinoBalance(_req: Req, res: Res, next: NextFn) {
+  static async getCasinoBalance(req: Req, res: Res, next: NextFn) {
     try {
-      const balance = await AgentServices.getCasinoBalance();
+      const agent = req.user!;
+      const balance = await AgentServices.getCasinoBalance(agent.Cashier!);
 
       res.status(OK).json(apiResponse(balance));
     } catch (error) {
@@ -77,9 +78,10 @@ export class AgentController {
     }
   }
 
-  static async getAlqBalance(_req: Req, res: Res, next: NextFn) {
+  static async getAlqBalance(req: Req, res: Res, next: NextFn) {
     try {
-      const balance = await AgentServices.getAlqBalance();
+      const agent = req.user!;
+      const balance = await AgentServices.getAlqBalance(agent.Cashier!);
 
       res.status(OK).json(apiResponse(balance));
     } catch (error) {

@@ -8,6 +8,7 @@ import {
 } from "@/types/request/players";
 import {
   CertainUserResponse,
+  FullUser,
   PlainPlayerResponse,
   RoledPlayer,
 } from "@/types/response/players";
@@ -179,8 +180,9 @@ export class PlayerServices extends ResourceService {
     };
   }
 
-  async resetPassword(user: Player, new_password: string): Promise<void> {
-    const { authedAgentApi } = new HttpService();
+  async resetPassword(user: FullUser, new_password: string): Promise<void> {
+    const agent = await prisma.player.findAgent();
+    const { authedAgentApi } = new HttpService(agent);
     const url = `users/${user.panel_id}/change-password/`;
 
     const response = await authedAgentApi.post<any>(url, { new_password });
@@ -224,7 +226,8 @@ export class PlayerServices extends ResourceService {
   async getBalance(player_id: string, player: RoledPlayer): Promise<number> {
     await PlayersDAO.authorizeShow(player, player_id);
 
-    const httpService = new HttpService();
+    const agent = await prisma.player.findAgent();
+    const httpService = new HttpService(agent);
     const response = await httpService.authedAgentApi.get<CertainUserResponse>(
       `/pyramid/certain-user/${player.panel_id}`,
     );

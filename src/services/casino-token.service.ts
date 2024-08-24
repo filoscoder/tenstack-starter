@@ -20,7 +20,6 @@ export class CasinoTokenService extends JwtService implements ITokenRetreiver {
     super();
     this._username = agent.username;
     this._password = decrypt(agent.password);
-    console.log("CASHIER", agent);
   }
 
   private async loginDetails() {
