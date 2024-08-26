@@ -47,8 +47,10 @@ const isPlayerStatus = (
   return value === PLAYER_STATUS.ACTIVE || value === PLAYER_STATUS.BANNED;
 };
 
-const isCashierId: CustomValidator = async (id: string) => {
-  const user = await CashierDAO.findFirst({ where: { id } });
+const isValidHandleOrId: CustomValidator = async (value: string) => {
+  const user = await CashierDAO.findFirst({
+    where: { OR: [{ handle: value }, { id: value }] },
+  });
   if (!user) throw new Error("El cajero no existe");
 };
 
@@ -57,6 +59,13 @@ const validateCashierId: CustomValidator = (cashier_id: string, { req }) => {
     cashier_id &&
     (req.body.roles.length > 1 || !req.body.roles.includes(CONFIG.ROLES.PLAYER))
   );
+};
+
+const sanitizeCashierId: CustomValidator = async (value: string) => {
+  const user = await CashierDAO.findFirst({
+    where: { OR: [{ handle: value }, { id: value }] },
+  });
+  return user?.id ?? value;
 };
 
 const isRoleList = (value: string[]) => {
@@ -151,12 +160,15 @@ export const validatePlayerRequest = () => {
       isString: true,
       trim: true,
       custom: {
-        options: isCashierId,
-        errorMessage: "cashier_id no es un ID de cajero válido.",
+        options: isValidHandleOrId,
+        errorMessage: "cashier_id inválido.",
       },
       anotherValidator: {
         custom: validateCashierId,
         errorMessage: "No se puede crear un cajero como hijo de otro cajero.",
+      },
+      customSanitizer: {
+        options: sanitizeCashierId,
       },
       errorMessage: "cashier_id is required",
     },

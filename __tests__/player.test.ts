@@ -71,12 +71,25 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       expect(result.player.cashier_id).toBe(undefined);
     });
 
-    it("Should create a player as child of cashier", async () => {
+    it("Should create a player as child of cashier using cashier id", async () => {
       const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
         username,
         password,
         email,
         cashier_id: cashier.id,
+      });
+      const result = response.body.data;
+
+      expect(response.status).toBe(CREATED);
+      expect(result.player.cashier_id).toBe(cashier.id);
+    });
+
+    it("Should create a player as child of cashier using cashier handle", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        cashier_id: cashier.handle,
       });
       const result = response.body.data;
 
@@ -163,7 +176,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       expect(response.body.data[0].msg).toBe("Usuario con ese email ya existe");
     });
 
-    it("Should return 400 invalid cashier_id", async () => {
+    it.only("Should return 400 invalid cashier_id", async () => {
       const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
         username,
         password,
@@ -171,10 +184,9 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
         cashier_id: "foo",
       });
 
+      console.log("RESPONSE", response.body);
       expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.data[0].msg).toBe(
-        "cashier_id no es un ID de cajero válido.",
-      );
+      expect(response.body.data[0].msg).toBe("cashier_id inválido.");
     });
 
     it("Should return 400", async () => {
