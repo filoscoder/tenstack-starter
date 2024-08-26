@@ -11,5 +11,6 @@ export type CreateBonusProps = BonusSettings & {
 
 export type BonusUpdatableProps = {
   amount?: number;
-  status: string;
+  status?: string;
+  dirty?: boolean;
 };

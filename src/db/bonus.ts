@@ -178,7 +178,7 @@ export class BonusDAO {
   ): Promise<Bonus> {
     const playerServices = new PlayerServices();
     const authorized = await prisma.$transaction(async (tx) => {
-      const bonus = await tx.bonus.findUnique({
+      const bonus = await tx.bonus.findFirst({
         where: { id: bonusId },
         include: { Player: { include: { roles: true } } },
       });
@@ -209,7 +209,10 @@ export class BonusDAO {
           "El bono solo se puede canjear cuando el balance es menor que 10.",
         );
 
-      return bonus;
+      return await tx.bonus.update({
+        where: { id: bonusId },
+        data: { dirty: true },
+      });
     });
     return authorized;
   }

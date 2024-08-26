@@ -38,7 +38,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
   const movile_number = "5490000000000";
 
   describe("POST: /players", () => {
-    beforeAll(preparePlayerTest);
+    beforeAll(() => preparePlayerTest());
     afterEach(() => jest.clearAllMocks());
 
     it("Should create a player with default role", async () => {
@@ -176,7 +176,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       expect(response.body.data[0].msg).toBe("Usuario con ese email ya existe");
     });
 
-    it.only("Should return 400 invalid cashier_id", async () => {
+    it("Should return 400 invalid cashier_id", async () => {
       const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
         username,
         password,
@@ -184,7 +184,6 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
         cashier_id: "foo",
       });
 
-      console.log("RESPONSE", response.body);
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe("cashier_id inválido.");
     });

@@ -84,7 +84,7 @@ export async function generateAccessToken(type: string) {
 
 async function cleanUp() {
   const deletePlayers = Object.values(users).map(async (u) =>
-    testPrisma.player.delete({ where: { id: (await u).id } }),
+    testPrisma.player.delete({ where: { id: (await u).id } }).catch(),
   );
 
   const cashier_id = (await users[CONFIG.ROLES.CASHIER]).cashier_id;
