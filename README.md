@@ -699,7 +699,7 @@ Requiere rol| cashier
   date_of_birth: DateTime?
   movile_number: string?
   country: string?
-  cashier_id: string?
+  cashier_id: string?                 // Puede ser el ID o handle (@foo)
   roles: string[]?                    // default: [ "player" ]
 }
 ``` 
