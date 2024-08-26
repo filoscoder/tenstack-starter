@@ -176,6 +176,18 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       expect(response.body.data[0].msg).toBe("Usuario con ese email ya existe");
     });
 
+    it("Should return 400 handle not available", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        handle: cashier.handle,
+      });
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe("Alias no disponible.");
+    });
+
     it("Should return 400 invalid cashier_id", async () => {
       const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
         username,

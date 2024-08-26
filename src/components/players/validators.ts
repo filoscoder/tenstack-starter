@@ -76,6 +76,11 @@ const isRoleList = (value: string[]) => {
 
 const removeDuplicates = (val: string[]) => Array.from(new Set(val));
 
+const checkHandleNotInUse: CustomValidator = async (handle: string) => {
+  const user = await CashierDAO.findFirst({ where: { handle } });
+  if (user) throw new Error("El handle ya esta en uso");
+};
+
 export const validatePlayerRequest = () => {
   const optionalString: {
     in: Location[];
@@ -171,6 +176,16 @@ export const validatePlayerRequest = () => {
         options: sanitizeCashierId,
       },
       errorMessage: "cashier_id is required",
+    },
+    handle: {
+      in: ["body"],
+      optional: true,
+      isString: true,
+      trim: true,
+      custom: {
+        options: checkHandleNotInUse,
+        errorMessage: "Alias no disponible.",
+      },
     },
   });
 };

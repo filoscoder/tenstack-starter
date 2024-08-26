@@ -701,6 +701,7 @@ Requiere rol| cashier
   country: string?
   cashier_id: string?                 // Puede ser el ID o handle (@foo)
   roles: string[]?                    // default: [ "player" ]
+  handle: string?
 }
 ``` 
 

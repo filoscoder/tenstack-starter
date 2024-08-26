@@ -87,6 +87,7 @@ export class PlayersController {
       if (request.roles.includes(CONFIG.ROLES.CASHIER))
         cashier = await new CashierServices().create(request);
 
+      delete request.handle;
       const player = await playersServices.create({
         cashier_id: cashier?.id,
         ...request,

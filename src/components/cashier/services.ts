@@ -30,7 +30,7 @@ export class CashierServices {
       data: {
         username,
         password: encryptedPassword,
-        handle: `@${username}`,
+        handle: playerRequest.handle || `@${username}`,
       },
     });
   }
