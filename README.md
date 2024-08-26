@@ -627,7 +627,7 @@ Requiere rol| cashier
 |Endpoint| `/cashier/:cashier_id/cashout`|
 ---|---|
 Método      |`GET`
-Devuelve    |[`CoinTransfer`](#cointransfer)
+Devuelve    |[`CoinTransfer`](#cointransfer) \|  [`ERR.INSUFICIENT_BALANCE`](#errinsuficient_balance) \| [`ERR.COIN_TRANSFER_UNSUCCESSFUL`](#errcoin_transfer_unsuccessful)
 Requiere rol| cashier
 
 ### Actualizar Alias 🔒

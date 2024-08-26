@@ -43,13 +43,13 @@ cashierRouter.get(
   throwIfBadRequest,
   CashierController.showBalance,
 );
-// cashierRouter.get(
-//   "/:id/cashout",
-//   validateCashierId(),
-//   checkExact(),
-//   throwIfBadRequest,
-//   CashierController.cashout,
-// );
+cashierRouter.get(
+  "/:id/cashout",
+  validateCashierId(),
+  checkExact(),
+  throwIfBadRequest,
+  CashierController.cashout,
+);
 cashierRouter.post(
   "/:id/update",
   validateCashierId(),

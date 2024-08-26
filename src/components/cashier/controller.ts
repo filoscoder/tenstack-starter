@@ -85,19 +85,19 @@ export class CashierController {
     }
   }
 
-  // static async cashout(req: Req, res: Res, next: NextFn) {
-  //   try {
-  //     const cashierId = req.params.id;
-  //     const user: RoledPlayer = req.user!;
+  static async cashout(req: Req, res: Res, next: NextFn) {
+    try {
+      const cashierId = req.params.id;
+      const user = req.user!;
 
-  //     CashierDAO.authorizeUpdate(cashierId, user);
+      CashierDAO.authorizeUpdate(cashierId, user);
 
-  //     const cashierServices = new CashierServices();
-  //     const result = await cashierServices.cashout(cashierId, user);
+      const cashierServices = new CashierServices();
+      const result = await cashierServices.cashout(cashierId, user);
 
-  //     res.status(OK).send(apiResponse(result));
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
+      res.status(OK).send(apiResponse(result));
+    } catch (error) {
+      next(error);
+    }
+  }
 }

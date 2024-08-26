@@ -102,4 +102,9 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "agent_bank_account_unset",
     description: "No se encontro la cuenta bancaria del agente en la BD.",
   },
+  CASHOUT_UNAVAILABLE: {
+    status: 400,
+    code: "cashout_unavailable",
+    description: "No hay saldo disponible",
+  },
 };

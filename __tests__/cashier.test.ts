@@ -9,6 +9,7 @@ import {
 import { Cashier } from "@prisma/client";
 import { initAgent } from "./helpers";
 import { generateAccessToken } from "./helpers/auth";
+import { prepareCashierCashoutTest } from "./mocks/cashier.ts/cashout";
 import CONFIG from "@/config";
 
 let agent: SuperAgentTest;
@@ -128,43 +129,35 @@ describe("[UNIT] => CASHIER ROUTER", () => {
     });
   });
 
-  // describe("GET: /cashier/:id/cashout", () => {
-  //   beforeAll(() => {
-  //     const mockCoinTransferResult: CoinTransferResult = {
-  //       ok: true,
-  //       player_balance: 0,
-  //     };
-  //     jest
-  //       .spyOn((CoinTransferServices as any).prototype, "transfer")
-  //       .mockResolvedValue(mockCoinTransferResult);
-  //   });
-  //   afterAll(jest.clearAllMocks);
+  describe("GET: /cashier/:id/cashout", () => {
+    beforeAll(() => prepareCashierCashoutTest());
+    afterAll(jest.clearAllMocks);
 
-  //   it("Should redeem cashier's balance", async () => {
-  //     const response = await agent
-  //       .get(`/app/${CONFIG.APP.VER}/cashier/${cashier.id}/cashout`)
-  //       .set("Authorization", `Bearer ${cashierAccessToken}`);
+    it("Should redeem cashier's balance", async () => {
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/cashier/${cashier.id}/cashout`)
+        .set("Authorization", `Bearer ${cashierAccessToken}`);
 
-  //     expect(response.status).toBe(OK);
-  //     expect(response.body.data.player_balance_after).toBe(0);
-  //   });
+      expect(response.status).toBe(OK);
+      expect(response.body.data.player_balance_after).toBe(10);
+    });
 
-  //   it("Should return 401", async () => {
-  //     const response = await agent.get(
-  //       `/app/${CONFIG.APP.VER}/cashier/${cashier.id}/cashout`,
-  //     );
+    it("Should return 401", async () => {
+      const response = await agent.get(
+        `/app/${CONFIG.APP.VER}/cashier/${cashier.id}/cashout`,
+      );
 
-  //     expect(response.status).toBe(UNAUTHORIZED);
-  //   });
+      expect(response.status).toBe(UNAUTHORIZED);
+    });
 
-  //   it("Should return 403", async () => {
-  //     const response = await agent
-  //       .get(`/app/${CONFIG.APP.VER}/cashier/foreign/cashout`)
-  //       .set("Authorization", `Bearer ${cashierAccessToken}`);
+    it("Should return 403", async () => {
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/cashier/foreign/cashout`)
+        .set("Authorization", `Bearer ${cashierAccessToken}`);
 
-  //     expect(response.status).toBe(FORBIDDEN);
-  //   });
-  // });
+      expect(response.status).toBe(FORBIDDEN);
+    });
+  });
 
   describe("POST: /cashier/:id/update", () => {
     it("Should update cashier's handle", async () => {
