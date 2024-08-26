@@ -988,6 +988,7 @@ Requiere rol| cashier
   access: string?  
   refresh: string? 
   dirty: boolean   
+  last_cashout: DateTime
   created_at: DateTime      // 2024-01-29T18:14:41.534Z
   updated_at: DateTime      // 2024-01-29T18:14:41.534Z
 }
