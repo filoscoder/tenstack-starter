@@ -14,6 +14,7 @@ export const mockCashier: Cashier = {
   password: "baz",
   handle: "@foo",
   panel_id: -69,
+  last_cashout: new Date(),
   created_at: new Date(),
   updated_at: new Date(),
 };

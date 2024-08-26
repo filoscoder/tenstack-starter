@@ -46,6 +46,7 @@ async function createUserRoot() {
       access: "",
       refresh: "",
       panel_id: -1,
+      handle: `${casinoUsername}`,
     },
   });
 }
