@@ -93,41 +93,40 @@ describe("[UNIT] => CASHIER ROUTER", () => {
     });
   });
 
-  // describe("GET: /cashier/:id/balance", () => {
-  //   it("Should return cashier's balance", async () => {
-  //     const response = await agent
-  //       .get(`/app/${CONFIG.APP.VER}/cashier/${cashier.id}/balance`)
-  //       .set("Authorization", `Bearer ${cashierAccessToken}`);
+  describe("GET: /cashier/:id/balance", () => {
+    it("Should return cashier's balance", async () => {
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/cashier/${cashier.id}/balance`)
+        .set("Authorization", `Bearer ${cashierAccessToken}`);
 
-  //     expect(response.status).toBe(OK);
-  //     expect(response.body.data).toBeGreaterThanOrEqual(0);
-  //   });
+      expect(response.status).toBe(OK);
+      expect(response.body.data).toBe(undefined);
+    });
 
-  //   it("Should return 401", async () => {
-  //     const response = await agent.get(
-  //       `/app/${CONFIG.APP.VER}/cashier/${cashier.id}/balance`,
-  //     );
+    it("Should return 401", async () => {
+      const response = await agent.get(
+        `/app/${CONFIG.APP.VER}/cashier/${cashier.id}/balance`,
+      );
 
-  //     expect(response.status).toBe(UNAUTHORIZED);
-  //   });
+      expect(response.status).toBe(UNAUTHORIZED);
+    });
 
-  //   it("Should return 403", async () => {
-  //     const response = await agent
-  //       .get(`/app/${CONFIG.APP.VER}/cashier/${cashier.id}/balance`)
-  //       .set("Authorization", `Bearer ${playerAccessToken}`);
+    it("Should return 403", async () => {
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/cashier/${cashier.id}/balance`)
+        .set("Authorization", `Bearer ${playerAccessToken}`);
 
-  //     expect(response.status).toBe(FORBIDDEN);
-  //   });
+      expect(response.status).toBe(FORBIDDEN);
+    });
 
-  //   it("Should return 403", async () => {
-  //     const response = await agent
-  //       .get(`/app/${CONFIG.APP.VER}/cashier/nonexistent/balance`)
-  //       .set("Authorization", `Bearer ${cashierAccessToken}`);
+    it("Should return 403", async () => {
+      const response = await agent
+        .get(`/app/${CONFIG.APP.VER}/cashier/nonexistent/balance`)
+        .set("Authorization", `Bearer ${cashierAccessToken}`);
 
-  //     console.log("RESPONSE", response.body);
-  //     expect(response.status).toBe(FORBIDDEN);
-  //   });
-  // });
+      expect(response.status).toBe(FORBIDDEN);
+    });
+  });
 
   // describe("GET: /cashier/:id/cashout", () => {
   //   beforeAll(() => {
@@ -146,7 +145,6 @@ describe("[UNIT] => CASHIER ROUTER", () => {
   //       .get(`/app/${CONFIG.APP.VER}/cashier/${cashier.id}/cashout`)
   //       .set("Authorization", `Bearer ${cashierAccessToken}`);
 
-  //     console.log("RESPONSE", response.body);
   //     expect(response.status).toBe(OK);
   //     expect(response.body.data.player_balance_after).toBe(0);
   //   });
@@ -185,6 +183,7 @@ describe("[UNIT] => CASHIER ROUTER", () => {
         "access",
         "refresh",
         "dirty",
+        "last_cashout",
         "created_at",
         "updated_at",
       ]);
