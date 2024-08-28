@@ -18,3 +18,19 @@ export type ComissionResponse = {
     children: any[];
   };
 };
+
+export type GeneralReport = {
+  total: BetReport;
+  providers: GameProvider[];
+};
+
+export type GameProvider = BetReport & {
+  producer: string;
+};
+
+export type BetReport = {
+  bets_count: number;
+  total_bets: string;
+  total_wins: string;
+  total_profit: string;
+};

@@ -10,6 +10,7 @@ import {
 } from "@/components/players/validators";
 import {
   validateCashierId,
+  validateGeneralReportRequest,
   validateHandleUpdateRequest,
   validatePlayerId,
 } from "@/components/cashier/validator";
@@ -35,6 +36,15 @@ cashierRouter.get(
   checkExact(),
   throwIfBadRequest,
   CashierController.showPlayer,
+);
+cashierRouter.get(
+  "/:id/player/:player_id/general-report",
+  validateCashierId(),
+  validatePlayerId(),
+  validateGeneralReportRequest(),
+  checkExact(),
+  throwIfBadRequest,
+  CashierController.playerGeneralReport,
 );
 cashierRouter.get(
   "/:id/balance",

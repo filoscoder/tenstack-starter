@@ -11,9 +11,12 @@ import { encrypt } from "@/utils/crypt";
 import { prisma } from "@/prisma";
 import { ERR } from "@/config/errors";
 import { CustomError } from "@/helpers/error/CustomError";
-import { CashierUpdateRequest } from "@/types/request/cashier";
+import {
+  CashierUpdateRequest,
+  GeneralReportRequest,
+} from "@/types/request/cashier";
 import { NotFoundException } from "@/helpers/error";
-import { ComissionResponse } from "@/types/response/cashier";
+import { ComissionResponse, GeneralReport } from "@/types/response/cashier";
 import { FullUser, PlayerWithUsageMetrics } from "@/types/response/players";
 import { useTransaction } from "@/helpers/useTransaction";
 
@@ -162,5 +165,33 @@ export class CashierServices {
 
       return await coinTransferServices.agentToPlayer(coinTransfer.id, tx);
     });
+  }
+
+  async playerGeneralReport(
+    playerId: string,
+    request: GeneralReportRequest,
+    cashier: Cashier,
+  ): Promise<GeneralReport> {
+    const player = await PlayersDAO._getById(playerId);
+    if (!player) throw new NotFoundException("Jugador no encontrado");
+
+    const endpoint = `/pyramid/statistics/general_report/${cashier.panel_id}`;
+    const params = new URLSearchParams();
+    params.append("date_from", request.date_from);
+    params.append("date_to", request.date_to);
+
+    const url = endpoint + "?" + params.toString();
+
+    const { authedAgentApi } = new HttpService(cashier);
+    const response = await authedAgentApi.get<GeneralReport>(url);
+
+    if (response.status !== 200)
+      throw new AgentApiError(
+        response.status,
+        "Error en el casino al obtener reporte",
+        response.data,
+      );
+
+    return response.data;
   }
 }

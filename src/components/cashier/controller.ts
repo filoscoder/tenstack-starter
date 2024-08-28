@@ -6,7 +6,10 @@ import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 import { apiResponse } from "@/helpers/apiResponse";
 import { PlayersDAO } from "@/db/players";
 import { CashierDAO } from "@/db/cashier";
-import { CashierUpdateRequest } from "@/types/request/cashier";
+import {
+  CashierUpdateRequest,
+  GeneralReportRequest,
+} from "@/types/request/cashier";
 import { RoledPlayer } from "@/types/response/players";
 import CONFIG from "@/config";
 
@@ -98,6 +101,28 @@ export class CashierController {
 
       const cashierServices = new CashierServices();
       const result = await cashierServices.cashout(cashierId, user);
+
+      res.status(OK).send(apiResponse(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async playerGeneralReport(req: Req, res: Res, next: NextFn) {
+    try {
+      const cashierId = req.params.id;
+      const playerId = req.params.player_id;
+      const user = req.user!;
+      const request = req.query as GeneralReportRequest;
+
+      await CashierDAO.authorizeShowPlayer(cashierId, playerId, user);
+
+      const cashierServices = new CashierServices();
+      const result = await cashierServices.playerGeneralReport(
+        playerId,
+        request,
+        user.Cashier!,
+      );
 
       res.status(OK).send(apiResponse(result));
     } catch (error) {

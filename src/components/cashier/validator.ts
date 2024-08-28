@@ -7,6 +7,11 @@ const checkHandleNotInUse: CustomValidator = async (handle, { req }) => {
     throw new Error("Handle already in use");
 };
 
+const isValidCasinoDate: CustomValidator = (value: string) => {
+  const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}-\d{2}:\d{2}$/;
+  return regex.test(value);
+};
+
 export const validateCashierId = () =>
   checkSchema({
     id: {
@@ -36,5 +41,27 @@ export const validateHandleUpdateRequest = () =>
         options: checkHandleNotInUse,
         errorMessage: "Ese alias ya está en uso",
       },
+    },
+  });
+
+export const validateGeneralReportRequest = () =>
+  checkSchema({
+    date_from: {
+      in: ["query"],
+      custom: {
+        options: isValidCasinoDate,
+        errorMessage: "Formato inválido en date_from",
+      },
+      trim: true,
+      errorMessage: "date_from is required",
+    },
+    date_to: {
+      in: ["query"],
+      custom: {
+        options: isValidCasinoDate,
+        errorMessage: "Formato inválido en date_to",
+      },
+      trim: true,
+      errorMessage: "date_to is required",
     },
   });

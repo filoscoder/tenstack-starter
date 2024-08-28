@@ -125,6 +125,7 @@ Comes with:
 
   + [Listar Jugadores de Cajero](#listar-jugadores-de-cajero-)
   + [Ver Jugador de Cajero](#ver-jugador-de-cajero-)
+  + [Ver Reporte General](#ver-reporte-general-)
   + [Ver Balance de Cajero](#ver-balance-de-cajero-)
   + [Cobrar Ganancias](#cobrar-ganancias-)
   + [Actualizar Alias](#actualizar-alias-)
@@ -535,7 +536,7 @@ Devuelve    |`Analytics`
 |Endpoint| `/analytics/summary`|
 ---|---|
 Método      |`GET`
-Devuelve    | [`AnalyticsSummary[]`]()
+Devuelve    | [`AnalyticsSummary[]`](#analyticssummary)
 
 Bonos
 -----
@@ -613,6 +614,14 @@ Requiere rol| cashier
 Método      |`GET`
 Devuelve    |[`Player`](#player)
 Requiere rol| cashier
+
+### Ver Reporte General 🔒
+
+|Endpoint| `/cashier/:cashier_id/player/:player_id/general-report`|
+---|---|
+Método      |`GET`
+Query string| [`GeneralReportRequest`](#generalreportrequest)
+Devuelve    | [`GeneralReport`](#generalreport)
 
 ### Ver Balance de Cajero 🔒
 
@@ -1008,6 +1017,43 @@ Requiere rol| cashier
   last_cashout: DateTime
   created_at: DateTime      // 2024-01-29T18:14:41.534Z
   updated_at: DateTime      // 2024-01-29T18:14:41.534Z
+}
+```
+
+### GeneralReportRequest
+> ❗**Importante**: revisar el formato de las fechas. El casino no soporta ISO-8601.
+```typescript
+{
+  date_from: string;        // 2024-01-29T18:14-03:00
+  date_to: string;          // 2024-01-29T18:14-03:00
+}
+```
+
+### GeneralReport 
+```typescript
+{
+  total: BetReport;
+  providers: GameProvider[];
+}
+```
+
+### GameProvider 
+```typescript
+{
+  BetReport & 
+  {
+    producer: string;
+  }
+}
+```
+
+### BetReport 
+```typescript
+{
+  bets_count: number;
+  total_bets: string;
+  total_wins: string;
+  total_profit: string;
 }
 ```
 

@@ -6,16 +6,18 @@ import {
   OK,
   UNAUTHORIZED,
 } from "http-status";
-import { Cashier } from "@prisma/client";
+import { Cashier, Player } from "@prisma/client";
 import { initAgent } from "./helpers";
 import { generateAccessToken } from "./helpers/auth";
-import { prepareCashierCashoutTest } from "./mocks/cashier.ts/cashout";
+import { prepareCashierCashoutTest } from "./mocks/cashier/cashout";
+import { prepareGeneralReportTest } from "./mocks/cashier/generalReport";
 import CONFIG from "@/config";
 
 let agent: SuperAgentTest;
 let cashierAccessToken: string;
 let cashier: Cashier;
 let playerAccessToken: string;
+let player: Player;
 let cleanUp: () => Promise<any>;
 
 beforeAll(async () => {
@@ -23,6 +25,7 @@ beforeAll(async () => {
   ({
     token: cashierAccessToken,
     user: { Cashier: cashier },
+    user: player,
     cleanUp,
   } = await generateAccessToken(CONFIG.ROLES.CASHIER));
   ({ token: playerAccessToken } = await generateAccessToken(
@@ -91,6 +94,54 @@ describe("[UNIT] => CASHIER ROUTER", () => {
         .set("Authorization", `Bearer ${cashierAccessToken}`);
 
       expect(response.status).toBe(NOT_FOUND);
+    });
+  });
+
+  describe.only("GET: /cashier/:id/player/:player_id/general-report", () => {
+    beforeAll(() => prepareGeneralReportTest());
+    afterAll(jest.clearAllMocks);
+
+    it("Should return a general report", async () => {
+      const date_from = "2024-08-01T00:00-03:00";
+      const date_to = "2024-08-31T23:59-03:00";
+      const url =
+        `/app/${CONFIG.APP.VER}/cashier/${cashier.id}/player/` +
+        `${player.id}/general-report?` +
+        `date_from=${date_from}&date_to=${date_to}`;
+
+      const response = await agent
+        .get(url)
+        .set("Authorization", `Bearer ${cashierAccessToken}`);
+
+      expect(response.status).toBe(OK);
+    });
+
+    it("Should return 400", async () => {
+      const date_from = new Date().toISOString();
+      const date_to = "2024-08-31T23:59-03:00";
+      const url =
+        `/app/${CONFIG.APP.VER}/cashier/${cashier.id}/player/` +
+        `${player.id}/general-report?` +
+        `date_from=${date_from}&date_to=${date_to}`;
+      const response = await agent
+        .get(url)
+        .set("Authorization", `Bearer ${cashierAccessToken}`);
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe("Formato inválido en date_from");
+    });
+
+    it("Should return 401", async () => {
+      const date_from = "2024-08-01T00:00-03:00";
+      const date_to = "2024-08-31T23:59-03:00";
+      const url =
+        `/app/${CONFIG.APP.VER}/cashier/${cashier.id}/player/` +
+        `${player.id}/general-report?` +
+        `date_from=${date_from}&date_to=${date_to}`;
+
+      const response = await agent.get(url);
+
+      expect(response.status).toBe(UNAUTHORIZED);
     });
   });
 
