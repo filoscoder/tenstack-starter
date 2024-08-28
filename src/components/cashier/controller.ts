@@ -8,6 +8,7 @@ import { PlayersDAO } from "@/db/players";
 import { CashierDAO } from "@/db/cashier";
 import { CashierUpdateRequest } from "@/types/request/cashier";
 import { RoledPlayer } from "@/types/response/players";
+import CONFIG from "@/config";
 
 export class CashierController {
   static async listPlayers(req: Req, res: Res, next: NextFn) {
@@ -22,12 +23,15 @@ export class CashierController {
       const result = await cashierServices.listPlayers(
         page,
         itemsPerPage,
+        cashierId,
         search,
         orderBy,
-        cashierId,
       );
 
-      const total = await PlayersDAO.count({ cashier_id: cashierId });
+      const total = await PlayersDAO.count({
+        cashier_id: cashierId,
+        roles: { every: { name: CONFIG.ROLES.PLAYER } },
+      });
 
       res.status(OK).send(apiResponse({ result, total }));
     } catch (error) {

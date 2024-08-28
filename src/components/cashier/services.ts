@@ -14,7 +14,7 @@ import { CustomError } from "@/helpers/error/CustomError";
 import { CashierUpdateRequest } from "@/types/request/cashier";
 import { NotFoundException } from "@/helpers/error";
 import { ComissionResponse } from "@/types/response/cashier";
-import { FullUser } from "@/types/response/players";
+import { FullUser, PlayerWithUsageMetrics } from "@/types/response/players";
 import { useTransaction } from "@/helpers/useTransaction";
 
 export class CashierServices {
@@ -70,17 +70,19 @@ export class CashierServices {
   async listPlayers(
     page: number,
     itemsPerPage: number,
+    cashierId: string,
     search?: string,
     orderBy?: OrderBy<Player>,
-    cashierId?: string,
-  ) {
-    return await PlayersDAO._getAllByCashier(
+  ): Promise<PlayerWithUsageMetrics[]> {
+    const query = PlayersDAO.filteredPlayersWithUsageMetricsQuery(
       page,
       itemsPerPage,
+      cashierId,
       search,
       orderBy,
-      cashierId,
     );
+    const players = await prisma.$queryRaw<PlayerWithUsageMetrics[]>(query);
+    return players;
   }
 
   async update(cashier_id: string, data: CashierUpdateRequest) {

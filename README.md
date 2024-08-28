@@ -143,7 +143,7 @@ Jugadores
 ---|---|
 Método      | `GET`
 Query string| [`ResourceListQueryString`](#ResourceListQueryString)
-Devuelve    | [`PlayerListResponse`](#playerlistresponse)
+Devuelve    | [`ListResponse<Player>`](#listresponset)
 Requiere rol| agent
 
 ### Ver Jugador 🔒
@@ -603,7 +603,7 @@ Cajeros
 |Endpoint| `/cashier/:cashier_id/player`|
 ---|---|
 Método      |`GET`
-Devuelve    |[`PlayerListResponse`](#playerlistresponse)
+Devuelve    |[`ListResponse<PlayerWithUsageMetrics>`](#listresponset)
 Requiere rol| cashier
 
 ### Ver Jugador de Cajero 🔒
@@ -670,11 +670,27 @@ Requiere rol| cashier
   sort_direction='asc' | 'desc'
 ```
 
-### PlayerListResponse
+### ListResponse&lt;T&gt;
 ```typescript
 {
-  result: Player[]
+  result: T[]
   total: number
+}
+```
+
+### PlayerWithUsageMetrics
+```typescript
+{
+  player_id: string
+  username: string
+  email: string
+  movile_number: string
+  first_name: string
+  last_name: string
+  deposits_total: number
+  cashout_total: number
+  last_deposit: string                // 2024-01-29T18:14:41.534Z
+  created_at: string                  // 2024-01-29T18:14:41.534Z
 }
 ```
 
@@ -701,7 +717,7 @@ Requiere rol| cashier
   country: string?
   cashier_id: string?                 // Puede ser el ID o handle (@foo)
   roles: string[]?                    // default: [ "player" ]
-  handle: string?
+  handle: string?                     // Solo para cajeros, default: @<username>
 }
 ``` 
 

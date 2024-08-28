@@ -15,13 +15,6 @@ model AgentConfig {
   id                String        @id @default(uuid())
   player_id         String        @unique    
   Player            Player        @relation(fields: [player_id], references: [id])
-  // username          String        @db.VarChar(50) @unique
-  // password          String        @db.Text
-  // panel_id          Int
-  // access            String        @db.VarChar(800)
-  // refresh           String        @db.VarChar(800)
-  // json_response     String        @db.Text
-  // dirty             Boolean       @default(false)     // El agente está siendo logueado
   bankAccount       Json?      
   alq_api_manager   String?       @db.Text
   alq_token         String?       @db.VarChar(800)

@@ -233,4 +233,69 @@ export class PlayersDAO {
   }
 
   static findFirst = prisma.player.findFirst;
+
+  static filteredPlayersWithUsageMetricsQuery(
+    page: number,
+    itemsPerPage: number,
+    cashierId: string,
+    search?: string,
+    orderBy?: OrderBy<Player>,
+  ): Prisma.Sql {
+    let orderByColumn, orderByDirection;
+    if (orderBy) {
+      orderByColumn = Object.keys(orderBy)[0] as keyof Player;
+      orderByDirection = orderBy[orderByColumn];
+    }
+    const orderByQuery = `ORDER BY ${orderByColumn} ${orderByDirection}`;
+    const querySearch = `%${search}%`;
+
+    const query = Prisma.sql`
+SELECT p.id as player_id, p.username, p.email, p.movile_number, p.first_name,
+       p.last_name, p.created_at,
+       d.amount AS deposits_total,
+       c.amount AS cashout_total,
+       ld.last_deposit
+  FROM PLAYERS AS p 
+       -- Deposits
+       LEFT JOIN (
+                  SELECT SUM(amount) AS amount, player_id 
+                    FROM DEPOSITS 
+                   GROUP BY player_id
+                 )    AS d
+         ON p.id = d.player_id
+       -- Cashouts
+       LEFT JOIN (
+                  SELECT SUM(amount) AS amount, player_id 
+                    FROM PAYMENTS 
+                   GROUP BY player_id
+                 )    AS c
+         ON p.id = c.player_id
+       -- Last deposit date
+       LEFT JOIN ( 
+                  SELECT MAX(created_at) AS last_deposit, player_id
+                    FROM DEPOSITS
+                   GROUP BY player_id
+                 )    AS ld
+         ON p.id = ld.player_id
+       -- Select only players
+       JOIN _PlayerToRole as ptr
+         ON p.id = ptr.a
+       JOIN ROLES AS r
+         ON r.id = ptr.b AND r.name = ${CONFIG.ROLES.PLAYER}
+ WHERE cashier_id = ${cashierId}
+    ${
+      search
+        ? Prisma.sql` 
+       AND (first_name LIKE ${querySearch}
+        OR last_name LIKE ${querySearch}
+        OR email LIKE ${querySearch}
+        OR username LIKE ${querySearch}
+        OR movile_number LIKE ${querySearch})`
+        : Prisma.empty
+    }
+    ${orderBy ? orderByQuery : Prisma.empty}
+    LIMIT ${itemsPerPage * page}, ${itemsPerPage}`;
+
+    return query;
+  }
 }

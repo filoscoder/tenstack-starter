@@ -73,3 +73,16 @@ export type CertainUserResponse = {
   cpf_document: null;
   parent: number;
 };
+
+export type PlayerWithUsageMetrics = {
+  player_id: string;
+  username: string;
+  email: string;
+  movile_number: string;
+  first_name: string;
+  last_name: string;
+  deposits_total: number;
+  cashout_total: number;
+  last_deposit: string; // datetime
+  created_at: string;
+};
