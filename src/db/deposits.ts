@@ -28,7 +28,7 @@ export class DepositsDAO {
           ],
         },
         orderBy,
-        include: { Player: true },
+        include: { Player: true, CoinTransfer: { select: { status: true } } },
       });
       return deposits;
     } catch (error: any) {
@@ -42,7 +42,10 @@ export class DepositsDAO {
     try {
       return await prisma.deposit.findUnique({
         where: { id },
-        include: { Player: { include: { Bonus: true } } },
+        include: {
+          Player: { include: { Bonus: true } },
+          CoinTransfer: { select: { status: true } },
+        },
       });
     } catch (error) {
       throw error;

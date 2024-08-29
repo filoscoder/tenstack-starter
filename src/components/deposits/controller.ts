@@ -85,8 +85,7 @@ export class DepositController {
         );
       }
 
-      // @ts-ignore
-      delete deposit.Player;
+      deposit.Player = hidePassword(deposit.Player);
       res
         .status(OK)
         .json(apiResponse({ deposit, bonus, coinTransfer } as DepositResult));
