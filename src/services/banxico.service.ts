@@ -46,9 +46,7 @@ export class BanxicoService {
       });
       if (
         response.status !== 200 ||
-        !(response.data as string).includes(
-          "Haga clic sobre el &iacute;cono para descargar el CEP",
-        )
+        (response.data as string).includes("Operación no encontrada")
       )
         throw response.data;
 
