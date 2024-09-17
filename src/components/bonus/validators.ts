@@ -2,6 +2,7 @@ import { Bonus, Player } from "@prisma/client";
 import { checkSchema } from "express-validator";
 import { isKeyOfNestedObject } from "../players/validators";
 import { validatePlayerId } from "@/helpers/validateUserId";
+import { mockPlayer } from "@/config/mockPlayer";
 
 export const isKeyOfBonus = (key: string): key is keyof Bonus => {
   const mockBonus: Bonus & { Player: Player } = {
@@ -12,22 +13,7 @@ export const isKeyOfBonus = (key: string): key is keyof Bonus => {
     status: "",
     coin_transfer_id: "",
     dirty: false,
-    Player: {
-      id: "",
-      panel_id: 0,
-      username: "",
-      password: "",
-      email: "",
-      first_name: "",
-      last_name: "",
-      date_of_birth: new Date(),
-      movile_number: "",
-      country: "",
-      balance_currency: "",
-      status: "",
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
+    Player: mockPlayer,
     created_at: new Date(),
     updated_at: new Date(),
   };

@@ -82,6 +82,7 @@ const CONFIG = {
   ROLES: {
     AGENT: "agent",
     PLAYER: "player",
+    CASHIER: "cashier",
   },
   /** Static Details */
   SD: {
@@ -105,6 +106,9 @@ const CONFIG = {
     USER: process.env.EMAIL_USER,
     PASS: process.env.EMAIL_PASS,
     FROM: process.env.EMAIL_FROM,
+  },
+  SUBAGENT: {
+    PAYMENT_PERCENTAGE: Number(process.env.SUBAGENT_PAYMENT_PERCENTAGE) || 0.5,
   },
 } as const;
 

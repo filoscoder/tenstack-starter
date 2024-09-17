@@ -6,7 +6,9 @@ import {
 } from "express-validator";
 import { Player } from "@prisma/client";
 import { PlayersDAO } from "@/db/players";
-import { PLAYER_STATUS } from "@/config";
+import CONFIG, { PLAYER_STATUS } from "@/config";
+import { mockPlayer } from "@/config/mockPlayer";
+import { CashierDAO } from "@/db/cashier";
 
 const isDate: CustomValidator = (value: string, { req }) => {
   if (value.length === 0) return true;
@@ -32,22 +34,6 @@ export const isKeyOfNestedObject = (
 };
 
 export const isKeyOfPlayer = (key: string): key is keyof Player => {
-  const mockPlayer: Player = {
-    id: "",
-    panel_id: 0,
-    username: "",
-    password: "",
-    email: "",
-    first_name: "",
-    last_name: "",
-    date_of_birth: new Date(),
-    movile_number: "",
-    country: "",
-    balance_currency: "",
-    status: "",
-    created_at: new Date(),
-    updated_at: new Date(),
-  };
   return isKeyOfNestedObject(mockPlayer, key);
 };
 
@@ -59,6 +45,40 @@ const isPlayerStatus = (
   value: string,
 ): value is PLAYER_STATUS.ACTIVE | PLAYER_STATUS.BANNED => {
   return value === PLAYER_STATUS.ACTIVE || value === PLAYER_STATUS.BANNED;
+};
+
+const isValidHandleOrId: CustomValidator = async (value: string) => {
+  const user = await CashierDAO.findFirst({
+    where: { OR: [{ handle: value }, { id: value }] },
+  });
+  if (!user) throw new Error("El cajero no existe");
+};
+
+const validateCashierId: CustomValidator = (cashier_id: string, { req }) => {
+  return !(
+    cashier_id &&
+    (req.body.roles.length > 1 || !req.body.roles.includes(CONFIG.ROLES.PLAYER))
+  );
+};
+
+const sanitizeCashierId: CustomValidator = async (value: string) => {
+  const user = await CashierDAO.findFirst({
+    where: { OR: [{ handle: value }, { id: value }] },
+  });
+  return user?.id ?? value;
+};
+
+const isRoleList = (value: string[]) => {
+  const roles = CONFIG.ROLES;
+  // @ts-ignore
+  return value.every((role) => Object.values(roles).includes(role));
+};
+
+const removeDuplicates = (val: string[]) => Array.from(new Set(val));
+
+const checkHandleNotInUse: CustomValidator = async (handle: string) => {
+  const user = await CashierDAO.findFirst({ where: { handle } });
+  if (user) throw new Error("El handle ya esta en uso");
 };
 
 export const validatePlayerRequest = () => {
@@ -133,6 +153,40 @@ export const validatePlayerRequest = () => {
       errorMessage: "movile_number must be a numeric string",
     },
     country: optionalString,
+    roles: {
+      in: ["body"],
+      default: { options: [[CONFIG.ROLES.PLAYER]] },
+      customSanitizer: { options: removeDuplicates },
+      custom: { options: isRoleList, errorMessage: "Rol invalido" },
+    },
+    cashier_id: {
+      in: ["body"],
+      optional: true,
+      isString: true,
+      trim: true,
+      custom: {
+        options: isValidHandleOrId,
+        errorMessage: "cashier_id inválido.",
+      },
+      anotherValidator: {
+        custom: validateCashierId,
+        errorMessage: "No se puede crear un cajero como hijo de otro cajero.",
+      },
+      customSanitizer: {
+        options: sanitizeCashierId,
+      },
+      errorMessage: "cashier_id is required",
+    },
+    handle: {
+      in: ["body"],
+      optional: true,
+      isString: true,
+      trim: true,
+      custom: {
+        options: checkHandleNotInUse,
+        errorMessage: "Alias no disponible.",
+      },
+    },
   });
 };
 

@@ -1,4 +1,4 @@
-import { Payment } from "@prisma/client";
+import { Cashier, Payment } from "@prisma/client";
 import { AxiosResponse } from "axios";
 import { AuthServices } from "../auth/services";
 import { Credentials } from "@/types/request/players";
@@ -9,7 +9,6 @@ import {
   BalanceResponse,
   SupportResponse,
 } from "@/types/response/agent";
-import { UserRootDAO } from "@/db/user-root";
 import { TokenPair } from "@/types/response/jwt";
 import { HttpService } from "@/services/http.service";
 import { NotFoundException, UnauthorizedError } from "@/helpers/error";
@@ -24,6 +23,7 @@ import {
 import { CustomError } from "@/helpers/error/CustomError";
 import { UserRootUpdatableProps } from "@/types/request/agent";
 import { AlquimiaTransferService } from "@/services/alquimia-transfer.service";
+import { AgentConfigDAO } from "@/db/agentConfig";
 
 export class AgentServices {
   static async login(
@@ -81,23 +81,21 @@ export class AgentServices {
     }
   }
 
-  static async getBankAccount(): Promise<AgentBankAccount> {
-    const account = UserRootDAO.getBankAccount();
+  static async getBankAccount(): Promise<AgentBankAccount | undefined> {
+    const account = AgentConfigDAO.getBankAccount();
     return account;
   }
 
   static async updateBankAccount(
-    data: AgentBankAccount,
-  ): Promise<AgentBankAccount> {
-    const agent = await UserRootDAO.update({
-      bankAccount: data,
-    });
-    return agent.bankAccount as AgentBankAccount;
+    bankAccount: AgentBankAccount,
+  ): Promise<AgentBankAccount | null> {
+    const config = await AgentConfigDAO.update({ bankAccount });
+    return config.bankAccount as AgentBankAccount;
   }
 
-  static async getCasinoBalance(): Promise<BalanceResponse> {
+  static async getCasinoBalance(agent: Cashier): Promise<BalanceResponse> {
     const url = "accounts/user";
-    const httpService = new HttpService();
+    const httpService = new HttpService(agent);
     const response: AxiosResponse = await httpService.authedAgentApi.get(url);
     if (response.status !== 200)
       throw new CustomError({
@@ -111,9 +109,9 @@ export class AgentServices {
     };
   }
 
-  static async getAlqBalance(): Promise<BalanceResponse> {
+  static async getAlqBalance(agent: Cashier): Promise<BalanceResponse> {
     const url = "cuenta-ahorro-cliente";
-    const httpService = new HttpService();
+    const httpService = new HttpService(agent);
     const response: AxiosResponse = await httpService.authedAlqApi.get(url);
     if (response.status !== 200)
       throw new CustomError({
@@ -143,24 +141,24 @@ export class AgentServices {
   }
 
   static async getSupportNumbers(): Promise<SupportResponse> {
-    const agent = await UserRootDAO.getAgent();
+    const config = await AgentConfigDAO.getConfig();
 
-    if (!agent) throw new CustomError(ERR.AGENT_UNSET);
+    if (!config) throw new CustomError(ERR.AGENT_UNSET);
 
     return {
-      bot_phone: agent.bot_phone,
-      human_phone: agent.human_phone,
+      bot_phone: config.bot_phone,
+      human_phone: config.human_phone,
     };
   }
 
   static async updateSupportNumbers(
     data: UserRootUpdatableProps,
   ): Promise<SupportResponse> {
-    const agent = await UserRootDAO.update(data);
+    const config = await AgentConfigDAO.update(data);
 
     return {
-      bot_phone: agent.bot_phone,
-      human_phone: agent.human_phone,
+      bot_phone: config.bot_phone,
+      human_phone: config.human_phone,
     };
   }
 }

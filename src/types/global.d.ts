@@ -1,5 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import { Player, Prisma, PrismaClient, Role } from "@prisma/client";
+import {
+  BankAccount,
+  Cashier,
+  Player,
+  Prisma,
+  PrismaClient,
+  Role,
+} from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 
 declare global {
@@ -16,6 +23,8 @@ declare global {
   namespace Express {
     interface User extends Player {
       roles: Role[];
+      BankAccounts: BankAccount[];
+      Cashier: Cashier | null;
     }
   }
 }

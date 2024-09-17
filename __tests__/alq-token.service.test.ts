@@ -1,10 +1,13 @@
-import { UserRootDAO } from "@/db/user-root";
+import { testPrisma } from "./helpers";
 import { AlquimiaTokenService } from "@/services/alquimia-token.service";
 
 let service: AlquimiaTokenService;
 beforeAll(async () => {
   service = new AlquimiaTokenService();
-  await UserRootDAO.update({ alq_api_manager: "", alq_token: "" });
+  await testPrisma.agentConfig.updateMany({
+    data: { alq_api_manager: "", alq_token: "" },
+  });
+  // await UserRootDAO.update({ alq_api_manager: "", alq_token: "" });
 });
 
 describe.skip("AlquimiaTokenService", () => {
@@ -17,9 +20,9 @@ describe.skip("AlquimiaTokenService", () => {
     });
 
     it("Ensures token was saved in DB", async () => {
-      const agent = await UserRootDAO.getAgent();
-      expect(agent?.alq_token).toBeTruthy();
-      expect(agent?.alq_api_manager).toBeTruthy();
+      const config = await testPrisma.agentConfig.findFirst();
+      expect(config?.alq_token).toBeTruthy();
+      expect(config?.alq_api_manager).toBeTruthy();
     });
   });
 

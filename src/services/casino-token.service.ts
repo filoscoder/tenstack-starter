@@ -1,11 +1,11 @@
+import { Cashier } from "@prisma/client";
 import { HttpService } from "./http.service";
 import { JwtService } from "./jwt.service";
 import { decrypt } from "@/utils/crypt";
-import { UserRootDAO } from "@/db/user-root";
 import { LoginResponse } from "@/types/response/agent";
-import { ERR } from "@/config/errors";
 import { ITokenRetreiver } from "@/types/services/http";
 import { CustomError } from "@/helpers/error/CustomError";
+import { CashierDAO } from "@/db/cashier";
 
 /**
  * Generates and refreshes Agent's panel token
@@ -16,31 +16,16 @@ export class CasinoTokenService extends JwtService implements ITokenRetreiver {
   private _token?: string;
   tokenNames = ["access"];
 
-  async username(): Promise<string> {
-    if (this._username) return this._username;
-
-    const agent = await UserRootDAO.getAgent();
-    if (!agent?.username) throw new CustomError(ERR.AGENT_UNSET);
-
+  constructor(private agent: Cashier) {
+    super();
     this._username = agent.username;
-    return this._username;
-  }
-
-  private async password(): Promise<string> {
-    if (this._password) return this._password;
-
-    const agent = await UserRootDAO.getAgent();
-    const encryptedPassword = agent?.password;
-    if (!encryptedPassword) throw new CustomError(ERR.AGENT_UNSET);
-
-    this._password = decrypt(encryptedPassword);
-    return this._password;
+    this._password = decrypt(agent.password);
   }
 
   private async loginDetails() {
     return {
-      username: await this.username(),
-      password: await this.password(),
+      username: this._username,
+      password: this._password,
     };
   }
 
@@ -65,12 +50,16 @@ export class CasinoTokenService extends JwtService implements ITokenRetreiver {
 
     let agent = null;
     try {
-      agent = await UserRootDAO.getAgent();
+      agent = await this.fetchAgentFromDb();
     } catch (error) {
       return null;
     }
 
-    if (!agent || agent.dirty || !this.verifyTokenExpiration(agent.access)) {
+    if (
+      !agent?.access ||
+      agent.dirty ||
+      !this.verifyTokenExpiration(agent.access)
+    ) {
       return null;
     }
 
@@ -84,8 +73,8 @@ export class CasinoTokenService extends JwtService implements ITokenRetreiver {
    * @returns Agent access token
    */
   async refreshToken(): Promise<string | null> {
-    const agent = await UserRootDAO.getAgent();
-    if (!agent) return null;
+    const agent = await this.fetchAgentFromDb();
+    if (!agent?.refresh) return null;
 
     const isValid = this.verifyTokenExpiration(agent.refresh);
     if (!isValid) return null;
@@ -101,7 +90,10 @@ export class CasinoTokenService extends JwtService implements ITokenRetreiver {
 
       const access: string = response.data.access;
       if (access) {
-        await UserRootDAO.update({ access });
+        await CashierDAO.update({
+          where: { id: this.agent.id },
+          data: { access },
+        });
         return access;
       }
       return null;
@@ -115,7 +107,7 @@ export class CasinoTokenService extends JwtService implements ITokenRetreiver {
    * @returns access token or null if agent login is under way
    */
   async login(): Promise<string | null> {
-    const agent = await UserRootDAO.getAgent();
+    const agent = await this.fetchAgentFromDb();
     if (agent && agent.dirty) return null;
 
     try {
@@ -165,16 +157,22 @@ export class CasinoTokenService extends JwtService implements ITokenRetreiver {
 
   private setAgentDirtyFlag(dirty: boolean) {
     if (dirty) this._token = undefined;
-    return UserRootDAO.update({ dirty });
+    return CashierDAO.update({ where: { id: this.agent.id }, data: { dirty } });
   }
 
   private updateAgent(data: LoginResponse) {
-    return UserRootDAO.update({
-      access: data.access,
-      refresh: data.refresh,
-      json_response: JSON.stringify(data),
-      panel_id: data.id,
-      dirty: false,
+    return CashierDAO.update({
+      where: { id: this.agent.id },
+      data: {
+        access: data.access,
+        refresh: data.refresh,
+        panel_id: data.id,
+        dirty: false,
+      },
     });
+  }
+
+  private fetchAgentFromDb() {
+    return CashierDAO.findFirst({ where: { id: this.agent.id } });
   }
 }

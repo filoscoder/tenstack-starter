@@ -1,4 +1,4 @@
-import { BankAccount, Player, Role } from "@prisma/client";
+import { BankAccount, Cashier, Player, Role } from "@prisma/client";
 
 export type PlayerResponse = {
   id: number;
@@ -18,7 +18,14 @@ export type PlayerResponse = {
 
 export type PlainPlayerResponse = Player;
 
-export type RoledPlayer = Player & { roles: Role[] };
+export type RoledPlayer = Player & {
+  roles: Role[];
+};
+
+export type FullUser = RoledPlayer & {
+  BankAccounts: BankAccount[];
+  Cashier: Cashier | null;
+};
 
 export type LoginResponse = {
   access: string;
@@ -65,4 +72,17 @@ export type CertainUserResponse = {
   pap_data: null;
   cpf_document: null;
   parent: number;
+};
+
+export type PlayerWithUsageMetrics = {
+  player_id: string;
+  username: string;
+  email: string;
+  movile_number: string;
+  first_name: string;
+  last_name: string;
+  deposits_total: number;
+  cashout_total: number;
+  last_deposit: string; // datetime
+  created_at: string;
 };

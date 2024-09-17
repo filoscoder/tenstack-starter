@@ -1,6 +1,6 @@
 {
   "name": "timba-api",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Timba Api Server",
   "private": true,
   "authors": "Alpha-Dev",
@@ -43,7 +43,7 @@
   ],
   "dependencies": {
     "@logtail/pino": "^0.4.21",
-    "@prisma/client": "^5.18.0",
+    "@prisma/client": "^5.19.0",
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
@@ -64,7 +64,7 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pino": "^9.2.0",
-    "prisma": "^5.18.0",
+    "prisma": "^5.19.0",
     "rate-limiter-flexible": "^5.0.0",
     "readline-sync": "^1.4.10",
     "rimraf": "^3.0.2",

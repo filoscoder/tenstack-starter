@@ -3,6 +3,7 @@ import { checkSchema } from "express-validator";
 import { isKeyOfNestedObject } from "../players/validators";
 import { bankCodes } from "@/config/bank-codes";
 import { DEPOSIT_STATUS } from "@/config";
+import { mockPlayer } from "@/config/mockPlayer";
 
 export const isKeyOfDeposit = (key: string): key is keyof Deposit => {
   const mockDeposit: Deposit & { Player: Player } = {
@@ -17,22 +18,7 @@ export const isKeyOfDeposit = (key: string): key is keyof Deposit => {
     sending_bank: "",
     cep_ok: false,
     coin_transfer_id: "",
-    Player: {
-      id: "",
-      panel_id: 0,
-      username: "",
-      password: "",
-      email: "",
-      first_name: "",
-      last_name: "",
-      date_of_birth: new Date(),
-      movile_number: "",
-      country: "",
-      balance_currency: "",
-      status: "",
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
+    Player: mockPlayer,
     created_at: new Date(),
     updated_at: new Date(),
   };

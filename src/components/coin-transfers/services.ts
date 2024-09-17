@@ -6,7 +6,6 @@ import CONFIG, {
 } from "@/config";
 import { CoinTransferDAO } from "@/db/coin-transfer";
 import { ERR } from "@/config/errors";
-import { UserRootDAO } from "@/db/user-root";
 import { NotFoundException } from "@/helpers/error";
 import { AgentApiError } from "@/helpers/error/AgentApiError";
 import { CustomError } from "@/helpers/error/CustomError";
@@ -17,6 +16,7 @@ import { TransferDetails } from "@/types/request/transfers";
 import { CoinTransferResult } from "@/types/response/transfers";
 import { parseTransferResult } from "@/utils/parser";
 import { useTransaction } from "@/helpers/useTransaction";
+import { prisma } from "@/prisma";
 
 export class CoinTransferServices {
   /**
@@ -75,11 +75,13 @@ export class CoinTransferServices {
       include: {
         Deposit: { include: { Player: { include: { roles: true } } } },
         Bonus: { include: { Player: { include: { roles: true } } } },
+        CashierPayout: { include: { Player: { include: { roles: true } } } },
       },
     });
     if (!coinTransfer) throw new NotFoundException("CoinTransfer not found");
 
-    const parent = coinTransfer.Bonus || coinTransfer.Deposit;
+    const parent =
+      coinTransfer.Bonus || coinTransfer.Deposit || coinTransfer.CashierPayout;
     const transferDetails = await this.generateTransferDetails(
       "deposit",
       parent!.Player.panel_id,
@@ -111,7 +113,8 @@ export class CoinTransferServices {
   private async transfer(
     transferDetails: TransferDetails,
   ): Promise<CoinTransferResult> {
-    const { authedAgentApi } = new HttpService();
+    const agent = await prisma.player.findAgent();
+    const { authedAgentApi } = new HttpService(agent);
     const url = "/backoffice/transactions/";
     const result = await authedAgentApi.post<any>(url, transferDetails);
 
@@ -140,17 +143,18 @@ export class CoinTransferServices {
     amount: number,
     currency: string,
   ): Promise<TransferDetails> {
-    const agent = await UserRootDAO.getAgent();
+    const cashier = await prisma.player.findAgent();
+    if (!cashier.panel_id) throw new CustomError(ERR.AGENT_UNSET);
 
     let recipient_id, sender_id;
 
     switch (type) {
       case "deposit":
         recipient_id = playerPanelId;
-        sender_id = agent!.panel_id;
+        sender_id = cashier.panel_id;
         break;
       case "cashout":
-        recipient_id = agent!.panel_id;
+        recipient_id = cashier.panel_id;
         sender_id = playerPanelId;
         break;
     }

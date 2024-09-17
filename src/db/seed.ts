@@ -1,4 +1,4 @@
-import { Player, PrismaClient, UserRoot } from "@prisma/client";
+import { Cashier, Player, PrismaClient } from "@prisma/client";
 import readlineSync from "readline-sync";
 import CONFIG from "@/config";
 import { encrypt, hash } from "@/utils/crypt";
@@ -7,12 +7,21 @@ import { CasinoTokenService } from "@/services/casino-token.service";
 const prisma = new PrismaClient();
 
 async function ensureRolesExist() {
-  const roles = await prisma.role.findMany();
-  if (roles.length === 0) {
+  const roles = Object.values(CONFIG.ROLES);
+  const dbRoles = await prisma.role.findMany();
+  if (dbRoles.length === 0) {
     await prisma.role.createMany({
-      data: [{ name: CONFIG.ROLES.AGENT }, { name: CONFIG.ROLES.PLAYER }],
+      data: roles.map((role) => ({ name: role })),
+    });
+  } else {
+    roles.forEach(async (role) => {
+      if (dbRoles.some((r) => r.name === role)) return;
+
+      await prisma.role.create({ data: { name: role } });
     });
   }
+
+  console.log("\nRoles OK 👍\n");
 }
 
 async function createUserRoot() {
@@ -30,19 +39,19 @@ async function createUserRoot() {
     },
   );
 
-  await prisma.userRoot.create({
+  return await prisma.cashier.create({
     data: {
       username: casinoUsername,
       password: encrypt(casinoPassword),
       access: "",
       refresh: "",
-      json_response: "",
       panel_id: -1,
+      handle: `${casinoUsername}`,
     },
   });
 }
 
-async function updateUserRoot(userRoot: UserRoot) {
+async function updateUserRoot(userRoot: Cashier) {
   const casinoUsername = readlineSync.question(
     `Nombre de usuario del agente en el casino [${CONFIG.AUTH.CASINO_PANEL_USER}]:`,
     {
@@ -57,7 +66,7 @@ async function updateUserRoot(userRoot: UserRoot) {
     },
   );
 
-  await prisma.userRoot.update({
+  return await prisma.cashier.update({
     where: { id: userRoot.id },
     data: {
       username: casinoUsername,
@@ -66,10 +75,14 @@ async function updateUserRoot(userRoot: UserRoot) {
   });
 }
 
-async function upsertUserRoot() {
-  const userRoot = await prisma.userRoot.findFirst();
+async function upsertUserRoot(): Promise<Cashier> {
+  const agent = await prisma.player.findFirst({
+    where: { roles: { every: { name: CONFIG.ROLES.AGENT } } },
+    select: { Cashier: true },
+  });
+  let userRoot = agent?.Cashier;
   if (!userRoot) {
-    await createUserRoot();
+    userRoot = await createUserRoot();
   } else {
     const update = readlineSync.question(
       "User root ya existe, actualizar? [Y/n]",
@@ -77,16 +90,17 @@ async function upsertUserRoot() {
         defaultInput: "y",
       },
     );
-    if (update.toLowerCase() === "y") await updateUserRoot(userRoot);
+    if (update.toLowerCase() === "y") userRoot = await updateUserRoot(userRoot);
   }
 
-  const casinoTokenService = new CasinoTokenService();
+  const casinoTokenService = new CasinoTokenService(userRoot);
   await casinoTokenService.login();
 
   console.log("\nUser root OK 👍\n");
+  return userRoot;
 }
 
-async function createAgent(userRoot: UserRoot) {
+async function createAgent(userRoot: Cashier) {
   const localUsername = readlineSync.question(
     "Usuario del agente en panel propio [cmex-admin]: ",
     {
@@ -104,7 +118,7 @@ async function createAgent(userRoot: UserRoot) {
     data: {
       username: localUsername,
       password: await hash(localPassword),
-      panel_id: userRoot.panel_id,
+      panel_id: userRoot.panel_id!,
       roles: {
         connectOrCreate: {
           where: { name: CONFIG.ROLES.AGENT },
@@ -112,12 +126,12 @@ async function createAgent(userRoot: UserRoot) {
         },
       },
       email: "agent@example.com",
+      cashier_id: userRoot.id,
     },
   });
 }
 
-async function updateAgent(agent: Player) {
-  const userRoot = await prisma.userRoot.findFirst();
+async function updateAgent(agent: Player, userRoot: Cashier) {
   const localUsername = readlineSync.question(
     "Usuario del agente en panel propio [cmex-admin]: ",
     {
@@ -136,28 +150,31 @@ async function updateAgent(agent: Player) {
     data: {
       username: localUsername,
       password: await hash(localPassword),
-      panel_id: userRoot!.panel_id,
+      panel_id: userRoot.panel_id!,
+      cashier_id: userRoot.id,
     },
   });
 }
 
-async function upsertAgent() {
-  const userRoot = await prisma.userRoot.findFirst();
-
+async function upsertAgent(userRoot: Cashier) {
   const agent = await prisma.player.findFirst({
     where: { roles: { some: { name: CONFIG.ROLES.AGENT } } },
   });
 
   if (!agent) {
-    await createAgent(userRoot!);
+    await createAgent(userRoot);
   } else {
+    await prisma.player.update({
+      where: { id: agent.id },
+      data: { cashier_id: userRoot.id },
+    });
     const update = readlineSync.question(
       "Las credenciales del agente ya existen, actualizar? [Y/n]",
       {
         defaultInput: "y",
       },
     );
-    if (update.toLowerCase() === "y") await updateAgent(agent);
+    if (update.toLowerCase() === "y") await updateAgent(agent, userRoot);
   }
 
   console.log("\nAgente OK 👍\n");
@@ -165,9 +182,9 @@ async function upsertAgent() {
 async function main() {
   await ensureRolesExist();
 
-  await upsertUserRoot();
+  const userRoot: Cashier = await upsertUserRoot();
 
-  await upsertAgent();
+  await upsertAgent(userRoot);
 }
 
 main();

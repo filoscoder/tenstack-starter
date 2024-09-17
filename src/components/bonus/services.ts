@@ -51,31 +51,32 @@ export class BonusServices extends ResourceService {
     }
   }
 
-  async redeem(
-    bonusId: string,
-    user: Player,
-  ): Promise<BonusRedemptionResult | undefined> {
+  async redeem(bonusId: string, user: Player): Promise<BonusRedemptionResult> {
     let bonus: Bonus = await BonusDAO.authorizeRedemption(bonusId, user);
+    try {
+      return await useTransaction(async (tx) => {
+        bonus = await tx.bonus.update({
+          where: { id: bonusId },
+          data: {
+            status: BONUS_STATUS.REDEEMED,
+          },
+        });
 
-    return await useTransaction(async (tx) => {
-      bonus = await tx.bonus.update({
-        where: { id: bonusId },
-        data: {
-          status: BONUS_STATUS.REDEEMED,
-        },
+        const coinTransferServices = new CoinTransferServices();
+        const coinTransfer = await coinTransferServices.agentToPlayer(
+          bonus.coin_transfer_id,
+          tx,
+        );
+
+        return {
+          coinTransfer,
+          bonus,
+        };
       });
-
-      const coinTransferServices = new CoinTransferServices();
-      const coinTransfer = await coinTransferServices.agentToPlayer(
-        bonus.coin_transfer_id,
-        tx,
-      );
-
-      return {
-        coinTransfer,
-        bonus,
-      };
-    });
+    } catch (e) {
+      await BonusDAO.update(bonusId, { dirty: false });
+      throw e;
+    }
   }
 
   /**

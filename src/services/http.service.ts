@@ -1,15 +1,23 @@
 import axios from "axios";
+import { Cashier } from "@prisma/client";
 import { CasinoTokenService } from "./casino-token.service";
 import { ExternalApiService } from "./external-api.service";
 import { AlquimiaTokenService } from "./alquimia-token.service";
 import CONFIG from "@/config";
 
 export class HttpService extends ExternalApiService {
+  constructor(private agent?: Cashier) {
+    super();
+  }
   /**
    * Expose methods for authenticated agent to call external API.
    */
   public get authedAgentApi() {
-    this.tokenService = new CasinoTokenService();
+    if (!this.agent)
+      throw new SyntaxError(
+        "You need to provide a cashier to use an authed API",
+      );
+    this.tokenService = new CasinoTokenService(this.agent);
     return this.authedApi;
   }
 

@@ -1,4 +1,4 @@
-import { Bonus, Player } from "@prisma/client";
+import { Bonus, Cashier, Player } from "@prisma/client";
 import { AuthServices } from "../auth/services";
 import { PlayersDAO } from "@/db/players";
 import {
@@ -8,6 +8,7 @@ import {
 } from "@/types/request/players";
 import {
   CertainUserResponse,
+  FullUser,
   PlainPlayerResponse,
   RoledPlayer,
 } from "@/types/response/players";
@@ -21,11 +22,13 @@ import { Mail } from "@/helpers/email/email";
 import { TokenDAO } from "@/db/token";
 import { Whatsapp } from "@/notification/whatsapp";
 import CONFIG, { PLAYER_STATUS } from "@/config";
-import { ForbiddenError } from "@/helpers/error";
+import { ForbiddenError, NotFoundException } from "@/helpers/error";
 import { ResourceService } from "@/services/resource.service";
 import { logtailLogger } from "@/helpers/loggers";
 import { AuthResult } from "@/types/response/auth";
 import { BonusDAO } from "@/db/bonus";
+import { CashierDAO } from "@/db/cashier";
+import { prisma } from "@/prisma";
 
 export class PlayerServices extends ResourceService {
   constructor() {
@@ -36,9 +39,12 @@ export class PlayerServices extends ResourceService {
    * @throws if user exists or something goes wrong
    */
   create = async (player: PlayerRequest): Promise<PlainPlayerResponse> => {
+    const cashier = await this.findAgent(player.cashier_id);
+
     const panel_id = await this.createCasinoPlayer(
       player.username,
       player.password,
+      cashier,
     );
 
     const localPlayer = await this.createLocalPlayer(panel_id, player);
@@ -53,13 +59,24 @@ export class PlayerServices extends ResourceService {
     return hidePassword(localPlayer);
   };
 
+  private async findAgent(cashier_id?: string) {
+    const cashier = cashier_id
+      ? await CashierDAO.findFirst({ where: { id: cashier_id } })
+      : await prisma.player.findAgent();
+
+    if (!cashier) throw new NotFoundException("Cajero no encontrado");
+
+    return cashier;
+  }
+
   private async createCasinoPlayer(
     username: string,
     password: string,
+    cashier: Cashier,
   ): Promise<number> {
     const playerLoginUrl = "/accounts/login/";
     const panelSignUpUrl = "/pyramid/create/player/";
-    const { authedAgentApi, playerApi } = new HttpService();
+    const { authedAgentApi, playerApi } = new HttpService(cashier);
 
     let response = await authedAgentApi.post<any>(panelSignUpUrl, {
       username,
@@ -147,6 +164,7 @@ export class PlayerServices extends ResourceService {
         password: await hash(credentials.password),
         panel_id: id,
         email,
+        roles: [CONFIG.ROLES.PLAYER],
       },
     );
   }
@@ -162,8 +180,9 @@ export class PlayerServices extends ResourceService {
     };
   }
 
-  async resetPassword(user: Player, new_password: string): Promise<void> {
-    const { authedAgentApi } = new HttpService();
+  async resetPassword(user: FullUser, new_password: string): Promise<void> {
+    const agent = await prisma.player.findAgent();
+    const { authedAgentApi } = new HttpService(agent);
     const url = `users/${user.panel_id}/change-password/`;
 
     const response = await authedAgentApi.post<any>(url, { new_password });
@@ -207,7 +226,8 @@ export class PlayerServices extends ResourceService {
   async getBalance(player_id: string, player: RoledPlayer): Promise<number> {
     await PlayersDAO.authorizeShow(player, player_id);
 
-    const httpService = new HttpService();
+    const agent = await prisma.player.findAgent();
+    const httpService = new HttpService(agent);
     const response = await httpService.authedAgentApi.get<CertainUserResponse>(
       `/pyramid/certain-user/${player.panel_id}`,
     );
