@@ -456,16 +456,6 @@ Método      |`GET`
 Devuelve    |[`Balance`](#balance)
 Requiere rol| agent
 
-### Setear Guardia 🔒
-Indicar que alguien está al teléfono para que el bot muestre el menú "contactanos".
-
-|Endpoint| `/agent/on-call`|
----|---|
-Método      |`POST`
-Body (json) |[`OnCallRequest`](#oncallrequest)
-Devuelve    |200 OK
-Requiere rol| agent
-
 ### Ver Guardia 🔒
 Indicar que alguien está al teléfono para que el bot muestre el menú "contactanos".
 

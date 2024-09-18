@@ -15,7 +15,6 @@ import { NotFoundException, UnauthorizedError } from "@/helpers/error";
 import { PlayersDAO } from "@/db/players";
 import CONFIG, { PAYMENT_STATUS } from "@/config";
 import { ERR } from "@/config/errors";
-import { BotFlowsDAO } from "@/db/bot-flows";
 import {
   AlqCuentaAhorroResponse,
   AlqStatusTx,
@@ -128,16 +127,6 @@ export class AgentServices {
     return {
       balance: Number(account.saldo_ahorro),
     };
-  }
-
-  static async setOnCallBotFlow(active: boolean): Promise<void> {
-    await BotFlowsDAO.setOnCall(active);
-  }
-
-  static async getOnCallStatus(): Promise<boolean> {
-    const botFlow = await BotFlowsDAO.findOnCallFlow();
-
-    return !!botFlow;
   }
 
   static async getSupportNumbers(): Promise<SupportResponse> {
