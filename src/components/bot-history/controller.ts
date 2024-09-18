@@ -19,18 +19,12 @@ export class BotHistoryController {
         orderBy,
       );
 
-      const total = await BotHistoryDAO.count();
+      const { count } = (await BotHistoryDAO.count())[0];
+      console.log("TOTAL", count);
 
-      res.status(OK).json(apiResponse({ result, total }));
+      res.status(OK).json(apiResponse({ result, total: Number(count) }));
     } catch (e) {
       next(e);
     }
   }
-
-  //   static async show(req: Req, res: Res, next: NextFn) {
-  //     try {
-  //     } catch (e) {
-  //       next(e);
-  //     }
-  //   }
 }

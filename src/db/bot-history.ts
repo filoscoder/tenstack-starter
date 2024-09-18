@@ -1,17 +1,19 @@
-import { BotHistory } from "@prisma/client";
+import { BotHistory, Prisma } from "@prisma/client";
 import { prisma } from "@/prisma";
 import { OrderBy } from "@/types/request/players";
 
 export class BotHistoryDAO {
-  static count() {
-    return prisma.botHistory.count();
+  static count(): Promise<{ count: number }[]> {
+    return prisma.$queryRaw(Prisma.sql`
+      SELECT COUNT(DISTINCT(\`from\`)) AS count FROM BOT_HISTORY`);
   }
+
   static _getAll(
     page: number,
     itemsPerPage: number,
     search?: string,
     orderBy?: OrderBy<BotHistory>,
-  ): Promise<BotHistory[]> {
+  ): Promise<Pick<BotHistory, "id" | "from" | "answer" | "created_at">[]> {
     return prisma.botHistory.findMany({
       skip: page * itemsPerPage,
       take: itemsPerPage,
@@ -19,7 +21,8 @@ export class BotHistoryDAO {
         OR: [{ from: { contains: search } }, { answer: { contains: search } }],
       },
       orderBy,
-      //   include: { Player: true, CoinTransfer: { select: { status: true } } },
+      distinct: "from",
+      select: { id: true, from: true, answer: true, created_at: true },
     });
   }
 
