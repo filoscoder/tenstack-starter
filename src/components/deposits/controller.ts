@@ -106,6 +106,7 @@ export class DepositController {
         deposit_id,
         request,
       );
+      result.Player = hidePassword(result.Player);
       res.status(OK).json(apiResponse(result));
     } catch (e) {
       next(e);

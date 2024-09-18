@@ -63,12 +63,14 @@ export class DepositServices extends ResourceService {
     agent: Player & { roles: Role[] },
     deposit_id: string,
     request: SetDepositStatusRequest,
-  ): Promise<Deposit> {
+  ): Promise<Deposit & { Player: Player }> {
     await DepositsDAO.authorizeUpdate(deposit_id, agent);
 
+    // @ts-ignore
     return await DepositsDAO.update({
       where: { id: deposit_id },
       data: { ...request, dirty: false },
+      include: { Player: true },
     });
   }
 
