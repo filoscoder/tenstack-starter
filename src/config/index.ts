@@ -112,6 +112,8 @@ const CONFIG = {
   },
 } as const;
 
+export default CONFIG;
+
 export enum PLAYER_STATUS {
   ACTIVE = "ACTIVO",
   BANNED = "BLOQUEADO",
@@ -168,4 +170,12 @@ export enum ENVIRONMENTS {
   STAGING = "staging",
 }
 
-export default CONFIG;
+export enum GLOBAL_SWITCH_STATE {
+  ON = "on",
+  OFF = "off",
+}
+
+export enum BLACKLIST_METHOD {
+  ADD = "add",
+  REMOVE = "remove",
+}

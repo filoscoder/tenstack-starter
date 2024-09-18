@@ -107,4 +107,9 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "cashout_unavailable",
     description: "No hay saldo disponible",
   },
+  BOT_API_ERROR: {
+    status: 500,
+    code: "bot_api_error",
+    description: "Error en la api interna del bot",
+  },
 };
