@@ -50,15 +50,6 @@ export const validateBankAccountUpdate = () => {
   });
 };
 
-export const validateOnCallRequest = () =>
-  checkSchema({
-    active: {
-      in: ["body"],
-      isBoolean: true,
-      optional: false,
-    },
-  });
-
 export const validateSupportRequest = () =>
   checkSchema({
     bot_phone: {

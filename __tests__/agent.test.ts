@@ -274,6 +274,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "created_at",
         "updated_at",
         "Player",
+        "CoinTransfer",
       ]);
       expect(response.body.data.result[0].Player.password).toBe("********");
     });
@@ -440,77 +441,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(NOT_FOUND);
-    });
-  });
-
-  describe("POST: /agent/on-call", () => {
-    it("Should set on call status", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .set("Authorization", `Bearer ${access}`)
-
-        .send({
-          active: true,
-        });
-
-      expect(response.status).toBe(OK);
-      expect(response.body.data).toBeUndefined();
-    });
-
-    it("Should return 400", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .set("Authorization", `Bearer ${access}`)
-
-        .send({
-          active: true,
-          unknownField: "foo",
-        });
-
-      expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.data[0].type).toBe("unknown_fields");
-    });
-
-    it("Should return 401", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .send({ active: true });
-
-      expect(response.status).toBe(UNAUTHORIZED);
-    });
-
-    it("Should return 403", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .send({ active: true })
-        .set("Authorization", `Bearer ${playerAccessToken}`);
-
-      expect(response.status).toBe(FORBIDDEN);
-    });
-  });
-
-  describe("GET: /agent/on-call", () => {
-    it("Should return on call status", async () => {
-      const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .set("Authorization", `Bearer ${access}`);
-
-      expect(response.status).toBe(OK);
-      expect(response.body.data).toBeTruthy();
-    });
-
-    it("Should return 401", async () => {
-      const response = await agent.get(`/app/${CONFIG.APP.VER}/agent/on-call`);
-
-      expect(response.status).toBe(UNAUTHORIZED);
-    });
-
-    it("Should return 403", async () => {
-      const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .set("Authorization", `Bearer ${playerAccessToken}`);
-
-      expect(response.status).toBe(FORBIDDEN);
     });
   });
 

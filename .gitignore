@@ -113,12 +113,12 @@ dist
 # My-SQL  Data
 mysql-data
 mariadb-data
+mariadb-data2
 
 # Bot stuff
 *.qr.png
 
 test_setup.sh
-
 .vscode
-
 backup
+docker-compose.yml

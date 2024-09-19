@@ -5,7 +5,6 @@ import { AgentController } from "@/components/agent/controller";
 import { validateCredentials } from "@/components/players/validators";
 import {
   validateBankAccountUpdate,
-  validateOnCallRequest,
   validatePaymentIndex,
   validateResetPasswordRequest,
   validateSupportRequest,
@@ -53,14 +52,6 @@ agentRouter.post(
 );
 agentRouter.get("/balance/casino", AgentController.getCasinoBalance);
 agentRouter.get("/balance/alquimia", AgentController.getAlqBalance);
-agentRouter.post(
-  "/on-call",
-  validateOnCallRequest(),
-  checkExact(),
-  throwIfBadRequest,
-  AgentController.setOnCallBotFlow,
-);
-agentRouter.get("/on-call", AgentController.getOnCallStatus);
 agentRouter.get("/support", AgentController.getSupportNumbers);
 agentRouter.post(
   "/support",

@@ -24,20 +24,20 @@ Comes with:
 <details>
   <summary>Jugadores</summary>
 
-  + [Listar Jugadores](#listar-jugadores-)
-  + [Ver Jugador](#ver-jugador-)
-  + [Crear Jugador](#crear-jugador)
-  + [Editar Jugador](#editar-jugador-)
-  + [Login de Jugador](#login-jugador)
-  + [Consultar Balance](#consultar-balance-)
-  + [Consultar Bono](#consultar-bono-)
+  + [Listar Jugadores](#listar-jugadores-) ✅
+  + [Ver Jugador](#ver-jugador-) ❓
+  + [Crear Jugador](#crear-jugador) ✅
+  + [Editar Jugador](#editar-jugador-) ✅
+  + [Login de Jugador](#login-jugador) ✅
+  + [Consultar Balance](#consultar-balance-) ✅
+  + [Consultar Bono](#consultar-bono-) ✅
 </details>
 
 <details>
   <summary>Cuentas Bancarias</summary>
   
   + [Ver Cuentas Bancarias](#ver-cuentas-bancarias-)
-  + [Crear Cuenta Bancaria](#crear-cuenta-bancaria-)
+  + [Crear Cuenta Bancaria](#crear-cuenta-bancaria-) ✅
   + [Actualizar Cuenta Bancaria](#actualizar-cuenta-bancaria-)
   + [Eliminar Cuenta Bancaria](#eliminar-cuenta-bancaria-)
 </details>
@@ -45,7 +45,7 @@ Comes with:
 <details>
   <summary>Depositos (jugador ➡ plataforma)</summary>
 
-  + [Cargar Fichas](#cargar-fichas-) (instanciar depósito)
+  + [Cargar Fichas](#cargar-fichas-) (instanciar depósito) ✅
   + [Ver Depósitos Pendientes](#ver-depósitos-pendientes-)
   + [Ver Depósito](#ver-depósito-)
   + [Listar Depósitos](#listar-depósitos-)
@@ -56,7 +56,7 @@ Comes with:
 <details>
   <summary>Pagos (plataforma ➡ jugador)</summary>
 
-  + [Retirar Premios](#retirar-premios-) (instanciar pago)
+  + [Retirar Premios](#retirar-premios-) (instanciar pago) ✅
   + [Listar Pagos](#listar-pagos-)
 </details>
 
@@ -83,13 +83,23 @@ Comes with:
 
   + [Ver QR](#ver-qr-)
   + [Ver bots](#ver-qr-)
+  + [Blacklist](#blacklist-)
+  + [Ver Blacklist](#ver-blacklist-)
+  + [Encender / Apagar](#encender--apagar-)
+  + [Ver Estado](#ver-estado-)
+</details>
+
+<details>
+<summary>Bot History</summary>
+
+  + [Listar Bot History](#listar-bot-history)
 </details>
 
 <details>
   <summary>Auth</summary>
 
   + [Refrescar Token](#refrescar-token)
-  + [Logout](#logout-)
+  + [Logout](#logout-) ✅
   + [Olvidé mi contraseña](#olvide-mi-contraseña)
   + [Reestablecer contraseña](#reestablecer-contraseña)
   + [Cambiar contraseña](#cambiar-contraseña-)
@@ -379,7 +389,7 @@ Requiere rol| agent
 |Endpoint| `/transactions/deposit/:id`|
 ---|---|
 Método      |`GET`
-Devuelve    |[`Deposit[]`](#deposit)
+Devuelve    |[`Deposit & { Player: Player}[]`](#deposit)
 Requiere rol| agent
 
 ### Listar Depósitos 🔒
@@ -446,16 +456,6 @@ Método      |`GET`
 Devuelve    |[`Balance`](#balance)
 Requiere rol| agent
 
-### Setear Guardia 🔒
-Indicar que alguien está al teléfono para que el bot muestre el menú "contactanos".
-
-|Endpoint| `/agent/on-call`|
----|---|
-Método      |`POST`
-Body (json) |[`OnCallRequest`](#oncallrequest)
-Devuelve    |200 OK
-Requiere rol| agent
-
 ### Ver Guardia 🔒
 Indicar que alguien está al teléfono para que el bot muestre el menú "contactanos".
 
@@ -504,6 +504,52 @@ Requiere rol| agent
 
 > Omitir el parametro `:name` para que devuelva un array con los nombres de los bots.
 > Cualquier caracter que no esté en el rango [a-b] es eliminado del parametro `:name`. Ademas `:name` debe tener entre 1 y 10 caracteres.
+
+### Blacklist 🔒
+
+|Endpoint| `/bot/blacklist`|
+---|---|
+Método      | `POST`
+Body (json) |[`BlacklistRequest`](#blacklistrequest)
+Devuelve    | 200 OK
+Requiere rol| agent
+
+### Ver Blacklist 🔒
+
+|Endpoint| `/bot/blacklist`|
+---|---|
+Método      | `GET`
+Devuelve    | `string[]` (la lista de números)
+Requiere rol| agent
+
+### Encender / Apagar 🔒
+
+|Endpoint| `//bot/switch`|
+---|---|
+Método      | `POST`
+Body (json) |[`BotSwitchRequest`](#botswitchrequest)
+Devuelve    | 200 OK
+Requiere rol| agent
+
+### Ver Estado 🔒
+Muestra si el bot está encendido o apagado.
+
+|Endpoint| `/bot/switch`|
+---|---|
+Método      | `GET`
+Devuelve    | [`GLOBAL_SWITCH_STATE`](#global_switch_state)
+
+Bot History
+-----------
+
+### Listar Bot History
+
+|Endpoint| `/bot-history`|
+---|---|
+Método      | `GET`
+Query string| [`ResourceListQueryString`](#ResourceListQueryString)
+Devuelve    |[`BotHistory[]`]()
+
 
 Analytics
 ---------
@@ -817,7 +863,6 @@ Requiere rol| cashier
   player_id: string
   currency: string
   dirty: boolean
-  // Esperando verificacion | verificacion fallida | verificado | eliminado por agente
   status: "pending"|"unverified"|"verified"|"deleted"
   tracking_number: string
   amount: number
@@ -1054,6 +1099,44 @@ Requiere rol| cashier
   total_bets: string;
   total_wins: string;
   total_profit: string;
+}
+```
+
+### BlacklistRequest
+```typescript
+{
+  number: string,
+  method: 'add' | 'remove'
+}
+```
+
+### BotSwitchRequest
+```typescript
+{
+  state: GLOBAL_SWITCH_STATE
+}
+```
+
+### GLOBAL_SWITCH_STATE 
+```typescript
+enum {
+  ON = "on",
+  OFF = "off",
+}
+```
+
+### BotHistory
+```typescript
+{
+  id: string 
+  ref: string
+  keyword?: string
+  answer: string 
+  refSerialize: string
+  from: string
+  options: any
+  created_at: string
+  updated_at: string
 }
 ```
 

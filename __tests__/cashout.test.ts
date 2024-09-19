@@ -2,6 +2,7 @@ import { BankAccount, Player, PrismaClient } from "@prisma/client";
 import { SuperAgentTest } from "supertest";
 import { BAD_REQUEST, OK, TOO_MANY_REQUESTS, UNAUTHORIZED } from "http-status";
 import { initAgent } from "./helpers";
+import { prepareCashoutTest } from "./mocks/payment/create";
 import { TokenPair } from "@/types/response/jwt";
 import { AuthServices } from "@/components/auth/services";
 import CONFIG from "@/config";
@@ -17,7 +18,13 @@ beforeAll(initialize);
 afterAll(cleanUp);
 
 describe("[UNIT] => CASHOUT", () => {
-  describe("POST: /transactions/cashout", () => {
+  describe.only("POST: /transactions/cashout", () => {
+    beforeAll(() => {
+      prepareCashoutTest();
+    });
+
+    afterEach(() => jest.clearAllMocks());
+
     it("Should create a withdrawal", async () => {
       const result = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/cashout`)
