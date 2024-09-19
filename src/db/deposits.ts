@@ -3,7 +3,7 @@ import { DefaultArgs } from "@prisma/client/runtime/library";
 import { DepositRequest } from "@/types/request/transfers";
 import { ForbiddenError, NotFoundException } from "@/helpers/error";
 import { hidePassword } from "@/utils/auth";
-import CONFIG, { DEPOSIT_STATUS } from "@/config";
+import CONFIG, { COIN_TRANSFER_STATUS, DEPOSIT_STATUS } from "@/config";
 import { OrderBy } from "@/types/request/players";
 
 const prisma = new PrismaClient();
@@ -212,8 +212,14 @@ export class DepositsDAO {
     tracking_number?: string,
   ) {
     await prisma.$transaction(async (tx) => {
-      const deposit = await tx.deposit.findFirst({ where: { id: deposit_id } });
+      const deposit = await tx.deposit.findFirst({
+        where: { id: deposit_id },
+        include: { CoinTransfer: true },
+      });
       if (!deposit) throw new NotFoundException("Deposit not found");
+
+      if (deposit.CoinTransfer?.status === COIN_TRANSFER_STATUS.COMPLETED)
+        throw new ForbiddenError("Deposito ya acreditado");
 
       if (deposit.status === DEPOSIT_STATUS.VERIFIED)
         throw new ForbiddenError("El deposito ya está verificado");

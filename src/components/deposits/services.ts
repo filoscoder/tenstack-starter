@@ -43,7 +43,11 @@ export class DepositServices extends ResourceService {
     request: DepositRequest,
   ) {
     const deposit = await DepositsDAO._getById(deposit_id);
-    if (deposit?.status === DEPOSIT_STATUS.VERIFIED) return deposit;
+    if (
+      deposit?.status === DEPOSIT_STATUS.VERIFIED &&
+      deposit.CoinTransfer.status === COIN_TRANSFER_STATUS.PENDING
+    )
+      return deposit;
 
     await DepositsDAO.authorizeUpdate(
       deposit_id,
