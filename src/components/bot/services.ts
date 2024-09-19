@@ -5,7 +5,7 @@ import { ERR } from "@/config/errors";
 import { CustomError } from "@/helpers/error/CustomError";
 
 export class BotServices {
-  static BASE_URL = CONFIG.INTERNAL.BOT_API_BASE_URL;
+  private static BASE_URL = CONFIG.INTERNAL.BOT_API_BASE_URL;
 
   static showNames(): string[] {
     const paths = CONFIG.BOT.QR_PATHS.trim().split("\n");
