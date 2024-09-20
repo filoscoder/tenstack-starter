@@ -9,6 +9,7 @@ export function cors(req: Req, res: Res, next: NextFn) {
   if (allowedOriginsArray.includes(origin)) {
     res.header("Access-Control-Allow-Origin", origin);
     res.header("Access-Control-Allow-Methods", "GET, POST");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   }
   next();
 }
