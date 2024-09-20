@@ -1,4 +1,4 @@
-import cors from "cors";
+// import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -8,16 +8,14 @@ import cookieParser from "cookie-parser";
 import CONFIG from "./config";
 import { AuthServices } from "./components/auth/services";
 import { exposeHeaders } from "./middlewares/exposeHeaders";
+import { cors } from "./middlewares/cors";
 import * as errorHandler from "@/middlewares/errorHandler";
 import mainRouter from "@/routes";
 
 export const createApp = (): express.Application => {
   const app = express();
-  const allowedOrigin = CONFIG.APP.ENV?.includes("staging")
-    ? `http://localhost:${CONFIG.APP.PORT}`
-    : CONFIG.APP.ALLOWED_ORIGIN;
 
-  allowedOrigin !== "" && app.use(cors({ origin: allowedOrigin }));
+  app.use(cors);
   app.use(exposeHeaders);
   app.use(helmet());
   app.use(express.json());
