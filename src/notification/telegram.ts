@@ -15,6 +15,7 @@ export class Telegram {
       await axios.post(this.url, {
         chat_id: this.CHAT_ID,
         text: message,
+        parse_mode: "MarkdownV2",
       });
     } catch (e) {
       if (CONFIG.LOG.LEVEL === "debug") console.error(e);

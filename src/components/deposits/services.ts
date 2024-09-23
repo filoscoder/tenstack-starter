@@ -164,7 +164,7 @@ export class DepositServices extends ResourceService {
 
   private notifyDepositCreation(player: Player, deposit: DepositRequest) {
     return Telegram.arturito(
-      "Nuevo deposito de usuario " +
+      "*Nuevo deposito* de usuario " +
         player.username +
         " por una cantidad de " +
         deposit.amount +
@@ -177,7 +177,7 @@ export class DepositServices extends ResourceService {
   }
 
   private notifyDepositVerification(deposit: Deposit, amount?: number) {
-    const result = amount ? "verificado" : "no verificado";
+    const result = amount ? "*verificado*" : "*no verificado*";
     return Telegram.arturito(
       `Depósito Nº ${deposit.tracking_number} ${result}`,
     );

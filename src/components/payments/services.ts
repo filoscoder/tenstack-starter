@@ -55,9 +55,9 @@ export class PaymentServices extends ResourceService {
 
   private notifyPaymentCreation(player: Player, request: CashoutRequest) {
     return Telegram.arturito(
-      "Usuario " +
+      "*Nuevo retiro* de usuario " +
         player.username +
-        " ha solicitado un retiro de " +
+        " por una cantidad de " +
         request.amount +
         " " +
         player.balance_currency,

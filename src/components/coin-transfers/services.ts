@@ -17,6 +17,7 @@ import { CoinTransferResult } from "@/types/response/transfers";
 import { parseTransferResult } from "@/utils/parser";
 import { useTransaction } from "@/helpers/useTransaction";
 import { prisma } from "@/prisma";
+import { Telegram } from "@/notification/telegram";
 
 export class CoinTransferServices {
   /**
@@ -118,8 +119,11 @@ export class CoinTransferServices {
     const url = "/backoffice/transactions/";
     const result = await authedAgentApi.post<any>(url, transferDetails);
 
+    console.log("RESULT", result.data);
+
     if (
-      result.data.code == "insuficient_balance" &&
+      (result.data.code == "insuficient_balance" ||
+        result.data.code == "transaction_insufficient_balance") &&
       transferDetails.type === "deposit"
     )
       await this.notifyInsuficientBalance(
@@ -172,10 +176,17 @@ export class CoinTransferServices {
     transferAmount: number,
     currentBalance: number,
   ): Promise<void> {
-    const difference = transferAmount - currentBalance;
+    const difference = Math.ceil(transferAmount - currentBalance);
+    const message =
+      "Necesitas recargar " +
+      difference +
+      " fichas para completar transferencias pendientes\\.";
+
+    Telegram.arturito("*Fichas insuficientes*\n\n" + message);
+
     return WebPush.agent({
       title: "Fichas insuficientes",
-      body: `Necesitas recargar ${difference} fichas para completar transferencias pendientes.`,
+      body: message,
       tag: CONFIG.SD.INSUFICIENT_CREDITS,
     });
   }
