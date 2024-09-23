@@ -10,6 +10,7 @@ import { HttpService } from "@/services/http.service";
 import { AlqMovementResponse } from "@/types/response/alquimia";
 import { ResourceService } from "@/services/resource.service";
 import { BanxicoService } from "@/services/banxico.service";
+import { Telegram } from "@/notification/telegram";
 
 export class DepositServices extends ResourceService {
   constructor() {
@@ -21,6 +22,8 @@ export class DepositServices extends ResourceService {
    */
   async create(player: PlainPlayerResponse, request: DepositRequest) {
     await DepositsDAO.authorizeCreation(request);
+
+    this.notifyDepositCreation(player, request);
 
     const deposit = await DepositsDAO.create({
       data: {
@@ -82,6 +85,8 @@ export class DepositServices extends ResourceService {
     deposit: Deposit,
   ): Promise<Deposit & { Player: Player & { Bonus: Bonus | null } }> {
     const amount = await this.verifyThroughBanxico(deposit);
+
+    this.notifyDepositVerification(deposit, amount);
 
     if (amount) return await this.markAsVerified(deposit, amount);
 
@@ -155,6 +160,27 @@ export class DepositServices extends ResourceService {
       if (CONFIG.LOG.LEVEL === "debug") console.error(e);
       return;
     }
+  }
+
+  private notifyDepositCreation(player: Player, deposit: DepositRequest) {
+    return Telegram.arturito(
+      "Nuevo deposito de usuario " +
+        player.username +
+        " por una cantidad de " +
+        deposit.amount +
+        " " +
+        player.balance_currency +
+        "\n\n" +
+        "Número de seguimiento: " +
+        deposit.tracking_number,
+    );
+  }
+
+  private notifyDepositVerification(deposit: Deposit, amount?: number) {
+    const result = amount ? "verificado" : "no verificado";
+    return Telegram.arturito(
+      `Depósito Nº ${deposit.tracking_number} ${result}`,
+    );
   }
 
   private markAsVerified(deposit: Deposit, amount: number) {
