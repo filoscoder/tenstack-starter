@@ -2,7 +2,10 @@ import { BankAccount, Player, PrismaClient } from "@prisma/client";
 import { SuperAgentTest } from "supertest";
 import { BAD_REQUEST, OK, TOO_MANY_REQUESTS, UNAUTHORIZED } from "http-status";
 import { initAgent } from "./helpers";
-import { prepareCashoutTest } from "./mocks/payment/create";
+import {
+  mockNotifPaymentStatus,
+  prepareCashoutTest,
+} from "./mocks/payment/create";
 import { TokenPair } from "@/types/response/jwt";
 import { AuthServices } from "@/components/auth/services";
 import CONFIG from "@/config";
@@ -32,6 +35,7 @@ describe("[UNIT] => CASHOUT", () => {
         .set("Authorization", `Bearer ${tokens[0].access}`);
 
       expect(result.status).toBe(OK);
+      expect(mockNotifPaymentStatus).toHaveBeenCalledTimes(1);
     });
 
     it("Should return 429 too_many_requests", async () => {

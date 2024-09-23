@@ -9,7 +9,10 @@ import {
   UNAUTHORIZED,
 } from "http-status";
 import { initAgent } from "./helpers";
-import { prepareDepositTest } from "./mocks/deposit/create";
+import {
+  mockNotifDepositStatus,
+  prepareDepositTest,
+} from "./mocks/deposit/create";
 import { TokenPair } from "@/types/response/jwt";
 import { AuthServices } from "@/components/auth/services";
 import CONFIG, { COIN_TRANSFER_STATUS, DEPOSIT_STATUS } from "@/config";
@@ -41,6 +44,7 @@ describe("[UNIT] => DEPOSIT", () => {
 
       expect(response.status).toBe(OK);
       expect(response.body.data.deposit).toBeDefined();
+      expect(mockNotifDepositStatus).toHaveBeenCalledTimes(2);
 
       deposits[0] = response.body.data.deposit;
     });

@@ -1,6 +1,7 @@
 import { Telegram } from "@/notification/telegram";
 
+export const mockNotifDepositStatus = jest.fn();
+
 export function prepareDepositTest() {
-  const mockNotif = jest.fn();
-  jest.spyOn(Telegram, "arturito").mockImplementation(mockNotif);
+  jest.spyOn(Telegram, "arturito").mockImplementation(mockNotifDepositStatus);
 }
