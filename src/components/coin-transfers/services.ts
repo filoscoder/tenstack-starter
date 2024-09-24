@@ -119,8 +119,6 @@ export class CoinTransferServices {
     const url = "/backoffice/transactions/";
     const result = await authedAgentApi.post<any>(url, transferDetails);
 
-    console.log("RESULT", result.data);
-
     if (
       (result.data.code == "insuficient_balance" ||
         result.data.code == "transaction_insufficient_balance") &&
