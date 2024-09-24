@@ -5,17 +5,19 @@ import morgan from "morgan";
 import timeout from "connect-timeout";
 import passport from "passport";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import CONFIG from "./config";
 import { AuthServices } from "./components/auth/services";
 import { exposeHeaders } from "./middlewares/exposeHeaders";
-import { cors } from "./middlewares/cors";
+// import { cors } from "./middlewares/cors";
+import { corsOptions } from "./middlewares/corsOptions";
 import * as errorHandler from "@/middlewares/errorHandler";
 import mainRouter from "@/routes";
 
 export const createApp = (): express.Application => {
   const app = express();
 
-  app.use(cors);
+  app.use(cors(corsOptions));
   app.use(exposeHeaders);
   app.use(helmet());
   app.use(express.json());
