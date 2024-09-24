@@ -1,3 +1,4 @@
+import { after } from "node:test";
 import { BankAccount, Deposit, Player, PrismaClient } from "@prisma/client";
 import { SuperAgentTest } from "supertest";
 import {
@@ -8,6 +9,10 @@ import {
   UNAUTHORIZED,
 } from "http-status";
 import { initAgent } from "./helpers";
+import {
+  mockNotifDepositStatus,
+  prepareDepositTest,
+} from "./mocks/deposit/create";
 import { TokenPair } from "@/types/response/jwt";
 import { AuthServices } from "@/components/auth/services";
 import CONFIG, { COIN_TRANSFER_STATUS, DEPOSIT_STATUS } from "@/config";
@@ -28,6 +33,9 @@ afterAll(cleanUp);
 
 describe("[UNIT] => DEPOSIT", () => {
   describe("POST: /transactions/deposit", () => {
+    beforeAll(() => prepareDepositTest());
+    after(() => jest.clearAllMocks());
+
     it("Should create a deposit", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/transactions/deposit`)
@@ -36,6 +44,7 @@ describe("[UNIT] => DEPOSIT", () => {
 
       expect(response.status).toBe(OK);
       expect(response.body.data.deposit).toBeDefined();
+      expect(mockNotifDepositStatus).toHaveBeenCalledTimes(2);
 
       deposits[0] = response.body.data.deposit;
     });

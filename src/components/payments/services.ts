@@ -1,4 +1,4 @@
-import { CoinTransfer } from "@prisma/client";
+import { CoinTransfer, Player } from "@prisma/client";
 import { BonusServices } from "../bonus/services";
 import { CoinTransferServices } from "../coin-transfers/services";
 import { PaymentsDAO } from "@/db/payments";
@@ -7,6 +7,7 @@ import { PlainPlayerResponse } from "@/types/response/players";
 import { ResourceService } from "@/services/resource.service";
 import { COIN_TRANSFER_STATUS, PAYMENT_STATUS } from "@/config";
 import { useTransaction } from "@/helpers/useTransaction";
+import { Telegram } from "@/notification/telegram";
 
 export class PaymentServices extends ResourceService {
   constructor() {
@@ -22,7 +23,7 @@ export class PaymentServices extends ResourceService {
   ): Promise<CoinTransfer | undefined> {
     await PaymentsDAO.authorizeCreation(request.bank_account, player.id);
 
-    return await useTransaction(async (tx) => {
+    const result = await useTransaction(async (tx) => {
       const payment = await tx.payment.create({
         data: {
           Player: { connect: { id: player.id } },
@@ -46,5 +47,20 @@ export class PaymentServices extends ResourceService {
       );
       return coinTransfer;
     });
+
+    this.notifyPaymentCreation(player, request);
+
+    return result;
+  }
+
+  private notifyPaymentCreation(player: Player, request: CashoutRequest) {
+    return Telegram.arturito(
+      "*Nuevo retiro* de usuario " +
+        player.username +
+        " por una cantidad de " +
+        request.amount +
+        " " +
+        player.balance_currency,
+    );
   }
 }
