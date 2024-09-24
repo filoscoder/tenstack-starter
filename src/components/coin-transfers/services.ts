@@ -120,14 +120,14 @@ export class CoinTransferServices {
     const result = await authedAgentApi.post<any>(url, transferDetails);
 
     if (
-      (result.data.code == "insuficient_balance" ||
-        result.data.code == "transaction_insufficient_balance") &&
+      result.data.code.includes("insuficient_balance") &&
       transferDetails.type === "deposit"
-    )
+    ) { 
       await this.notifyInsuficientBalance(
         transferDetails.amount,
         result.data.variables.balance_amount,
       );
+    }
 
     if (result.status !== 201 && result.status !== 400) {
       if (CONFIG.LOG.LEVEL === "debug") console.log(result.data);
