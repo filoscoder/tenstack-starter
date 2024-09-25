@@ -1,5 +1,6 @@
 import { CorsOptions } from "cors";
 import CONFIG from "@/config";
+import { CustomError } from "@/helpers/error/CustomError";
 
 export const corsOptions: CorsOptions = {
   origin: (origin, cb) => {
@@ -11,6 +12,6 @@ export const corsOptions: CorsOptions = {
 
     if (allowedOrigins?.includes(origin)) return cb(null, true);
 
-    cb(new Error("not allowed by CORS"));
+    cb(new CustomError({ status: 400, code: "cors", description: "" }), false);
   },
 };

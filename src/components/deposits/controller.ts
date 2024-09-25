@@ -1,5 +1,5 @@
 import { OK } from "http-status";
-import { Bonus, CoinTransfer, Deposit, Player } from "@prisma/client";
+import { Deposit, Player } from "@prisma/client";
 import { BonusServices } from "../bonus/services";
 import { CoinTransferServices } from "../coin-transfers/services";
 import { DepositServices } from "./services";
@@ -11,7 +11,7 @@ import {
 } from "@/types/request/transfers";
 import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 import { hidePassword } from "@/utils/auth";
-import { DEPOSIT_STATUS } from "@/config";
+import { COIN_TRANSFER_STATUS, DEPOSIT_STATUS } from "@/config";
 import { DepositResult } from "@/types/response/transfers";
 import { useTransaction } from "@/helpers/useTransaction";
 
@@ -51,10 +51,21 @@ export class DepositController {
       next(err);
     }
   };
+
   /**
    * Create new deposit or verify existing
    */
   static readonly upsert = async (req: Req, res: Res, next: NextFn) => {
+    const deposit_id = req.params.id;
+
+    if (deposit_id) {
+      this.update(req, res, next);
+    } else {
+      this.create(req, res, next);
+    }
+  };
+
+  private static readonly update = async (req: Req, res: Res, next: NextFn) => {
     const deposit_id = req.params.id;
     const request: Omit<DepositRequest, "player_id"> = req.body;
     const player = req.user!;
@@ -62,35 +73,63 @@ export class DepositController {
     const depositServices = new DepositServices(),
       coinTransferServices = new CoinTransferServices(),
       bonusServices = new BonusServices();
-    let deposit:
-        | (Deposit & { Player: Player & { Bonus: Bonus | null } })
-        | undefined,
-      bonus: Bonus | undefined,
-      coinTransfer: CoinTransfer | undefined;
 
     try {
-      if (deposit_id) {
-        deposit = await depositServices.update(player, deposit_id, request);
-      } else {
-        deposit = await depositServices.create(player, request);
-      }
-
-      if (deposit.status === DEPOSIT_STATUS.VERIFIED) {
-        coinTransfer = await useTransaction((tx) =>
-          coinTransferServices.agentToPlayer(deposit!.coin_transfer_id, tx),
-        ).catch(() => undefined);
-        bonus = await bonusServices.load(
-          deposit.amount,
-          deposit.Player.Bonus?.id,
-        );
-      }
-
+      const deposit = await depositServices.update(player, deposit_id, request);
       deposit.Player = hidePassword(deposit.Player);
-      res
+
+      if (deposit.CoinTransfer?.status === COIN_TRANSFER_STATUS.COMPLETED)
+        return res
+          .status(OK)
+          .json(apiResponse({ deposit, coinTransfer: deposit.CoinTransfer }));
+
+      const coinTransfer = await useTransaction((tx) =>
+        coinTransferServices.agentToPlayer(deposit!.coin_transfer_id, tx),
+      ).catch(() => undefined);
+
+      const bonus = await bonusServices.load(
+        deposit.amount,
+        deposit.Player.Bonus?.id,
+      );
+
+      return res.status(OK).json(apiResponse({ deposit, bonus, coinTransfer }));
+    } catch (e) {
+      next(e);
+      return;
+    }
+  };
+
+  private static readonly create = async (req: Req, res: Res, next: NextFn) => {
+    const request: Omit<DepositRequest, "player_id"> = req.body;
+    const player = req.user!;
+
+    const depositServices = new DepositServices(),
+      coinTransferServices = new CoinTransferServices(),
+      bonusServices = new BonusServices();
+
+    try {
+      const deposit = await depositServices.create(player, request);
+      deposit.Player = hidePassword(deposit.Player);
+
+      if (deposit.status !== DEPOSIT_STATUS.VERIFIED) {
+        return res.status(OK).json(apiResponse({ deposit }));
+      }
+
+      const coinTransfer = await useTransaction((tx) =>
+        coinTransferServices.agentToPlayer(deposit!.coin_transfer_id, tx),
+      ).catch(() => undefined);
+
+      const bonus = await bonusServices.load(
+        deposit.amount,
+        deposit.Player.Bonus?.id,
+      );
+
+      return res
         .status(OK)
         .json(apiResponse({ deposit, bonus, coinTransfer } as DepositResult));
     } catch (e) {
       next(e);
+      return;
     }
   };
 
