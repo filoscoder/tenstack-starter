@@ -119,7 +119,6 @@ export class CoinTransferServices {
     const url = "/backoffice/transactions/";
     const result = await authedAgentApi.post<any>(url, transferDetails);
 
-    console.log("DATA", result.data);
     if (
       result.data.code?.includes("insufficient_balance") &&
       transferDetails.type === "deposit"
