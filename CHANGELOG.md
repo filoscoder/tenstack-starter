@@ -1,3 +1,9 @@
+## [1.1.1] - 2024-09-25
+
+### Changed
+- Fixed bug on deposit flow that allowed a deposit to be creditted twice by calling the update endpoint.
+- Improved the check to match `insufficient_balance` errors on coin transfer by using `.includes()` instead of `===`.
+
 ## [1.1.0] - 2024-08-19
 
 ### Added
