@@ -13,9 +13,10 @@ import { ERR } from "@/config/errors";
 
 export class BanxicoService {
   private url = "https://www.banxico.org.mx/cep/valida.do";
-  // private agent: UserRoot | null = null;
+  private deposit!: Deposit;
 
   public async verifyDeposit(deposit: Deposit): Promise<number | undefined> {
+    this.deposit = deposit;
     const cookies = await this.prepareCepDownload(deposit);
     if (!cookies) return;
 
@@ -255,7 +256,16 @@ export class BanxicoService {
     if (CONFIG.LOG.LEVEL === "debug") console.error(e);
     if (CONFIG.APP.ENV === ENVIRONMENTS.PRODUCTION) {
       logtailLogger.error(e);
-      await Telegram.arturito(e?.toString() ?? e.message ?? e);
+      const stringifiedError = `${e?.toString() ?? e.message ?? e}`;
+      await Telegram.arturito(
+        stringifiedError +
+          "\n\n" +
+          "No se puede verificar el depósito, necesitamos la intervención de" +
+          " un humano\\." +
+          "\n\n" +
+          "Número de seguimiento: " +
+          this.deposit.tracking_number,
+      );
     }
   }
 }
