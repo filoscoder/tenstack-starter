@@ -44,7 +44,9 @@ export class DepositsDAO {
         where: { id },
         include: {
           Player: { include: { Bonus: true } },
-          CoinTransfer: { select: { status: true } },
+          CoinTransfer: {
+            select: { status: true, player_balance_after: true },
+          },
         },
       });
     } catch (error) {
