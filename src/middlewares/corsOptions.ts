@@ -3,7 +3,6 @@ import CONFIG from "@/config";
 
 export const corsOptions: CorsOptions = {
   origin: (origin, cb) => {
-    console.log("ORIGIN", origin);
     if (!origin) return cb(null, true);
 
     const allowedOrigins = CONFIG.APP.ALLOWED_ORIGIN?.split(",").map((o) =>

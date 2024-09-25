@@ -13,7 +13,6 @@ import { ERR } from "@/config/errors";
 
 export class BanxicoService {
   private url = "https://www.banxico.org.mx/cep/valida.do";
-  // private agent: UserRoot | null = null;
 
   public async verifyDeposit(deposit: Deposit): Promise<number | undefined> {
     const cookies = await this.prepareCepDownload(deposit);
