@@ -11,6 +11,8 @@ import { AlqMovementResponse } from "@/types/response/alquimia";
 import { ResourceService } from "@/services/resource.service";
 import { BanxicoService } from "@/services/banxico.service";
 import { Telegram } from "@/notification/telegram";
+import { NotFoundException } from "@/helpers/error";
+import { FullDeposit } from "@/types/services/deposits";
 
 export class DepositServices extends ResourceService {
   constructor() {
@@ -44,13 +46,11 @@ export class DepositServices extends ResourceService {
     player: RoledPlayer,
     deposit_id: string,
     request: DepositRequest,
-  ) {
+  ): Promise<FullDeposit> {
     const deposit = await DepositsDAO._getById(deposit_id);
-    if (
-      deposit?.status === DEPOSIT_STATUS.VERIFIED &&
-      deposit.CoinTransfer.status === COIN_TRANSFER_STATUS.PENDING
-    )
-      return deposit;
+    if (!deposit) throw new NotFoundException("Deposit not found");
+
+    if (deposit.status === DEPOSIT_STATUS.VERIFIED) return deposit;
 
     await DepositsDAO.authorizeUpdate(
       deposit_id,

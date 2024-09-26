@@ -30,7 +30,7 @@ export class PaymentServices extends ResourceService {
           amount: request.amount,
           BankAccount: { connect: { id: request.bank_account } },
           currency: player.balance_currency,
-          status: PAYMENT_STATUS.PENDING,
+          status: PAYMENT_STATUS.REQUESTED,
           CoinTransfer: {
             create: { status: COIN_TRANSFER_STATUS.PENDING },
           },
