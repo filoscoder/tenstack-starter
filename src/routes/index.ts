@@ -9,6 +9,9 @@ import botRouter from "./bot.router";
 import transactionsRouter from "./transactions";
 import analyticsRouter from "./analytics.router";
 import bonusRouter from "./bonus.router";
+import coinTransferRouter from "./coin-transfer.router";
+import cashierRouter from "./cashier.router";
+import botHistoryRouter from "./bot-history.router";
 
 const mainRouter = Router();
 
@@ -22,5 +25,8 @@ mainRouter.use("/web-push", webPushRouter);
 mainRouter.use("/bot", botRouter);
 mainRouter.use("/analytics", analyticsRouter);
 mainRouter.use("/bonus", bonusRouter);
+mainRouter.use("/coin-transfer", coinTransferRouter);
+mainRouter.use("/cashier", cashierRouter);
+mainRouter.use("/bot-history", botHistoryRouter);
 
 export default mainRouter;

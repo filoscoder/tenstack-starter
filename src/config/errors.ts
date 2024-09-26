@@ -87,4 +87,29 @@ export const ERR: { [key: string]: ErrorData } = {
     code: "too_many_requests",
     description: "Demasiadas solicitudes",
   },
+  COIN_TRANSFER_UNSUCCESSFUL: {
+    status: 502,
+    code: "bad_gateway",
+    description: "No se pudo transferir las fichas.",
+  },
+  INSUFICIENT_BALANCE: {
+    status: 400,
+    code: "insuficient_balance",
+    description: "Saldo insuficiente",
+  },
+  AGENT_BANK_ACCOUNT_UNSET: {
+    status: 500,
+    code: "agent_bank_account_unset",
+    description: "No se encontro la cuenta bancaria del agente en la BD.",
+  },
+  CASHOUT_UNAVAILABLE: {
+    status: 400,
+    code: "cashout_unavailable",
+    description: "No hay saldo disponible",
+  },
+  BOT_API_ERROR: {
+    status: 500,
+    code: "bot_api_error",
+    description: "Error en la api interna del bot",
+  },
 };

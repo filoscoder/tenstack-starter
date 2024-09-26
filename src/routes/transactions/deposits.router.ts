@@ -13,7 +13,7 @@ import {
   isKeyOfDeposit,
   validateDepositIndex,
   validateDepositRequest,
-  validateDepositUpdateRequest,
+  validateDepositSetStatusRequest,
 } from "@/components/deposits/validators";
 import { DepositController } from "@/components/deposits/controller";
 import { validateResourceSearchRequest } from "@/components/players/validators";
@@ -26,7 +26,7 @@ depositsRouter.use(
 depositsRouter.get(
   "/deposit/pending",
   requireUserRole,
-  DepositController.pending,
+  DepositController.getPending,
 );
 depositsRouter.post(
   "/deposit/:id?",
@@ -46,10 +46,6 @@ depositsRouter.get(
 depositsRouter.use(requireAgentRole);
 
 depositsRouter.get(
-  "/deposit/pending-coin-transfers",
-  DepositController.pendingCoinTransfers,
-);
-depositsRouter.get(
   "/deposit/:id",
   validateDepositIndex(),
   checkExact(),
@@ -57,12 +53,12 @@ depositsRouter.get(
   DepositController.show,
 );
 depositsRouter.post(
-  "/deposit/:id/update",
+  "/deposit/:id/set-status",
   validateDepositIndex(),
-  validateDepositUpdateRequest(),
+  validateDepositSetStatusRequest(),
   checkExact(),
   throwIfBadRequest,
-  DepositController.update,
+  DepositController.setStatus,
 );
 depositsRouter.get(
   "/deposit",

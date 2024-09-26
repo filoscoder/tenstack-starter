@@ -1,8 +1,8 @@
-import { BankAccount, Payment, PrismaClient } from "@prisma/client";
-import { PaymentRequest } from "@/types/request/transfers";
+import { BankAccount, Payment, Prisma, PrismaClient } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 import { PaymentUpdatableProps } from "@/types/request/transfers";
 import { NotFoundException, ForbiddenError } from "@/helpers/error";
-import CONFIG from "@/config";
+import CONFIG, { ENVIRONMENTS, PAYMENT_STATUS } from "@/config";
 import { CustomError } from "@/helpers/error/CustomError";
 import { OrderBy } from "@/types/request/players";
 
@@ -12,11 +12,16 @@ export class PaymentsDAO {
   /**
    * Create a DB entry for a deposit
    */
-  static async create(data: PaymentRequest) {
+  static async create(data: {
+    select?: Prisma.PaymentSelect<DefaultArgs> | null | undefined;
+    include?: Prisma.PaymentInclude<DefaultArgs> | null | undefined;
+    data: Prisma.XOR<
+      Prisma.PaymentCreateInput,
+      Prisma.PaymentUncheckedCreateInput
+    >;
+  }) {
     try {
-      const deposit = await prisma.payment.create({ data });
-
-      return deposit;
+      return await prisma.payment.create(data);
     } catch (error) {
       throw error;
     } finally {
@@ -87,6 +92,19 @@ export class PaymentsDAO {
       prisma.$disconnect();
     }
   }
+
+  static delete(
+    data: { where?: Prisma.PaymentWhereInput | undefined } | undefined,
+  ) {
+    if (!data) return;
+    try {
+      return prisma.payment.deleteMany(data);
+    } catch (error) {
+      throw error;
+    } finally {
+      prisma.$disconnect();
+    }
+  }
   /**
    * Ensure bank account exists and belongs to authenticated player
    * @param bank_account
@@ -118,10 +136,9 @@ export class PaymentsDAO {
         take: 1,
       });
 
-      if (!latestCashout || CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.DEV)
-        return;
+      if (!latestCashout || CONFIG.APP.ENV === ENVIRONMENTS.DEV) return;
 
-      const latestCashoutTime = latestCashout?.created_at.getTime();
+      const latestCashoutTime = latestCashout.created_at.getTime();
       const retryAfterMins = Math.ceil(
         (dayInMs - (now - latestCashoutTime)) / 1000 / 60,
       );
@@ -149,7 +166,7 @@ export class PaymentsDAO {
       const payment = await tx.payment.findFirst({ where: { id: payment_id } });
       if (!payment) throw new NotFoundException();
 
-      if (payment.status === CONFIG.SD.PAYMENT_STATUS.COMPLETED)
+      if (payment.status === PAYMENT_STATUS.COMPLETED)
         throw new ForbiddenError("El pago ya está completado");
 
       if (payment.dirty)

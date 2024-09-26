@@ -1,20 +1,22 @@
-import { Deposit, UserRoot } from "@prisma/client";
+import { Deposit } from "@prisma/client";
 import axios, { AxiosResponse } from "axios";
 import { XMLParser } from "fast-xml-parser";
-import CONFIG from "@/config";
+import CONFIG, { ENVIRONMENTS } from "@/config";
 import { logtailLogger } from "@/helpers/loggers";
-import { UserRootDAO } from "@/db/user-root";
-import { RootBankAccount } from "@/types/request/user-root";
 import { DepositsDAO } from "@/db/deposits";
 import { Telegram } from "@/notification/telegram";
 import { AnalyticsDAO } from "@/db/analytics";
 import { bankCodes } from "@/config/bank-codes";
+import { AgentConfigDAO } from "@/db/agentConfig";
+import { CustomError } from "@/helpers/error/CustomError";
+import { ERR } from "@/config/errors";
 
 export class BanxicoService {
   private url = "https://www.banxico.org.mx/cep/valida.do";
-  private agent: UserRoot | null = null;
+  private deposit!: Deposit;
 
   public async verifyDeposit(deposit: Deposit): Promise<number | undefined> {
+    this.deposit = deposit;
     const cookies = await this.prepareCepDownload(deposit);
     if (!cookies) return;
 
@@ -46,9 +48,7 @@ export class BanxicoService {
       });
       if (
         response.status !== 200 ||
-        !(response.data as string).includes(
-          "Haga clic sobre el &iacute;cono para descargar el CEP",
-        )
+        (response.data as string).includes("Operación no encontrada")
       )
         throw response.data;
 
@@ -196,9 +196,9 @@ export class BanxicoService {
     deposit: Deposit,
     queryType: "1" | "0",
   ): Promise<URLSearchParams> {
-    const agent = this.agent || (await UserRootDAO.getAgent());
-    this.agent = agent;
-    const bankAccount = agent!.bankAccount as RootBankAccount;
+    const bankAccount = await AgentConfigDAO.getBankAccount();
+    if (!bankAccount) throw new CustomError(ERR.AGENT_BANK_ACCOUNT_UNSET);
+
     const day = deposit.date.getDate(),
       month = (deposit.date.getMonth() + 1).toString().padStart(2, "0"),
       year = deposit.date.getFullYear(),
@@ -240,17 +240,32 @@ export class BanxicoService {
         source: "cep",
         event: "allisgood",
       });
-      await DepositsDAO.update(deposit.id, { cep_ok: true });
+      await DepositsDAO.update({
+        where: { id: deposit.id },
+        data: { cep_ok: true },
+      });
       return;
     }
-    await DepositsDAO.update(deposit.id, { cep_ok: false });
+    await DepositsDAO.update({
+      where: { id: deposit.id },
+      data: { cep_ok: false },
+    });
   }
 
   private async errorHandler(e: any) {
     if (CONFIG.LOG.LEVEL === "debug") console.error(e);
-    if (CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.PRODUCTION) {
+    if (CONFIG.APP.ENV === ENVIRONMENTS.PRODUCTION) {
       logtailLogger.error(e);
-      await Telegram.arturito(e?.toString() ?? e.message ?? e);
+      const stringifiedError = `${e?.toString() ?? e.message ?? e}`;
+      await Telegram.arturito(
+        stringifiedError +
+          "\n\n" +
+          "No se puede verificar el depósito, necesitamos la intervención de" +
+          " un humano\\." +
+          "\n\n" +
+          "Número de seguimiento: " +
+          this.deposit.tracking_number,
+      );
     }
   }
 }

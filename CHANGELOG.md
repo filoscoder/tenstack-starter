@@ -1,7 +1,65 @@
+## [1.1.1] - 2024-09-25
+
+### Changed
+- Fixed bug on deposit flow that allowed a deposit to be creditted twice by calling the update endpoint.
+- Improved the check to match `insufficient_balance` errors on coin transfer by using `.includes()` instead of `===`.
+
+## [1.1.0] - 2024-08-19
+
+### Added
+- GET `/cashier/:cashierId/player` to retrieve cashier's players. Supports search and pagination.
+- GET `/cashier/:cashierId/player/:playerId` to see a player's details.
+
+## [1.1.0] - 2024-08-17
+
+### Added
+- Optional parameter `role` to POST `/players`. Options: "player", "cashier". Default: "player".
+
+## [1.0.0] - 2024-08-12
+
+## Added
+- Rate limiter to `/bonus/:id/redeem`: 1 request every 10 seconds for the same `:id`.
+- "Dirty" column to Bonus table.
+
+## [1.0.0] - 2024-08-09
+
+### Changed
+- `/transactions/cashout` returns `CoinTransfer | ERR.COIN_TRANSFER_UNSUCCESSFUL | ERR.INSUFICIENT_BALANCE`
+
+- Removed `error` and `player_balance` from `BonusRedemptionResult`.
+- Added `coinTransfer` to `BonusRedemptionResult`.
+
+## [1.0.0] - 2024-08-08
+
+### Changed
+- Rename `transactions/deposit/pending-coin-transfers` to `/coin-transfer/pending-total`
+
+## [1.0.0] - 2024-08-01
+
+### Changed
+- New possible Deposit status:
+    + pending: just created, verification not yet attempted.
+    + unverified: verification attempted and failed.
+    + verified: verification succesful
+    + deleted: deleted by agent.
+- Updated [`DepositResult`](./README.md#depositresult) to include `Bonus` and separate coin transfer info.
+    + `DepositResult.player_balance` is now `DepositResult.coinTransfer.player_balance_after`
+- Replaced `/agent/pending/deposits` with `/coin-transfer/release-pending`
+
+### Added
+- `/coin-transfer` routes
+
+## [1.0.0] - 2024-07-29
+
+### Changed
+- Rename `DepositServices.update` to `DepositServices.setStatus`.
+- Rename `/deposit/:id/update` to `/deposit/:id/set-status`.
+- Rename `DepositController.create` to `DepositController.upsert`.
+
 ## [1.0.0] - 2024-07-26
 
 ### Added
-- GET `/players/:id/bonus` to see a player's bonus
+- GET `/players/:id/bonus` to see a player's bonus.
 
 ## [1.0.0] - 2024-07-25
 

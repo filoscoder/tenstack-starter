@@ -1,15 +1,19 @@
 import { OK } from "http-status";
 import { Deposit, Player } from "@prisma/client";
+import { BonusServices } from "../bonus/services";
+import { CoinTransferServices } from "../coin-transfers/services";
 import { DepositServices } from "./services";
 import { DepositsDAO } from "@/db/deposits";
 import { apiResponse } from "@/helpers/apiResponse";
 import {
   DepositRequest,
-  DepositUpdateRequest,
+  SetDepositStatusRequest,
 } from "@/types/request/transfers";
-import { DepositResult } from "@/types/response/transfers";
 import { extractResourceSearchQueryParams } from "@/helpers/queryParams";
 import { hidePassword } from "@/utils/auth";
+import { COIN_TRANSFER_STATUS, DEPOSIT_STATUS } from "@/config";
+import { DepositResult } from "@/types/response/transfers";
+import { useTransaction } from "@/helpers/useTransaction";
 
 export class DepositController {
   static readonly index = async (req: Req, res: Res, next: NextFn) => {
@@ -47,38 +51,101 @@ export class DepositController {
       next(err);
     }
   };
+
   /**
    * Create new deposit or verify existing
    */
   static readonly upsert = async (req: Req, res: Res, next: NextFn) => {
     const deposit_id = req.params.id;
-    const request: Omit<DepositRequest, "player_id"> = req.body;
-    const player = req.user!;
 
-    const depositServices = new DepositServices();
-    try {
-      let result: DepositResult;
-
-      if (deposit_id) {
-        result = await depositServices.confirm(player, deposit_id, request);
-      } else {
-        result = await depositServices.create(player, request);
-      }
-
-      res.status(OK).json(apiResponse(result));
-    } catch (e) {
-      next(e);
+    if (deposit_id) {
+      this.update(req, res, next);
+    } else {
+      this.create(req, res, next);
     }
   };
 
-  static readonly update = async (req: Req, res: Res, next: NextFn) => {
+  private static readonly update = async (req: Req, res: Res, next: NextFn) => {
     const deposit_id = req.params.id;
-    const request: DepositUpdateRequest = req.body;
+    const request: Omit<DepositRequest, "player_id"> = req.body;
+    const player = req.user!;
+
+    const depositServices = new DepositServices(),
+      coinTransferServices = new CoinTransferServices(),
+      bonusServices = new BonusServices();
+
+    try {
+      const deposit = await depositServices.update(player, deposit_id, request);
+      deposit.Player = hidePassword(deposit.Player);
+
+      if (deposit.CoinTransfer?.status === COIN_TRANSFER_STATUS.COMPLETED)
+        return res
+          .status(OK)
+          .json(apiResponse({ deposit, coinTransfer: deposit.CoinTransfer }));
+
+      const coinTransfer = await useTransaction((tx) =>
+        coinTransferServices.agentToPlayer(deposit!.coin_transfer_id, tx),
+      ).catch(() => undefined);
+
+      const bonus = await bonusServices.load(
+        deposit.amount,
+        deposit.Player.Bonus?.id,
+      );
+
+      return res.status(OK).json(apiResponse({ deposit, bonus, coinTransfer }));
+    } catch (e) {
+      next(e);
+      return;
+    }
+  };
+
+  private static readonly create = async (req: Req, res: Res, next: NextFn) => {
+    const request: Omit<DepositRequest, "player_id"> = req.body;
+    const player = req.user!;
+
+    const depositServices = new DepositServices(),
+      coinTransferServices = new CoinTransferServices(),
+      bonusServices = new BonusServices();
+
+    try {
+      const deposit = await depositServices.create(player, request);
+      deposit.Player = hidePassword(deposit.Player);
+
+      if (deposit.status !== DEPOSIT_STATUS.VERIFIED) {
+        return res.status(OK).json(apiResponse({ deposit }));
+      }
+
+      const coinTransfer = await useTransaction((tx) =>
+        coinTransferServices.agentToPlayer(deposit!.coin_transfer_id, tx),
+      ).catch(() => undefined);
+
+      const bonus = await bonusServices.load(
+        deposit.amount,
+        deposit.Player.Bonus?.id,
+      );
+
+      return res
+        .status(OK)
+        .json(apiResponse({ deposit, bonus, coinTransfer } as DepositResult));
+    } catch (e) {
+      next(e);
+      return;
+    }
+  };
+
+  static readonly setStatus = async (req: Req, res: Res, next: NextFn) => {
+    const deposit_id = req.params.id;
+    const request: SetDepositStatusRequest = req.body;
     const agent = req.user!;
 
     const depositServices = new DepositServices();
     try {
-      const result = await depositServices.update(agent, deposit_id, request);
+      const result = await depositServices.setStatus(
+        agent,
+        deposit_id,
+        request,
+      );
+      result.Player = hidePassword(result.Player);
       res.status(OK).json(apiResponse(result));
     } catch (e) {
       next(e);
@@ -88,28 +155,12 @@ export class DepositController {
   /**
    * Show player's pending deposits
    */
-  static readonly pending = async (req: Req, res: Res, next: NextFn) => {
+  static readonly getPending = async (req: Req, res: Res, next: NextFn) => {
     const player = req.user!;
 
     try {
       const deposits = await DepositServices.showPending(player.id);
       res.status(OK).json(apiResponse(deposits));
-    } catch (err) {
-      next(err);
-    }
-  };
-
-  /**
-   * Show total amount of pending coin transfers
-   */
-  static readonly pendingCoinTransfers = async (
-    _req: Req,
-    res: Res,
-    next: NextFn,
-  ) => {
-    try {
-      const amount = await DepositServices.pendingCoinTransfers();
-      res.status(OK).json(apiResponse(amount));
     } catch (err) {
       next(err);
     }

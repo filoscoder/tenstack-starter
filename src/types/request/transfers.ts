@@ -21,11 +21,12 @@ export type DepositRequest = {
 };
 export type CreateDepositProps = DepositRequest & {
   player_id: string;
+  coin_transfer_id: string;
   cep_ok?: boolean;
 };
 
-export type DepositUpdateRequest = {
-  status: string;
+export type SetDepositStatusRequest = {
+  status: "pending" | "unverified" | "verified" | "deleted";
 };
 
 export type DepositUpdatableProps = {

@@ -2,7 +2,8 @@ import { Deposit, Player } from "@prisma/client";
 import { checkSchema } from "express-validator";
 import { isKeyOfNestedObject } from "../players/validators";
 import { bankCodes } from "@/config/bank-codes";
-import CONFIG from "@/config";
+import { DEPOSIT_STATUS } from "@/config";
+import { mockPlayer } from "@/config/mockPlayer";
 
 export const isKeyOfDeposit = (key: string): key is keyof Deposit => {
   const mockDeposit: Deposit & { Player: Player } = {
@@ -16,22 +17,8 @@ export const isKeyOfDeposit = (key: string): key is keyof Deposit => {
     date: new Date(),
     sending_bank: "",
     cep_ok: false,
-    Player: {
-      id: "",
-      panel_id: 0,
-      username: "",
-      password: "",
-      email: "",
-      first_name: "",
-      last_name: "",
-      date_of_birth: new Date(),
-      movile_number: "",
-      country: "",
-      balance_currency: "",
-      status: "",
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
+    coin_transfer_id: "",
+    Player: mockPlayer,
     created_at: new Date(),
     updated_at: new Date(),
   };
@@ -65,6 +52,7 @@ export const validateDepositRequest = () =>
       in: ["body"],
       isEmpty: false,
       isISO8601: true,
+      customSanitizer: { options: (val) => new Date(val).toISOString() },
       errorMessage: "invalid date",
     },
     sending_bank: {
@@ -99,23 +87,17 @@ export const validateDepositIndex = () =>
     },
   });
 
-export const validateDepositUpdateRequest = () =>
+export const validateDepositSetStatusRequest = () =>
   checkSchema({
     status: {
       in: ["body"],
       optional: true,
       isString: true,
       trim: true,
-      isIn: {
-        options: [Object.values(CONFIG.SD.DEPOSIT_STATUS)],
+      custom: {
+        options: (val) => Object.values(Object(DEPOSIT_STATUS)).includes(val),
         errorMessage: "invalid status",
       },
       errorMessage: "status is required",
-    },
-    tracking_number: {
-      in: ["body"],
-      optional: true,
-      isString: true,
-      errorMessage: "tracking_number is required",
     },
   });

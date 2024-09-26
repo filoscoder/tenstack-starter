@@ -1,6 +1,7 @@
 import { BankAccount, Payment, Player } from "@prisma/client";
 import { checkSchema } from "express-validator";
 import { isKeyOfNestedObject } from "../players/validators";
+import { mockPlayer } from "@/config/mockPlayer";
 
 export const isKeyOfPayment = (key: string): key is keyof Payment => {
   const mockPayment: Payment & { Player: Player; BankAccount: BankAccount } = {
@@ -12,22 +13,8 @@ export const isKeyOfPayment = (key: string): key is keyof Payment => {
     player_id: "",
     status: "",
     alquimia_id: 0,
-    Player: {
-      id: "",
-      panel_id: 0,
-      username: "",
-      password: "",
-      email: "",
-      first_name: "",
-      last_name: "",
-      date_of_birth: new Date(),
-      movile_number: "",
-      country: "",
-      balance_currency: "",
-      status: "",
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
+    coin_transfer_id: "",
+    Player: mockPlayer,
     BankAccount: {
       id: "",
       player_id: "",

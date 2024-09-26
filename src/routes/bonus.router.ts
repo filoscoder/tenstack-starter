@@ -2,7 +2,11 @@ import { Router } from "express";
 import passport from "passport";
 import { checkExact } from "express-validator";
 import { BonusController } from "@/components/bonus/controller";
-import { requireAgentRole, requireUserRole } from "@/middlewares/auth";
+import {
+  requireAgentRole,
+  requireUserOrAgentRole,
+  requireUserRole,
+} from "@/middlewares/auth";
 import { validateResourceSearchRequest } from "@/components/players/validators";
 import { throwIfBadRequest } from "@/middlewares/requestErrorHandler";
 import {
@@ -10,6 +14,7 @@ import {
   validateBonusCreateRequest,
   validateBonusId,
 } from "@/components/bonus/validators";
+import { bonusRateLimiter } from "@/middlewares/rate-limiters/bonus";
 
 const bonusRouter = Router();
 
@@ -26,6 +31,7 @@ bonusRouter.get(
 );
 bonusRouter.get(
   "/:id",
+  requireUserOrAgentRole,
   validateBonusId(),
   checkExact(),
   throwIfBadRequest,
@@ -37,6 +43,7 @@ bonusRouter.get(
   validateBonusId(),
   checkExact(),
   throwIfBadRequest,
+  bonusRateLimiter,
   BonusController.redeem,
 );
 bonusRouter.post(

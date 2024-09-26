@@ -1,19 +1,16 @@
-import { Bonus, Player } from "@prisma/client";
-import CONFIG from "@/config";
+import { Bonus, Player, PrismaClient } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { CoinTransferServices } from "../coin-transfers/services";
+import { BONUS_STATUS } from "@/config";
 import { BonusDAO } from "@/db/bonus";
 import { ResourceService } from "@/services/resource.service";
 import { BonusSettings } from "@/types/request/bonus";
-import {
-  CasinoCoinsService,
-  CoinTransferRequest,
-} from "@/services/casino-coins.service";
-import { logtailLogger } from "@/helpers/loggers";
 import { BonusRedemptionResult } from "@/types/response/bonus";
-import { CoinTransferResult } from "@/types/response/transfers";
 import { NotFoundException } from "@/helpers/error";
+import { useTransaction } from "@/helpers/useTransaction";
 
 export class BonusServices extends ResourceService {
-  constructor() {
+  constructor(private tx?: PrismaTransactionClient) {
     super(BonusDAO);
   }
 
@@ -28,45 +25,58 @@ export class BonusServices extends ResourceService {
     return { percentage: 100, amount: 0 };
   }
 
-  async invalidate(player_id: string): Promise<Bonus> {
-    return await BonusDAO.updateWhere(
-      {
-        player_id,
-        AND: {
-          OR: [
-            { status: CONFIG.SD.BONUS_STATUS.ASSIGNED },
-            { status: CONFIG.SD.BONUS_STATUS.PENDING },
-          ],
+  /**
+   * @returns Bonus | undefined if bonus not found
+   */
+  async invalidate(player_id: string): Promise<Bonus | undefined> {
+    const prisma = this.tx ?? new PrismaClient();
+    try {
+      return await prisma.bonus.update({
+        where: {
+          player_id,
+          AND: {
+            OR: [
+              { status: BONUS_STATUS.ASSIGNED },
+              { status: BONUS_STATUS.PENDING },
+              { status: BONUS_STATUS.REQUESTED },
+            ],
+          },
         },
-      },
-      { status: CONFIG.SD.BONUS_STATUS.UNAVAILABLE },
-    );
+        data: { status: BONUS_STATUS.UNAVAILABLE },
+      });
+    } catch (e: any) {
+      if (e instanceof PrismaClientKnownRequestError && e.code === "P2025")
+        return;
+      throw e;
+    }
   }
 
   async redeem(bonusId: string, user: Player): Promise<BonusRedemptionResult> {
-    const bonus: Bonus & { Player?: Player } =
-      await BonusDAO.authorizeRedemption(bonusId, user);
-    const casinoCoinsService = new CasinoCoinsService();
-
-    let transferResult: CoinTransferResult = { ok: false };
+    let bonus: Bonus = await BonusDAO.authorizeRedemption(bonusId, user);
     try {
-      const request: CoinTransferRequest = {
-        amount: bonus.amount,
-        currency: bonus.Player!.balance_currency,
-        panel_id: bonus.Player!.panel_id,
-      };
-      transferResult = await casinoCoinsService.bonusAgentToPlayer(request);
-    } catch (e: any) {
-      if (CONFIG.LOG.LEVEL === "debug") console.error(e);
-      logtailLogger.warn({ err: e });
-    }
+      return await useTransaction(async (tx) => {
+        bonus = await tx.bonus.update({
+          where: { id: bonusId },
+          data: {
+            status: BONUS_STATUS.REDEEMED,
+          },
+        });
 
-    delete bonus.Player;
-    return {
-      error: transferResult.error,
-      player_balance: transferResult.player_balance,
-      bonus,
-    };
+        const coinTransferServices = new CoinTransferServices();
+        const coinTransfer = await coinTransferServices.agentToPlayer(
+          bonus.coin_transfer_id,
+          tx,
+        );
+
+        return {
+          coinTransfer,
+          bonus,
+        };
+      });
+    } catch (e) {
+      await BonusDAO.update(bonusId, { dirty: false });
+      throw e;
+    }
   }
 
   /**
@@ -74,20 +84,23 @@ export class BonusServices extends ResourceService {
    * Only if bonus is in ASSIGNED status
    */
   async load(
-    bonus_id: string,
     deposit_amount: number,
-  ): Promise<Bonus & { Player: Player }> {
+    bonus_id?: string,
+  ): Promise<Bonus | undefined> {
+    if (!bonus_id) return;
     const bonus = await BonusDAO._getById(bonus_id);
     if (!bonus) throw new NotFoundException("Bonus not found");
 
     const amount = (bonus.percentage / 100) * deposit_amount;
 
-    if (bonus.status === CONFIG.SD.BONUS_STATUS.ASSIGNED)
+    if (bonus.status === BONUS_STATUS.ASSIGNED)
       return await BonusDAO.update(bonus_id, {
         amount,
-        status: CONFIG.SD.BONUS_STATUS.PENDING,
+        status: BONUS_STATUS.PENDING,
       });
 
-    return bonus;
+    const clientSafeBonus: Bonus & { Player?: Player } = bonus;
+    delete clientSafeBonus.Player;
+    return clientSafeBonus;
   }
 }

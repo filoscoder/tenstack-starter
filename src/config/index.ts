@@ -82,53 +82,12 @@ const CONFIG = {
   ROLES: {
     AGENT: "agent",
     PLAYER: "player",
+    CASHIER: "cashier",
   },
   /** Static Details */
   SD: {
     INSUFICIENT_BALANCE: "Saldo insuficiente",
     INSUFICIENT_CREDITS: "FichasInsuficientes",
-    DEPOSIT_STATUS: {
-      /** Created by user, awaiting confirmation at alquimia */
-      PENDING: "pending",
-      /** Found and verified at alquimia. Coins not sent yet */
-      VERIFIED: "verified",
-      /** Payment verified and coins sent to player. Not yet logged into DB */
-      CONFIRMED: "confirmed",
-      /** Allisgood */
-      COMPLETED: "completed",
-      /** Deleted by agent */
-      DELETED: "deleted",
-    },
-    PAYMENT_STATUS: {
-      /** Requested by player, awaiting to be released by agent */
-      REQUESTED: "PEDIDO",
-      /** Created, awaiting authorization */
-      PENDING: "PENDIENTE AUTORIZAR",
-      /** Authorized, processing */
-      PROCESSING: "EN PROCESO",
-      /** Awaiting provider's response */
-      PROVIDER: "PENDIENTE RESPUESTA PROVEEDOR",
-      /** Completed */
-      COMPLETED: "LIQUIDADA",
-      /** Error */
-      ERROR: "error",
-    },
-    BONUS_STATUS: {
-      /** Player signed up and bonus was assigned (amount = 0) */
-      ASSIGNED: "assigned",
-      /** Bonus was loaded into Player's account, not yet redeemed */
-      PENDING: "pending",
-      /** Bonus has been used */
-      REDEEMED: "redeemed",
-      /** Unavailable */
-      UNAVAILABLE: "unavailable",
-    },
-    ENVIRONMENTS: {
-      TEST: "test",
-      DEV: "development",
-      PRODUCTION: "production",
-      STAGING: "staging",
-    },
     PLAYER_WELCOME_MESSAGE: process.env.PLAYER_WELCOME_MESSAGE || "",
   },
   INFO: {
@@ -148,11 +107,75 @@ const CONFIG = {
     PASS: process.env.EMAIL_PASS,
     FROM: process.env.EMAIL_FROM,
   },
+  SUBAGENT: {
+    PAYMENT_PERCENTAGE: Number(process.env.SUBAGENT_PAYMENT_PERCENTAGE) || 0.5,
+  },
 } as const;
+
+export default CONFIG;
 
 export enum PLAYER_STATUS {
   ACTIVE = "ACTIVO",
   BANNED = "BLOQUEADO",
 }
 
-export default CONFIG;
+export enum DEPOSIT_STATUS {
+  /** Created by user, yet to be verified. */
+  PENDING = "pending",
+  /** Unsucsessful verification attempt was made */
+  UNVERIFIED = "unverified",
+  /** Found and verified at alquimia or bank. */
+  VERIFIED = "verified",
+  /** Deleted by agent */
+  DELETED = "deleted",
+}
+
+export enum BONUS_STATUS {
+  /** Player signed up and bonus was assigned (amount = 0) */
+  ASSIGNED = "assigned",
+  /** Bonus was loaded into Player's account, not yet redeemed */
+  PENDING = "pending",
+  /** Bonus was requested by Player but coins not yet transfered */
+  REQUESTED = "requested",
+  /** Bonus has been used */
+  REDEEMED = "redeemed",
+  /** Unavailable */
+  UNAVAILABLE = "unavailable",
+}
+
+export enum PAYMENT_STATUS {
+  /** Requested by player, awaiting to be released by agent */
+  REQUESTED = "PEDIDO",
+  /** Created, awaiting authorization */
+  PENDING = "PENDIENTE AUTORIZAR",
+  /** Authorized, processing */
+  PROCESSING = "EN PROCESO",
+  /** Awaiting provider's response */
+  PROVIDER = "PENDIENTE RESPUESTA PROVEEDOR",
+  /** Completed */
+  COMPLETED = "LIQUIDADA",
+  /** Error */
+  ERROR = "error",
+}
+
+export enum COIN_TRANSFER_STATUS {
+  PENDING = "pending",
+  COMPLETED = "completed",
+}
+
+export enum ENVIRONMENTS {
+  TEST = "test",
+  DEV = "development",
+  PRODUCTION = "production",
+  STAGING = "staging",
+}
+
+export enum GLOBAL_SWITCH_STATE {
+  ON = "on",
+  OFF = "off",
+}
+
+export enum BLACKLIST_METHOD {
+  ADD = "add",
+  REMOVE = "remove",
+}

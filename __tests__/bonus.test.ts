@@ -1,18 +1,21 @@
 import { SuperAgentTest } from "supertest";
-import { Bonus, Player, PrismaClient } from "@prisma/client";
+import { Bonus, Player } from "@prisma/client";
 import { BAD_REQUEST, CREATED, OK, UNAUTHORIZED } from "http-status";
-import { initAgent } from "./helpers";
-import CONFIG from "@/config";
-import { AuthServices } from "@/components/auth/services";
+import { initAgent, testPrisma } from "./helpers";
+import { generateAccessToken } from "./helpers/auth";
+import {
+  mockAgentToPlayer,
+  prepareRedeemBonusTest,
+} from "./mocks/bonus/redeem";
+import CONFIG, { BONUS_STATUS, COIN_TRANSFER_STATUS } from "@/config";
 import { BonusServices } from "@/components/bonus/services";
-import { CoinTransferResult } from "@/types/response/transfers";
-import { CasinoCoinsService } from "@/services/casino-coins.service";
 
 let agent: SuperAgentTest;
 let pendingBonus: Bonus;
 let playerAccessToken: string;
-let prisma: PrismaClient;
 let player: Player;
+let userCleanUp: () => Promise<any>;
+
 beforeAll(initialize);
 
 afterAll(cleanUp);
@@ -23,7 +26,9 @@ describe("[UNIT] => BONUS ROUTER", () => {
     amount: 1,
     percentage: 100,
     player_id: "baz",
-    status: CONFIG.SD.BONUS_STATUS.ASSIGNED,
+    status: BONUS_STATUS.ASSIGNED,
+    coin_transfer_id: "bar",
+    dirty: false,
     created_at: new Date(),
     updated_at: new Date(),
   };
@@ -74,14 +79,8 @@ describe("[UNIT] => BONUS ROUTER", () => {
   });
 
   describe("GET /bonus/:id/redeem", () => {
-    const mockCoinTransferResult: CoinTransferResult = {
-      ok: true,
-      player_balance: 1,
-    };
-    const mockBonusAgentToPlayer = jest.fn(async () => mockCoinTransferResult);
-    jest
-      .spyOn(CasinoCoinsService.prototype, "bonusAgentToPlayer")
-      .mockImplementation(mockBonusAgentToPlayer);
+    beforeAll(() => prepareRedeemBonusTest());
+    afterAll(jest.clearAllMocks);
 
     it("Should redeem a bonus", async () => {
       const response = await agent
@@ -89,38 +88,35 @@ describe("[UNIT] => BONUS ROUTER", () => {
         .set("Authorization", "Bearer " + playerAccessToken);
 
       expect(response.status).toBe(OK);
-      expect(response.body.data.bonus.status).toBe(
-        CONFIG.SD.BONUS_STATUS.REDEEMED,
-      );
-      expect(response.body.data.player_balance).toBe(1);
-      expect(mockBonusAgentToPlayer).toHaveBeenCalledTimes(1);
+      expect(response.body.data.bonus.status).toBe(BONUS_STATUS.REDEEMED);
+      expect(response.body.data.coinTransfer.player_balance_after).toBe(1);
+      expect(mockAgentToPlayer).toHaveBeenCalledTimes(1);
     });
   });
 });
 async function initialize() {
   agent = await initAgent();
-  prisma = new PrismaClient();
-  const authServices = new AuthServices();
 
-  const found = await prisma.player.findFirst();
-  if (!found) throw new Error("Player not found");
-  player = found;
+  ({
+    user: player,
+    token: playerAccessToken,
+    cleanUp: userCleanUp,
+  } = await generateAccessToken(CONFIG.ROLES.PLAYER));
 
-  pendingBonus = await prisma.bonus.create({
+  pendingBonus = await testPrisma.bonus.create({
     data: {
       amount: 1,
       percentage: 100,
-      player_id: player!.id,
-      status: CONFIG.SD.BONUS_STATUS.PENDING,
+      Player: { connect: { id: player!.id } },
+      status: BONUS_STATUS.PENDING,
+      CoinTransfer: { create: { status: COIN_TRANSFER_STATUS.PENDING } },
     },
   });
-
-  const { tokens } = await authServices.tokens(player!.id, "jest_test");
-  playerAccessToken = tokens.access;
 }
 
 async function cleanUp() {
-  await prisma.bonus.delete({
+  await testPrisma.bonus.delete({
     where: { id: pendingBonus.id },
   });
+  await userCleanUp();
 }

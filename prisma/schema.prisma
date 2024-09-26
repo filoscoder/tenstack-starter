@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
@@ -11,200 +11,262 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model UserRoot {
-  id                String        @id @default(uuid())
-  username          String        @db.VarChar(50) @unique
-  password          String        @db.Text
-  panel_id          Int
-  access            String        @db.VarChar(800)
-  refresh           String        @db.VarChar(800)
-  json_response     String        @db.Text
-  dirty             Boolean       @default(false)     // El agente está siendo logueado
-  bankAccount       Json?      
-  alq_api_manager   String?       @db.Text
-  alq_token         String?       @db.VarChar(800)
-  bot_phone         String?       @db.VarChar(20)
-  human_phone       String?       @db.VarChar(20)
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt
+model AgentConfig {
+  id              String   @id @default(uuid())
+  player_id       String   @unique
+  Player          Player   @relation(fields: [player_id], references: [id])
+  bankAccount     Json?
+  alq_api_manager String?  @db.Text
+  alq_token       String?  @db.VarChar(800)
+  bot_phone       String?  @db.VarChar(20)
+  human_phone     String?  @db.VarChar(20)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
-  @@map("USERS_ROOT")
+  @@map("AGENT_CONFIG")
 }
 
 model Transactions {
-  id                String        @id @default(uuid())
-  sender_id         Int           // Panel ID
-  recipient_id      Int           // Panel ID
-  amount            Float
-  date              DateTime
-  ok                Boolean
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt
+  id           String   @id @default(uuid())
+  sender_id    Int // Panel ID
+  recipient_id Int // Panel ID
+  amount       Float
+  date         DateTime
+  ok           Boolean
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 
   @@map("TRANSACTIONS")
 }
 
 model Player {
-  id                  String        @id @default(uuid())
-  panel_id            Int           @unique
-  username            String        @db.VarChar(100) @unique
-  password            String        @db.Text
-  email               String        @db.VarChar(50) @unique
-  first_name          String?       @db.VarChar(50)
-  last_name           String?       @db.VarChar(50)
+  id                  String               @id @default(uuid())
+  panel_id            Int                  @unique
+  username            String               @unique @db.VarChar(100)
+  password            String               @db.Text
+  email               String               @unique @db.VarChar(50)
+  first_name          String?              @db.VarChar(50)
+  last_name           String?              @db.VarChar(50)
   date_of_birth       DateTime?
-  movile_number       String?       @db.VarChar(50)
-  country             String?       @db.VarChar(50)
+  movile_number       String?              @db.VarChar(50)
+  country             String?              @db.VarChar(50)
   BankAccounts        BankAccount[]
-  balance_currency    String        @db.VarChar(10) @default("MXN")
-  status              String?       @db.VarChar(20) @default("ACTIVO")
-  Payments            Payment[]       
+  balance_currency    String               @default("MXN") @db.VarChar(10)
+  status              String?              @default("ACTIVO") @db.VarChar(20)
+  Payments            Payment[]
   Deposits            Deposit[]
   Tokens              Token[]
   roles               Role[]
   PasswordResetTokens PasswordResetToken[]
-  Bonus               Bonus?         
-  created_at          DateTime      @default(now())
-  updated_at          DateTime      @updatedAt     
+  Bonus               Bonus?
+  cashier_id          String?
+  Cashier             Cashier?             @relation(fields: [cashier_id], references: [id], onDelete: Cascade)
+  CashierPayouts      CashierPayout[]
+  AgentConfig         AgentConfig?
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @updatedAt
 
   @@map("PLAYERS")
 }
 
 model Payment {
-  id                String        @id @default(uuid())
-  player_id         String           
-  Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
-  amount            Float
-  status            String        @default("PEDIDO")
-  bank_account      String           
-  BankAccount       BankAccount   @relation(fields: [bank_account], references: [id], onDelete: Cascade)
-  currency          String        @default("MXN")
-  dirty             Boolean       @default(false)
-  alquimia_id       Int?
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt    
+  id               String       @id @default(uuid())
+  player_id        String
+  Player           Player       @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  amount           Float
+  status           String       @default("PEDIDO")
+  bank_account     String
+  BankAccount      BankAccount  @relation(fields: [bank_account], references: [id], onDelete: Cascade)
+  currency         String       @default("MXN")
+  dirty            Boolean      @default(false)
+  alquimia_id      Int?
+  coin_transfer_id String       @unique
+  CoinTransfer     CoinTransfer @relation(fields: [coin_transfer_id], references: [id], onDelete: Cascade)
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
 
-  @@map("PAYMENTS")   
+  @@map("PAYMENTS")
 }
 
 model BankAccount {
-  id                String        @id @default(uuid())
-  owner             String                  // Nombre del beneficiario
-  Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
-  player_id         String                  // ID de Player
-  bankId            String                  // Como aparece en banxico
-  bankNumber        String        @unique   // CLABE
-  bankAlias         String?       
-  Payments          Payment[]
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt    
+  id         String    @id @default(uuid())
+  owner      String // Nombre del beneficiario
+  Player     Player    @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  player_id  String // ID de Player
+  bankId     String // Como aparece en banxico
+  bankNumber String    @unique // CLABE
+  bankAlias  String?
+  Payments   Payment[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 
   @@map("BANK_ACCOUNTS")
 }
 
 model Deposit {
-  id                String        @id @default(uuid())
-  player_id         String           
-  Player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
-  currency          String        @default("MXN")
-  dirty             Boolean       @default(true)
-  status            String
-  tracking_number   String        @unique
-  amount            Float         
-  date              DateTime
-  sending_bank      String         
-  cep_ok            Boolean       @default(false)
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt    
+  id               String       @id @default(uuid())
+  player_id        String
+  Player           Player       @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  currency         String       @default("MXN")
+  dirty            Boolean      @default(true)
+  status           String
+  tracking_number  String       @unique
+  amount           Float
+  date             DateTime
+  sending_bank     String
+  cep_ok           Boolean      @default(false)
+  coin_transfer_id String       @unique
+  CoinTransfer     CoinTransfer @relation(fields: [coin_transfer_id], references: [id], onDelete: Cascade)
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
 
-  @@map("DEPOSITS")   
+  @@map("DEPOSITS")
 }
 
 model Token {
-  id                String        @id @default(uuid())
-  invalid           Boolean       @default(false)
-  next              String?       
-  user_agent        String?
-  player_id         String           
-  player            Player        @relation(fields: [player_id], references: [id], onDelete: Cascade)
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt 
+  id         String   @id @default(uuid())
+  invalid    Boolean  @default(false)
+  next       String?
+  user_agent String?
+  player_id  String
+  player     Player   @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  @@map("TOKENS")   
+  @@map("TOKENS")
 }
 
 model PushSubscription {
-  id                String        @id @default(uuid())
-  endpoint          String        @unique @db.VarChar(512)
-  keys              Json          
-  expirationTime    Float?
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt 
-  
+  id             String   @id @default(uuid())
+  endpoint       String   @unique @db.VarChar(512)
+  keys           Json
+  expirationTime Float?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
   @@map("WEB_PUSH_SUBSCRIPTIONS")
 }
 
 model Role {
-  id                String        @id @default(uuid())
-  name              String        @unique
-  players           Player[]
+  id      String   @id @default(uuid())
+  name    String   @unique
+  players Player[]
 
   @@map("ROLES")
 }
 
 model BotFlow {
-  id                String        @id @default(uuid())
-  menus             Json      
-  messages          Json
-  on_call           Boolean
-  active            Boolean
-  name              String        @db.VarChar(20)
+  id       String  @id @default(uuid())
+  menus    Json
+  messages Json
+  on_call  Boolean
+  active   Boolean
+  name     String  @db.VarChar(20)
 
   @@map("BOT_FLOWS")
 }
 
 model PasswordResetToken {
-  id                          String    @id @default(uuid())
-  token                       String    @db.VarChar(342)      // 256 bytes in base64url
-  player_id                   String
-  player                      Player    @relation(fields: [player_id], references: [id], onDelete: Cascade)
-  expires_at                  DateTime
-  created_at                  DateTime  @default(now())
-  updated_at                  DateTime  @updatedAt 
+  id         String   @id @default(uuid())
+  token      String   @db.VarChar(342) // 256 bytes in base64url
+  player_id  String
+  player     Player   @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  expires_at DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@map("PASSWORD_RESET_TOKENS")
 }
 
 model ChatData {
-  id                          String    @id @default(uuid())
-  number                      String    @unique
-  name                        String    
-  created_at                  DateTime  @default(now())
-  updated_at                  DateTime  @updatedAt 
+  id         String   @id @default(uuid())
+  number     String   @unique
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@map("CHAT_DATA")
 }
 
 model Analytics {
-  id                          String    @id @default(uuid())
-  source                      String
-  event                       String
-  data                        Json?
-  created_at                  DateTime  @default(now())
-  updated_at                  DateTime  @updatedAt 
+  id         String   @id @default(uuid())
+  source     String
+  event      String
+  data       Json?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@map("ANALYTICS")
 }
 
 model Bonus {
-  id                          String    @id @default(uuid())
-  player_id                   String    @unique
-  Player                      Player    @relation(fields: [player_id], references: [id], onDelete: Cascade)
-  status                      String    @db.VarChar(32)
-  percentage                  Int
-  amount                      Int
-  created_at                  DateTime  @default(now())
-  updated_at                  DateTime  @updatedAt 
-  
+  id               String       @id @default(uuid())
+  player_id        String       @unique
+  Player           Player       @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  status           String       @db.VarChar(32)
+  percentage       Int
+  amount           Int
+  coin_transfer_id String       @unique
+  CoinTransfer     CoinTransfer @relation(fields: [coin_transfer_id], references: [id], onDelete: Cascade)
+  dirty            Boolean      @default(false)
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+
   @@map("BONUS")
+}
+
+model CoinTransfer {
+  id                   String         @id @default(uuid())
+  status               String         @db.VarChar(32)
+  player_balance_after Float?
+  Bonus                Bonus?
+  Deposit              Deposit?
+  Payment              Payment?
+  CashierPayout        CashierPayout?
+  created_at           DateTime       @default(now())
+  updated_at           DateTime       @updatedAt
+
+  @@map("COIN_TRANSFERS")
+}
+
+model Cashier {
+  id           String   @id @default(uuid())
+  handle       String   @unique
+  username     String   @unique
+  password     String   @db.Text
+  panel_id     Int?
+  access       String?  @db.VarChar(800)
+  refresh      String?  @db.VarChar(800)
+  dirty        Boolean  @default(false)
+  Players      Player[]
+  last_cashout DateTime @default(now())
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@map("CASHIERS")
+}
+
+model CashierPayout {
+  id               String       @id @default(uuid())
+  amount           Float        @default(0)
+  player_id        String
+  Player           Player       @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  coin_transfer_id String       @unique
+  CoinTransfer     CoinTransfer @relation(fields: [coin_transfer_id], references: [id], onDelete: Cascade)
+
+  @@map("CASHIER_PAYOUTS")
+}
+
+model BotHistory {
+  id           String   @id @default(uuid())
+  ref          String
+  keyword      String?
+  answer       String   @db.Text
+  refSerialize String
+  from         String
+  options      Json
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@map("BOT_HISTORY")
 }

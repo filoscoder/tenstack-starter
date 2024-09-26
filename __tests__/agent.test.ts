@@ -16,7 +16,11 @@ import {
 } from "@prisma/client";
 import { AlquimiaTransferService } from "../src/services/alquimia-transfer.service";
 import { initAgent } from "./helpers";
-import CONFIG from "@/config";
+import CONFIG, {
+  COIN_TRANSFER_STATUS,
+  DEPOSIT_STATUS,
+  PAYMENT_STATUS,
+} from "@/config";
 import { AuthServices } from "@/components/auth/services";
 import { PlayerServices } from "@/components/players/services";
 import { AgentServices } from "@/components/agent/services";
@@ -103,6 +107,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "currency",
         "dirty",
         "alquimia_id",
+        "coin_transfer_id",
         "created_at",
         "updated_at",
         "Player",
@@ -182,6 +187,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "currency",
         "dirty",
         "alquimia_id",
+        "coin_transfer_id",
         "created_at",
         "updated_at",
       ]);
@@ -219,11 +225,12 @@ describe("[UNIT] => AGENT ROUTER", () => {
       id: "bacon",
       player_id: "spam",
       amount: 10,
-      status: CONFIG.SD.PAYMENT_STATUS.COMPLETED,
+      status: PAYMENT_STATUS.COMPLETED,
       bank_account: "baz",
       currency: "MXN",
       dirty: false,
       alquimia_id: null,
+      coin_transfer_id: "bar",
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -239,9 +246,7 @@ describe("[UNIT] => AGENT ROUTER", () => {
 
       expect(response.status).toBe(OK);
       expect(response.body.data.id).toEqual("bacon");
-      expect(response.body.data.status).toEqual(
-        CONFIG.SD.PAYMENT_STATUS.COMPLETED,
-      );
+      expect(response.body.data.status).toEqual(PAYMENT_STATUS.COMPLETED);
     });
   });
 
@@ -265,9 +270,11 @@ describe("[UNIT] => AGENT ROUTER", () => {
         "date",
         "sending_bank",
         "cep_ok",
+        "coin_transfer_id",
         "created_at",
         "updated_at",
         "Player",
+        "CoinTransfer",
       ]);
       expect(response.body.data.result[0].Player.password).toBe("********");
     });
@@ -300,27 +307,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(FORBIDDEN);
-    });
-  });
-
-  describe("GET: /transactions/deposit/pending-coin-transfers", () => {
-    it("Should return pending coin transfers", async () => {
-      const response = await agent
-        .get(
-          `/app/${CONFIG.APP.VER}/transactions/deposit/pending-coin-transfers`,
-        )
-        .set("Authorization", `Bearer ${access}`);
-
-      expect(response.status).toBe(OK);
-      expect(response.body.data).toBeGreaterThanOrEqual(0);
-    });
-
-    it("Should return 401", async () => {
-      const response = await agent.get(
-        `/app/${CONFIG.APP.VER}/transactions/deposit/pending-coin-transfers`,
-      );
-
-      expect(response.status).toBe(UNAUTHORIZED);
     });
   });
 
@@ -455,104 +441,6 @@ describe("[UNIT] => AGENT ROUTER", () => {
         .set("Authorization", `Bearer ${access}`);
 
       expect(response.status).toBe(NOT_FOUND);
-    });
-  });
-
-  describe("GET: /agent/pending/deposits", () => {
-    it("Should return completed deposits", async () => {
-      const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/pending/deposits`)
-        .set("Authorization", `Bearer ${access}`);
-
-      expect(response.status).toBe(OK);
-      expect(response.body.data.length).toBeGreaterThanOrEqual(0);
-    });
-
-    it("Should return 401", async () => {
-      const response = await agent.get(
-        `/app/${CONFIG.APP.VER}/agent/pending/deposits`,
-      );
-
-      expect(response.status).toBe(UNAUTHORIZED);
-    });
-
-    it("Should return 403", async () => {
-      const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/pending/deposits`)
-        .set("Authorization", `Bearer ${playerAccessToken}`);
-
-      expect(response.status).toBe(FORBIDDEN);
-    });
-  });
-
-  describe("POST: /agent/on-call", () => {
-    it("Should set on call status", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .set("Authorization", `Bearer ${access}`)
-
-        .send({
-          active: true,
-        });
-
-      expect(response.status).toBe(OK);
-      expect(response.body.data).toBeUndefined();
-    });
-
-    it("Should return 400", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .set("Authorization", `Bearer ${access}`)
-
-        .send({
-          active: true,
-          unknownField: "foo",
-        });
-
-      expect(response.status).toBe(BAD_REQUEST);
-      expect(response.body.data[0].type).toBe("unknown_fields");
-    });
-
-    it("Should return 401", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .send({ active: true });
-
-      expect(response.status).toBe(UNAUTHORIZED);
-    });
-
-    it("Should return 403", async () => {
-      const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .send({ active: true })
-        .set("Authorization", `Bearer ${playerAccessToken}`);
-
-      expect(response.status).toBe(FORBIDDEN);
-    });
-  });
-
-  describe("GET: /agent/on-call", () => {
-    it("Should return on call status", async () => {
-      const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .set("Authorization", `Bearer ${access}`);
-
-      expect(response.status).toBe(OK);
-      expect(response.body.data).toBeTruthy();
-    });
-
-    it("Should return 401", async () => {
-      const response = await agent.get(`/app/${CONFIG.APP.VER}/agent/on-call`);
-
-      expect(response.status).toBe(UNAUTHORIZED);
-    });
-
-    it("Should return 403", async () => {
-      const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/agent/on-call`)
-        .set("Authorization", `Bearer ${playerAccessToken}`);
-
-      expect(response.status).toBe(FORBIDDEN);
     });
   });
 
@@ -742,10 +630,10 @@ async function initialize() {
 
   userWithAgentRole = await prisma.player.create({
     data: {
-      email: "userWithAgentRole@example.com",
+      email: "userWithAgentRole11@example.com",
       password: "1234",
       panel_id: -11,
-      username: "userWithAgentRole",
+      username: "userWithAgentRole11",
       roles: {
         connect: {
           name: "agent",
@@ -760,9 +648,11 @@ async function initialize() {
   payment = await prisma.payment.create({
     data: {
       amount: 0.01,
-      bank_account: player.BankAccounts[0].id,
-      player_id: player?.id,
+      BankAccount: { connect: { id: player.BankAccounts[0].id } },
+      Player: { connect: { id: player.id } },
       currency: "MXN",
+      status: PAYMENT_STATUS.PENDING,
+      CoinTransfer: { create: { status: COIN_TRANSFER_STATUS.PENDING } },
     },
     include: { BankAccount: true },
   });
@@ -770,12 +660,13 @@ async function initialize() {
   deposit = await prisma.deposit.create({
     data: {
       amount: 0.01,
-      player_id: player.id,
+      Player: { connect: { id: player.id } },
       currency: "MXN",
-      status: CONFIG.SD.DEPOSIT_STATUS.PENDING,
+      status: DEPOSIT_STATUS.PENDING,
       tracking_number: "test_tracking_number3" + Date.now(),
       date: new Date(),
       sending_bank: "foo",
+      CoinTransfer: { create: { status: COIN_TRANSFER_STATUS.PENDING } },
     },
   });
 

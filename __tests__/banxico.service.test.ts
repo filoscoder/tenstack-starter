@@ -13,6 +13,7 @@ describe("[UNIT] => Banxico Service", () => {
     id: "abc",
     status: "foo",
     player_id: "",
+    coin_transfer_id: "",
     created_at: new Date(),
     updated_at: new Date(),
   };
@@ -27,6 +28,7 @@ describe("[UNIT] => Banxico Service", () => {
     id: "abc",
     status: "foo",
     player_id: "",
+    coin_transfer_id: "",
     created_at: new Date(),
     updated_at: new Date(),
   };

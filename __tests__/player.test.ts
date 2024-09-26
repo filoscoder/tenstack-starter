@@ -1,39 +1,47 @@
 import { BAD_REQUEST, CREATED, FORBIDDEN, OK, UNAUTHORIZED } from "http-status";
 import { SuperAgentTest } from "supertest";
-import { Bonus, PrismaClient, PrismaPromise } from "@prisma/client";
+import { Cashier, Player } from "@prisma/client";
 import { initAgent } from "./helpers";
+import {
+  mockCreateCasinoPlayer,
+  mockSend,
+  preparePlayerTest,
+} from "./mocks/player/create";
+import { generateAccessToken } from "./helpers/auth";
+import {
+  mockGetBalance,
+  preparePlayerBalanceTest,
+} from "./mocks/player/balance";
+import {
+  mockBonus,
+  mockFindMany,
+  preparePlayerBonusTest,
+} from "./mocks/player/bonus";
 import CONFIG from "@/config";
-import { Whatsapp } from "@/notification/whatsapp";
-import { PlayerServices } from "@/components/players/services";
-import { AuthServices } from "@/components/auth/services";
-import { BonusDAO } from "@/db/bonus";
+import * as crypt from "@/utils/crypt";
 
 let agent: SuperAgentTest;
-let prisma: PrismaClient;
-let playerId: string;
 let agentAccessToken: string;
 let agentEmail: string;
+let playerAccessToken: string;
+let player: Player;
+let cashier: Cashier;
+let cleanUp: () => Promise<any>;
 
 beforeAll(setUp);
-afterAll(cleanUp);
+afterAll(() => cleanUp());
 
 describe("[UNIT] => PLAYERS ROUTER", () => {
-  let playerAccessToken: string;
   const username = "jest_test" + Date.now();
   const email = username + "@test.com";
   const password = "1234";
   const movile_number = "5490000000000";
 
   describe("POST: /players", () => {
-    const mockCreateCasinoPlayer = jest.fn(async () => -420);
-    jest
-      .spyOn((PlayerServices as any).prototype, "createCasinoPlayer")
-      .mockImplementation(mockCreateCasinoPlayer);
+    beforeAll(() => preparePlayerTest());
+    afterEach(() => jest.clearAllMocks());
 
-    it("Should create a player", async () => {
-      const mockSend = jest.fn();
-      jest.spyOn(Whatsapp, "send").mockImplementation(mockSend);
-
+    it("Should create a player with default role", async () => {
       const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
         username,
         password,
@@ -47,35 +55,73 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       expect(mockSend).toHaveBeenCalledTimes(1);
       expect(response.status).toBe(CREATED);
       expect(Object.keys(result)).toEqual(["access", "refresh", "player"]);
-
-      playerId = result.player.id;
+      expect(result.player.cashier_id).toBe(undefined);
     });
 
-    it("Should return player.role === player", async () =>
-      checkPlayerRole(playerId));
-
-    it("Should delete player", async () => {
-      await prisma.token.deleteMany({ where: { player_id: playerId } });
-      await prisma.player.delete({ where: { id: playerId } });
-    });
-
-    it("Should re-create the player", async () => {
+    it("Should create a player with role of player", async () => {
       const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
         username,
         password,
         email,
+        roles: [CONFIG.ROLES.PLAYER],
       });
-
       const result = response.body.data;
 
       expect(response.status).toBe(CREATED);
-      expect(Object.keys(result)).toEqual(["access", "refresh", "player"]);
-
-      playerId = result.player.id;
+      expect(result.player.cashier_id).toBe(undefined);
     });
 
-    it("Should return player.role === player", async () =>
-      checkPlayerRole(playerId));
+    it("Should create a player as child of cashier using cashier id", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        cashier_id: cashier.id,
+      });
+      const result = response.body.data;
+
+      expect(response.status).toBe(CREATED);
+      expect(result.player.cashier_id).toBe(cashier.id);
+    });
+
+    it("Should create a player as child of cashier using cashier handle", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        cashier_id: cashier.handle,
+      });
+      const result = response.body.data;
+
+      expect(response.status).toBe(CREATED);
+      expect(result.player.cashier_id).toBe(cashier.id);
+    });
+
+    it("Should create a player with role of cashier", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        roles: [CONFIG.ROLES.PLAYER, CONFIG.ROLES.CASHIER],
+      });
+      const result = response.body.data;
+
+      expect(response.status).toBe(CREATED);
+      expect(result.player.cashier_id).toBe("cashier_id");
+    });
+
+    it("Should also create a player with role of cashier", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        roles: [CONFIG.ROLES.CASHIER],
+      });
+      const result = response.body.data;
+
+      expect(response.status).toBe(CREATED);
+      expect(result.player.cashier_id).toBe("cashier_id");
+    });
 
     it.each`
       field         | message
@@ -123,29 +169,57 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
         username,
         password,
-        email,
+        email: player.email,
       });
 
       expect(response.status).toBe(BAD_REQUEST);
       expect(response.body.data[0].msg).toBe("Usuario con ese email ya existe");
     });
 
-    // it("Should return 400 ya_existe", async () => {
-    //   const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
-    //     username,
-    //     password,
-    //     email: "jest_test" + Date.now() + "@test.com",
-    //   });
+    it("Should return 400 handle not available", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        handle: cashier.handle,
+      });
 
-    //   expect(response.status).toBe(BAD_REQUEST);
-    //   expect(response.body.code).toBe("ya_existe");
-    // });
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe("Alias no disponible.");
+    });
+
+    it("Should return 400 invalid cashier_id", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        cashier_id: "foo",
+      });
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe("cashier_id inválido.");
+    });
+
+    it("Should return 400", async () => {
+      const response = await agent.post(`/app/${CONFIG.APP.VER}/players`).send({
+        username,
+        password,
+        email,
+        cashier_id: cashier.id,
+        roles: [CONFIG.ROLES.CASHIER],
+      });
+
+      expect(response.status).toBe(BAD_REQUEST);
+      expect(response.body.data[0].msg).toBe(
+        "No se puede crear un cajero como hijo de otro cajero.",
+      );
+    });
   });
 
   describe("POST: /players/:id", () => {
     it("Should update player details", async () => {
       const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/players/${playerId}`)
+        .post(`/app/${CONFIG.APP.VER}/players/${player.id}`)
         .set("Authorization", `Bearer ${agentAccessToken}`)
         .send({
           first_name: "Jest",
@@ -159,7 +233,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
 
     it("Should return 400 unknown field", async () => {
       const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/players/${playerId}`)
+        .post(`/app/${CONFIG.APP.VER}/players/${player.id}`)
         .set("Authorization", `Bearer ${agentAccessToken}`)
         .send({
           unknown_field: "Jest",
@@ -171,7 +245,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
 
     it("Should return 400 email already in use", async () => {
       const response = await agent
-        .post(`/app/${CONFIG.APP.VER}/players/${playerId}`)
+        .post(`/app/${CONFIG.APP.VER}/players/${player.id}`)
         .set("Authorization", `Bearer ${agentAccessToken}`)
         .send({
           email: agentEmail,
@@ -183,12 +257,17 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
   });
 
   describe("POST: /players/login", () => {
-    it("Should return token and player data", async () => {
+    beforeAll(() => {
+      //@ts-ignore
+      crypt.compare = jest.fn((a, b) => a == b);
+    });
+
+    it("Should log player in", async () => {
       const response = await agent
         .post(`/app/${CONFIG.APP.VER}/players/login`)
         .send({
-          username,
-          password,
+          username: player.username,
+          password: player.password,
         });
 
       expect(response.status).toBe(OK);
@@ -197,8 +276,6 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
         "refresh",
         "player",
       ]);
-
-      playerAccessToken = response.body.data.access;
     });
 
     it("Should return 400 Bad Request (password missing)", async () => {
@@ -247,6 +324,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
         "country",
         "balance_currency",
         "status",
+        "cashier_id",
         "created_at",
         "updated_at",
       ]);
@@ -276,7 +354,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
   describe("GET: /players/:id", () => {
     it("Should return player info", async () => {
       const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/players/${playerId}`)
+        .get(`/app/${CONFIG.APP.VER}/players/${player.id}`)
         .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(OK);
@@ -294,6 +372,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
         "country",
         "balance_currency",
         "status",
+        "cashier_id",
         "created_at",
         "updated_at",
         "BankAccounts",
@@ -318,7 +397,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
 
     it("Should return 401", async () => {
       const response = await agent.get(
-        `/app/${CONFIG.APP.VER}/players/${playerId}`,
+        `/app/${CONFIG.APP.VER}/players/${player.id}`,
       );
 
       expect(response.status).toBe(UNAUTHORIZED);
@@ -332,13 +411,11 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
   });
 
   describe("GET: /players/:id/balance", () => {
-    const mockGetBalance = jest.fn(async () => 420);
-    jest
-      .spyOn(PlayerServices.prototype, "getBalance")
-      .mockImplementation(mockGetBalance);
+    beforeAll(preparePlayerBalanceTest);
+
     it("Should return player balance", async () => {
       const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/players/${playerId}/balance`)
+        .get(`/app/${CONFIG.APP.VER}/players/${player.id}/balance`)
         .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(OK);
@@ -348,7 +425,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
 
     it("Should return 401", async () => {
       const response = await agent.get(
-        `/app/${CONFIG.APP.VER}/players/${playerId}/balance`,
+        `/app/${CONFIG.APP.VER}/players/${player.id}/balance`,
       );
 
       expect(response.status).toBe(UNAUTHORIZED);
@@ -362,25 +439,13 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
       expect(response.status).toBe(UNAUTHORIZED);
     });
   });
-  describe("GET: /players/:id/bonus", () => {
-    const mockBonus: Bonus = {
-      id: "spam",
-      player_id: playerId,
-      amount: 0,
-      percentage: 100,
-      status: CONFIG.SD.BONUS_STATUS.ASSIGNED,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-    const mockFindMany = jest.fn(async () => [
-      mockBonus,
-    ]) as () => PrismaPromise<Bonus[]>;
 
-    jest.spyOn(BonusDAO, "findMany").mockImplementation(mockFindMany);
+  describe("GET: /players/:id/bonus", () => {
+    beforeAll(preparePlayerBonusTest);
 
     it("Should return player bonus", async () => {
       const response = await agent
-        .get(`/app/${CONFIG.APP.VER}/players/${playerId}/bonus`)
+        .get(`/app/${CONFIG.APP.VER}/players/${player.id}/bonus`)
         .set("Authorization", `Bearer ${playerAccessToken}`);
 
       expect(response.status).toBe(OK);
@@ -392,7 +457,7 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
 
     it("Should return 401", async () => {
       const response = await agent.get(
-        `/app/${CONFIG.APP.VER}/players/${playerId}/bonus`,
+        `/app/${CONFIG.APP.VER}/players/${player.id}/bonus`,
       );
 
       expect(response.status).toBe(UNAUTHORIZED);
@@ -408,29 +473,20 @@ describe("[UNIT] => PLAYERS ROUTER", () => {
   });
 });
 
-async function checkPlayerRole(player_id: string) {
-  const player = await prisma.player.findUnique({
-    where: { id: player_id },
-    include: { roles: true },
-  });
-  expect(player!.roles).toHaveLength(1);
-  expect(player!.roles[0].name).toBe("player");
-}
-
 async function setUp() {
-  prisma = new PrismaClient();
   agent = await initAgent();
-  const agentUser = await prisma.player.findFirst({
-    where: { roles: { some: { name: CONFIG.ROLES.AGENT } } },
-  });
-  if (!agentUser) throw new Error("No agent found");
-  agentEmail = agentUser.email;
-  const authServices = new AuthServices();
-  const { tokens } = await authServices.tokens(agentUser.id, "jest_test");
-  agentAccessToken = tokens.access;
-}
 
-async function cleanUp() {
-  await prisma.player.delete({ where: { id: playerId } });
-  await prisma.$disconnect();
+  ({
+    token: agentAccessToken,
+    user: { email: agentEmail },
+    cleanUp,
+  } = await generateAccessToken(CONFIG.ROLES.AGENT));
+
+  ({ token: playerAccessToken, user: player } = await generateAccessToken(
+    CONFIG.ROLES.PLAYER,
+  ));
+
+  ({
+    user: { Cashier: cashier },
+  } = await generateAccessToken(CONFIG.ROLES.CASHIER));
 }

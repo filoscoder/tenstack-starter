@@ -1,11 +1,11 @@
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import { DepositRequest } from "@/types/request/transfers";
 import { ERR } from "@/config/errors";
-import CONFIG from "@/config";
+import CONFIG, { ENVIRONMENTS } from "@/config";
 import { CustomError } from "@/helpers/error/CustomError";
 
 const rateLimiter = new RateLimiterMemory({
-  points: CONFIG.APP.ENV === CONFIG.SD.ENVIRONMENTS.TEST ? 10 : 1,
+  points: CONFIG.APP.ENV === ENVIRONMENTS.TEST ? 10 : 1,
   duration: 10,
 });
 

@@ -5,8 +5,11 @@ export type getPlayerId = string;
 export type PlayerRequest = {
   username: string;
   password: string;
+  handle?: string;
   panel_id: number;
   email: string;
+  roles: string[];
+  cashier_id?: string;
   first_name?: string;
   last_name?: string;
   date_of_birth?: string;
