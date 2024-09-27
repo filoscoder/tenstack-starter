@@ -155,6 +155,7 @@ export class Mail {
   private subject!: string;
 
   constructor() {
+    // @ts-ignore
     this.transporter = nodemailer.createTransport({
       //@ts-ignore
       host: CONFIG.EMAIL.HOST,

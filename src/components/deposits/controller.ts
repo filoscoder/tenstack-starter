@@ -78,7 +78,10 @@ export class DepositController {
       const deposit = await depositServices.update(player, deposit_id, request);
       deposit.Player = hidePassword(deposit.Player);
 
-      if (deposit.CoinTransfer?.status === COIN_TRANSFER_STATUS.COMPLETED)
+      if (
+        deposit.CoinTransfer?.status === COIN_TRANSFER_STATUS.COMPLETED ||
+        deposit.status !== DEPOSIT_STATUS.VERIFIED
+      )
         return res
           .status(OK)
           .json(apiResponse({ deposit, coinTransfer: deposit.CoinTransfer }));
