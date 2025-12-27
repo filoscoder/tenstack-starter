@@ -43,7 +43,7 @@
     "express-validator": "^6.14.2",
     "helmet": "^6.2.0",
     "http-status": "^1.8.1",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "lodash-es": "^4.17.21",
     "morgan": "^1.10.1",
     "pino-pretty": "^10.3.1",
